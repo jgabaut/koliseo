@@ -1,0 +1,8 @@
+[Build info]
+demo.c# source file name
+demo# executable file name
+0.1.0# make support version
+tests# tests folder name
+0.1.0# autoconf and automake support version
+[Supported versions]
+0.1.0# First release

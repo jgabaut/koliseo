@@ -1,0 +1,3 @@
+[submodule "amboso"]
+	path = amboso
+	url = git@github.com:jgabaut/amboso.git
