@@ -19,6 +19,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->prev_offset = kls->offset;
 	} else {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
+		abort();
 	}
 	return p;
 }
@@ -27,7 +28,8 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
 		fprintf(stderr,"[KLS] Failed kls_pop() call.\n");
-		return 0;
+		abort();
+		//return 0;
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->offset -= padding + size*count;
@@ -44,7 +46,8 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
 		}
 		fprintf(stderr,"[KLS] Failed kls_push() call.\n");
-		return 0;
+		abort();
+		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
 	kls->offset += padding + size*count;
@@ -61,7 +64,8 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
-		return 0;
+		abort();
+		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
 	//Zero new area

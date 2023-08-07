@@ -16,7 +16,7 @@ int main(void) {
   int minusone = -1;
   int* p = &minusone;
   printf("\n*p is [%i] before KLS_PUSH\n",*p);
-  printf("[KLS_PUSH for a int] [size: %li]\n",sizeof(int));
+  printf("[KLS_PUSH for a int to Koliseo] [size: %li]\n",sizeof(int));
   p = (int*) KLS_PUSH(kls, int, 1);
   printf("[Current position in Koliseo] [pos: %li]\n",kls_get_pos(kls));
   print_dbg_kls(kls);

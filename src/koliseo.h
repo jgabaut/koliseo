@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.0";
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.1";
 const char* string_koliseo_version(void);
 
 #define KLS_DEFAULT_SIZE (16*1024)
