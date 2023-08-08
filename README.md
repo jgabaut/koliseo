@@ -14,12 +14,14 @@
   This is a C library for an arena allocator, whose arenas are named Koliseo.
   It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
 
+  Thanks to [skeeto](https://www.reddit.com/user/skeeto/) for showing me the implementation.
+
 ## Prerequisites <a name = "prerequisites"></a>
 
   To build the `demo` binary, you need:
   * `automake` and `autoconf` to generate the needed `Makefile`
   * `make` to build the binary
-  * `gcc`, for building `demo`
+  * `gcc` or `clang`, for building `demo`
 
   To use `./anvil` to build all amboso-supported tags for `demo` , you also need the same packages.
 
