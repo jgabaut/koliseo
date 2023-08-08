@@ -6,25 +6,52 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.1";
+
+#define KLS_MAJOR 0 /**< Represents current major release.*/
+#define KLS_MINOR 1 /**< Represents current minor release.*/
+#define KLS_PATCH 1 /**< Represents current patch release.*/
+
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+
 const char* string_koliseo_version(void);
 
-#define KLS_DEFAULT_SIZE (16*1024)
+#define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 
-#ifndef DEFAULT_ALIGNMENT
-#define DEFAULT_ALIGNMENT (2*sizeof(void *))
+#ifndef KLS_DEFAULT_ALIGNMENT
+#define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
 #endif
 
+/**
+ * Represents the initialised arena allocator struct.
+ * @see kls_new()
+ * @see kls_clear()
+ * @see kls_free()
+ * @see KLS_PUSH()
+ * @see KLS_POP()
+ */
 typedef struct Koliseo {
-	char* data; /**< Points to data field*/
-	ptrdiff_t size; /**< Size of data field*/
-	ptrdiff_t offset; /**< Current position of memory pointer*/
-	ptrdiff_t prev_offset; /**< Previous position of memory pointer*/
+	char* data; /**< Points to data field.*/
+	ptrdiff_t size; /**< Size of data field.*/
+	ptrdiff_t offset; /**< Current position of memory pointer.*/
+	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
 } Koliseo;
+
+/**
+ * Represents a savestate for a Koliseo.
+ * @see kls_temp_start()
+ * @see kls_temp_end()
+ * @see KLS_PUSH()
+ * @see KLS_POP()
+ */
+typedef struct Koliseo_Temp {
+	Koliseo* kls; /**< Reference to the actual Koliseo we're saving.*/
+	ptrdiff_t offset; /**< Current position of memory pointer.*/
+	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
+} Koliseo_Temp;
 
 ptrdiff_t kls_get_pos(Koliseo* kls);
 
-Koliseo *kls_new(ptrdiff_t size);
+Koliseo* kls_new(ptrdiff_t size);
 
 void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
@@ -39,5 +66,8 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void kls_clear(Koliseo* kls);
 void kls_free(Koliseo* kls);
 void print_dbg_kls(Koliseo* kls);
+
+Koliseo_Temp kls_temp_start(Koliseo* kls);
+void kls_temp_end(Koliseo_Temp tmp_kls);
 
 #endif
