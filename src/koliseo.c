@@ -117,17 +117,29 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 }
 
 /**
- * Prints header fields from the passed Koliseo pointer.
+ * Prints header fields from the passed Koliseo pointer, to the passed FILE pointer.
+ * @param kls The Koliseo at hand.
+ */
+void print_kls_2file(FILE* fp, Koliseo* kls) {
+	if (fp == NULL) {
+		fprintf(stderr,"print_kls_2file():  fp was NULL.\n");
+		exit(EXIT_FAILURE);
+	}
+	if (kls == NULL) {
+		fprintf(fp,"[KLS] kls was NULL.");
+	} else {
+		fprintf(fp,"\n[KLS] Size: [%li]\n", kls->size);
+		fprintf(fp,"[KLS] Offset: [%li]\n", kls->offset);
+		fprintf(fp,"[KLS] Prev_Offset: [%li]\n\n", kls->prev_offset);
+	}
+}
+
+/**
+ * Prints header fields from the passed Koliseo pointer, to stderr.
  * @param kls The Koliseo at hand.
  */
 void print_dbg_kls(Koliseo* kls) {
-	if (kls == NULL) {
-		fprintf(stderr,"[KLS] kls was NULL.");
-	} else {
-		printf("\n[KLS] Size: [%li]\n", kls->size);
-		printf("[KLS] Offset: [%li]\n", kls->offset);
-		printf("[KLS] Prev_Offset: [%li]\n\n", kls->prev_offset);
-	}
+  print_kls_2file(stderr,kls);
 }
 
 /**
