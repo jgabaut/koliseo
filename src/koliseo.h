@@ -9,9 +9,9 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 2 /**< Represents current patch release.*/
+#define KLS_PATCH 3 /**< Represents current patch release.*/
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 

@@ -83,6 +83,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		abort();
 	}
 	char* p = kls->data + kls->offset + padding;
+	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	return p;
 }
@@ -112,6 +113,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	char* p = kls->data + kls->offset + padding;
 	//Zero new area
 	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	return p;
 }
