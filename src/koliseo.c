@@ -1,4 +1,6 @@
 #include "koliseo.h"
+int KOLISEO_DEBUG = 0;
+FILE* KOLISEO_DEBUG_FP = NULL;
 
 /**
  * Returns the constant string representing current version for Koliseo.
@@ -18,6 +20,22 @@ ptrdiff_t kls_get_pos(Koliseo* kls) {
 }
 
 /**
+ * When KOLISEO_DEBUG is 1, logs a message to the defined KOLISEO_DEBUG_FP.
+ * @param tag Tag for a message.
+ * @param msg The actual message.
+ */
+void kls_log(const char* tag, const char* msg) {
+	if (KOLISEO_DEBUG == 1) {
+		if (KOLISEO_DEBUG_FP == NULL) {
+			fprintf(stderr,"[KLS]    kls_log(): Failed opening KOLISEO_DEBUG_FP to print logs.\n");
+		} else {
+			fprintf(KOLISEO_DEBUG_FP,"[%s]    %s\n", tag, msg);
+		}
+	}
+}
+
+
+/**
  * Takes a ptrdiff_t size and allocates the backing memory for a Koliseo. Sets the fields with appropriate values if memory allocation was successful, goes to abort() otherwise.
  * @param size The size for Koliseo data field.
  * @return A pointer to the initialised Koliseo struct.
@@ -30,6 +48,9 @@ Koliseo* kls_new(ptrdiff_t size) {
 	assert(size >= (ptrdiff_t)sizeof(Koliseo));
 	void *p = malloc(size);
 	if (p) {
+		char msg[500];
+		sprintf(msg,"Allocated (%li) for new KLS.",size);
+		kls_log("KLS",msg);
 		Koliseo* kls = p;
 		kls->data = p;
 		kls->size = size;
@@ -58,6 +79,10 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->offset -= padding + size*count;
+	char msg[500];
+	sprintf(msg,"Popped (%li) for KLS.",size);
+	kls_log("KLS",msg);
+
 	return p;
 }
 
@@ -85,6 +110,9 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	char* p = kls->data + kls->offset + padding;
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
+	char msg[500];
+	sprintf(msg,"Pushed (%li) for KLS.",size);
+	kls_log("KLS",msg);
 	return p;
 }
 
@@ -115,6 +143,9 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
+	char msg[500];
+	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	kls_log("KLS",msg);
 	return p;
 }
 
@@ -153,6 +184,9 @@ void kls_clear(Koliseo* kls) {
 	//Reset pointer
 	kls->prev_offset = kls->offset;
 	kls->offset = sizeof(*kls);
+	char msg[500];
+	sprintf(msg,"Cleared offsets for KLS.");
+	kls_log("KLS",msg);
 }
 
 /**
@@ -163,6 +197,9 @@ void kls_clear(Koliseo* kls) {
 void kls_free(Koliseo* kls) {
 	kls_clear(kls);
 	free(kls);
+	char msg[500];
+	sprintf(msg,"Freed KLS.");
+	kls_log("KLS",msg);
 }
 
 /**
@@ -177,6 +214,9 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 	tmp.kls = kls;
 	tmp.prev_offset = kls->prev_offset;
 	tmp.offset = kls->offset;
+	char msg[500];
+	sprintf(msg,"Prepared new Temp KLS.");
+	kls_log("KLS",msg);
 	return tmp;
 }
 
@@ -188,4 +228,7 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 void kls_temp_end(Koliseo_Temp tmp_kls) {
 	tmp_kls.prev_offset = tmp_kls.prev_offset;
 	tmp_kls.offset = tmp_kls.offset;
+	char msg[500];
+	sprintf(msg,"Ended Temp KLS.");
+	kls_log("KLS",msg);
 }

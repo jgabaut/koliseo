@@ -3,8 +3,29 @@
 #include "amboso.h"
 
 int main(void) {
+  KOLISEO_DEBUG = 1;
   printf("Demo for Koliseo, using API version %s\n", string_koliseo_version());
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
+  printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
+  //Reset debug log file
+  if (KOLISEO_DEBUG == 1) {
+	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","w");
+	  if (KOLISEO_DEBUG_FP == NULL) {
+		fprintf(stderr,"[KLS]    Failed to open debug logfile.\n");
+		exit(EXIT_FAILURE);
+	  }
+	  kls_log("KLS-DEMO","New demo run.");
+  }
+  if (KOLISEO_DEBUG == 1) {
+	  fclose(KOLISEO_DEBUG_FP);
+  }
+  if (KOLISEO_DEBUG == 1) {
+	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","a");
+	  if (KOLISEO_DEBUG_FP == NULL) {
+		fprintf(stderr,"[KLS]    Failed to open debug logfile.\n");
+		exit(EXIT_FAILURE);
+	  }
+  }
 
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
@@ -31,6 +52,7 @@ int main(void) {
   printf("[KLS_POP a int from Koliseo] [size: %li]\n",sizeof(int));
   z = KLS_POP(kls, int, 1);
 
+
   printf("\n*z is [%i] after KLS_POP\n",*z);
   printf("[Current position in Koliseo] [pos: %li]\n",kls_get_pos(kls));
 
@@ -44,5 +66,9 @@ int main(void) {
   kls_free(kls);
 
   printf("[End of demo]\n");
+  if (KOLISEO_DEBUG == 1) {
+	  fclose(KOLISEO_DEBUG_FP);
+  }
+
   return 0;
 }

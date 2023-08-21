@@ -11,6 +11,9 @@ amboso_cfg.dot
 #Ignore docs pdf
 docs/docs.pdf
 
+# ignore debug log file
+debug_log.txt
+
 #Ignore doxygen dir
 doxygen/
 
