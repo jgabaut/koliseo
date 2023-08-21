@@ -9,11 +9,23 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 3 /**< Represents current patch release.*/
+#define KLS_PATCH 4 /**< Represents current patch release.*/
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+/**
+ * Global variable for debug flag.
+ */
+extern int KOLISEO_DEBUG;
+
+/**
+ * Global variable for debug file pointer.
+ */
+extern FILE* KOLISEO_DEBUG_FP;
+
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.4"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
+
+void kls_log(const char* tag, const char* msg);
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 
