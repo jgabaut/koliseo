@@ -60,6 +60,9 @@ Koliseo* kls_new(ptrdiff_t size) {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
 		abort();
 	}
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,p);
+	}
 	return p;
 }
 
@@ -78,11 +81,14 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		abort();
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
+	kls->prev_offset = kls->offset;
 	kls->offset -= padding + size*count;
 	char msg[500];
 	sprintf(msg,"Popped (%li) for KLS.",size);
 	kls_log("KLS",msg);
-
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
 	return p;
 }
 
@@ -113,6 +119,9 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	char msg[500];
 	sprintf(msg,"Pushed (%li) for KLS.",size);
 	kls_log("KLS",msg);
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
 	return p;
 }
 
@@ -146,6 +155,9 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	char msg[500];
 	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	kls_log("KLS",msg);
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
 	return p;
 }
 
