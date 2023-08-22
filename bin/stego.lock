@@ -10,3 +10,4 @@ tests# tests folder name
 0.1.2# print_kls_2file()
 0.1.3# update prev_offset on kls_push()
 0.1.5# add kls_log(), fixes
+0.1.6# functional Koliseo_Temp

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <time.h>
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
@@ -21,7 +22,7 @@ extern int KOLISEO_DEBUG;
  */
 extern FILE* KOLISEO_DEBUG_FP;
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.5"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -82,5 +83,8 @@ void print_dbg_kls(Koliseo* kls);
 
 Koliseo_Temp kls_temp_start(Koliseo* kls);
 void kls_temp_end(Koliseo_Temp tmp_kls);
+
+#define KLS_PUSH_T(kls_temp, type, count) (type*)KLS_PUSH(kls_temp.kls, type, count)
+#define KLS_POP_T(kls_temp, type, count) (type*)KLS_POP(kls_temp.kls, type, count)
 
 #endif
