@@ -29,7 +29,13 @@ void kls_log(const char* tag, const char* msg) {
 		if (KOLISEO_DEBUG_FP == NULL) {
 			fprintf(stderr,"[KLS]    kls_log(): Failed opening KOLISEO_DEBUG_FP to print logs.\n");
 		} else {
-			fprintf(KOLISEO_DEBUG_FP,"[%s]    %s\n", tag, msg);
+			time_t now = time(0);
+			struct tm *mytime = localtime(&now);
+			char timeheader[500];
+			if ( strftime(timeheader, sizeof timeheader, "%X", mytime) )
+			{
+				fprintf(KOLISEO_DEBUG_FP,"[%-10.10s] [%s] [%s]\n", tag, timeheader, msg);
+			}
 		}
 	}
 }
@@ -238,8 +244,8 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
  * @param kls The Koliseo at hand.
  */
 void kls_temp_end(Koliseo_Temp tmp_kls) {
-	tmp_kls.prev_offset = tmp_kls.prev_offset;
-	tmp_kls.offset = tmp_kls.offset;
+	tmp_kls.kls->prev_offset = tmp_kls.prev_offset;
+	tmp_kls.kls->offset = tmp_kls.offset;
 	char msg[500];
 	sprintf(msg,"Ended Temp KLS.");
 	kls_log("KLS",msg);
