@@ -36,7 +36,7 @@ int main(void) {
 
   printf("[Show Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
 
-  KLS_PRINTLIST(kls->regs);
+  KLS_ECHOLIST(kls->regs);
 
   Koliseo_Temp temp_kls = kls_temp_start(kls);
   printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls.kls));
@@ -68,7 +68,7 @@ int main(void) {
   
   printf("[Show reversed Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
 
-  KLS_PRINTLIST(kls_reverse(kls->regs));
+  KLS_ECHOLIST(kls_reverse(kls->regs));
 
   int* z = &minusone;
   printf("\n*z is [%i] before KLS_POP\n",*z);

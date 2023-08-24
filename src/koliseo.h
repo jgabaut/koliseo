@@ -131,7 +131,9 @@ Region_List kls_cons(element, Region_List);
 void kls_freeList(Region_List);
 #define KLS_FREELIST(kls_list) kls_freeList(kls_list)
 void kls_showList(Region_List);
-#define KLS_PRINTLIST(kls_list) kls_showList(kls_list)
+void kls_showList_toFile(Region_List, FILE* fp);
+#define KLS_ECHOLIST(kls_list) kls_showList(kls_list)
+#define KLS_PRINTLIST(kls_list,file) kls_showList_toFile(kls_list,file)
 bool kls_member(element, Region_List);
 int kls_lenght(Region_List);
 Region_List kls_append(Region_List, Region_List);

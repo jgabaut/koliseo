@@ -383,14 +383,18 @@ void kls_freeList(Region_List l) {
 	return;
 }
 
-void kls_showList(Region_List l) {
+void kls_showList_toFile(Region_List l, FILE* fp) {
+	if (fp == NULL) {
+		fprintf(stderr,"[KLS]  kls_showList_toFile():  passed file was NULL.\n");
+		abort();
+	}
 	char msg[1000];
 	printf("[");
 	while (!kls_empty(l))
 	{
-		printf("--BEGIN Region--\n\n");
-		printf("Begin [%li] End [%li]\n",kls_head(l)->begin_offset,kls_head(l)->end_offset);
-		printf("Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
+		fprintf(fp,"--BEGIN Region--\n\n");
+		fprintf(fp,"Begin [%li] End [%li]\n",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		fprintf(fp,"Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
 		printf("\n\n--END Region--");
 		kls_log("KLS","--BEGIN Region--");
 		sprintf(msg,"Begin [%li] End [%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
@@ -405,13 +409,15 @@ void kls_showList(Region_List l) {
 		l = kls_tail(l);
 		if (!kls_empty(l))
 		{
-			printf(",\n");
+			fprintf(fp,",\n");
 		}
 	}
-	printf("]\n");
+	fprintf(fp,"]\n");
 }
 
-
+void kls_showList(Region_List l) {
+	kls_showList_toFile(l,stdout);
+}
 
 bool kls_member(element el, Region_List l) {
 	if (kls_empty(l))
