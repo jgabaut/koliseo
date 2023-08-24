@@ -395,7 +395,7 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 		fprintf(fp,"--BEGIN Region--\n\n");
 		fprintf(fp,"Begin [%li] End [%li]\n",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		fprintf(fp,"Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
-		printf("\n\n--END Region--");
+		fprintf(fp,"\n\n--END Region--");
 		kls_log("KLS","--BEGIN Region--");
 		sprintf(msg,"Begin [%li] End [%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		kls_log("KLS",msg);
