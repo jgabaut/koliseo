@@ -175,8 +175,8 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	Region* reg = (Region*) malloc(sizeof(Region));
 	reg->begin_offset = kls->prev_offset;
 	reg->end_offset = kls->offset;
-	strcpy(reg->name,"KLS");
-	strcpy(reg->desc,"KLS");
+	strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
+	strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
 	Region_List reglist = kls_emptyList();
 	reglist = kls_cons(reg,reglist);
 	kls->regs = kls_append(reglist, kls->regs);

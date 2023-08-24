@@ -37,6 +37,7 @@ void kls_log(const char* tag, const char* msg);
 /**
  * Represents an allocated Region in a Koliseo.
  * @see KLS_PUSH()
+ * @see KLS_PUSH_NAMED()
  */
 typedef struct Region {
 	ptrdiff_t begin_offset; /**< Starting offset of memory region.*/
@@ -45,6 +46,9 @@ typedef struct Region {
 	char name[255]; /**< Name field for the Region.*/
 	char desc[255]; /**< Description field for the Region.*/
 } Region;
+
+static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
+static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
 
 #ifndef KOLISEO_LIST_H
 #define KOLISEO_LIST_H
