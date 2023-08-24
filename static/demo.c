@@ -48,9 +48,9 @@ int main(void) {
   printf("\n*p2 is [%i] before KLS_PUSH_T\n",*p2);
   printf("[KLS_PUSH for a int to Koliseo] [size: %li]\n",sizeof(int));
   printf("[This handles the Koliseo directly while we have an open Koliseo_Temp.]\n");
-  p = (int*) KLS_PUSH(kls, int, 1);
+  p = (int*) KLS_PUSH_NAMED(kls, int, 1,"int","An int");
   printf("[KLS_PUSH_T for a int to Koliseo_Temp] [size: %li]\n",sizeof(int));
-  p2 = (int*) KLS_PUSH_T(temp_kls, int, 1);
+  p2 = (int*) KLS_PUSH_T_NAMED(temp_kls, int, 1,"int", "Another int");
   printf("[Current position in Koliseo] [pos: %li]\n",kls_get_pos(kls));
   printf("[Current position in Koliseo_Temp] [pos: %li]\n",temp_kls.offset);
   print_dbg_kls(kls);

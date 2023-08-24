@@ -191,6 +191,52 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 }
 
 /**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Notably, it zeroes the memory region.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the Koliseo.
+ */
+void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc) {
+	ptrdiff_t available = kls->size - kls->offset;
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
+		if (count > PTRDIFF_MAX/size) {
+			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+		} else {
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+		}
+		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		abort();
+		//return 0;
+	}
+	char* p = kls->data + kls->offset + padding;
+	//Zero new area
+	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
+	kls->offset += padding + size*count;
+	Region* reg = (Region*) malloc(sizeof(Region));
+	reg->begin_offset = kls->prev_offset;
+	reg->end_offset = kls->offset;
+	strcpy(reg->name,name);
+	strcpy(reg->desc,desc);
+	Region_List reglist = kls_emptyList();
+	reglist = kls_cons(reg,reglist);
+	kls->regs = kls_append(reglist, kls->regs);
+
+	char msg[500];
+	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	kls_log("KLS",msg);
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
+	return p;
+}
+
+/**
  * Prints header fields from the passed Koliseo pointer, to the passed FILE pointer.
  * @param kls The Koliseo at hand.
  */
