@@ -10,7 +10,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 5 /**< Represents current patch release.*/
+#define KLS_PATCH 7 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -22,7 +22,7 @@ extern int KOLISEO_DEBUG;
  */
 extern FILE* KOLISEO_DEBUG_FP;
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.7"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -33,6 +33,31 @@ void kls_log(const char* tag, const char* msg);
 #ifndef KLS_DEFAULT_ALIGNMENT
 #define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
 #endif
+
+/**
+ * Represents an allocated Region in a Koliseo.
+ * @see KLS_PUSH()
+ */
+typedef struct Region {
+	ptrdiff_t begin_offset; /**< Starting offset of memory region.*/
+	ptrdiff_t end_offset; /**< Ending offset of memory region.*/
+	ptrdiff_t size; /**< Size of memory for the Region.*/
+	char name[255]; /**< Name field for the Region.*/
+	char desc[255]; /**< Description field for the Region.*/
+} Region;
+
+#ifndef KOLISEO_LIST_H
+#define KOLISEO_LIST_H
+#include "stdbool.h"
+
+typedef Region* element;
+
+typedef struct list_region
+{
+	element value;
+	struct list_region *next;
+} region_list_item;
+typedef region_list_item *Region_List;
 
 /**
  * Represents the initialised arena allocator struct.
@@ -47,6 +72,7 @@ typedef struct Koliseo {
 	ptrdiff_t size; /**< Size of data field.*/
 	ptrdiff_t offset; /**< Current position of memory pointer.*/
 	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
+	Region_List regs; /**< List of allocated Regions*/
 } Koliseo;
 
 /**
@@ -86,5 +112,36 @@ void kls_temp_end(Koliseo_Temp tmp_kls);
 
 #define KLS_PUSH_T(kls_temp, type, count) (type*)KLS_PUSH(kls_temp.kls, type, count)
 #define KLS_POP_T(kls_temp, type, count) (type*)KLS_POP(kls_temp.kls, type, count)
+
+
+Region_List kls_emptyList(void);
+#define KLS_GETLIST() kls_emptyList()
+bool kls_empty(Region_List);
+element kls_head(Region_List);
+Region_List kls_tail(Region_List);
+Region_List kls_cons(element, Region_List);
+
+void kls_freeList(Region_List);
+#define KLS_FREELIST(kls_list) kls_freeList(kls_list)
+void kls_showList(Region_List);
+#define KLS_PRINTLIST(kls_list) kls_showList(kls_list)
+bool kls_member(element, Region_List);
+int kls_lenght(Region_List);
+Region_List kls_append(Region_List, Region_List);
+Region_List kls_reverse(Region_List);
+Region_List kls_copy(Region_List);
+Region_List kls_delet(element, Region_List);
+
+Region_List kls_insord(element, Region_List);
+#define KLS_PUSHLIST(kls,kls_list) kls_insord(kls,kls_list)
+Region_List kls_insord_p(element, Region_List);
+#define KLS_PUSHLIST_P(kls,kls_list) kls_insord_p(kls,kls_list)
+Region_List kls_mergeList(Region_List, Region_List);
+Region_List kls_intersect(Region_List, Region_List);
+Region_List kls_diff(Region_List, Region_List);
+bool kls_isLess(element, element);
+bool kls_isEqual(element, element);
+
+#endif
 
 #endif

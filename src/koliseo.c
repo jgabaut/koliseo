@@ -62,6 +62,20 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->size = size;
 		kls->offset = sizeof(*kls);
 		kls->prev_offset = kls->offset;
+		sprintf(msg,"Init of Region_List for kls.");
+		kls_log("KLS",msg);
+		Region* kls_header = (Region*) malloc(sizeof(Region));
+		kls_header->begin_offset = 0;
+		kls_header->end_offset = kls->offset;
+		strcpy(kls_header->name,"KLS Header");
+		strcpy(kls_header->desc,"Denotes Space occupied by the Koliseo header.");
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(kls_header,reglist);
+		kls->regs = reglist;
+		if (kls->regs == NULL) {
+		  fprintf(stderr,"[KLS] kls_new() failed to get a Region_List.\n");
+		  abort();
+		}
 	} else {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
 		abort();
@@ -249,4 +263,289 @@ void kls_temp_end(Koliseo_Temp tmp_kls) {
 	char msg[500];
 	sprintf(msg,"Ended Temp KLS.");
 	kls_log("KLS",msg);
+}
+
+
+Region_List kls_emptyList(void)
+{
+	return NULL;
+}
+bool kls_empty(Region_List l) {
+	if (l==NULL)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+element kls_head(Region_List l) {
+	if (kls_empty(l))
+	{
+		abort();
+	}
+	else
+	{
+		return l->value;
+	}
+}
+Region_List kls_tail(Region_List l) {
+	if (kls_empty(l))
+	{
+		abort();
+	}
+	else
+	{
+		return l->next;
+	}
+}
+Region_List kls_cons(element e, Region_List l) {
+	if (e == NULL) {
+	  kls_log("KLS","kls_cons():  element was NULL");
+	}
+	Region_List t;
+	t = (Region_List)malloc(sizeof(region_list_item));
+	t->value = e;
+	t->next = l;
+	return t;
+}
+
+void kls_freeList(Region_List l) {
+	if (kls_empty(l))
+	{
+		return;
+	}
+	else
+	{
+		kls_freeList(kls_tail(l));
+		free(l);
+	}
+	return;
+}
+
+void kls_showList(Region_List l) {
+	char msg[1000];
+	printf("[");
+	while (!kls_empty(l))
+	{
+		printf("--BEGIN Region--\n\n");
+		printf("Begin [%li] End [%li]\n",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		printf("Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
+		printf("\n\n--END Region--");
+		kls_log("KLS","--BEGIN Region--");
+		sprintf(msg,"Begin [%li] End [%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		kls_log("KLS",msg);
+		sprintf(msg,"Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
+		kls_log("KLS",msg);
+		kls_log("KLS","--END Region--");
+		kls_log("KLS",msg);
+		//TODO
+		//Print containing kls
+		//print_kls_2file(stdout,kls_head(l));
+		l = kls_tail(l);
+		if (!kls_empty(l))
+		{
+			printf(",\n");
+		}
+	}
+	printf("]\n");
+}
+
+
+
+bool kls_member(element el, Region_List l) {
+	if (kls_empty(l))
+	{
+		return false;
+	}
+	else
+	{
+		if (el == kls_head(l))
+		{
+			return true;
+		}
+		else
+		{
+			return kls_member(el, kls_tail(l));
+		}
+	}
+}
+int kls_lenght(Region_List l) {
+	if (kls_empty(l))
+	{
+		return 0;
+	}
+	else
+	{
+		return 1 + kls_lenght(kls_tail(l));
+	}
+}
+Region_List kls_append(Region_List l1, Region_List l2) {
+	if (kls_empty(l1))
+	{
+		return l2;
+	}
+	else
+	{
+		return kls_cons(kls_head(l1), kls_append(kls_tail(l1), l2));
+	}
+}
+Region_List kls_reverse(Region_List l) {
+	if (kls_empty(l))
+	{
+		return kls_emptyList();
+	}
+	else
+	{
+		return kls_append(kls_reverse(kls_tail(l)), kls_cons(kls_head(l), kls_emptyList()));
+	}
+}
+Region_List kls_copy(Region_List l) {
+	if (kls_empty(l))
+	{
+		return l;
+	}
+	else
+	{
+		return kls_cons(kls_head(l), kls_copy(kls_tail(l)));
+	}
+}
+Region_List kls_delet(element el, Region_List l) {
+	if (kls_empty(l))
+	{
+		return kls_emptyList();
+	}
+	else
+	{
+		if (el == kls_head(l))
+		{
+			return kls_tail(l);
+		}
+		else
+		{
+			return kls_cons(kls_head(l), kls_delet(el, kls_tail(l)));
+		}
+	}
+}
+
+Region_List kls_insord(element el, Region_List l) {
+	if (kls_empty(l))
+	{
+		return kls_cons(el, l);
+	}
+	else
+	{
+		if (el->begin_offset <= kls_head(l)->begin_offset)
+		{
+			return kls_cons(el, l);
+		}
+		else
+		{
+			return kls_cons(kls_head(l),kls_insord(el, kls_tail(l)));
+		}
+	}
+}
+
+Region_List kls_insord_p(element el, Region_List l) {
+	Region_List pprec, patt = l, paux;
+	bool found = false;
+	pprec = NULL;
+
+	while (patt != NULL && !found)
+	{
+		if (el < patt->value)
+		{
+			found = true;
+		}
+		else
+		{
+			pprec = patt; patt = patt->next;
+		}
+	}
+	paux = (Region_List) malloc(sizeof(region_list_item));
+	paux->value = el;
+	paux->next = patt;
+	if (patt == l)
+	{
+		return paux;
+	}
+	else
+	{
+		pprec->next = paux;
+		return l;
+	}
+}
+Region_List kls_mergeList(Region_List l1, Region_List l2) {
+	if (kls_empty(l1))
+	{
+		return l2;
+	}
+	else
+	{
+		if (kls_empty(l2))
+		{
+			return l1;
+		}
+		else
+		{
+			if (kls_isLess(kls_head(l1), kls_head(l2)))
+			{
+				return kls_cons(kls_head(l1), kls_mergeList(kls_tail(l1), l2));
+			}
+			else
+			{
+				if (kls_isEqual(kls_head(l1), kls_head(l2)))
+				{
+					return kls_cons(kls_head(l1), kls_mergeList(kls_tail(l1), kls_tail(l2)));
+				}
+				else
+				{
+					return kls_cons(kls_head(l2), kls_mergeList(l1, kls_tail(l2)));
+				}
+			}
+		}
+	}
+}
+Region_List kls_intersect(Region_List l1, Region_List l2) {
+	if (kls_empty(l1) || kls_empty(l2))
+	{
+		return kls_emptyList();
+	}
+
+	if (kls_member(kls_head(l1), l2) && !kls_member(kls_head(l1), kls_tail(l1)))
+	{
+		return kls_cons(kls_head(l1), kls_intersect(kls_tail(l1), l2));
+	}
+
+	else
+	{
+		return kls_intersect(kls_tail(l1), l2);
+	}
+}
+Region_List kls_diff(Region_List l1, Region_List l2) {
+	if (kls_empty(l1) || kls_empty(l2))
+	{
+		return l1;
+	}
+
+	else
+	{
+		if (!kls_member(kls_head(l1), l2) && !kls_member(kls_head(l1), kls_tail(l1)))
+		{
+			return kls_cons(kls_head(l1), kls_diff(kls_tail(l1), l2));
+		}
+		else
+		{
+			return kls_diff(kls_tail(l1), l2);
+		}
+	}
+}
+
+bool kls_isLess(Region* r1, Region* r2) {
+  return (r1->begin_offset < r2->begin_offset);
+}
+
+bool kls_isEqual(Region* r1, Region* r2) {
+  return (r1->begin_offset == r2->begin_offset);
 }
