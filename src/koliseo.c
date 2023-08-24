@@ -172,6 +172,15 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
+	Region* reg = (Region*) malloc(sizeof(Region));
+	reg->begin_offset = kls->prev_offset;
+	reg->end_offset = kls->offset;
+	strcpy(reg->name,"KLS");
+	strcpy(reg->desc,"KLS");
+	Region_List reglist = kls_emptyList();
+	reglist = kls_cons(reg,reglist);
+	kls->regs = kls_append(reglist, kls->regs);
+
 	char msg[500];
 	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	kls_log("KLS",msg);

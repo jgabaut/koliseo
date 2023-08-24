@@ -59,6 +59,10 @@ int main(void) {
   printf("\n*p is [%i] after KLS_PUSH\n",*p);
   *p2 = 3;
   printf("\n*p2 is [%i] after KLS_PUSH\n",*p2);
+  
+  printf("[Show reversed Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
+
+  KLS_PRINTLIST(kls_reverse(kls->regs));
 
   int* z = &minusone;
   printf("\n*z is [%i] before KLS_POP\n",*z);
