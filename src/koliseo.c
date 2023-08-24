@@ -237,6 +237,7 @@ void kls_clear(Koliseo* kls) {
  */
 void kls_free(Koliseo* kls) {
 	kls_clear(kls);
+	kls_freeList(kls->regs);
 	free(kls);
 	char msg[500];
 	sprintf(msg,"Freed KLS.");
@@ -328,6 +329,9 @@ void kls_freeList(Region_List l) {
 	else
 	{
 		kls_freeList(kls_tail(l));
+		kls_log("KLS","Freeing Region_List->value");
+		free(l->value);
+		kls_log("KLS","Freeing Region_List");
 		free(l);
 	}
 	return;
