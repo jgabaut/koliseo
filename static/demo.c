@@ -36,7 +36,7 @@ int main(void) {
 
   printf("[Show Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
 
-  KLS_PRINTLIST(kls->regs);
+  KLS_ECHOLIST(kls->regs);
 
   Koliseo_Temp temp_kls = kls_temp_start(kls);
   printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls.kls));
@@ -44,21 +44,31 @@ int main(void) {
   int minusone = -1;
   int* p = &minusone;
   int* p2 = &minusone;
+  int* p3 = &minusone;
   printf("\n*p is [%i] before KLS_PUSH\n",*p);
   printf("\n*p2 is [%i] before KLS_PUSH_T\n",*p2);
+  printf("\n*p3 is [%i] before KLS_PUSH_T\n",*p3);
   printf("[KLS_PUSH for a int to Koliseo] [size: %li]\n",sizeof(int));
   printf("[This handles the Koliseo directly while we have an open Koliseo_Temp.]\n");
   p = (int*) KLS_PUSH(kls, int, 1);
+  printf("[KLS_PUSH_T_NAMED for a int to Koliseo_Temp] [size: %li]\n",sizeof(int));
+  p2 = (int*) KLS_PUSH_T_NAMED(temp_kls, int, 1,"int", "Another int");
   printf("[KLS_PUSH_T for a int to Koliseo_Temp] [size: %li]\n",sizeof(int));
-  p2 = (int*) KLS_PUSH_T(temp_kls, int, 1);
+  p3 = (int*) KLS_PUSH_T(temp_kls, int, 1);
   printf("[Current position in Koliseo] [pos: %li]\n",kls_get_pos(kls));
   printf("[Current position in Koliseo_Temp] [pos: %li]\n",temp_kls.offset);
   print_dbg_kls(kls);
 
   *p = 1;
   printf("\n*p is [%i] after KLS_PUSH\n",*p);
-  *p2 = 3;
+  *p2 = 2;
   printf("\n*p2 is [%i] after KLS_PUSH\n",*p2);
+  *p2 = 3;
+  printf("\n*p3 is [%i] after KLS_PUSH\n",*p3);
+  
+  printf("[Show reversed Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
+
+  KLS_ECHOLIST(kls_reverse(kls->regs));
 
   int* z = &minusone;
   printf("\n*z is [%i] before KLS_POP\n",*z);

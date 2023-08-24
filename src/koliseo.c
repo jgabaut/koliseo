@@ -172,6 +172,61 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
+	Region* reg = (Region*) malloc(sizeof(Region));
+	reg->begin_offset = kls->prev_offset;
+	reg->end_offset = kls->offset;
+	strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
+	strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
+	Region_List reglist = kls_emptyList();
+	reglist = kls_cons(reg,reglist);
+	kls->regs = kls_append(reglist, kls->regs);
+
+	char msg[500];
+	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	kls_log("KLS",msg);
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
+	return p;
+}
+
+/**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Notably, it zeroes the memory region.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the Koliseo.
+ */
+void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc) {
+	ptrdiff_t available = kls->size - kls->offset;
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
+		if (count > PTRDIFF_MAX/size) {
+			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+		} else {
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+		}
+		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		abort();
+		//return 0;
+	}
+	char* p = kls->data + kls->offset + padding;
+	//Zero new area
+	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
+	kls->offset += padding + size*count;
+	Region* reg = (Region*) malloc(sizeof(Region));
+	reg->begin_offset = kls->prev_offset;
+	reg->end_offset = kls->offset;
+	strcpy(reg->name,name);
+	strcpy(reg->desc,desc);
+	Region_List reglist = kls_emptyList();
+	reglist = kls_cons(reg,reglist);
+	kls->regs = kls_append(reglist, kls->regs);
+
 	char msg[500];
 	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	kls_log("KLS",msg);
@@ -228,6 +283,7 @@ void kls_clear(Koliseo* kls) {
  */
 void kls_free(Koliseo* kls) {
 	kls_clear(kls);
+	kls_freeList(kls->regs);
 	free(kls);
 	char msg[500];
 	sprintf(msg,"Freed KLS.");
@@ -319,19 +375,26 @@ void kls_freeList(Region_List l) {
 	else
 	{
 		kls_freeList(kls_tail(l));
+		kls_log("KLS","Freeing Region_List->value");
+		free(l->value);
+		kls_log("KLS","Freeing Region_List");
 		free(l);
 	}
 	return;
 }
 
-void kls_showList(Region_List l) {
+void kls_showList_toFile(Region_List l, FILE* fp) {
+	if (fp == NULL) {
+		fprintf(stderr,"[KLS]  kls_showList_toFile():  passed file was NULL.\n");
+		abort();
+	}
 	char msg[1000];
 	printf("[");
 	while (!kls_empty(l))
 	{
-		printf("--BEGIN Region--\n\n");
-		printf("Begin [%li] End [%li]\n",kls_head(l)->begin_offset,kls_head(l)->end_offset);
-		printf("Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
+		fprintf(fp,"--BEGIN Region--\n\n");
+		fprintf(fp,"Begin [%li] End [%li]\n",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		fprintf(fp,"Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
 		printf("\n\n--END Region--");
 		kls_log("KLS","--BEGIN Region--");
 		sprintf(msg,"Begin [%li] End [%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
@@ -346,13 +409,15 @@ void kls_showList(Region_List l) {
 		l = kls_tail(l);
 		if (!kls_empty(l))
 		{
-			printf(",\n");
+			fprintf(fp,",\n");
 		}
 	}
-	printf("]\n");
+	fprintf(fp,"]\n");
 }
 
-
+void kls_showList(Region_List l) {
+	kls_showList_toFile(l,stdout);
+}
 
 bool kls_member(element el, Region_List l) {
 	if (kls_empty(l))
