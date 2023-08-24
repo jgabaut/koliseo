@@ -34,6 +34,10 @@ int main(void) {
 
   print_dbg_kls(kls);
 
+  printf("[Show Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
+
+  KLS_PRINTLIST(kls->regs);
+
   Koliseo_Temp temp_kls = kls_temp_start(kls);
   printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls.kls));
 
