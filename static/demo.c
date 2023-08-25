@@ -4,9 +4,11 @@
 
 int main(void) {
   KOLISEO_DEBUG = 1;
+  KOLISEO_AUTOSET_REGIONS = 1;
   printf("Demo for Koliseo, using API version %s\n", string_koliseo_version());
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
   printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
+  printf("KOLISEO_AUTOSET_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_REGIONS);
   //Reset debug log file
   if (KOLISEO_DEBUG == 1) {
 	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","w");
@@ -34,9 +36,9 @@ int main(void) {
 
   print_dbg_kls(kls);
 
-  printf("[Show Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
+  printf("[Show reversed Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
 
-  KLS_ECHOLIST(kls->regs);
+  KLS_ECHOLIST(kls_reverse(kls->regs));
 
   Koliseo_Temp temp_kls = kls_temp_start(kls);
   printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls.kls));
@@ -65,10 +67,14 @@ int main(void) {
   printf("\n*p2 is [%i] after KLS_PUSH\n",*p2);
   *p2 = 3;
   printf("\n*p3 is [%i] after KLS_PUSH\n",*p3);
-  
+
   printf("[Show reversed Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
 
   KLS_ECHOLIST(kls_reverse(kls->regs));
+  printf("[%i] List size\n",kls_length(kls->regs));
+
+  printf("[Usage report for Koliseo]\n");
+  kls_usageReport(kls);
 
   int* z = &minusone;
   printf("\n*z is [%i] before KLS_POP\n",*z);
@@ -95,6 +101,7 @@ int main(void) {
   kls_free(kls);
 
   printf("[End of demo]\n");
+  printf("[End of demo for Koliseo v%s]\n", string_koliseo_version());
   if (KOLISEO_DEBUG == 1) {
 	  fclose(KOLISEO_DEBUG_FP);
   }

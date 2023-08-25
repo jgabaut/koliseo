@@ -13,3 +13,4 @@ tests# tests folder name
 0.1.6# functional Koliseo_Temp
 0.1.7# add Region_List
 0.1.8# improved Region API
+0.1.9# add kls_usageReport()

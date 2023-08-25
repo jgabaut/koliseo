@@ -1,5 +1,7 @@
 #include "koliseo.h"
+//Default settings for global vars.
 int KOLISEO_DEBUG = 0;
+int KOLISEO_AUTOSET_REGIONS = 1;
 FILE* KOLISEO_DEBUG_FP = NULL;
 
 /**
@@ -62,19 +64,21 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->size = size;
 		kls->offset = sizeof(*kls);
 		kls->prev_offset = kls->offset;
-		sprintf(msg,"Init of Region_List for kls.");
-		kls_log("KLS",msg);
-		Region* kls_header = (Region*) malloc(sizeof(Region));
-		kls_header->begin_offset = 0;
-		kls_header->end_offset = kls->offset;
-		strcpy(kls_header->name,"KLS Header");
-		strcpy(kls_header->desc,"Denotes Space occupied by the Koliseo header.");
-		Region_List reglist = kls_emptyList();
-		reglist = kls_cons(kls_header,reglist);
-		kls->regs = reglist;
-		if (kls->regs == NULL) {
-		  fprintf(stderr,"[KLS] kls_new() failed to get a Region_List.\n");
-		  abort();
+		if (KOLISEO_AUTOSET_REGIONS == 1) {
+			sprintf(msg,"Init of Region_List for kls.");
+			kls_log("KLS",msg);
+			Region* kls_header = (Region*) malloc(sizeof(Region));
+			kls_header->begin_offset = 0;
+			kls_header->end_offset = kls->offset;
+			strcpy(kls_header->name,"KLS Header");
+			strcpy(kls_header->desc,"Denotes Space occupied by the Koliseo header.");
+			Region_List reglist = kls_emptyList();
+			reglist = kls_cons(kls_header,reglist);
+			kls->regs = reglist;
+			if (kls->regs == NULL) {
+			  fprintf(stderr,"[KLS] kls_new() failed to get a Region_List.\n");
+			  abort();
+			}
 		}
 	} else {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
@@ -172,14 +176,16 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	Region* reg = (Region*) malloc(sizeof(Region));
-	reg->begin_offset = kls->prev_offset;
-	reg->end_offset = kls->offset;
-	strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
-	strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
-	Region_List reglist = kls_emptyList();
-	reglist = kls_cons(reg,reglist);
-	kls->regs = kls_append(reglist, kls->regs);
+	if (KOLISEO_AUTOSET_REGIONS == 1) {
+		Region* reg = (Region*) malloc(sizeof(Region));
+		reg->begin_offset = kls->prev_offset;
+		reg->end_offset = kls->offset;
+		strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
+		strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(reg,reglist);
+		kls->regs = kls_append(reglist, kls->regs);
+	}
 
 	char msg[500];
 	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
@@ -389,30 +395,25 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 		abort();
 	}
 	char msg[1000];
-	printf("[");
+	fprintf(fp,"[");
 	while (!kls_empty(l))
 	{
-		fprintf(fp,"--BEGIN Region--\n\n");
-		fprintf(fp,"Begin [%li] End [%li]\n",kls_head(l)->begin_offset,kls_head(l)->end_offset);
-		fprintf(fp,"Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
-		fprintf(fp,"\n\n--END Region--");
+		fprintf(fp,"\n[%s], [%s]    ",kls_head(l)->name,kls_head(l)->desc);
+		fprintf(fp,"[%li]->[%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		kls_log("KLS","--BEGIN Region--");
-		sprintf(msg,"Begin [%li] End [%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		sprintf(msg,"[%s], [%s]",kls_head(l)->name,kls_head(l)->desc);
 		kls_log("KLS",msg);
-		sprintf(msg,"Name [%s] Desc [%s]",kls_head(l)->name,kls_head(l)->desc);
+		sprintf(msg,"[%li]->[%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		kls_log("KLS",msg);
 		kls_log("KLS","--END Region--");
-		kls_log("KLS",msg);
-		//TODO
-		//Print containing kls
-		//print_kls_2file(stdout,kls_head(l));
+
 		l = kls_tail(l);
 		if (!kls_empty(l))
 		{
 			fprintf(fp,",\n");
 		}
 	}
-	fprintf(fp,"]\n");
+	fprintf(fp,"\n]\n");
 }
 
 void kls_showList(Region_List l) {
@@ -436,14 +437,14 @@ bool kls_member(element el, Region_List l) {
 		}
 	}
 }
-int kls_lenght(Region_List l) {
+int kls_length(Region_List l) {
 	if (kls_empty(l))
 	{
 		return 0;
 	}
 	else
 	{
-		return 1 + kls_lenght(kls_tail(l));
+		return 1 + kls_length(kls_tail(l));
 	}
 }
 Region_List kls_append(Region_List l1, Region_List l2) {
@@ -613,4 +614,40 @@ bool kls_isLess(Region* r1, Region* r2) {
 
 bool kls_isEqual(Region* r1, Region* r2) {
   return (r1->begin_offset == r2->begin_offset);
+}
+
+double kls_usageShare(Region* r, Koliseo* kls) {
+	if (r == NULL) {
+		kls_log("ERROR","kls_usageShare():  passed Region was NULL");
+		return -1;
+	}
+	if (kls == NULL) {
+		kls_log("ERROR","kls_usageShare():  passed Koliseo was NULL");
+		return -1;
+	}
+	ptrdiff_t r_size = r->end_offset - r->begin_offset;
+	double res = (r_size * 100.0) / kls->size;
+	return res;
+}
+
+void kls_usageReport_toFile(Koliseo* kls, FILE* fp) {
+	if (fp == NULL) {
+		kls_log("ERROR","kls_usageReport_toFile():  passed file was NULL");
+		return;
+	}
+	if (kls == NULL) {
+		kls_log("ERROR","kls_usageReport_toFile():  passed Koliseo was NULL");
+		return;
+	}
+	Region_List rl = kls_copy(kls->regs);
+	int i = 0;
+	while(!kls_empty(rl)) {
+		fprintf(fp,"Usage for region (%i) [%s]:  [%.3f%%]\n", i, rl->value->name, kls_usageShare(rl->value,kls));
+		rl = kls_tail(rl);
+		i++;
+	}
+}
+
+void kls_usageReport(Koliseo* kls) {
+	kls_usageReport_toFile(kls,stdout);
 }
