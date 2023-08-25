@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <locale.h>
 #include "../src/koliseo.h"
 #include "amboso.h"
 
@@ -75,6 +76,26 @@ int main(void) {
 
   printf("[Usage report for Koliseo]\n");
   kls_usageReport(kls);
+
+  WINDOW* win = NULL;
+  /* Initialize curses */
+  setlocale(LC_ALL, "");
+  initscr();
+  clear();
+  refresh();
+  start_color();
+  cbreak();
+  noecho();
+  keypad(stdscr, TRUE);
+  win = newwin(20, 60, 1, 2);
+  keypad(win, TRUE);
+  wclear(win);
+  wrefresh(win);
+  kls_show_toWin(kls,win);
+  refresh();
+  kls_showList_toWin(kls,win);
+  delwin(win);
+  endwin();
 
   int* z = &minusone;
   printf("\n*z is [%i] before KLS_POP\n",*z);

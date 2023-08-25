@@ -10,7 +10,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 9 /**< Represents current patch release.*/
+#define KLS_PATCH 10 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -26,7 +26,7 @@ extern int KOLISEO_AUTOSET_REGIONS;
  */
 extern FILE* KOLISEO_DEBUG_FP;
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.9"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.10"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -116,6 +116,15 @@ void kls_clear(Koliseo* kls);
 void kls_free(Koliseo* kls);
 void print_kls_2file(FILE* fp, Koliseo* kls);
 void print_dbg_kls(Koliseo* kls);
+
+#ifdef KOLISEO_HAS_CURSES
+#ifndef KOLISEO_CURSES_H
+#define KOLISEO_CURSES_H
+#include "ncurses.h"
+void kls_show_toWin(Koliseo* kls, WINDOW* win);
+void kls_showList_toWin(Koliseo* kls, WINDOW* win);
+#endif
+#endif
 
 Koliseo_Temp kls_temp_start(Koliseo* kls);
 void kls_temp_end(Koliseo_Temp tmp_kls);
