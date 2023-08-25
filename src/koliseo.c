@@ -268,6 +268,125 @@ void print_dbg_kls(Koliseo* kls) {
   print_kls_2file(stderr,kls);
 }
 
+#ifdef KOLISEO_HAS_CURSES
+/**
+ * Prints fields and eventually Region_List from the passed Koliseo pointer, to the passed WINDOW pointer.
+ * @param kls The Koliseo at hand.
+ * @param win The Window at hand.
+ */
+void kls_show_toWin(Koliseo* kls, WINDOW* win) {
+	if (win == NULL) {
+		kls_log("ERROR","kls_show_toWin():  passed WINDOW was null.");
+		abort();
+	}
+	if (kls == NULL) {
+		kls_log("ERROR","kls_show_toWin():  passed Koliseo was null.");
+		abort();
+	}
+	wclear(win);
+	box(win,0,0);
+	wrefresh(win);
+	int y = 2;
+	int x = 2;
+	mvwprintw(win, y++, x, "Koliseo data:");
+	mvwprintw(win, y++, x, "Size: [%li]", kls->size);
+	mvwprintw(win, y++, x, "Offset: [%li]", kls->offset);
+	mvwprintw(win, y++, x, "Prev_Offset: [%li]", kls->prev_offset);
+	mvwprintw(win, y++, x, "Region_List len: [%i]", kls_length(kls->regs));
+	mvwprintw(win, y++, x, "Current usage: [%.3f%%]", (kls->offset * 100.0 ) / kls->size );
+	mvwprintw(win, y++, x, "q or Enter to quit.");
+	/*
+	Region_List rl = kls_copy(kls->regs);
+	while (!kls_empty(rl)) {
+	  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
+	}
+	*/
+	wrefresh(win);
+	int ch = '?';
+	int quit = -1;
+	do {
+		quit = 0;
+		ch = wgetch(win);
+		switch (ch) {
+			case 10: case 'q': {
+				quit = 1;
+			}
+			break;
+			default: {
+				quit = 0;
+			}
+			break;
+		}
+	} while (!quit);
+}
+
+/**
+ * Displays a slideshow of Region_List from passed Koliseo, to the passed WINDOW pointer.
+ * @param kls The Koliseo at hand.
+ * @param win The Window at hand.
+ */
+void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
+	if (win == NULL) {
+		kls_log("ERROR","kls_show_toWin():  passed WINDOW was null.");
+		abort();
+	}
+	if (kls == NULL) {
+		kls_log("ERROR","kls_show_toWin():  passed Koliseo was null.");
+		abort();
+	}
+	wclear(win);
+	box(win,0,0);
+	wrefresh(win);
+	int y = 2;
+	int x = 2;
+	int quit = 0;
+	mvwprintw(win, y++, x, "Region_List data:");
+	Region_List rl = kls_copy(kls->regs);
+	do {
+		wclear(win);
+		y = 3;
+		element e = kls_head(rl);
+		mvwprintw(win, y++, x, "Name: [%s]", e->name);
+		mvwprintw(win, y++, x, "Desc: [%s]", e->desc);
+		mvwprintw(win, y++, x, "Begin_Offset: [%li]", e->begin_offset);
+		mvwprintw(win, y++, x, "End_Offset: [%li]", e->end_offset);
+		mvwprintw(win, y++, x, "Region_List len: [%i]", kls_length(kls->regs));
+		mvwprintw(win, y++, x, "Current usage: [%.3f%%]", kls_usageShare(e,kls));
+		mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
+		/*
+		Region_List rl = kls_copy(kls->regs);
+		while (!kls_empty(rl)) {
+		  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
+		}
+		*/
+		box(win,0,0);
+		wrefresh(win);
+		int ch = '?';
+		int picked = -1;
+		do {
+			picked = 0;
+			ch = wgetch(win);
+			switch (ch) {
+				case KEY_RIGHT: {
+					rl = kls_tail(rl);
+					picked = 1;
+				}
+				break;
+				case 'q': {
+					quit = 1;
+					picked = 1;
+				}
+				break;
+				default: {
+					picked = 0;
+				}
+				break;
+			}
+		} while (!quit && !picked);
+	} while (!quit && !kls_empty(rl));
+}
+#endif
+
 /**
  * Resets the offset field for the passed Koliseo pointer.
  * Notably, it sets the prev_offset field to the previous offset, thus remembering where last allocation was before the clear.

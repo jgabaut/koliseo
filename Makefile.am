@@ -20,13 +20,13 @@ PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
 koliseo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
 
 # Linking rule
-LDADD = $(KOLISEO_LDFLAGS)
+LDADD = $(KOLISEO_LDFLAGS) -lncurses
 
 # Linker flag to strip symbols
 AM_LDFLAGS = -s
 
 # Compiler flags
-AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall
+AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall -DKOLISEO_HAS_CURSES
 
 # Build rule for object files
 %.o: %.c
