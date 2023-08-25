@@ -101,6 +101,7 @@ int main(void) {
   kls_free(kls);
 
   printf("[End of demo]\n");
+  printf("[End of demo for Koliseo v%s]\n", string_koliseo_version());
   if (KOLISEO_DEBUG == 1) {
 	  fclose(KOLISEO_DEBUG_FP);
   }
