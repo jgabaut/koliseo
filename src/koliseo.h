@@ -16,6 +16,10 @@
  * Global variable for debug flag.
  */
 extern int KOLISEO_DEBUG;
+/**
+ * Global variable for auto-setting of Regions flag.
+ */
+extern int KOLISEO_AUTOSET_REGIONS;
 
 /**
  * Global variable for debug file pointer.
@@ -120,7 +124,6 @@ void kls_temp_end(Koliseo_Temp tmp_kls);
 #define KLS_PUSH_T_NAMED(kls_temp, type, count, name, desc) (type*)KLS_PUSH_NAMED(kls_temp.kls, type, count, name, desc)
 #define KLS_POP_T(kls_temp, type, count) (type*)KLS_POP(kls_temp.kls, type, count)
 
-
 Region_List kls_emptyList(void);
 #define KLS_GETLIST() kls_emptyList()
 bool kls_empty(Region_List);
@@ -135,21 +138,26 @@ void kls_showList_toFile(Region_List, FILE* fp);
 #define KLS_ECHOLIST(kls_list) kls_showList(kls_list)
 #define KLS_PRINTLIST(kls_list,file) kls_showList_toFile(kls_list,file)
 bool kls_member(element, Region_List);
-int kls_lenght(Region_List);
+int kls_length(Region_List);
 Region_List kls_append(Region_List, Region_List);
 Region_List kls_reverse(Region_List);
 Region_List kls_copy(Region_List);
 Region_List kls_delet(element, Region_List);
 
 Region_List kls_insord(element, Region_List);
-#define KLS_PUSHLIST(kls,kls_list) kls_insord(kls,kls_list)
+#define KLS_PUSHLIST(reg,kls_list) kls_insord(reg,kls_list)
 Region_List kls_insord_p(element, Region_List);
-#define KLS_PUSHLIST_P(kls,kls_list) kls_insord_p(kls,kls_list)
+#define KLS_PUSHLIST_P(reg,kls_list) kls_insord_p(reg,kls_list)
 Region_List kls_mergeList(Region_List, Region_List);
 Region_List kls_intersect(Region_List, Region_List);
 Region_List kls_diff(Region_List, Region_List);
+
+#define KLS_DIFF(kls_list1,kls_list2) kls_diff(kls_list1,kls_list2)
 bool kls_isLess(element, element);
 bool kls_isEqual(element, element);
+double kls_usageShare(element, Koliseo*);
+void kls_usageReport_toFile(Koliseo*,FILE*);
+void kls_usageReport(Koliseo*);
 
 #endif
 
