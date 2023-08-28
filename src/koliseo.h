@@ -10,7 +10,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 10 /**< Represents current patch release.*/
+#define KLS_PATCH 11 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -26,7 +26,7 @@ extern int KOLISEO_AUTOSET_REGIONS;
  */
 extern FILE* KOLISEO_DEBUG_FP;
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.10"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.11"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -116,6 +116,7 @@ void kls_clear(Koliseo* kls);
 void kls_free(Koliseo* kls);
 void print_kls_2file(FILE* fp, Koliseo* kls);
 void print_dbg_kls(Koliseo* kls);
+void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize);
 
 #ifdef KOLISEO_HAS_CURSES
 #ifndef KOLISEO_CURSES_H
@@ -151,7 +152,7 @@ int kls_length(Region_List);
 Region_List kls_append(Region_List, Region_List);
 Region_List kls_reverse(Region_List);
 Region_List kls_copy(Region_List);
-Region_List kls_delet(element, Region_List);
+Region_List kls_delete(element, Region_List);
 
 Region_List kls_insord(element, Region_List);
 #define KLS_PUSHLIST(reg,kls_list) kls_insord(reg,kls_list)

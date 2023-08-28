@@ -57,7 +57,11 @@ Koliseo* kls_new(ptrdiff_t size) {
 	void *p = malloc(size);
 	if (p) {
 		char msg[500];
-		sprintf(msg,"Allocated (%li) for new KLS.",size);
+		//sprintf(msg,"Allocated (%li) for new KLS.",size);
+		//kls_log("KLS",msg);
+		char h_size[200];
+		kls_formatSize(size,h_size,sizeof(h_size));
+		sprintf(msg,"Allocated (%s) for new KLS.",h_size);
 		kls_log("KLS",msg);
 		Koliseo* kls = p;
 		kls->data = p;
@@ -141,7 +145,11 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	char msg[500];
-	sprintf(msg,"Pushed (%li) for KLS.",size);
+	char h_size[200];
+	kls_formatSize(size,h_size,sizeof(h_size));
+	//sprintf(msg,"Pushed size (%li) for KLS.",size);
+	//kls_log("KLS",msg);
+	sprintf(msg,"Pushed size (%s) for KLS.",h_size);
 	kls_log("KLS",msg);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -188,7 +196,11 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	}
 
 	char msg[500];
-	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	char h_size[200];
+	kls_formatSize(size,h_size,sizeof(h_size));
+	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	//kls_log("KLS",msg);
+	sprintf(msg,"Pushed zeroes, size (%s) for KLS.",h_size);
 	kls_log("KLS",msg);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -234,7 +246,11 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	kls->regs = kls_append(reglist, kls->regs);
 
 	char msg[500];
-	sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	char h_size[200];
+	kls_formatSize(size,h_size,sizeof(h_size));
+	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	//kls_log("KLS",msg);
+	sprintf(msg,"Pushed zeroes, size (%s) for KLS.",h_size);
 	kls_log("KLS",msg);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -255,6 +271,12 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
 		fprintf(fp,"[KLS] kls was NULL.");
 	} else {
 		fprintf(fp,"\n[KLS] Size: [%li]\n", kls->size);
+		char human_size[200];
+		char curr_size[200];
+		kls_formatSize(kls->size,human_size,sizeof(human_size));
+		fprintf(fp,"[KLS] Human: [%s]\n", human_size);
+		kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
+		fprintf(fp,"[KLS] Used (Human): [%s]\n", curr_size);
 		fprintf(fp,"[KLS] Offset: [%li]\n", kls->offset);
 		fprintf(fp,"[KLS] Prev_Offset: [%li]\n\n", kls->prev_offset);
 	}
@@ -266,6 +288,28 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
  */
 void print_dbg_kls(Koliseo* kls) {
   print_kls_2file(stderr,kls);
+}
+
+/**
+ * Converts a ptrdiff_t size to human-readable SI units (modulo 1000).
+ * Fills outputBuffer with the converted string.
+ * @param size The size at hand.
+ * @param outputBuffer The output buffer.
+ * @param bufferSize The output buffer size.
+ */
+void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize) {
+    const char* units[] = {"bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+    const int numUnits = sizeof(units) / sizeof(units[0]);
+
+    int unitIndex = 0;
+    double sizeValue = (double)size;
+
+    while (sizeValue >= 1000 && unitIndex < numUnits - 1) {
+        sizeValue /= 1000;
+        unitIndex++;
+    }
+
+    snprintf(outputBuffer, bufferSize, "%.2f %s", sizeValue, units[unitIndex]);
 }
 
 #ifdef KOLISEO_HAS_CURSES
@@ -290,10 +334,17 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 	int x = 2;
 	mvwprintw(win, y++, x, "Koliseo data:");
 	mvwprintw(win, y++, x, "Size: [%li]", kls->size);
+	char h_size[200];
+	kls_formatSize(kls->size,h_size,sizeof(h_size));
+	mvwprintw(win, y++, x, "Human size: [%s]", h_size);
+	char curr_size[200];
+	kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
+	mvwprintw(win, y++, x, "Used (Human): [%s]\n", curr_size);
 	mvwprintw(win, y++, x, "Offset: [%li]", kls->offset);
 	mvwprintw(win, y++, x, "Prev_Offset: [%li]", kls->prev_offset);
 	mvwprintw(win, y++, x, "Region_List len: [%i]", kls_length(kls->regs));
 	mvwprintw(win, y++, x, "Current usage: [%.3f%%]", (kls->offset * 100.0 ) / kls->size );
+	mvwprintw(win, y++, x, "%s","");
 	mvwprintw(win, y++, x, "q or Enter to quit.");
 	/*
 	Region_List rl = kls_copy(kls->regs);
@@ -352,6 +403,11 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		mvwprintw(win, y++, x, "End_Offset: [%li]", e->end_offset);
 		mvwprintw(win, y++, x, "Region_List len: [%i]", kls_length(kls->regs));
 		mvwprintw(win, y++, x, "Current usage: [%.3f%%]", kls_usageShare(e,kls));
+		char h_size[200];
+		ptrdiff_t reg_size = e->end_offset - e->begin_offset;
+		kls_formatSize(reg_size,h_size,sizeof(h_size));
+		mvwprintw(win, y++, x, "Human size: [%s]", h_size);
+		mvwprintw(win, y++, x, "%s","");
 		mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
 		/*
 		Region_List rl = kls_copy(kls->regs);
@@ -514,13 +570,18 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 		abort();
 	}
 	char msg[1000];
-	fprintf(fp,"[");
+	fprintf(fp,"{");
 	while (!kls_empty(l))
 	{
 		fprintf(fp,"\n[%s], [%s]    ",kls_head(l)->name,kls_head(l)->desc);
 		fprintf(fp,"[%li]->[%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		kls_log("KLS","--BEGIN Region--");
 		sprintf(msg,"[%s], [%s]",kls_head(l)->name,kls_head(l)->desc);
+		kls_log("KLS",msg);
+		char h_size[200];
+		ptrdiff_t r_size = kls_head(l)->end_offset - kls_head(l)->begin_offset;
+		kls_formatSize(r_size,h_size,sizeof(h_size));
+		sprintf(msg,"[%s]",h_size);
 		kls_log("KLS",msg);
 		sprintf(msg,"[%li]->[%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		kls_log("KLS",msg);
@@ -532,7 +593,7 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 			fprintf(fp,",\n");
 		}
 	}
-	fprintf(fp,"\n]\n");
+	fprintf(fp,"\n}\n");
 }
 
 void kls_showList(Region_List l) {
@@ -596,7 +657,7 @@ Region_List kls_copy(Region_List l) {
 		return kls_cons(kls_head(l), kls_copy(kls_tail(l)));
 	}
 }
-Region_List kls_delet(element el, Region_List l) {
+Region_List kls_delete(element el, Region_List l) {
 	if (kls_empty(l))
 	{
 		return kls_emptyList();
@@ -609,7 +670,7 @@ Region_List kls_delet(element el, Region_List l) {
 		}
 		else
 		{
-			return kls_cons(kls_head(l), kls_delet(el, kls_tail(l)));
+			return kls_cons(kls_head(l), kls_delete(el, kls_tail(l)));
 		}
 	}
 }
@@ -621,6 +682,7 @@ Region_List kls_insord(element el, Region_List l) {
 	}
 	else
 	{
+		//Insert element according to its begin_offset
 		if (el->begin_offset <= kls_head(l)->begin_offset)
 		{
 			return kls_cons(el, l);
@@ -728,11 +790,17 @@ Region_List kls_diff(Region_List l1, Region_List l2) {
 }
 
 bool kls_isLess(Region* r1, Region* r2) {
-  return (r1->begin_offset < r2->begin_offset);
+  //Compare regions by their effective size
+  ptrdiff_t s1 = r1->end_offset - r1->begin_offset;
+  ptrdiff_t s2 = r2->end_offset - r2->begin_offset;
+  return (s1 < s2);
 }
 
 bool kls_isEqual(Region* r1, Region* r2) {
-  return (r1->begin_offset == r2->begin_offset);
+  //Compare regions by their effective size
+  ptrdiff_t s1 = r1->end_offset - r1->begin_offset;
+  ptrdiff_t s2 = r2->end_offset - r2->begin_offset;
+  return (s1 == s2);
 }
 
 double kls_usageShare(Region* r, Koliseo* kls) {
