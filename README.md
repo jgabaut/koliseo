@@ -7,6 +7,7 @@
 + [What is this thing?](#witt)
   + [Prerequisites](#prerequisites)
   + [Building](#building)
++ [Credits](#credits)
 + [Todo](#todo)
 
 ## What is this thing? <a name = "witt"></a>
@@ -33,5 +34,9 @@
   * `autoreconf`, which should work now
   * `./configure`, which should generate the `Makefile`
   * `make`, to build the binary
+
+## Credits <a name = "credits"></a>
+
+  Thanks to [Mako](https://www.instagram.com/mako_x_tattoo/) for the repo banner.
 
 ## Todo <a name = "todo"></a>
