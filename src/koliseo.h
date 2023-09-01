@@ -42,10 +42,20 @@ void kls_log(const char* tag, const char* format, ...);
 #define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
 #endif
 
+/**
+ * Represents a type index for Regions.
+ * @see KLS_PUSH_TYPED()
+ */
 typedef enum Region_Type {
 	None=0,
 	KLS_Header=1,
 } Region_Type;
+
+/**
+ * Defines max index for Koliseo's own Region_Type values.
+ * @see Region_Type
+ */
+#define KLS_REGIONTYPE_MAX KLS_Header
 
 /**
  * Represents an allocated Region in a Koliseo.
@@ -58,7 +68,7 @@ typedef struct Region {
 	ptrdiff_t size; /**< Size of memory for the Region.*/
 	char name[255]; /**< Name field for the Region.*/
 	char desc[255]; /**< Description field for the Region.*/
-	Region_Type type; /**< Used to identify which type the Region holds.*/
+	int type; /**< Used to identify which type the Region holds.*/
 } Region;
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
