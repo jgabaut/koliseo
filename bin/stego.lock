@@ -16,3 +16,4 @@ tests# tests folder name
 0.1.9# add kls_usageReport()
 0.1.10# add ncurses debug functions
 0.1.11# add kls_formatSize()
+0.1.12# add int API lvl, vargs log

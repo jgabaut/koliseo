@@ -1,16 +1,17 @@
-#ifndef KOLISEO_H
-#define KOLISEO_H
+#ifndef KOLISEO_H_
+#define KOLISEO_H_
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <assert.h>
 #include <string.h>
 #include <time.h>
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 11 /**< Represents current patch release.*/
+#define KLS_PATCH 12 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -26,11 +27,14 @@ extern int KOLISEO_AUTOSET_REGIONS;
  */
 extern FILE* KOLISEO_DEBUG_FP;
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.11"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*3+KLS_MINOR*2+KLS_PATCH); /**< Represents current version with numeric format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.12"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
-void kls_log(const char* tag, const char* msg);
+const int int_koliseo_version(void);
+
+void kls_log(const char* tag, const char* format, ...);
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 
@@ -54,8 +58,8 @@ typedef struct Region {
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
 
-#ifndef KOLISEO_LIST_H
-#define KOLISEO_LIST_H
+#ifndef KOLISEO_LIST_H_
+#define KOLISEO_LIST_H_
 #include "stdbool.h"
 
 typedef Region* element;
@@ -119,8 +123,8 @@ void print_dbg_kls(Koliseo* kls);
 void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize);
 
 #ifdef KOLISEO_HAS_CURSES
-#ifndef KOLISEO_CURSES_H
-#define KOLISEO_CURSES_H
+#ifndef KOLISEO_CURSES_H_
+#define KOLISEO_CURSES_H_
 #include "ncurses.h"
 void kls_show_toWin(Koliseo* kls, WINDOW* win);
 void kls_showList_toWin(Koliseo* kls, WINDOW* win);
