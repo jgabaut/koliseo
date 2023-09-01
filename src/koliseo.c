@@ -884,3 +884,19 @@ void kls_usageReport_toFile(Koliseo* kls, FILE* fp) {
 void kls_usageReport(Koliseo* kls) {
 	kls_usageReport_toFile(kls,stdout);
 }
+
+ptrdiff_t kls_type_usage(int type, Koliseo* kls) {
+	Region_List rl = kls_copy(kls->regs);
+
+	ptrdiff_t res = 0;
+
+	while (!kls_empty(rl)) {
+		element h = kls_head(rl);
+		if (h->type == type) {
+			res += (h->end_offset - h->begin_offset);
+		}
+		rl = kls_tail(rl);
+	}
+
+	return res;
+}
