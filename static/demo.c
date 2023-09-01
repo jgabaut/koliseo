@@ -6,7 +6,7 @@
 int main(void) {
   KOLISEO_DEBUG = 1;
   KOLISEO_AUTOSET_REGIONS = 1;
-  printf("Demo for Koliseo, using API version %s\n", string_koliseo_version());
+  printf("Demo for Koliseo, using API lvl [%i], version %s \n", int_koliseo_version(), string_koliseo_version());
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
   printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
   printf("KOLISEO_AUTOSET_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_REGIONS);
@@ -122,7 +122,7 @@ int main(void) {
   kls_free(kls);
 
   printf("[End of demo]\n");
-  printf("[End of demo for Koliseo v%s]\n", string_koliseo_version());
+  printf("[End of demo for Koliseo, API lvl [%i] v%s ]\n", int_koliseo_version(), string_koliseo_version());
   if (KOLISEO_DEBUG == 1) {
 	  fclose(KOLISEO_DEBUG_FP);
   }

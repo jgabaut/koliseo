@@ -11,6 +11,13 @@ FILE* KOLISEO_DEBUG_FP = NULL;
 const char* string_koliseo_version(void) {
 	return KOLISEO_API_VERSION_STRING;
 }
+/**
+ * Returns the constant int representing current version for Koliseo.
+ * @return A constant int in numeric format for current Koliseo version.
+ */
+const int int_koliseo_version(void) {
+	return KOLISEO_API_VERSION_INT;
+}
 
 /**
  * Returns the current offset (position of pointer bumper) for the passed Koliseo.
