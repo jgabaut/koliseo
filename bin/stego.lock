@@ -17,3 +17,4 @@ tests# tests folder name
 0.1.10# add ncurses debug functions
 0.1.11# add kls_formatSize()
 0.1.12# add int API lvl, vargs log
+0.1.13# log API level
