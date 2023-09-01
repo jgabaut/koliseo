@@ -4,13 +4,14 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <assert.h>
 #include <string.h>
 #include <time.h>
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 11 /**< Represents current patch release.*/
+#define KLS_PATCH 12 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -26,11 +27,11 @@ extern int KOLISEO_AUTOSET_REGIONS;
  */
 extern FILE* KOLISEO_DEBUG_FP;
 
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.11"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.12"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
-void kls_log(const char* tag, const char* msg);
+void kls_log(const char* tag, const char* format, ...);
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 

@@ -24,10 +24,12 @@ ptrdiff_t kls_get_pos(Koliseo* kls) {
 /**
  * When KOLISEO_DEBUG is 1, logs a message to the defined KOLISEO_DEBUG_FP.
  * @param tag Tag for a message.
- * @param msg The actual message.
+ * @param format The message format string.
  */
-void kls_log(const char* tag, const char* msg) {
+void kls_log(const char* tag, const char* format, ...) {
 	if (KOLISEO_DEBUG == 1) {
+		va_list args;
+		va_start(args, format);
 		if (KOLISEO_DEBUG_FP == NULL) {
 			fprintf(stderr,"[KLS]    kls_log(): Failed opening KOLISEO_DEBUG_FP to print logs.\n");
 		} else {
@@ -36,9 +38,12 @@ void kls_log(const char* tag, const char* msg) {
 			char timeheader[500];
 			if ( strftime(timeheader, sizeof timeheader, "%X", mytime) )
 			{
-				fprintf(KOLISEO_DEBUG_FP,"[%-10.10s] [%s] [%s]\n", tag, timeheader, msg);
+				fprintf(KOLISEO_DEBUG_FP,"[%-10.10s] [%s] [", tag, timeheader);
+				vfprintf(KOLISEO_DEBUG_FP, format, args);
+				fprintf(KOLISEO_DEBUG_FP,"]\n");
 			}
 		}
+		va_end(args);
 	}
 }
 
@@ -270,15 +275,15 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(fp,"[KLS] kls was NULL.");
 	} else {
-		fprintf(fp,"\n[KLS] Size: [%li]\n", kls->size);
+		fprintf(fp,"\n[KLS] Size: { %li }\n", kls->size);
 		char human_size[200];
 		char curr_size[200];
 		kls_formatSize(kls->size,human_size,sizeof(human_size));
-		fprintf(fp,"[KLS] Human: [%s]\n", human_size);
+		fprintf(fp,"[KLS] Human: { %s }\n", human_size);
 		kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
-		fprintf(fp,"[KLS] Used (Human): [%s]\n", curr_size);
-		fprintf(fp,"[KLS] Offset: [%li]\n", kls->offset);
-		fprintf(fp,"[KLS] Prev_Offset: [%li]\n\n", kls->prev_offset);
+		fprintf(fp,"[KLS] Used (Human): { %s }\n", curr_size);
+		fprintf(fp,"[KLS] Offset: { %li }\n", kls->offset);
+		fprintf(fp,"[KLS] Prev_Offset: { %li }\n\n", kls->prev_offset);
 	}
 }
 
@@ -333,17 +338,17 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 	int y = 2;
 	int x = 2;
 	mvwprintw(win, y++, x, "Koliseo data:");
-	mvwprintw(win, y++, x, "Size: [%li]", kls->size);
+	mvwprintw(win, y++, x, "Size: { %li }", kls->size);
 	char h_size[200];
 	kls_formatSize(kls->size,h_size,sizeof(h_size));
-	mvwprintw(win, y++, x, "Human size: [%s]", h_size);
+	mvwprintw(win, y++, x, "Human size: { %s }", h_size);
 	char curr_size[200];
 	kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
-	mvwprintw(win, y++, x, "Used (Human): [%s]\n", curr_size);
-	mvwprintw(win, y++, x, "Offset: [%li]", kls->offset);
-	mvwprintw(win, y++, x, "Prev_Offset: [%li]", kls->prev_offset);
-	mvwprintw(win, y++, x, "Region_List len: [%i]", kls_length(kls->regs));
-	mvwprintw(win, y++, x, "Current usage: [%.3f%%]", (kls->offset * 100.0 ) / kls->size );
+	mvwprintw(win, y++, x, "Used (Human): { %s }\n", curr_size);
+	mvwprintw(win, y++, x, "Offset: { %li }", kls->offset);
+	mvwprintw(win, y++, x, "Prev_Offset: { %li }", kls->prev_offset);
+	mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(kls->regs));
+	mvwprintw(win, y++, x, "Current usage: { %.3f%% }", (kls->offset * 100.0 ) / kls->size );
 	mvwprintw(win, y++, x, "%s","");
 	mvwprintw(win, y++, x, "q or Enter to quit.");
 	/*
@@ -397,16 +402,15 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		wclear(win);
 		y = 3;
 		element e = kls_head(rl);
-		mvwprintw(win, y++, x, "Name: [%s]", e->name);
-		mvwprintw(win, y++, x, "Desc: [%s]", e->desc);
-		mvwprintw(win, y++, x, "Begin_Offset: [%li]", e->begin_offset);
-		mvwprintw(win, y++, x, "End_Offset: [%li]", e->end_offset);
-		mvwprintw(win, y++, x, "Region_List len: [%i]", kls_length(kls->regs));
-		mvwprintw(win, y++, x, "Current usage: [%.3f%%]", kls_usageShare(e,kls));
+		mvwprintw(win, y++, x, "Name: { %s }", e->name);
+		mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
+		mvwprintw(win, y++, x, "Offsets: { %li } -> { %li }", e->begin_offset, e->end_offset);
+		mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(kls->regs));
+		mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
 		char h_size[200];
 		ptrdiff_t reg_size = e->end_offset - e->begin_offset;
 		kls_formatSize(reg_size,h_size,sizeof(h_size));
-		mvwprintw(win, y++, x, "Human size: [%s]", h_size);
+		mvwprintw(win, y++, x, "Human size: { %s }", h_size);
 		mvwprintw(win, y++, x, "%s","");
 		mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
 		/*
@@ -573,19 +577,19 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 	fprintf(fp,"{");
 	while (!kls_empty(l))
 	{
-		fprintf(fp,"\n[%s], [%s]    ",kls_head(l)->name,kls_head(l)->desc);
-		fprintf(fp,"[%li]->[%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
-		kls_log("KLS","--BEGIN Region--");
-		sprintf(msg,"[%s], [%s]",kls_head(l)->name,kls_head(l)->desc);
-		kls_log("KLS",msg);
+		fprintf(fp,"\n{ %s }, { %s }    ",kls_head(l)->name,kls_head(l)->desc);
+		fprintf(fp,"{ %li } -> { %li }",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		kls_log("KLS-Region","    Region {");
+		sprintf(msg,"{ %s }, { %s }",kls_head(l)->name,kls_head(l)->desc);
+		kls_log("KLS-Region",msg);
 		char h_size[200];
 		ptrdiff_t r_size = kls_head(l)->end_offset - kls_head(l)->begin_offset;
 		kls_formatSize(r_size,h_size,sizeof(h_size));
-		sprintf(msg,"[%s]",h_size);
-		kls_log("KLS",msg);
-		sprintf(msg,"[%li]->[%li]",kls_head(l)->begin_offset,kls_head(l)->end_offset);
-		kls_log("KLS",msg);
-		kls_log("KLS","--END Region--");
+		sprintf(msg,"{ %s }",h_size);
+		kls_log("KLS-Region",msg);
+		sprintf(msg,"{ %li } -> { %li }",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		kls_log("KLS-Region",msg);
+		kls_log("KLS-Region","    }");
 
 		l = kls_tail(l);
 		if (!kls_empty(l))
