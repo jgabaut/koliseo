@@ -11,7 +11,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 15 /**< Represents current patch release.*/
+#define KLS_PATCH 16 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -27,8 +27,8 @@ extern int KOLISEO_AUTOSET_REGIONS;
  */
 extern FILE* KOLISEO_DEBUG_FP;
 
-static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*3+KLS_MINOR*2+KLS_PATCH); /**< Represents current version with numeric format.*/
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.15"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.16"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -155,6 +155,7 @@ void kls_temp_end(Koliseo_Temp tmp_kls);
 
 #define KLS_PUSH_T(kls_temp, type, count) (type*)KLS_PUSH(kls_temp.kls, type, count)
 #define KLS_PUSH_T_NAMED(kls_temp, type, count, name, desc) (type*)KLS_PUSH_NAMED(kls_temp.kls, type, count, name, desc)
+#define KLS_PUSH_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)KLS_PUSH_TYPED(kls_temp.kls, type, count, region_type, name, desc)
 #define KLS_POP_T(kls_temp, type, count) (type*)KLS_POP(kls_temp.kls, type, count)
 
 Region_List kls_emptyList(void);
