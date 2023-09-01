@@ -83,6 +83,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 			Region* kls_header = (Region*) malloc(sizeof(Region));
 			kls_header->begin_offset = 0;
 			kls_header->end_offset = kls->offset;
+			kls_header->type = KLS_Header;
 			strcpy(kls_header->name,"KLS Header");
 			strcpy(kls_header->desc,"Denotes Space occupied by the Koliseo header.");
 			Region_List reglist = kls_emptyList();
@@ -193,6 +194,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 		Region* reg = (Region*) malloc(sizeof(Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
+		reg->type = None;
 		strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
 		strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
 		Region_List reglist = kls_emptyList();
@@ -239,22 +241,76 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	Region* reg = (Region*) malloc(sizeof(Region));
-	reg->begin_offset = kls->prev_offset;
-	reg->end_offset = kls->offset;
-	strcpy(reg->name,name);
-	strcpy(reg->desc,desc);
-	Region_List reglist = kls_emptyList();
-	reglist = kls_cons(reg,reglist);
-	kls->regs = kls_append(reglist, kls->regs);
+	if (KOLISEO_AUTOSET_REGIONS == 1) {
+		Region* reg = (Region*) malloc(sizeof(Region));
+		reg->begin_offset = kls->prev_offset;
+		reg->end_offset = kls->offset;
+		reg->type = None;
+		strcpy(reg->name,name);
+		strcpy(reg->desc,desc);
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(reg,reglist);
+		kls->regs = kls_append(reglist, kls->regs);
 
-	char h_size[200];
-	kls_formatSize(size,h_size,sizeof(h_size));
-	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
-	//kls_log("KLS",msg);
-	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
-	if (KOLISEO_DEBUG == 1) {
-		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+		char h_size[200];
+		kls_formatSize(size,h_size,sizeof(h_size));
+		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+		//kls_log("KLS",msg);
+		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
+		if (KOLISEO_DEBUG == 1) {
+			print_kls_2file(KOLISEO_DEBUG_FP,kls);
+		}
+	}
+	return p;
+}
+
+/**
+ * Takes a Koliseo pointer, a Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Notably, it zeroes the memory region.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the Koliseo.
+ */
+void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Region_Type type, char* name, char* desc) {
+	ptrdiff_t available = kls->size - kls->offset;
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
+		if (count > PTRDIFF_MAX/size) {
+			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+		} else {
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+		}
+		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		abort();
+		//return 0;
+	}
+	char* p = kls->data + kls->offset + padding;
+	//Zero new area
+	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
+	kls->offset += padding + size*count;
+	if (KOLISEO_AUTOSET_REGIONS == 1) {
+		Region* reg = (Region*) malloc(sizeof(Region));
+		reg->begin_offset = kls->prev_offset;
+		reg->end_offset = kls->offset;
+		reg->type = type;
+		strcpy(reg->name,name);
+		strcpy(reg->desc,desc);
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(reg,reglist);
+		kls->regs = kls_append(reglist, kls->regs);
+
+		char h_size[200];
+		kls_formatSize(size,h_size,sizeof(h_size));
+		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+		//kls_log("KLS",msg);
+		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
+		if (KOLISEO_DEBUG == 1) {
+			print_kls_2file(KOLISEO_DEBUG_FP,kls);
+		}
 	}
 	return p;
 }

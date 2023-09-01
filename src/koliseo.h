@@ -11,7 +11,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 13 /**< Represents current patch release.*/
+#define KLS_PATCH 14 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -28,7 +28,7 @@ extern int KOLISEO_AUTOSET_REGIONS;
 extern FILE* KOLISEO_DEBUG_FP;
 
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*3+KLS_MINOR*2+KLS_PATCH); /**< Represents current version with numeric format.*/
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.13"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.14"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -42,6 +42,11 @@ void kls_log(const char* tag, const char* format, ...);
 #define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
 #endif
 
+typedef enum Region_Type {
+	None=0,
+	KLS_Header=1,
+} Region_Type;
+
 /**
  * Represents an allocated Region in a Koliseo.
  * @see KLS_PUSH()
@@ -53,10 +58,12 @@ typedef struct Region {
 	ptrdiff_t size; /**< Size of memory for the Region.*/
 	char name[255]; /**< Name field for the Region.*/
 	char desc[255]; /**< Description field for the Region.*/
+	Region_Type type; /**< Used to identify which type the Region holds.*/
 } Region;
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
+
 
 #ifndef KOLISEO_LIST_H_
 #define KOLISEO_LIST_H_
@@ -107,10 +114,12 @@ Koliseo* kls_new(ptrdiff_t size);
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
+void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Region_Type type, char* name, char* desc);
 void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
 #define KLS_PUSH(kls, type, count) (type*)kls_push_zero(kls, sizeof(type), _Alignof(type), count)
 #define KLS_PUSH_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named(kls, sizeof(type), _Alignof(type), count, name, desc)
+#define KLS_PUSH_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_index(kls, sizeof(type), _Alignof(type), count, region_type, name, desc)
 #define KLS_POP(kls, type, count) (type*)kls_pop(kls, sizeof(type), _Alignof(type), count)
 
 #define KLS_PUSH_ARRAY(kls, type, count) (type*)kls_push_zero(kls, sizeof(type)*(count), _Alignof(type), count)
