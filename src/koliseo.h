@@ -11,7 +11,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 16 /**< Represents current patch release.*/
+#define KLS_PATCH 17 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -28,7 +28,7 @@ extern int KOLISEO_AUTOSET_REGIONS;
 extern FILE* KOLISEO_DEBUG_FP;
 
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.16"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.17"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -192,6 +192,7 @@ bool kls_isEqual(element, element);
 double kls_usageShare(element, Koliseo*);
 void kls_usageReport_toFile(Koliseo*,FILE*);
 void kls_usageReport(Koliseo*);
+ptrdiff_t kls_type_usage(int, Koliseo*);
 
 #endif
 

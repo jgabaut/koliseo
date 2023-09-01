@@ -20,3 +20,4 @@ tests# tests folder name
 0.1.13# log API level
 0.1.15# add KLS_PUSH_TYPED()
 0.1.16# add KLS_PUSH_T_TYPED()
+0.1.17# add kls_type_usage()
