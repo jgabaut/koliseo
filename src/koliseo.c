@@ -5,12 +5,66 @@ int KOLISEO_AUTOSET_REGIONS = 1;
 FILE* KOLISEO_DEBUG_FP = NULL;
 
 /**
+ * Defines titlescreen.
+ */
+char* kls_title[KLS_TITLEROWS+1] = {
+	"                               .',,,.                                                               ",
+	"                        ...''',,;;:cl;.                                                             ",
+	"                  ..''''''....      .co,                                                            ",
+	"              .'',,,'..               'ol.                                                          ",
+	"          ..''''..                     .co.                                                         ",
+	"        ..'..                            cl.                                                        ",
+	"      ..'...               .          .  .:'...       .       .      ..      .....     ...          ",
+	"     ....      .      ..:c,'.   .oc .ll.  :dddxo.    ld.     'x:  .cxddx;   :kxodo,  .lddxx;        ",
+	"    .,..     .cl,..   .cxd:..   ;Ol;do.  :Ol. c0c   .kx.     lO;  ;0d..::  .xk'     .xx' 'kx.       ",
+	"    .,..     'dOl.     .''......lKOkc.  .kx.  ;0l   ;0l     .xk.  'xk;     'Ok;'.   l0;  .xk.       ",
+	"    ''.;,    .,;;............. .xKKO'   ;0c   c0:   lO;     'Od.   .lko.   :0koo:. .xk.  'Od.       ",
+	"   ',.'c;.  .......            'Oo:ko.  c0;  .xk.  .xx.     :0c  .   ;Od. .oO,     'Od.  c0:        ",
+	"   ,;  .......        .::.     :O; lO;  :0l..okc.  'Od...  .oO' .ld'.:Od. 'kk,...  .kk,.:kd.        ",
+	"   ;xc,...  .   'd:   .:d;     ;l. .l:  .:dool''c. 'ddolc. .cc.  'ldooc.  'dxoll:.  'odoo:.         ",
+	"  .lx;. .  ,d;  .ll.   .''.                     ;l:'                                                ",
+	"  :o.   ;,  cc    ..     .                       ,cc:::c,                                           ",
+	" .c;    ..  .'           ....',,;;;;;;;;;;,,,,,,,,,,;;;ox;........'cddoollcc:;,,'..                 ",
+	"  ,:         ...',:clodxkO0KKXXXXXXKKK000000KKKKXXXXKKKXXXKKKKKKKKKXNNNNNNNNNNNXXKOxoc;'.           ",
+	"  .:. ..';cldkOKXXXXK0Okxxdolc::;,''.','......';clc::cloONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNK0xl;.       ",
+	"  :xxxOKKK0kxoddl;,';od;.   'cl,    .ckko.    ,d00Ol.   .xXNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNKkl;.   ",
+	".lKX0xoc,';;. .ll.   ;xO;   .oX0,    ,ONXl    ,0NNNK;    .lKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNX0o' ",
+	".xk;.  .  .;.  .:,    .dc    'OK;    .dNNo.   ;0NNNXc      ;kXNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNk.",
+	" :c        ..   ..    .l,    .k0,    .xXXo    ;0XNNXc       .l0NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNO'",
+	" :;                   .'.    .;:.    .,cl;....,loddo;..       'dKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN0,",
+	".c,        ....',;;:cclllooddddddddddodxxxxxxxdddddddolllccccc:cxXNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNK;",
+	".l:',:cloxxkkkOkkxxdollcc::;,,'''.............................',cONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXc",
+	":00OOxdoc:;,'...                     ..        ..         .     .oNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXl",
+	":o,..',. ..   ';.   .co'     ;d,    'oOk;    .o00kd;    .oOkd,   :KNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXl",
+	":;   ,o'  ..  .l:    ;0o    .dXo.   'xNNk.   'ONNNNO'   :KNNNd.   cKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXo",
+	"c;    ..  ..   ';    'ko.   'ONo.   .kNNO'   ,0NNNNK;   :KNNXd.    :0NNNNNNNNNNNNNNNNNNNNNNNNNNNNNXo",
+	"l,             ..    'ko    'OXl    ,0NNO'   'ONNNNK;   ;KNNXl.     ;ONNNNNNNNNNNNNNNNNNNNNNNNNNNNXl",
+	"cc.............';'...;do'...:k0c....:0XX0:...'xXXXX0c...:0XK0l.......c0NNNNNNNNNNNNNNNNNNNNXXXXXXKO,",
+	".;:;;;;;;:::::::::cc:::::::::c:;;;;,;ccc:;,,,,:cccc:;;;;;ccc:;,,,,,;;;clloooooooooooooooooollcc:;,. "
+};
+
+void kls_print_title_2file(FILE* fp) {
+	if (fp == NULL) {
+		fprintf(stderr,"[KLS] kls_print_title_2file():  Passed file pointer was NULL.\n");
+		abort();
+	}
+  	for (int i = 0; i < KLS_TITLEROWS; i++) {
+		fprintf(fp,"%s\n",kls_title[i]);
+  	}
+}
+
+void kls_print_title() {
+	kls_print_title_2file(stdout);
+}
+
+/**
  * Returns the constant string representing current version for Koliseo.
  * @return A constant string in MAJOR-MINOR-PATCH format for current Koliseo version.
  */
 const char* string_koliseo_version(void) {
 	return KOLISEO_API_VERSION_STRING;
 }
+
 /**
  * Returns the constant int representing current version for Koliseo.
  * @return A constant int in numeric format for current Koliseo version.
@@ -18,6 +72,7 @@ const char* string_koliseo_version(void) {
 const int int_koliseo_version(void) {
 	return KOLISEO_API_VERSION_INT;
 }
+
 
 /**
  * Returns the current offset (position of pointer bumper) for the passed Koliseo.
