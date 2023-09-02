@@ -272,9 +272,10 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
+ * @param type The type index for pushed Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
-void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Region_Type type, char* name, char* desc) {
+void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
