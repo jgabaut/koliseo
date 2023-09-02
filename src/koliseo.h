@@ -38,7 +38,7 @@ const int int_koliseo_version(void);
 extern char* kls_title[KLS_TITLEROWS+1];
 
 void kls_print_title_2file(FILE* fp);
-void kls_print_title();
+void kls_print_title(void);
 
 void kls_log(const char* tag, const char* format, ...);
 

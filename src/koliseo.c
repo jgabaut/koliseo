@@ -53,7 +53,7 @@ void kls_print_title_2file(FILE* fp) {
   	}
 }
 
-void kls_print_title() {
+void kls_print_title(void) {
 	kls_print_title_2file(stdout);
 }
 
