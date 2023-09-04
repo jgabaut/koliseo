@@ -3,10 +3,12 @@
 #include "../src/koliseo.h"
 #include "amboso.h"
 
+
 int main(void) {
   KOLISEO_DEBUG = 1;
   KOLISEO_AUTOSET_REGIONS = 1;
-  printf("Demo for Koliseo, using API lvl [%i], version %s \n", int_koliseo_version(), string_koliseo_version());
+  kls_print_title();
+  printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n", int_koliseo_version(), string_koliseo_version());
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
   printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
   printf("KOLISEO_AUTOSET_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_REGIONS);
