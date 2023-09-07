@@ -11,7 +11,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
-#define KLS_PATCH 19 /**< Represents current patch release.*/
+#define KLS_PATCH 20 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -28,7 +28,7 @@ extern int KOLISEO_AUTOSET_REGIONS;
 extern FILE* KOLISEO_DEBUG_FP;
 
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
-static const char KOLISEO_API_VERSION_STRING[] = "0.1.19"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.1.20"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -108,6 +108,7 @@ typedef struct Koliseo {
 	ptrdiff_t offset; /**< Current position of memory pointer.*/
 	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
 	Region_List regs; /**< List of allocated Regions*/
+	int has_temp; /**< When == 1, a Koliseo_Temp is currently active on this Koliseo.*/
 } Koliseo;
 
 /**
@@ -129,11 +130,12 @@ Koliseo* kls_new(ptrdiff_t size);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
 void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc);
 void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
-#define KLS_PUSH(kls, type, count) (type*)kls_push_zero(kls, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH(kls, type, count) (type*)kls_push_zero_AR(kls, sizeof(type), _Alignof(type), count)
 #define KLS_PUSH_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named(kls, sizeof(type), _Alignof(type), count, name, desc)
 #define KLS_PUSH_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed(kls, sizeof(type), _Alignof(type), count, region_type, name, desc)
 #define KLS_POP(kls, type, count) (type*)kls_pop(kls, sizeof(type), _Alignof(type), count)
@@ -159,9 +161,9 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win);
 Koliseo_Temp kls_temp_start(Koliseo* kls);
 void kls_temp_end(Koliseo_Temp tmp_kls);
 
-#define KLS_PUSH_T(kls_temp, type, count) (type*)KLS_PUSH(kls_temp.kls, type, count)
-#define KLS_PUSH_T_NAMED(kls_temp, type, count, name, desc) (type*)KLS_PUSH_NAMED(kls_temp.kls, type, count, name, desc)
-#define KLS_PUSH_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)KLS_PUSH_TYPED(kls_temp.kls, type, count, region_type, name, desc)
+#define KLS_PUSH_T(kls_temp, type, count) (type*)kls_push_zero(kls_temp.kls, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_push_zero(kls_temp.kls, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)kls_push_zero(kls_temp.kls, sizeof(type), _Alignof(type), count)
 #define KLS_POP_T(kls_temp, type, count) (type*)KLS_POP(kls_temp.kls, type, count)
 
 Region_List kls_emptyList(void);
