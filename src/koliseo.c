@@ -133,6 +133,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->size = size;
 		kls->offset = sizeof(*kls);
 		kls->prev_offset = kls->offset;
+		kls->has_temp = 0;
 		if (KOLISEO_AUTOSET_REGIONS == 1) {
 			kls_log("KLS","Init of Region_List for kls.");
 			Region* kls_header = (Region*) malloc(sizeof(Region));
@@ -228,6 +229,44 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+	ptrdiff_t available = kls->size - kls->offset;
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
+		if (count > PTRDIFF_MAX/size) {
+			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+		} else {
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+		}
+		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		abort();
+		//return 0;
+	}
+	char* p = kls->data + kls->offset + padding;
+	//Zero new area
+	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
+	kls->offset += padding + size*count;
+	char h_size[200];
+	kls_formatSize(size,h_size,sizeof(h_size));
+	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	//kls_log("KLS",msg);
+	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",h_size);
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
+	return p;
+}
+
+/**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Notably, it zeroes the memory region.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the Koliseo.
+ */
+void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
@@ -589,10 +628,12 @@ void kls_free(Koliseo* kls) {
  * @see Koliseo_Temp
  */
 Koliseo_Temp kls_temp_start(Koliseo* kls) {
+	assert(kls->has_temp == 0); //TODO handle this more gracefully
 	Koliseo_Temp tmp;
 	tmp.kls = kls;
 	tmp.prev_offset = kls->prev_offset;
 	tmp.offset = kls->offset;
+	kls->has_temp = 1;
 	kls_log("KLS","Prepared new Temp KLS.");
 	return tmp;
 }
@@ -606,6 +647,7 @@ void kls_temp_end(Koliseo_Temp tmp_kls) {
 	tmp_kls.kls->prev_offset = tmp_kls.prev_offset;
 	tmp_kls.kls->offset = tmp_kls.offset;
 	kls_log("KLS","Ended Temp KLS.");
+	tmp_kls.kls->has_temp = 0;
 }
 
 
