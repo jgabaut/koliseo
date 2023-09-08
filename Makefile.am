@@ -66,14 +66,16 @@ run: demo
 
 clean:
 	@echo -en "Cleaning build artifacts:  "
-	rm $(TARGET)
-	rm src/*.o
-	rm static/*.o
+	-rm $(TARGET)
+	-rm $(TARGET)
+	-rm src/*.o
+	-rm static/*.o
 	@echo -e "\033[1;33mDone.\e[0m"
 
 cleanob:
 	@echo -en "Cleaning object build artifacts:  "
-	rm src/*.o
+	-rm src/*.o
+	-rm static/*.o
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)
