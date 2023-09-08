@@ -5,17 +5,13 @@ AUTOMAKE_OPTIONS = foreign
 
 # Variables
 CFLAGS = @CFLAGS@
-TARGET = demo
 # Specify the shell to use in the makefile
 SHELL := /bin/bash
 # Set the .ONESHELL special target to use a specific shell for all recipes
 .ONESHELL:
 # Check system info
-OS := $$(uname -s)
 MACHINE := $$(uname -m)
 PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
-
-
 
 # Source files
 koliseo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
@@ -67,7 +63,6 @@ run: demo
 clean:
 	@echo -en "Cleaning build artifacts:  "
 	-rm $(TARGET)
-	-rm $(TARGET)
 	-rm src/*.o
 	-rm static/*.o
 	@echo -e "\033[1;33mDone.\e[0m"
@@ -76,6 +71,32 @@ cleanob:
 	@echo -en "Cleaning object build artifacts:  "
 	-rm src/*.o
 	-rm static/*.o
+	@echo -e "\033[1;33mDone.\e[0m"
+
+pack: rebuild
+	@echo -e "Packing koliseo:  make pack for $(VERSION)"
+	@echo -e "\033[1;32m[TREE] Prepping tree, pack for $(VERSION):\e[0m"
+	[[ -d ~/koliseo-local/ ]] || mkdir ~/koliseo-local
+	[[ -d ~/koliseo-local/share ]] || mkdir ~/koliseo-local/share
+	[[ -d ~/koliseo-local/share/$(PACK_NAME) ]] || mkdir ~/koliseo-local/share/$(PACK_NAME)
+	[[ -d ~/koliseo-local/share/$(PACK_NAME)/src ]] || mkdir ~/koliseo-local/share/$(PACK_NAME)/src
+
+	@echo -e "\033[1;32m[TREE] Removing '~/koliseo-local/share/$(PACK_NAME).zip':\e[0m"
+	touch ~/koliseo-local/share/$(PACK_NAME).zip
+	rm ~/koliseo-local/share/$(PACK_NAME).zip
+	@echo -e "\033[1;32m[TREE] Done.\e[0m"
+	@echo -e "\033[1;35m[PACK] Installing:\e[0m"
+	install $(TARGET) ~/koliseo-local/share/$(PACK_NAME)
+	install ./src/koliseo.c ~/koliseo-local/share/$(PACK_NAME)/src
+	install ./src/koliseo.h ~/koliseo-local/share/$(PACK_NAME)/src
+
+	@echo -e "\033[1;35m[PACK] Done.\e[0m"
+	@echo -e "\033[1;32m[ZIP] Compressing $(PACK_NAME):\e[0m"
+	cd ~/koliseo-local/share && zip -r $(PACK_NAME).zip ./$(PACK_NAME)
+	@echo -e "\033[1;33m[ZIP] Testing zip:\e[0m"
+	echo -e "\033[1;36m[UNZIP] Result:\n"
+	unzip -t ~/koliseo-local/share/$(PACK_NAME).zip | tail -n1
+	@echo -e "\033[1;32m[ZIP] Done.\e[0m"
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)
