@@ -198,9 +198,17 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || available-padding < size*count) {
 		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
 		} else {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push() call.\n");
 		abort();
@@ -233,9 +241,17 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
 		} else {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
 		abort();
@@ -271,9 +287,17 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
 		} else {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
 		abort();
@@ -322,9 +346,17 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
 		} else {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
 		abort();
@@ -374,9 +406,17 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
 		} else {
+			#ifndef MINGW32_BUILD
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
 		abort();
@@ -423,15 +463,27 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
 		fprintf(fp,"[KLS] kls was NULL.");
 	} else {
 		fprintf(fp,"\n[KLS] API Level: { %i }\n", int_koliseo_version());
+		#ifndef MINGW32_BUILD
 		fprintf(fp,"\n[KLS] Size: { %li }\n", kls->size);
+		#else
+		fprintf(fp,"\n[KLS] Size: { %lli }\n", kls->size);
+		#endif
 		char human_size[200];
 		char curr_size[200];
 		kls_formatSize(kls->size,human_size,sizeof(human_size));
 		fprintf(fp,"[KLS] Human: { %s }\n", human_size);
 		kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
 		fprintf(fp,"[KLS] Used (Human): { %s }\n", curr_size);
+		#ifndef MINGW32_BUILD
 		fprintf(fp,"[KLS] Offset: { %li }\n", kls->offset);
+		#else
+		fprintf(fp,"[KLS] Offset: { %lli }\n", kls->offset);
+		#endif
+		#ifndef MINGW32_BUILD
 		fprintf(fp,"[KLS] Prev_Offset: { %li }\n\n", kls->prev_offset);
+		#else
+		fprintf(fp,"[KLS] Prev_Offset: { %lli }\n\n", kls->prev_offset);
+		#endif
 	}
 }
 
@@ -487,15 +539,27 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 	int x = 2;
 	mvwprintw(win, y++, x, "Koliseo data:");
 	mvwprintw(win, y++, x, "API Level: { %i }", int_koliseo_version());
+	#ifndef MINGW32_BUILD
 	mvwprintw(win, y++, x, "Size: { %li }", kls->size);
+	#else
+	mvwprintw(win, y++, x, "Size: { %lli }", kls->size);
+	#endif
 	char h_size[200];
 	kls_formatSize(kls->size,h_size,sizeof(h_size));
 	mvwprintw(win, y++, x, "Human size: { %s }", h_size);
 	char curr_size[200];
 	kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
 	mvwprintw(win, y++, x, "Used (Human): { %s }\n", curr_size);
+	#ifndef MINGW32_BUILD
 	mvwprintw(win, y++, x, "Offset: { %li }", kls->offset);
+	#else
+	mvwprintw(win, y++, x, "Offset: { %lli }", kls->offset);
+	#endif
+	#ifndef MINGW32_BUILD
 	mvwprintw(win, y++, x, "Prev_Offset: { %li }", kls->prev_offset);
+	#else
+	mvwprintw(win, y++, x, "Prev_Offset: { %lli }", kls->prev_offset);
+	#endif
 	mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(kls->regs));
 	mvwprintw(win, y++, x, "Current usage: { %.3f%% }", (kls->offset * 100.0 ) / kls->size );
 	mvwprintw(win, y++, x, "%s","");
@@ -553,7 +617,11 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		element e = kls_head(rl);
 		mvwprintw(win, y++, x, "Name: { %s }", e->name);
 		mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
+		#ifndef MINGW32_BUILD
 		mvwprintw(win, y++, x, "Offsets: { %li } -> { %li }", e->begin_offset, e->end_offset);
+		#else
+		mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset, e->end_offset);
+		#endif
 		mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(kls->regs));
 		mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
 		char h_size[200];
@@ -721,7 +789,11 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 	while (!kls_empty(l))
 	{
 		fprintf(fp,"\n{ %s }, { %s }    ",kls_head(l)->name,kls_head(l)->desc);
+		#ifndef MINGW32_BUILD
 		fprintf(fp,"{ %li } -> { %li }",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		#else
+		fprintf(fp,"{ %lli } -> { %lli }",kls_head(l)->begin_offset,kls_head(l)->end_offset);
+		#endif
 		kls_log("KLS-Region","    Region {");
 		kls_log("KLS-Region","{ %s }, { %s }",kls_head(l)->name,kls_head(l)->desc);
 		char h_size[200];
