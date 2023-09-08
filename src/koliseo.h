@@ -9,9 +9,6 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef MINGW32_BUILD
-#include <windows.h>
-#endif
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 1 /**< Represents current minor release.*/
