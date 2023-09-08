@@ -40,7 +40,7 @@
 
   ATM the code should build for:
   - `x86_64-Linux`
-  - `x86_64-w64-mingw32` to target `Windows`
+  - `x86_64-w64-mingw32` to target `Windows`, but ATM there is no guarantee it works as intended there.
 
 ## Credits <a name = "credits"></a>
 
