@@ -5,8 +5,15 @@
 
 
 int main(void) {
+
+  #ifndef MINGW32_BUILD
   KOLISEO_DEBUG = 1;
   KOLISEO_AUTOSET_REGIONS = 1;
+  #else
+  KOLISEO_DEBUG = 0;
+  KOLISEO_AUTOSET_REGIONS = 0;
+  #endif
+
   kls_print_title();
   printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n", int_koliseo_version(), string_koliseo_version());
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
@@ -123,6 +130,7 @@ int main(void) {
   printf("[Usage report for Koliseo]\n");
   kls_usageReport(kls);
 
+  #ifdef KOLISEO_HAS_CURSES
   WINDOW* win = NULL;
   /* Initialize curses */
   setlocale(LC_ALL, "");
@@ -142,6 +150,7 @@ int main(void) {
   kls_showList_toWin(kls,win);
   delwin(win);
   endwin();
+  #endif
 
   int* z = &minusone;
   printf("\n*z is [%i] before KLS_POP\n",*z);
@@ -182,6 +191,9 @@ int main(void) {
   if (KOLISEO_DEBUG == 1) {
 	  fclose(KOLISEO_DEBUG_FP);
   }
+
+  printf("Press Enter to quit.\n");
+  scanf("%*c");
 
   return 0;
 }

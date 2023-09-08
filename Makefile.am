@@ -4,7 +4,6 @@
 AUTOMAKE_OPTIONS = foreign
 
 # Variables
-CC = @CC@
 CFLAGS = @CFLAGS@
 TARGET = demo
 # Specify the shell to use in the makefile
@@ -28,16 +27,16 @@ LDADD = $(KOLISEO_LDFLAGS)
 AM_LDFLAGS = -s
 
 # Compiler flags
-AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall -DKOLISEO_HAS_CURSES
+AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall
 
 
 # Build rule for object files
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
+	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
 
 # Build rule for the final binary
 $(TARGET): $(koliseo_SOURCES:.c=.o)
-	$(CC) $(CFLAGS) $(AM_CFLAGS) $(koliseo_SOURCES:.c=.o) -o $@ $(LDADD) $(AM_LDFLAGS)
+	$(CCOMP) $(CFLAGS) $(AM_CFLAGS) $(koliseo_SOURCES:.c=.o) -o $@ $(LDADD) $(AM_LDFLAGS)
 
 doc:
 	@echo -e "Using doxygen to create tex + html from $(VERSION) src/:    "

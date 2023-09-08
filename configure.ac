@@ -15,18 +15,19 @@ if test "$host_os" = "mingw32"; then
   echo "Building for mingw32: [$host_cpu-$host_vendor-$host_os]"
   # mingw32 specific flags
   AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -DMINGW32_BUILD"])
-  AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -DNCURSES_STATIC -lncursesw"])
+  AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib"])
+  AC_SUBST([CCOMP], ["/usr/bin/x86_64-w64-mingw32-gcc"])
 fi
 if test "$host_os" = "darwin"; then
   echo "Building for macos: [$host_cpu-$host_vendor-$host_os]"
   # macOS specific flags
-  AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/local/opt/ncurses/include"])
+  AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/local/opt/ncurses/include -DKOLISEO_HAS_CURSES"])
   AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/local/opt/ncurses/lib -lncurses"])
 fi
 if test "$host_os" = "linux-gnu"; then
   echo "Building for Linux: [$host_cpu-$host_vendor-$host_os]"
   # Linux specific flags
-  AC_SUBST([KOLISEO_CFLAGS], [""])
+  AC_SUBST([KOLISEO_CFLAGS], ["-DKOLISEO_HAS_CURSES"])
   AC_SUBST([KOLISEO_LDFLAGS], ["-lncurses"])
 fi
 
@@ -40,7 +41,7 @@ fi
 AC_DEFINE_UNQUOTED([VERSION], ["$VERSION"], [Version number])
 
 
-AC_CHECK_PROGS([CC], [gcc clang])
+AC_CHECK_PROGS([CCOMP], [gcc clang])
 AC_CHECK_HEADERS([stdio.h])
 AC_CHECK_FUNCS([malloc calloc])
 
