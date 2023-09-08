@@ -195,7 +195,8 @@ int main(void) {
   }
 
   printf("Press Enter to quit.\n");
-  scanf("%*c");
+  int sc_res = -1;
+  sc_res = scanf("%*c");
 
-  return 0;
+  return sc_res;
 }
