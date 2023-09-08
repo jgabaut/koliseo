@@ -4,15 +4,12 @@
 AUTOMAKE_OPTIONS = foreign
 
 # Variables
-CC = @CC@
 CFLAGS = @CFLAGS@
-TARGET = demo
 # Specify the shell to use in the makefile
 SHELL := /bin/bash
 # Set the .ONESHELL special target to use a specific shell for all recipes
 .ONESHELL:
 # Check system info
-OS := $$(uname -s)
 MACHINE := $$(uname -m)
 PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
 
@@ -20,21 +17,24 @@ PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
 koliseo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
 
 # Linking rule
-LDADD = $(KOLISEO_LDFLAGS) -lncurses
+LDADD = $(KOLISEO_LDFLAGS)
 
 # Linker flag to strip symbols
 AM_LDFLAGS = -s
 
 # Compiler flags
-AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall -DKOLISEO_HAS_CURSES
+AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall
+
 
 # Build rule for object files
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
+	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
 
 # Build rule for the final binary
 $(TARGET): $(koliseo_SOURCES:.c=.o)
-	$(CC) $(CFLAGS) $(AM_CFLAGS) $(koliseo_SOURCES:.c=.o) -o $@ $(LDADD) $(AM_LDFLAGS)
+	@echo -e "    \033[1;35mAM_CFLAGS\e[0m: [ \"\033[1;34m$(AM_CFLAGS)\e[0m\" ]"
+	@echo -e "    \033[1;35mLDADD\e[0m: [ \"\033[1;34m$(LDADD)\e[0m\" ]"
+	$(CCOMP) $(CFLAGS) $(AM_CFLAGS) $(koliseo_SOURCES:.c=.o) -o $@ $(LDADD) $(AM_LDFLAGS)
 
 doc:
 	@echo -e "Using doxygen to create tex + html from $(VERSION) src/:    "
@@ -64,14 +64,41 @@ run: demo
 
 clean:
 	@echo -en "Cleaning build artifacts:  "
-	rm $(TARGET)
-	rm src/*.o
-	rm static/*.o
+	-rm $(TARGET)
+	-rm src/*.o
+	-rm static/*.o
 	@echo -e "\033[1;33mDone.\e[0m"
 
 cleanob:
 	@echo -en "Cleaning object build artifacts:  "
-	rm src/*.o
+	-rm src/*.o
+	-rm static/*.o
+	@echo -e "\033[1;33mDone.\e[0m"
+
+pack: rebuild
+	@echo -e "Packing koliseo:  make pack for $(VERSION)"
+	@echo -e "\033[1;32m[TREE] Prepping tree, pack for $(VERSION):\e[0m"
+	[[ -d ~/koliseo-local/ ]] || mkdir ~/koliseo-local
+	[[ -d ~/koliseo-local/share ]] || mkdir ~/koliseo-local/share
+	[[ -d ~/koliseo-local/share/$(PACK_NAME) ]] || mkdir ~/koliseo-local/share/$(PACK_NAME)
+	[[ -d ~/koliseo-local/share/$(PACK_NAME)/src ]] || mkdir ~/koliseo-local/share/$(PACK_NAME)/src
+
+	@echo -e "\033[1;32m[TREE] Removing '~/koliseo-local/share/$(PACK_NAME).zip':\e[0m"
+	touch ~/koliseo-local/share/$(PACK_NAME).zip
+	rm ~/koliseo-local/share/$(PACK_NAME).zip
+	@echo -e "\033[1;32m[TREE] Done.\e[0m"
+	@echo -e "\033[1;35m[PACK] Installing:\e[0m"
+	install $(TARGET) ~/koliseo-local/share/$(PACK_NAME)
+	install ./src/koliseo.c ~/koliseo-local/share/$(PACK_NAME)/src
+	install ./src/koliseo.h ~/koliseo-local/share/$(PACK_NAME)/src
+
+	@echo -e "\033[1;35m[PACK] Done.\e[0m"
+	@echo -e "\033[1;32m[ZIP] Compressing $(PACK_NAME):\e[0m"
+	cd ~/koliseo-local/share && zip -r $(PACK_NAME).zip ./$(PACK_NAME)
+	@echo -e "\033[1;33m[ZIP] Testing zip:\e[0m"
+	echo -e "\033[1;36m[UNZIP] Result:\n"
+	unzip -t ~/koliseo-local/share/$(PACK_NAME).zip | tail -n1
+	@echo -e "\033[1;32m[ZIP] Done.\e[0m"
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)

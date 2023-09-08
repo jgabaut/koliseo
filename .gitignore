@@ -2,6 +2,8 @@
 *.o
 # also explicitly ignore our executable for good measure
 demo
+# also explicitly ignore our windows executable for good measure
+demo.exe
 # also explicitly ignore our debug executable for good measure
 demo_debug
 
