@@ -798,7 +798,7 @@ void print_temp_kls_2file(FILE* fp, Koliseo_Temp* t_kls) {
 		fprintf(fp,"[KLS_T] Temp Prev_Offset: { %li }\n\n", t_kls->prev_offset);
 		#else
 		fprintf(fp,"[KLS_T] Inner Prev_Offset: { %lli }\n", kls->prev_offset);
-		fprintf(fp,"[KLS_T] Temp Prev_Offset: { %li }\n\n", t_kls->prev_offset);
+		fprintf(fp,"[KLS_T] Temp Prev_Offset: { %lli }\n\n", t_kls->prev_offset);
 		#endif
 	}
 }
