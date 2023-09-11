@@ -756,6 +756,58 @@ void print_dbg_kls(Koliseo* kls) {
 }
 
 /**
+ * Prints header fields from the passed Koliseo_Temp pointer, to the passed FILE pointer.
+ * @param t_kls The Koliseo_Temp at hand.
+ */
+void print_temp_kls_2file(FILE* fp, Koliseo_Temp* t_kls) {
+	if (fp == NULL) {
+		fprintf(stderr,"print_temp_kls_2file():  fp was NULL.\n");
+		exit(EXIT_FAILURE);
+	}
+	if (t_kls == NULL) {
+		fprintf(fp,"[KLS_T] t_kls was NULL.");
+	} else if (t_kls->kls == NULL) {
+		fprintf(fp,"[KLS_T] [%s()]: Referred Koliseo was NULL.\n",__func__);
+	} else {
+		Koliseo* kls = t_kls->kls;
+		fprintf(fp,"\n[KLS_T] API Level: { %i }\n", int_koliseo_version());
+		#ifndef MINGW32_BUILD
+		fprintf(fp,"\n[KLS_T] Size: { %li }\n", kls->size - t_kls->offset);
+		#else
+		fprintf(fp,"\n[KLS_T] Size: { %lli }\n", kls->size - t_kls->offset);
+		#endif
+		char human_size[200];
+		char curr_size[200];
+		kls_formatSize(kls->size,human_size,sizeof(human_size));
+		fprintf(fp,"[KLS_T] Human: { %s }\n", human_size);
+		kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
+		fprintf(fp,"[KLS_T] Used (Human): { %s }\n", curr_size);
+		#ifndef MINGW32_BUILD
+		fprintf(fp,"[KLS_T] Inner Offset: { %li }\n", kls->offset);
+		fprintf(fp,"[KLS_T] Temp Offset: { %li }\n", t_kls->offset);
+		#else
+		fprintf(fp,"[KLS_T] Inner Offset: { %lli }\n", kls->offset);
+		fprintf(fp,"[KLS_T] Temp Offset: { %lli }\n", t_kls->offset);
+		#endif
+		#ifndef MINGW32_BUILD
+		fprintf(fp,"[KLS_T] Inner Prev_Offset: { %li }\n", kls->prev_offset);
+		fprintf(fp,"[KLS_T] Temp Prev_Offset: { %li }\n\n", t_kls->prev_offset);
+		#else
+		fprintf(fp,"[KLS_T] Inner Prev_Offset: { %lli }\n", kls->prev_offset);
+		fprintf(fp,"[KLS_T] Temp Prev_Offset: { %li }\n\n", t_kls->prev_offset);
+		#endif
+	}
+}
+
+/**
+ * Prints header fields from the passed Koliseo_Temp pointer, to stderr.
+ * @param t_kls The Koliseo_Temp at hand.
+ */
+void print_dbg_temp_kls(Koliseo_Temp* t_kls) {
+  print_temp_kls_2file(stderr,t_kls);
+}
+
+/**
  * Converts a ptrdiff_t size to human-readable SI units (modulo 1000).
  * Fills outputBuffer with the converted string.
  * @param size The size at hand.

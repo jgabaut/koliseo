@@ -199,6 +199,7 @@ int main(int argc, char** argv) {
   #endif
 
   print_dbg_kls(kls);
+  print_dbg_temp_kls(&temp_kls);
 
   kls_temp_end(temp_kls);
   printf("[Ended Koliseo_Temp]\n");

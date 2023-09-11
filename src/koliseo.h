@@ -180,6 +180,9 @@ void* kls_temp_push_zero_AR(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align,
 void* kls_temp_push_zero_named(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
 void* kls_temp_push_zero_typed(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc);
 void* kls_temp_pop(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+void print_temp_kls_2file(FILE* fp, Koliseo_Temp* t_kls);
+void print_dbg_temp_kls(Koliseo_Temp* t_kls);
+
 
 #define KLS_PUSH_T(kls_temp, type, count) (type*)kls_temp_push_zero_AR(kls_temp, sizeof(type), _Alignof(type), count)
 #define KLS_PUSH_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named(kls_temp, sizeof(type), _Alignof(type), count, name, desc)
