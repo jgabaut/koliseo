@@ -6,6 +6,7 @@
 
 + [What is this thing?](#witt)
   + [Prerequisites](#prerequisites)
+  + [Configuration](#config)
   + [Building](#building)
   + [Supported platforms](#support)
 + [Credits](#credits)
@@ -16,8 +17,6 @@
   This is a C library for an arena allocator, whose arenas are named Koliseo.
   It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
 
-  Thanks to [skeeto](https://www.reddit.com/user/skeeto/) for showing me the implementation.
-
 ## Prerequisites <a name = "prerequisites"></a>
 
   To build the `demo` binary, you need:
@@ -27,13 +26,24 @@
 
   To use `./anvil` to build all amboso-supported tags for `demo` , you also need the same packages.
 
+## Configuration <a name = "config"></a>
+
+  To prepare the files needed by `autotools`, run:
+
+  - `autoreconf`, which will complain about missing files
+  - `automake --add-missing`, which should provide the missing files
+  - `autoreconf`, which should work now.
+
+  You will get a `./configure` script, which you can use to enable debug mode or other features.
+
+  - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
+  - Run `./configure --enable-debug=yes` to setup the `Makefile` appropriately and build the `demo` binary with `-DKLS_DEBUG_CORE` flag.
+
+
 ## Building <a name = "building"></a>
 
   To build the `demo` binary, run:
-  * `autoreconf`, which will complain about missing files
-  * `automake --add-missing`, which should provide the missing files
-  * `autoreconf`, which should work now
-  * `./configure`, which should generate the `Makefile`
+  * `./configure`, which should generate the `Makefile`. See [Configuration](#config) section.
   * `make`, to build the binary
 
 ## Supported platforms <a name = "support"></a>
@@ -43,6 +53,8 @@
   - `x86_64-w64-mingw32` to target `Windows`, but ATM there is no guarantee it works as intended there.
 
 ## Credits <a name = "credits"></a>
+
+  Thanks to [skeeto](https://www.reddit.com/user/skeeto/) for showing me the original base implementation.
 
   Thanks to [Mako](https://www.instagram.com/mako_x_tattoo/) for the repo banner.
 

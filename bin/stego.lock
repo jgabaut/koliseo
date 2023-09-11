@@ -25,3 +25,4 @@ tests# tests folder name
 0.1.19# add kls_print_title()
 0.1.20# add kls->has_temp, KLS_PUSH_T doesn't account for AUTOREGION
 0.1.21# add MINGW32_BUILD preprocessor directives
+0.1.22# add KLS_DEBUG_CORE preprocessor directives to enable API call logs

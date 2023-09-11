@@ -127,7 +127,9 @@ Koliseo* kls_new(ptrdiff_t size) {
 		//kls_log("KLS",msg);
 		char h_size[200];
 		kls_formatSize(size,h_size,sizeof(h_size));
+		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","API Level { %i } ->  Allocated (%s) for new KLS.",int_koliseo_version(),h_size);
+		#endif
 		Koliseo* kls = p;
 		kls->data = p;
 		kls->size = size;
@@ -135,7 +137,9 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->prev_offset = kls->offset;
 		kls->has_temp = 0;
 		if (KOLISEO_AUTOSET_REGIONS == 1) {
+			#ifdef KLS_DEBUG_CORE
 			kls_log("KLS","Init of Region_List for kls.");
+			#endif
 			Region* kls_header = (Region*) malloc(sizeof(Region));
 			kls_header->begin_offset = 0;
 			kls_header->end_offset = kls->offset;
@@ -154,9 +158,11 @@ Koliseo* kls_new(ptrdiff_t size) {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
 		abort();
 	}
+	#ifdef KLS_DEBUG_CORE
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,p);
 	}
+	#endif
 	return p;
 }
 
@@ -177,10 +183,12 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->prev_offset = kls->offset;
 	kls->offset -= padding + size*count;
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","API Level { %i } -> Popped (%li) for KLS.", int_koliseo_version(), size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
 	}
+	#endif
 	return p;
 }
 
@@ -220,10 +228,12 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	kls_formatSize(size,h_size,sizeof(h_size));
 	//sprintf(msg,"Pushed size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","API Level { %i } -> Pushed size (%s) for KLS.", int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
 	}
+	#endif
 	return p;
 }
 
@@ -266,10 +276,12 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	kls_formatSize(size,h_size,sizeof(h_size));
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
 	}
+	#endif
 	return p;
 }
 
@@ -324,10 +336,12 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	kls_formatSize(size,h_size,sizeof(h_size));
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
 	}
+	#endif
 	return p;
 }
 
@@ -382,10 +396,12 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		kls_formatSize(size,h_size,sizeof(h_size));
 		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 		//kls_log("KLS",msg);
+		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
 		if (KOLISEO_DEBUG == 1) {
 			print_kls_2file(KOLISEO_DEBUG_FP,kls);
 		}
+		#endif
 	}
 	return p;
 }
@@ -442,10 +458,12 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		kls_formatSize(size,h_size,sizeof(h_size));
 		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 		//kls_log("KLS",msg);
+		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
 		if (KOLISEO_DEBUG == 1) {
 			print_kls_2file(KOLISEO_DEBUG_FP,kls);
 		}
+		#endif
 	}
 	return p;
 }
@@ -525,11 +543,19 @@ void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize) {
  */
 void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 	if (win == NULL) {
+		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","kls_show_toWin():  passed WINDOW was null.");
+		#else
+		fprintf(stderr,"kls_show_toWin(): passed WINDOW was null.");
+		#endif
 		abort();
 	}
 	if (kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","kls_show_toWin():  passed Koliseo was null.");
+		#else
+		fprintf(stderr,"kls_show_toWin(): passed Koliseo was null.");
+		#endif
 		abort();
 	}
 	wclear(win);
@@ -596,11 +622,19 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
  */
 void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 	if (win == NULL) {
-		kls_log("ERROR","kls_show_toWin():  passed WINDOW was null.");
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_showList_toWin():  passed WINDOW was null.");
+		#else
+		fprintf(stderr,"kls_showList_toWin(): passed WINDOW was null.");
+		#endif
 		abort();
 	}
 	if (kls == NULL) {
-		kls_log("ERROR","kls_show_toWin():  passed Koliseo was null.");
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_showList_toWin():  passed Koliseo was null.");
+		#else
+		fprintf(stderr,"kls_showList_toWin(): passed Koliseo was null.");
+		#endif
 		abort();
 	}
 	wclear(win);
@@ -673,7 +707,9 @@ void kls_clear(Koliseo* kls) {
 	//Reset pointer
 	kls->prev_offset = kls->offset;
 	kls->offset = sizeof(*kls);
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","API Level { %i } -> Cleared offsets for KLS.", int_koliseo_version());
+	#endif
 }
 
 /**
@@ -685,7 +721,9 @@ void kls_free(Koliseo* kls) {
 	kls_clear(kls);
 	kls_freeList(kls->regs);
 	free(kls);
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","API Level { %i } -> Freed KLS.", int_koliseo_version());
+	#endif
 }
 
 /**
@@ -702,7 +740,9 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 	tmp.prev_offset = kls->prev_offset;
 	tmp.offset = kls->offset;
 	kls->has_temp = 1;
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Prepared new Temp KLS.");
+	#endif
 	return tmp;
 }
 
@@ -714,7 +754,9 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 void kls_temp_end(Koliseo_Temp tmp_kls) {
 	tmp_kls.kls->prev_offset = tmp_kls.prev_offset;
 	tmp_kls.kls->offset = tmp_kls.offset;
+	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Ended Temp KLS.");
+	#endif
 	tmp_kls.kls->has_temp = 0;
 }
 
@@ -772,9 +814,13 @@ void kls_freeList(Region_List l) {
 	else
 	{
 		kls_freeList(kls_tail(l));
+		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","Freeing Region_List->value");
+		#endif
 		free(l->value);
+		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","Freeing Region_List");
+		#endif
 		free(l);
 	}
 	return;
@@ -794,6 +840,7 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 		#else
 		fprintf(fp,"{ %lli } -> { %lli }",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		#endif
+		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS-Region","    Region {");
 		kls_log("KLS-Region","{ %s }, { %s }",kls_head(l)->name,kls_head(l)->desc);
 		char h_size[200];
@@ -802,6 +849,7 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 		kls_log("KLS-Region","{ %s }",h_size);
 		kls_log("KLS-Region","{ %li } -> { %li }",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		kls_log("KLS-Region","    }");
+		#endif
 
 		l = kls_tail(l);
 		if (!kls_empty(l))
