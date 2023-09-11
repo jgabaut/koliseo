@@ -12,8 +12,8 @@ int main(void) {
   KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #else
   KOLISEO_DEBUG = 0;
-  KOLISEO_AUTOSET_REGIONS = 0;
-  KOLISEO_AUTOSET_TEMP_REGIONS = 0;
+  KOLISEO_AUTOSET_REGIONS = 1;
+  KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #endif
 
   kls_print_title();
@@ -150,10 +150,8 @@ int main(void) {
   wrefresh(win);
   kls_show_toWin(kls,win);
   refresh();
-  #ifndef MINGW32_BUILD
   kls_showList_toWin(kls,win);
   kls_temp_showList_toWin(&temp_kls,win);
-  #endif
   delwin(win);
   endwin();
   #endif
