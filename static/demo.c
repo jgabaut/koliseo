@@ -3,8 +3,28 @@
 #include "../src/koliseo.h"
 #include "amboso.h"
 
+void usage(char* progname) {
+	fprintf(stderr,"Usage:  %s [-a]\n\n", progname);
+	fprintf(stderr,"  [-a]  Makes the demo not interactive.\n");
+}
 
-int main(void) {
+int main(int argc, char** argv) {
+
+  int is_interactive = 1;
+
+  if (argc > 2 ) {
+	fprintf(stderr,"Too many arguments.\n");
+	usage(argv[0]);
+	exit(EXIT_FAILURE);
+  } else if (argc == 2) {
+	if ((strcmp(argv[1],"-a")) == 0) {
+  		is_interactive = 0;
+	} else {
+		fprintf(stderr,"Invalid argument: [%s].\n",argv[1]);
+		usage(argv[0]);
+		exit(EXIT_FAILURE);
+	}
+  }
 
   #ifndef MINGW32_BUILD
   KOLISEO_DEBUG = 1;
@@ -134,26 +154,28 @@ int main(void) {
   kls_usageReport(kls);
 
   #ifdef KOLISEO_HAS_CURSES
-  WINDOW* win = NULL;
-  /* Initialize curses */
-  setlocale(LC_ALL, "");
-  initscr();
-  clear();
-  refresh();
-  start_color();
-  cbreak();
-  noecho();
-  keypad(stdscr, TRUE);
-  win = newwin(20, 60, 1, 2);
-  keypad(win, TRUE);
-  wclear(win);
-  wrefresh(win);
-  kls_show_toWin(kls,win);
-  refresh();
-  kls_showList_toWin(kls,win);
-  kls_temp_showList_toWin(&temp_kls,win);
-  delwin(win);
-  endwin();
+  if (is_interactive == 1) {
+	  WINDOW* win = NULL;
+	  /* Initialize curses */
+	  setlocale(LC_ALL, "");
+	  initscr();
+	  clear();
+	  refresh();
+	  start_color();
+	  cbreak();
+	  noecho();
+	  keypad(stdscr, TRUE);
+	  win = newwin(20, 60, 1, 2);
+	  keypad(win, TRUE);
+	  wclear(win);
+	  wrefresh(win);
+	  kls_show_toWin(kls,win);
+	  refresh();
+	  kls_showList_toWin(kls,win);
+	  kls_temp_showList_toWin(&temp_kls,win);
+	  delwin(win);
+	  endwin();
+  }
   #endif
 
   int* z = &minusone;
@@ -198,7 +220,9 @@ int main(void) {
 
   printf("Press Enter to quit.\n");
   int sc_res = -1;
-  sc_res = scanf("%*c");
+  if (is_interactive == 1) {
+  	sc_res = scanf("%*c");
+  }
 
   return sc_res;
 }
