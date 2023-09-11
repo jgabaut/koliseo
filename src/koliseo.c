@@ -773,8 +773,10 @@ void print_temp_kls_2file(FILE* fp, Koliseo_Temp* t_kls) {
 		fprintf(fp,"\n[KLS_T] API Level: { %i }\n", int_koliseo_version());
 		#ifndef MINGW32_BUILD
 		fprintf(fp,"\n[KLS_T] Temp Size: { %li }\n", kls->size - t_kls->offset);
+		fprintf(fp,"\n[KLS_T] Refer Size: { %li }\n", kls->size);
 		#else
 		fprintf(fp,"\n[KLS_T] Temp Size: { %lli }\n", kls->size - t_kls->offset);
+		fprintf(fp,"\n[KLS_T] Refer Size: { %lli }\n", kls->size);
 		#endif
 		char human_size[200];
 		char curr_size[200];
@@ -953,8 +955,10 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 	mvwprintw(win, y++, x, "API Level: { %i }", int_koliseo_version());
 	#ifndef MINGW32_BUILD
 	mvwprintw(win, y++, x, "Temp Size: { %li }", kls->size - t_kls->offset);
+	mvwprintw(win, y++, x, "Refer Size: { %li }", kls->size);
 	#else
 	mvwprintw(win, y++, x, "Temp Size: { %lli }", kls->size - t_kls->offset);
+	mvwprintw(win, y++, x, "Refer Size: { %lli }", kls->size);
 	#endif
 	char h_size[200];
 	char curr_size[200];
