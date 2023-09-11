@@ -3,15 +3,37 @@
 #include "../src/koliseo.h"
 #include "amboso.h"
 
+void usage(char* progname) {
+	fprintf(stderr,"Usage:  %s [-a]\n\n", progname);
+	fprintf(stderr,"  [-a]  Makes the demo not interactive.\n");
+}
 
-int main(void) {
+int main(int argc, char** argv) {
+
+  int is_interactive = 1;
+
+  if (argc > 2 ) {
+	fprintf(stderr,"Too many arguments.\n");
+	usage(argv[0]);
+	exit(EXIT_FAILURE);
+  } else if (argc == 2) {
+	if ((strcmp(argv[1],"-a")) == 0) {
+  		is_interactive = 0;
+	} else {
+		fprintf(stderr,"Invalid argument: [%s].\n",argv[1]);
+		usage(argv[0]);
+		exit(EXIT_FAILURE);
+	}
+  }
 
   #ifndef MINGW32_BUILD
   KOLISEO_DEBUG = 1;
   KOLISEO_AUTOSET_REGIONS = 1;
+  KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #else
   KOLISEO_DEBUG = 0;
-  KOLISEO_AUTOSET_REGIONS = 0;
+  KOLISEO_AUTOSET_REGIONS = 1;
+  KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #endif
 
   kls_print_title();
@@ -19,6 +41,7 @@ int main(void) {
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
   printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
   printf("KOLISEO_AUTOSET_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_REGIONS);
+  printf("KOLISEO_AUTOSET_TEMP_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_TEMP_REGIONS);
   //Reset debug log file
   if (KOLISEO_DEBUG == 1) {
 	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","w");
@@ -131,27 +154,29 @@ int main(void) {
   kls_usageReport(kls);
 
   #ifdef KOLISEO_HAS_CURSES
-  WINDOW* win = NULL;
-  /* Initialize curses */
-  setlocale(LC_ALL, "");
-  initscr();
-  clear();
-  refresh();
-  start_color();
-  cbreak();
-  noecho();
-  keypad(stdscr, TRUE);
-  win = newwin(20, 60, 1, 2);
-  keypad(win, TRUE);
-  wclear(win);
-  wrefresh(win);
-  kls_show_toWin(kls,win);
-  refresh();
-  #ifndef MINGW32_BUILD
-  kls_showList_toWin(kls,win);
-  #endif
-  delwin(win);
-  endwin();
+  if (is_interactive == 1) {
+	  WINDOW* win = NULL;
+	  /* Initialize curses */
+	  setlocale(LC_ALL, "");
+	  initscr();
+	  clear();
+	  refresh();
+	  start_color();
+	  cbreak();
+	  noecho();
+	  keypad(stdscr, TRUE);
+	  win = newwin(20, 60, 1, 2);
+	  keypad(win, TRUE);
+	  wclear(win);
+	  wrefresh(win);
+	  kls_show_toWin(kls,win);
+	  kls_temp_show_toWin(&temp_kls,win);
+	  refresh();
+	  kls_showList_toWin(kls,win);
+	  kls_temp_showList_toWin(&temp_kls,win);
+	  delwin(win);
+	  endwin();
+  }
   #endif
 
   int* z = &minusone;
@@ -175,6 +200,7 @@ int main(void) {
   #endif
 
   print_dbg_kls(kls);
+  print_dbg_temp_kls(&temp_kls);
 
   kls_temp_end(temp_kls);
   printf("[Ended Koliseo_Temp]\n");
@@ -196,7 +222,11 @@ int main(void) {
 
   printf("Press Enter to quit.\n");
   int sc_res = -1;
-  sc_res = scanf("%*c");
+  if (is_interactive == 1) {
+  	sc_res = scanf("%*c");
+  } else {
+	sc_res = 0;
+  }
 
   return sc_res;
 }

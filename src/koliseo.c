@@ -2,6 +2,7 @@
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
 int KOLISEO_AUTOSET_REGIONS = 1;
+int KOLISEO_AUTOSET_TEMP_REGIONS = 0;
 FILE* KOLISEO_DEBUG_FP = NULL;
 
 /**
@@ -193,6 +194,40 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 }
 
 /**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to abort() if the operation fails.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to pop.
+ * @param align The alignment for data to pop.
+ * @param count The multiplicative quantity to scale data size to pop for.
+ * @return A void pointer to the start of memory just popped from the referred Koliseo.
+ */
+void* kls_temp_pop(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+	Koliseo* kls = t_kls.kls;
+	if (kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
+		fprintf(stderr,"[KLS] Failed kls_pop() call.\n");
+		abort();
+	}
+	char* p = kls->data + kls->offset - padding - size*count;
+	kls->prev_offset = kls->offset;
+	kls->offset -= padding + size*count;
+	#ifdef KLS_DEBUG_CORE
+	kls_log("KLS","API Level { %i } -> Popped (%li) for Temp_KLS.", int_koliseo_version(), size);
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
+	#endif
+	return p;
+}
+
+/**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
  * Notably, it does NOT zero the memory region.
  * @param kls The Koliseo at hand.
@@ -207,9 +242,9 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	if (count > PTRDIFF_MAX/size || available-padding < size*count) {
 		if (count > PTRDIFF_MAX/size) {
 			#ifndef MINGW32_BUILD
-			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
 			#else
-			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
 			#endif
 		} else {
 			#ifndef MINGW32_BUILD
@@ -252,9 +287,9 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
 			#ifndef MINGW32_BUILD
-			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
 			#else
-			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
 			#endif
 		} else {
 			#ifndef MINGW32_BUILD
@@ -300,9 +335,9 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
 			#ifndef MINGW32_BUILD
-			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
 			#else
-			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
 			#endif
 		} else {
 			#ifndef MINGW32_BUILD
@@ -344,6 +379,73 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	#endif
 	return p;
 }
+/**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
+ * Notably, it zeroes the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ */
+void* kls_temp_push_zero_AR(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+	Koliseo* kls = t_kls.kls;
+	if (kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+	ptrdiff_t available = kls->size - kls->offset;
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
+		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
+		} else {
+			#ifndef MINGW32_BUILD
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
+		}
+		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		abort();
+		//return 0;
+	}
+	char* p = kls->data + kls->offset + padding;
+	//Zero new area
+	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
+	kls->offset += padding + size*count;
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+		Region* reg = (Region*) malloc(sizeof(Region));
+		reg->begin_offset = kls->prev_offset;
+		reg->end_offset = kls->offset;
+		reg->type = None;
+		strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
+		strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(reg,reglist);
+		t_kls.t_regs = kls_append(reglist, t_kls.t_regs);
+	}
+
+	char h_size[200];
+	kls_formatSize(size,h_size,sizeof(h_size));
+	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+	//kls_log("KLS",msg);
+	#ifdef KLS_DEBUG_CORE
+	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",h_size);
+	if (KOLISEO_DEBUG == 1) {
+		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+	}
+	#endif
+	return p;
+}
 
 /**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
@@ -361,9 +463,9 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
 			#ifndef MINGW32_BUILD
-			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
 			#else
-			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
 			#endif
 		} else {
 			#ifndef MINGW32_BUILD
@@ -407,6 +509,76 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 }
 
 /**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Notably, it zeroes the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the Koliseo.
+ */
+void* kls_temp_push_zero_named(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc) {
+	Koliseo* kls = t_kls.kls;
+	if (kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+
+	ptrdiff_t available = kls->size - kls->offset;
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
+		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
+		} else {
+			#ifndef MINGW32_BUILD
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
+		}
+		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		abort();
+		//return 0;
+	}
+	char* p = kls->data + kls->offset + padding;
+	//Zero new area
+	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
+	kls->offset += padding + size*count;
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+		Region* reg = (Region*) malloc(sizeof(Region));
+		reg->begin_offset = kls->prev_offset;
+		reg->end_offset = kls->offset;
+		reg->type = None;
+		strcpy(reg->name,name);
+		strcpy(reg->desc,desc);
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(reg,reglist);
+		t_kls.t_regs = kls_append(reglist, t_kls.t_regs);
+
+		char h_size[200];
+		kls_formatSize(size,h_size,sizeof(h_size));
+		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+		//kls_log("KLS",msg);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.", int_koliseo_version(), h_size);
+		if (KOLISEO_DEBUG == 1) {
+			print_kls_2file(KOLISEO_DEBUG_FP,kls);
+		}
+		#endif
+	}
+	return p;
+}
+
+/**
  * Takes a Koliseo pointer, a Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
  * Uses the passed name and desc fields to initialise the allocated Region fields.
  * Notably, it zeroes the memory region.
@@ -415,7 +587,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @param type The type index for pushed Region.
- * @return A void pointer to the start of memory just pushed to the Koliseo.
+ * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
 	ptrdiff_t available = kls->size - kls->offset;
@@ -423,9 +595,9 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
 		if (count > PTRDIFF_MAX/size) {
 			#ifndef MINGW32_BUILD
-			fprintf(stderr, "[KSL]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
 			#else
-			fprintf(stderr, "[KSL]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
 			#endif
 		} else {
 			#ifndef MINGW32_BUILD
@@ -460,6 +632,76 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		//kls_log("KLS",msg);
 		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
+		if (KOLISEO_DEBUG == 1) {
+			print_kls_2file(KOLISEO_DEBUG_FP,kls);
+		}
+		#endif
+	}
+	return p;
+}
+
+/**
+ * Takes a Koliseo_Temp, a Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Notably, it zeroes the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @param type The type index for pushed Region.
+ * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ */
+void* kls_temp_push_zero_typed(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
+	Koliseo* kls = t_kls.kls;
+	if (kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+	ptrdiff_t available = kls->size - kls->offset;
+	ptrdiff_t padding = -kls->offset & (align -1);
+	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
+		if (count > PTRDIFF_MAX/size) {
+			#ifndef MINGW32_BUILD
+			fprintf(stderr, "[KLS]  count [%li] was bigger than PTRDIFF_MAX/size [%li].\n", count, PTRDIFF_MAX/size);
+			#else
+			fprintf(stderr, "[KLS]  count [%lli] was bigger than PTRDIFF_MAX/size [%lli].\n", count, PTRDIFF_MAX/size);
+			#endif
+		} else {
+			#ifndef MINGW32_BUILD
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%li] was bigger than available-padding [%li].\n", size*count, available-padding);
+			#else
+			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
+			#endif
+		}
+		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		abort();
+		//return 0;
+	}
+	char* p = kls->data + kls->offset + padding;
+	//Zero new area
+	memset(p, 0, size*count);
+	kls->prev_offset = kls->offset;
+	kls->offset += padding + size*count;
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+		Region* reg = (Region*) malloc(sizeof(Region));
+		reg->begin_offset = kls->prev_offset;
+		reg->end_offset = kls->offset;
+		reg->type = type;
+		strcpy(reg->name,name);
+		strcpy(reg->desc,desc);
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(reg,reglist);
+		t_kls.t_regs = kls_append(reglist, t_kls.t_regs);
+
+		char h_size[200];
+		kls_formatSize(size,h_size,sizeof(h_size));
+		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+		//kls_log("KLS",msg);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.", int_koliseo_version(), h_size);
 		if (KOLISEO_DEBUG == 1) {
 			print_kls_2file(KOLISEO_DEBUG_FP,kls);
 		}
@@ -511,6 +753,62 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
  */
 void print_dbg_kls(Koliseo* kls) {
   print_kls_2file(stderr,kls);
+}
+
+/**
+ * Prints header fields from the passed Koliseo_Temp pointer, to the passed FILE pointer.
+ * @param t_kls The Koliseo_Temp at hand.
+ */
+void print_temp_kls_2file(FILE* fp, Koliseo_Temp* t_kls) {
+	if (fp == NULL) {
+		fprintf(stderr,"print_temp_kls_2file():  fp was NULL.\n");
+		exit(EXIT_FAILURE);
+	}
+	if (t_kls == NULL) {
+		fprintf(fp,"[KLS_T] t_kls was NULL.");
+	} else if (t_kls->kls == NULL) {
+		fprintf(fp,"[KLS_T] [%s()]: Referred Koliseo was NULL.\n",__func__);
+	} else {
+		Koliseo* kls = t_kls->kls;
+		fprintf(fp,"\n[KLS_T] API Level: { %i }\n", int_koliseo_version());
+		#ifndef MINGW32_BUILD
+		fprintf(fp,"\n[KLS_T] Temp Size: { %li }\n", kls->size - t_kls->offset);
+		#else
+		fprintf(fp,"\n[KLS_T] Temp Size: { %lli }\n", kls->size - t_kls->offset);
+		#endif
+		char human_size[200];
+		char curr_size[200];
+		kls_formatSize(kls->size - t_kls->offset,human_size,sizeof(human_size));
+		fprintf(fp,"[KLS_T] Temp Size Human: { %s }\n", human_size);
+		kls_formatSize(kls->size,human_size,sizeof(human_size));
+		fprintf(fp,"[KLS_T] Refer Size Human: { %s }\n", human_size);
+		kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
+		fprintf(fp,"[KLS_T] Inner Used (Human): { %s }\n", curr_size);
+		kls_formatSize(t_kls->offset,curr_size,sizeof(curr_size));
+		fprintf(fp,"[KLS_T] Temp Used (Human): { %s }\n", curr_size);
+		#ifndef MINGW32_BUILD
+		fprintf(fp,"[KLS_T] Inner Offset: { %li }\n", kls->offset);
+		fprintf(fp,"[KLS_T] Temp Offset: { %li }\n", t_kls->offset);
+		#else
+		fprintf(fp,"[KLS_T] Inner Offset: { %lli }\n", kls->offset);
+		fprintf(fp,"[KLS_T] Temp Offset: { %lli }\n", t_kls->offset);
+		#endif
+		#ifndef MINGW32_BUILD
+		fprintf(fp,"[KLS_T] Inner Prev_Offset: { %li }\n", kls->prev_offset);
+		fprintf(fp,"[KLS_T] Temp Prev_Offset: { %li }\n\n", t_kls->prev_offset);
+		#else
+		fprintf(fp,"[KLS_T] Inner Prev_Offset: { %lli }\n", kls->prev_offset);
+		fprintf(fp,"[KLS_T] Temp Prev_Offset: { %li }\n\n", t_kls->prev_offset);
+		#endif
+	}
+}
+
+/**
+ * Prints header fields from the passed Koliseo_Temp pointer, to stderr.
+ * @param t_kls The Koliseo_Temp at hand.
+ */
+void print_dbg_temp_kls(Koliseo_Temp* t_kls) {
+  print_temp_kls_2file(stderr,t_kls);
 }
 
 /**
@@ -588,6 +886,104 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 	#endif
 	mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(kls->regs));
 	mvwprintw(win, y++, x, "Current usage: { %.3f%% }", (kls->offset * 100.0 ) / kls->size );
+	mvwprintw(win, y++, x, "%s","");
+	mvwprintw(win, y++, x, "q or Enter to quit.");
+	/*
+	Region_List rl = kls_copy(kls->regs);
+	while (!kls_empty(rl)) {
+	  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
+	}
+	*/
+	wrefresh(win);
+	int ch = '?';
+	int quit = -1;
+	do {
+		quit = 0;
+		ch = wgetch(win);
+		switch (ch) {
+			case 10: case 'q': {
+				quit = 1;
+			}
+			break;
+			default: {
+				quit = 0;
+			}
+			break;
+		}
+	} while (!quit);
+}
+
+/**
+ * Takes a Koliseo_Temp pointer and prints fields and eventually Region_List from the referred Koliseo pointer, to the passed WINDOW pointer.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param win The Window at hand.
+ */
+void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
+	if (win == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_show_toWin():  passed WINDOW was null.");
+		#else
+		fprintf(stderr,"kls_temp_show_toWin(): passed WINDOW was null.");
+		#endif
+		abort();
+	}
+	if (t_kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_show_toWin():  passed Koliseo_Temp was null.");
+		#else
+		fprintf(stderr,"kls_temp_show_toWin(): passed Koliseo_Temp was null.");
+		#endif
+		abort();
+	}
+	Koliseo* kls = t_kls->kls;
+	if (kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_show_toWin():  referred Koliseo was null.");
+		#else
+		fprintf(stderr,"kls_temp_show_toWin(): referred Koliseo was null.");
+		#endif
+		abort();
+	}
+	wclear(win);
+	box(win,0,0);
+	wrefresh(win);
+	int y = 2;
+	int x = 2;
+	mvwprintw(win, y++, x, "Koliseo_Temp data:");
+	mvwprintw(win, y++, x, "API Level: { %i }", int_koliseo_version());
+	#ifndef MINGW32_BUILD
+	mvwprintw(win, y++, x, "Temp Size: { %li }", kls->size - t_kls->offset);
+	#else
+	mvwprintw(win, y++, x, "Temp Size: { %lli }", kls->size - t_kls->offset);
+	#endif
+	char h_size[200];
+	char curr_size[200];
+	kls_formatSize(kls->size - t_kls->offset,h_size,sizeof(h_size));
+	mvwprintw(win, y++, x, "Temp Human size: { %s }", h_size);
+	kls_formatSize(kls->size,h_size,sizeof(h_size));
+	mvwprintw(win, y++, x, "Inner Human size: { %s }", h_size);
+	kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
+	mvwprintw(win, y++, x, "Inner Used (Human): { %s }\n", curr_size);
+	kls_formatSize(t_kls->offset,curr_size,sizeof(curr_size));
+	mvwprintw(win, y++, x, "Temp Used (Human): { %s }\n", curr_size);
+	#ifndef MINGW32_BUILD
+	mvwprintw(win, y++, x, "Inner Offset: { %li }", kls->offset);
+	mvwprintw(win, y++, x, "Temp Offset: { %li }", t_kls->offset);
+	#else
+	mvwprintw(win, y++, x, "Inner Offset: { %lli }", kls->offset);
+	mvwprintw(win, y++, x, "Temp Offset: { %lli }", t_kls->offset);
+	#endif
+	#ifndef MINGW32_BUILD
+	mvwprintw(win, y++, x, "Inner Prev_Offset: { %li }", kls->prev_offset);
+	mvwprintw(win, y++, x, "Temp Prev_Offset: { %li }", t_kls->prev_offset);
+	#else
+	mvwprintw(win, y++, x, "Inner Prev_Offset: { %lli }", kls->prev_offset);
+	mvwprintw(win, y++, x, "Temp Prev_Offset: { %lli }", t_kls->prev_offset);
+	#endif
+	mvwprintw(win, y++, x, "Refer Region_List len: { %i }", kls_length(kls->regs));
+	mvwprintw(win, y++, x, "Temp Region_List len: { %i }", kls_length(t_kls->t_regs));
+	mvwprintw(win, y++, x, "Current inner usage: { %.3f%% }", (kls->offset * 100.0 ) / kls->size );
+	mvwprintw(win, y++, x, "Current refer usage: { %.3f%% }", (t_kls->offset * 100.0 ) / kls->size );
 	mvwprintw(win, y++, x, "%s","");
 	mvwprintw(win, y++, x, "q or Enter to quit.");
 	/*
@@ -696,6 +1092,88 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		} while (!quit && !picked);
 	} while (!quit && !kls_empty(rl));
 }
+
+/**
+ * Displays a slideshow of Region_List from passed Koliseo_Temp, to the passed WINDOW pointer.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param win The Window at hand.
+ */
+void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
+	if (win == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_showList_toWin():  passed WINDOW was null.");
+		#else
+		fprintf(stderr,"kls_temp_showList_toWin(): passed WINDOW was null.");
+		#endif
+		abort();
+	}
+	if (t_kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_showList_toWin():  passed Koliseo_Temp was null.");
+		#else
+		fprintf(stderr,"kls_temp_showList_toWin(): passed Koliseo_Temp was null.");
+		#endif
+		abort();
+	}
+	wclear(win);
+	box(win,0,0);
+	wrefresh(win);
+	int y = 2;
+	int x = 2;
+	int quit = 0;
+	mvwprintw(win, y++, x, "Region_List data:");
+	Region_List rl = kls_copy(t_kls->t_regs);
+	do {
+		wclear(win);
+		y = 3;
+		element e = kls_head(rl);
+		mvwprintw(win, y++, x, "Name: { %s }", e->name);
+		mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
+		#ifndef MINGW32_BUILD
+		mvwprintw(win, y++, x, "Offsets: { %li } -> { %li }", e->begin_offset, e->end_offset);
+		#else
+		mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset, e->end_offset);
+		#endif
+		mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(t_kls->t_regs));
+		//mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
+		char h_size[200];
+		ptrdiff_t reg_size = e->end_offset - e->begin_offset;
+		kls_formatSize(reg_size,h_size,sizeof(h_size));
+		mvwprintw(win, y++, x, "Human size: { %s }", h_size);
+		mvwprintw(win, y++, x, "%s","");
+		mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
+		/*
+		Region_List rl = kls_copy(kls->regs);
+		while (!kls_empty(rl)) {
+		  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
+		}
+		*/
+		box(win,0,0);
+		wrefresh(win);
+		int ch = '?';
+		int picked = -1;
+		do {
+			picked = 0;
+			ch = wgetch(win);
+			switch (ch) {
+				case KEY_RIGHT: {
+					rl = kls_tail(rl);
+					picked = 1;
+				}
+				break;
+				case 'q': {
+					quit = 1;
+					picked = 1;
+				}
+				break;
+				default: {
+					picked = 0;
+				}
+				break;
+			}
+		} while (!quit && !picked);
+	} while (!quit && !kls_empty(rl));
+}
 #endif
 
 /**
@@ -740,6 +1218,24 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 	tmp.prev_offset = kls->prev_offset;
 	tmp.offset = kls->offset;
 	kls->has_temp = 1;
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("KLS","Init of Region_List for temp kls.");
+		#endif
+		Region* temp_kls_header = (Region*) malloc(sizeof(Region));
+		temp_kls_header->begin_offset = tmp.prev_offset;
+		temp_kls_header->end_offset = tmp.offset;
+		temp_kls_header->type = Temp_KLS_Header;
+		strcpy(temp_kls_header->name,"Temp KLS Header");
+		strcpy(temp_kls_header->desc,"Denotes last region before starting the Koliseo_Temp.");
+		Region_List reglist = kls_emptyList();
+		reglist = kls_cons(temp_kls_header,reglist);
+		tmp.t_regs = reglist;
+		if (tmp.t_regs == NULL) {
+		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a Region_List.\n");
+		  abort();
+		}
+	}
 	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Prepared new Temp KLS.");
 	#endif
@@ -754,6 +1250,9 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 void kls_temp_end(Koliseo_Temp tmp_kls) {
 	tmp_kls.kls->prev_offset = tmp_kls.prev_offset;
 	tmp_kls.kls->offset = tmp_kls.offset;
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+		kls_freeList(tmp_kls.t_regs);
+	}
 	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Ended Temp KLS.");
 	#endif
