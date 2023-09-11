@@ -222,6 +222,8 @@ int main(int argc, char** argv) {
   int sc_res = -1;
   if (is_interactive == 1) {
   	sc_res = scanf("%*c");
+  } else {
+	sc_res = 0;
   }
 
   return sc_res;
