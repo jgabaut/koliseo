@@ -875,7 +875,7 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 	mvwprintw(win, y++, x, "Human size: { %s }", h_size);
 	char curr_size[200];
 	kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
-	mvwprintw(win, y++, x, "Used (Human): { %s }\n", curr_size);
+	mvwprintw(win, y++, x, "Used (Human): { %s }", curr_size);
 	#ifndef MINGW32_BUILD
 	mvwprintw(win, y++, x, "Offset: { %li }", kls->offset);
 	#else
@@ -967,9 +967,9 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 	kls_formatSize(kls->size,h_size,sizeof(h_size));
 	mvwprintw(win, y++, x, "Inner Human size: { %s }", h_size);
 	kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
-	mvwprintw(win, y++, x, "Inner Used (Human): { %s }\n", curr_size);
+	mvwprintw(win, y++, x, "Inner Used (Human): { %s }", curr_size);
 	kls_formatSize(t_kls->offset,curr_size,sizeof(curr_size));
-	mvwprintw(win, y++, x, "Temp Used (Human): { %s }\n", curr_size);
+	mvwprintw(win, y++, x, "Temp Used (Human): { %s }", curr_size);
 	#ifndef MINGW32_BUILD
 	mvwprintw(win, y++, x, "Inner Offset: { %li }", kls->offset);
 	mvwprintw(win, y++, x, "Temp Offset: { %li }", t_kls->offset);
