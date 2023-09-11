@@ -20,10 +20,17 @@ koliseo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
 LDADD = $(KOLISEO_LDFLAGS)
 
 # Linker flag to strip symbols
-AM_LDFLAGS = -s
+AM_LDFLAGS = -O2
 
 # Compiler flags
 AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall
+
+if DEBUG_BUILD
+AM_LDFLAGS += -ggdb -O0 -DKLS_DEBUG_CORE
+else
+# Linker flag to strip symbols
+AM_LDFLAGS += -s
+endif
 
 
 # Build rule for object files

@@ -1,5 +1,5 @@
 # Define the package name and version
-AC_INIT([koliseo], [0.1.21], [jgabaut@github.com])
+AC_INIT([koliseo], [0.1.22], [jgabaut@github.com])
 
 # Verify automake version and enable foreign option
 AM_INIT_AUTOMAKE([foreign -Wall])
@@ -9,6 +9,14 @@ AC_CANONICAL_HOST
 echo "Host os:  $host_os"
 AM_CONDITIONAL([OS_DARWIN], [test "$host_os" = "darwin"])
 AM_CONDITIONAL([MINGW32_BUILD], [test "$host_os" = "mingw32"])
+#
+# Check for the --enable-debug option
+AC_ARG_ENABLE([debug],
+  [AS_HELP_STRING([--enable-debug], [Enable debug build])],
+  [enable_debug=$enableval],
+  [enable_debug=no])
+# Define the DEBUG_BUILD conditional based on the --enable-debug option
+AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 
 # Define the include and library paths based on the host system
 if test "$host_os" = "mingw32"; then
@@ -40,7 +48,7 @@ fi
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
 if test -z "$VERSION"; then
-  VERSION="0.1.21"
+  VERSION="0.1.22"
 fi
 
 # Output variables to the config.h header
