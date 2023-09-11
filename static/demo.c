@@ -149,6 +149,7 @@ int main(void) {
   refresh();
   #ifndef MINGW32_BUILD
   kls_showList_toWin(kls,win);
+  kls_temp_showList_toWin(&temp_kls,win);
   #endif
   delwin(win);
   endwin();
