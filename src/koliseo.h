@@ -22,6 +22,10 @@ extern int KOLISEO_DEBUG;
  * Global variable for auto-setting of Regions flag.
  */
 extern int KOLISEO_AUTOSET_REGIONS;
+/**
+ * Global variable for auto-setting of Koliseo_Temp Regions flag.
+ */
+extern int KOLISEO_AUTOSET_TEMP_REGIONS;
 
 /**
  * Global variable for debug file pointer.

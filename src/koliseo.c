@@ -2,6 +2,7 @@
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
 int KOLISEO_AUTOSET_REGIONS = 1;
+int KOLISEO_AUTOSET_TEMP_REGIONS = 0;
 FILE* KOLISEO_DEBUG_FP = NULL;
 
 /**
@@ -421,7 +422,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align,
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
 		Region* reg = (Region*) malloc(sizeof(Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -552,7 +553,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t ali
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
 		Region* reg = (Region*) malloc(sizeof(Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -684,7 +685,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t ali
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
 		Region* reg = (Region*) malloc(sizeof(Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -1063,7 +1064,7 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 	tmp.prev_offset = kls->prev_offset;
 	tmp.offset = kls->offset;
 	kls->has_temp = 1;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","Init of Region_List for temp kls.");
 		#endif
@@ -1095,7 +1096,9 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 void kls_temp_end(Koliseo_Temp tmp_kls) {
 	tmp_kls.kls->prev_offset = tmp_kls.prev_offset;
 	tmp_kls.kls->offset = tmp_kls.offset;
-	kls_freeList(tmp_kls.t_regs);
+	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+		kls_freeList(tmp_kls.t_regs);
+	}
 	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Ended Temp KLS.");
 	#endif

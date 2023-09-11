@@ -9,9 +9,11 @@ int main(void) {
   #ifndef MINGW32_BUILD
   KOLISEO_DEBUG = 1;
   KOLISEO_AUTOSET_REGIONS = 1;
+  KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #else
   KOLISEO_DEBUG = 0;
   KOLISEO_AUTOSET_REGIONS = 0;
+  KOLISEO_AUTOSET_TEMP_REGIONS = 0;
   #endif
 
   kls_print_title();
@@ -19,6 +21,7 @@ int main(void) {
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
   printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
   printf("KOLISEO_AUTOSET_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_REGIONS);
+  printf("KOLISEO_AUTOSET_TEMP_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_TEMP_REGIONS);
   //Reset debug log file
   if (KOLISEO_DEBUG == 1) {
 	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","w");
