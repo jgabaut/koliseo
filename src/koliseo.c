@@ -914,6 +914,104 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 }
 
 /**
+ * Takes a Koliseo_Temp pointer and prints fields and eventually Region_List from the referred Koliseo pointer, to the passed WINDOW pointer.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param win The Window at hand.
+ */
+void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
+	if (win == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_show_toWin():  passed WINDOW was null.");
+		#else
+		fprintf(stderr,"kls_temp_show_toWin(): passed WINDOW was null.");
+		#endif
+		abort();
+	}
+	if (t_kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_show_toWin():  passed Koliseo_Temp was null.");
+		#else
+		fprintf(stderr,"kls_temp_show_toWin(): passed Koliseo_Temp was null.");
+		#endif
+		abort();
+	}
+	Koliseo* kls = t_kls->kls;
+	if (kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","kls_temp_show_toWin():  referred Koliseo was null.");
+		#else
+		fprintf(stderr,"kls_temp_show_toWin(): referred Koliseo was null.");
+		#endif
+		abort();
+	}
+	wclear(win);
+	box(win,0,0);
+	wrefresh(win);
+	int y = 2;
+	int x = 2;
+	mvwprintw(win, y++, x, "Koliseo_Temp data:");
+	mvwprintw(win, y++, x, "API Level: { %i }", int_koliseo_version());
+	#ifndef MINGW32_BUILD
+	mvwprintw(win, y++, x, "Temp Size: { %li }", kls->size - t_kls->offset);
+	#else
+	mvwprintw(win, y++, x, "Temp Size: { %lli }", kls->size - t_kls->offset);
+	#endif
+	char h_size[200];
+	char curr_size[200];
+	kls_formatSize(kls->size - t_kls->offset,h_size,sizeof(h_size));
+	mvwprintw(win, y++, x, "Temp Human size: { %s }", h_size);
+	kls_formatSize(kls->size,h_size,sizeof(h_size));
+	mvwprintw(win, y++, x, "Inner Human size: { %s }", h_size);
+	kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
+	mvwprintw(win, y++, x, "Inner Used (Human): { %s }\n", curr_size);
+	kls_formatSize(t_kls->offset,curr_size,sizeof(curr_size));
+	mvwprintw(win, y++, x, "Temp Used (Human): { %s }\n", curr_size);
+	#ifndef MINGW32_BUILD
+	mvwprintw(win, y++, x, "Inner Offset: { %li }", kls->offset);
+	mvwprintw(win, y++, x, "Temp Offset: { %li }", t_kls->offset);
+	#else
+	mvwprintw(win, y++, x, "Inner Offset: { %lli }", kls->offset);
+	mvwprintw(win, y++, x, "Temp Offset: { %lli }", t_kls->offset);
+	#endif
+	#ifndef MINGW32_BUILD
+	mvwprintw(win, y++, x, "Inner Prev_Offset: { %li }", kls->prev_offset);
+	mvwprintw(win, y++, x, "Temp Prev_Offset: { %li }", t_kls->prev_offset);
+	#else
+	mvwprintw(win, y++, x, "Inner Prev_Offset: { %lli }", kls->prev_offset);
+	mvwprintw(win, y++, x, "Temp Prev_Offset: { %lli }", t_kls->prev_offset);
+	#endif
+	mvwprintw(win, y++, x, "Refer Region_List len: { %i }", kls_length(kls->regs));
+	mvwprintw(win, y++, x, "Temp Region_List len: { %i }", kls_length(t_kls->t_regs));
+	mvwprintw(win, y++, x, "Current inner usage: { %.3f%% }", (kls->offset * 100.0 ) / kls->size );
+	mvwprintw(win, y++, x, "Current refer usage: { %.3f%% }", (t_kls->offset * 100.0 ) / kls->size );
+	mvwprintw(win, y++, x, "%s","");
+	mvwprintw(win, y++, x, "q or Enter to quit.");
+	/*
+	Region_List rl = kls_copy(kls->regs);
+	while (!kls_empty(rl)) {
+	  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
+	}
+	*/
+	wrefresh(win);
+	int ch = '?';
+	int quit = -1;
+	do {
+		quit = 0;
+		ch = wgetch(win);
+		switch (ch) {
+			case 10: case 'q': {
+				quit = 1;
+			}
+			break;
+			default: {
+				quit = 0;
+			}
+			break;
+		}
+	} while (!quit);
+}
+
+/**
  * Displays a slideshow of Region_List from passed Koliseo, to the passed WINDOW pointer.
  * @param kls The Koliseo at hand.
  * @param win The Window at hand.

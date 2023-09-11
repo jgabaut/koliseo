@@ -169,6 +169,7 @@ void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize);
 
 void kls_show_toWin(Koliseo* kls, WINDOW* win);
 void kls_showList_toWin(Koliseo* kls, WINDOW* win);
+void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 #endif
 

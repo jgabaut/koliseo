@@ -170,6 +170,7 @@ int main(int argc, char** argv) {
 	  wclear(win);
 	  wrefresh(win);
 	  kls_show_toWin(kls,win);
+	  kls_temp_show_toWin(&temp_kls,win);
 	  refresh();
 	  kls_showList_toWin(kls,win);
 	  kls_temp_showList_toWin(&temp_kls,win);
