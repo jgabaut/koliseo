@@ -772,16 +772,20 @@ void print_temp_kls_2file(FILE* fp, Koliseo_Temp* t_kls) {
 		Koliseo* kls = t_kls->kls;
 		fprintf(fp,"\n[KLS_T] API Level: { %i }\n", int_koliseo_version());
 		#ifndef MINGW32_BUILD
-		fprintf(fp,"\n[KLS_T] Size: { %li }\n", kls->size - t_kls->offset);
+		fprintf(fp,"\n[KLS_T] Temp Size: { %li }\n", kls->size - t_kls->offset);
 		#else
-		fprintf(fp,"\n[KLS_T] Size: { %lli }\n", kls->size - t_kls->offset);
+		fprintf(fp,"\n[KLS_T] Temp Size: { %lli }\n", kls->size - t_kls->offset);
 		#endif
 		char human_size[200];
 		char curr_size[200];
+		kls_formatSize(kls->size - t_kls->offset,human_size,sizeof(human_size));
+		fprintf(fp,"[KLS_T] Temp Size Human: { %s }\n", human_size);
 		kls_formatSize(kls->size,human_size,sizeof(human_size));
-		fprintf(fp,"[KLS_T] Human: { %s }\n", human_size);
+		fprintf(fp,"[KLS_T] Refer Size Human: { %s }\n", human_size);
 		kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
-		fprintf(fp,"[KLS_T] Used (Human): { %s }\n", curr_size);
+		fprintf(fp,"[KLS_T] Inner Used (Human): { %s }\n", curr_size);
+		kls_formatSize(t_kls->offset,curr_size,sizeof(curr_size));
+		fprintf(fp,"[KLS_T] Temp Used (Human): { %s }\n", curr_size);
 		#ifndef MINGW32_BUILD
 		fprintf(fp,"[KLS_T] Inner Offset: { %li }\n", kls->offset);
 		fprintf(fp,"[KLS_T] Temp Offset: { %li }\n", t_kls->offset);
