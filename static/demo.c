@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
 	  cbreak();
 	  noecho();
 	  keypad(stdscr, TRUE);
-	  win = newwin(20, 60, 1, 2);
+	  win = newwin(22, 60, 1, 2);
 	  keypad(win, TRUE);
 	  wclear(win);
 	  wrefresh(win);
