@@ -10,7 +10,7 @@ demo_debug
 #We also want to ignore the dotfile dump if we ever use anvil with -c flag
 amboso_cfg.dot
 
-MacOS DS_Store ignoring
+# MacOS DS_Store ignoring
 .DS_Store
 
 #Ignore docs pdf
