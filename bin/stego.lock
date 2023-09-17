@@ -28,3 +28,4 @@ tests# tests folder name
 0.1.22# add KLS_DEBUG_CORE preprocessor directives to enable API call logs
 0.2.0# Reworked Koliseo_Temp API with split functions
 0.2.1# Fix build for mingw32
+0.2.2#

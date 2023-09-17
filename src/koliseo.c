@@ -137,6 +137,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->offset = sizeof(*kls);
 		kls->prev_offset = kls->offset;
 		kls->has_temp = 0;
+		kls->t_kls = NULL;
 		if (KOLISEO_AUTOSET_REGIONS == 1) {
 			#ifdef KLS_DEBUG_CORE
 			kls_log("KLS","Init of Region_List for kls.");
@@ -201,8 +202,15 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
  * @param count The multiplicative quantity to scale data size to pop for.
  * @return A void pointer to the start of memory just popped from the referred Koliseo.
  */
-void* kls_temp_pop(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
-	Koliseo* kls = t_kls.kls;
+void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+	if (t_kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
@@ -388,8 +396,15 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
-void* kls_temp_push_zero_AR(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
-	Koliseo* kls = t_kls.kls;
+void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+	if (t_kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
@@ -431,7 +446,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align,
 		strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
 		Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
-		t_kls.t_regs = kls_append(reglist, t_kls.t_regs);
+		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
 	}
 
 	char h_size[200];
@@ -518,8 +533,16 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
-void* kls_temp_push_zero_named(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc) {
-	Koliseo* kls = t_kls.kls;
+void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc) {
+	if (t_kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+
+	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
@@ -562,7 +585,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t ali
 		strcpy(reg->desc,desc);
 		Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
-		t_kls.t_regs = kls_append(reglist, t_kls.t_regs);
+		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
 
 		char h_size[200];
 		kls_formatSize(size,h_size,sizeof(h_size));
@@ -651,8 +674,15 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
  * @param type The type index for pushed Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
-void* kls_temp_push_zero_typed(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
-	Koliseo* kls = t_kls.kls;
+void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
+	if (t_kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#endif
+		abort();
+	}
+	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
@@ -694,7 +724,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t ali
 		strcpy(reg->desc,desc);
 		Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
-		t_kls.t_regs = kls_append(reglist, t_kls.t_regs);
+		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
 
 		char h_size[200];
 		kls_formatSize(size,h_size,sizeof(h_size));
@@ -1200,6 +1230,12 @@ void kls_clear(Koliseo* kls) {
  * @see kls_clear()
  */
 void kls_free(Koliseo* kls) {
+	if (kls->has_temp == 1) {
+		#ifdef KLS_DEBUG_CORE
+		kls_log("KLS","API Level { %i } -> KLS had an active Koliseo_Temp.", int_koliseo_version());
+		#endif
+		kls_temp_end(kls->t_kls);
+	}
 	kls_clear(kls);
 	kls_freeList(kls->regs);
 	free(kls);
@@ -1209,33 +1245,37 @@ void kls_free(Koliseo* kls) {
 }
 
 /**
- * Starts a new savestate for the passed Koliseo pointer, by initialising a Koliseo_temp and returning it.
+ * Starts a new savestate for the passed Koliseo pointer, by initialising its Koliseo_Temp pointer and returning it.
  * Notably, you should not use the original while using the copy.
  * @param kls The Koliseo at hand.
  * @return A Koliseo_Temp struct.
  * @see Koliseo_Temp
  */
-Koliseo_Temp kls_temp_start(Koliseo* kls) {
+Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	assert(kls->has_temp == 0); //TODO handle this more gracefully
-	Koliseo_Temp tmp;
-	tmp.kls = kls;
-	tmp.prev_offset = kls->prev_offset;
-	tmp.offset = kls->offset;
+	ptrdiff_t prev = kls->prev_offset;
+	ptrdiff_t off = kls->offset;
+
+	Koliseo_Temp* tmp = KLS_PUSH(kls,Koliseo_Temp,1);
+	tmp->kls = kls;
+	tmp->prev_offset = prev;
+	tmp->offset = off;
 	kls->has_temp = 1;
+	kls->t_kls = tmp;
 	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","Init of Region_List for temp kls.");
 		#endif
 		Region* temp_kls_header = (Region*) malloc(sizeof(Region));
-		temp_kls_header->begin_offset = tmp.prev_offset;
-		temp_kls_header->end_offset = tmp.offset;
+		temp_kls_header->begin_offset = tmp->prev_offset;
+		temp_kls_header->end_offset = tmp->offset;
 		temp_kls_header->type = Temp_KLS_Header;
 		strcpy(temp_kls_header->name,"Temp KLS Header");
 		strcpy(temp_kls_header->desc,"Denotes last region before starting the Koliseo_Temp.");
 		Region_List reglist = kls_emptyList();
 		reglist = kls_cons(temp_kls_header,reglist);
-		tmp.t_regs = reglist;
-		if (tmp.t_regs == NULL) {
+		tmp->t_regs = reglist;
+		if (tmp->t_regs == NULL) {
 		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a Region_List.\n");
 		  abort();
 		}
@@ -1247,20 +1287,20 @@ Koliseo_Temp kls_temp_start(Koliseo* kls) {
 }
 
 /**
- * Ends a new savestate for the passed Koliseo pointer, by initialising a Koliseo_temp and returning it.
- * Notably, you should not use the original while using the copy.
- * @param kls The Koliseo at hand.
+ * Ends passed Koliseo_Temp pointer.
+ * @param tmp_kls The Koliseo_Temp at hand.
  */
-void kls_temp_end(Koliseo_Temp tmp_kls) {
-	tmp_kls.kls->prev_offset = tmp_kls.prev_offset;
-	tmp_kls.kls->offset = tmp_kls.offset;
+void kls_temp_end(Koliseo_Temp* tmp_kls) {
 	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
-		kls_freeList(tmp_kls.t_regs);
+		kls_freeList(tmp_kls->t_regs);
 	}
 	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Ended Temp KLS.");
 	#endif
-	tmp_kls.kls->has_temp = 0;
+	tmp_kls->kls->has_temp = 0;
+	tmp_kls->kls->t_kls = NULL;
+	tmp_kls->kls->prev_offset = tmp_kls->prev_offset;
+	tmp_kls->kls->offset = tmp_kls->offset;
 }
 
 

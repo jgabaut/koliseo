@@ -12,7 +12,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 2 /**< Represents current minor release.*/
-#define KLS_PATCH 1 /**< Represents current patch release.*/
+#define KLS_PATCH 2 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -33,7 +33,7 @@ extern int KOLISEO_AUTOSET_TEMP_REGIONS;
 extern FILE* KOLISEO_DEBUG_FP;
 
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
-static const char KOLISEO_API_VERSION_STRING[] = "0.2.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.2.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -100,6 +100,8 @@ typedef struct list_region
 } region_list_item;
 typedef region_list_item *Region_List;
 
+struct Koliseo_Temp; //Forward declaration for Koliseo itself
+
 /**
  * Represents the initialised arena allocator struct.
  * @see kls_new()
@@ -115,6 +117,7 @@ typedef struct Koliseo {
 	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
 	Region_List regs; /**< List of allocated Regions*/
 	int has_temp; /**< When == 1, a Koliseo_Temp is currently active on this Koliseo.*/
+	struct Koliseo_Temp* t_kls; /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
 } Koliseo;
 
 /**
@@ -175,12 +178,12 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 
 #endif
 
-Koliseo_Temp kls_temp_start(Koliseo* kls);
-void kls_temp_end(Koliseo_Temp tmp_kls);
-void* kls_temp_push_zero_AR(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
-void* kls_temp_push_zero_named(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
-void* kls_temp_push_zero_typed(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc);
-void* kls_temp_pop(Koliseo_Temp t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+Koliseo_Temp* kls_temp_start(Koliseo* kls);
+void kls_temp_end(Koliseo_Temp* tmp_kls);
+void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
+void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc);
+void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void print_temp_kls_2file(FILE* fp, Koliseo_Temp* t_kls);
 void print_dbg_temp_kls(Koliseo_Temp* t_kls);
 

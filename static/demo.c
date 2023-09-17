@@ -81,12 +81,12 @@ int main(int argc, char** argv) {
 
   KLS_ECHOLIST(kls_reverse(kls->regs));
 
-  Koliseo_Temp temp_kls = kls_temp_start(kls);
+  Koliseo_Temp* temp_kls = kls_temp_start(kls);
 
   #ifndef MINGW32_BUILD
-  printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls.kls));
+  printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls->kls));
   #else
-  printf("[Started Koliseo_Temp] [pos: %lli]\n",kls_get_pos(temp_kls.kls));
+  printf("[Started Koliseo_Temp] [pos: %lli]\n",kls_get_pos(temp_kls->kls));
   #endif
 
   int minusone = -1;
@@ -127,9 +127,9 @@ int main(int argc, char** argv) {
   #endif
 
   #ifndef MINGW32_BUILD
-  printf("[Current position in Koliseo_Temp] [pos: %li]\n",temp_kls.offset);
+  printf("[Current position in Koliseo_Temp] [pos: %li]\n",temp_kls->offset);
   #else
-  printf("[Current position in Koliseo_Temp] [pos: %lli]\n",temp_kls.offset);
+  printf("[Current position in Koliseo_Temp] [pos: %lli]\n",temp_kls->offset);
   #endif
 
   print_dbg_kls(kls);
@@ -170,10 +170,10 @@ int main(int argc, char** argv) {
 	  wclear(win);
 	  wrefresh(win);
 	  kls_show_toWin(kls,win);
-	  kls_temp_show_toWin(&temp_kls,win);
+	  kls_temp_show_toWin(temp_kls,win);
 	  refresh();
 	  kls_showList_toWin(kls,win);
-	  kls_temp_showList_toWin(&temp_kls,win);
+	  kls_temp_showList_toWin(temp_kls,win);
 	  delwin(win);
 	  endwin();
   }
@@ -200,10 +200,11 @@ int main(int argc, char** argv) {
   #endif
 
   print_dbg_kls(kls);
-  print_dbg_temp_kls(&temp_kls);
+  print_dbg_temp_kls(temp_kls);
 
-  kls_temp_end(temp_kls);
-  printf("[Ended Koliseo_Temp]\n");
+  //We may forget to end the Koliseo_Temp...
+  //kls_temp_end(temp_kls);
+  //printf("[Ended Koliseo_Temp]\n");
 
   print_dbg_kls(kls);
 
@@ -211,6 +212,7 @@ int main(int argc, char** argv) {
   kls_clear(kls);
   print_dbg_kls(kls);
 
+  //This should also clean up an eventual Koliseo_Temp
   printf("[Free Koliseo]\n");
   kls_free(kls);
 
