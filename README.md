@@ -21,15 +21,19 @@
 ## Basic example <a name = "basic_example"></a>
 
   This is a basic usage example, initialising a Koliseo and then pushing an example pointer.
+  You can build it by running:
+
+  `gcc static/basic_example.c src/koliseo.c -o basic_example`
+
   For a more complete example, including `Koliseo_Temp` usage, check out [demo.c](./static/demo.c) provided in `static` folder.
 
-```c
 
+```c
 typedef struct Example {
     int val;
 } Example;
 
-#include "koliseo.h"
+#include "../src/koliseo.h"
 
 int main(void)
 {
@@ -39,6 +43,9 @@ int main(void)
     //Use the arena (see demo for Koliseo_Temp usage)
     Example* e = KLS_PUSH(kls,Example,1);
     e->val = 42;
+
+    //Show contents to stdout
+    print_dbg_kls(kls);
 
     //Free the arena
     kls_free(kls);
