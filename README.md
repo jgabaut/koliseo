@@ -5,6 +5,7 @@
 ## Table of Contents
 
 + [What is this thing?](#witt)
+  + [Basic example](#basic_example)
   + [Prerequisites](#prerequisites)
   + [Configuration](#config)
   + [Building](#building)
@@ -16,6 +17,34 @@
 
   This is a C library for an arena allocator, whose arenas are named Koliseo.
   It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
+
+## Basic example <a name = "basic_example"></a>
+
+  This is a basic usage example, initialising a Koliseo and then pushing an example pointer.
+  For a more complete example, check out [demo.c](./static/demo.c)
+
+```c
+
+typedef struct Example {
+    int val;
+} Example;
+
+#include "koliseo.h"
+
+int main(void)
+{
+    //Init the arena
+    Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
+
+    //Use the arena (see demo for Koliseo_Temp usage)
+    Example* e = KLS_PUSH(kls,Example,1);
+    e->val = 42;
+
+    //Free the arena
+    kls_free(kls);
+    return 0;
+}
+```
 
 ## Prerequisites <a name = "prerequisites"></a>
 
