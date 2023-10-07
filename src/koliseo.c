@@ -262,6 +262,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push() call.\n");
+        kls_free(kls);
 		abort();
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -307,6 +308,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+        kls_free(kls);
 		abort();
 		//return 0;
 	}
@@ -355,6 +357,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+        kls_free(kls);
 		abort();
 		//return 0;
 	}
@@ -429,6 +432,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+        kls_free(kls);
 		abort();
 		//return 0;
 	}
@@ -490,6 +494,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+        kls_free(kls);
 		abort();
 		//return 0;
 	}
@@ -568,6 +573,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+        kls_free(kls);
 		abort();
 		//return 0;
 	}
@@ -630,6 +636,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+        kls_free(kls);
 		abort();
 		//return 0;
 	}
@@ -707,6 +714,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 			#endif
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+        kls_free(kls);
 		abort();
 		//return 0;
 	}
