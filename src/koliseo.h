@@ -168,15 +168,15 @@ void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize);
 #include "ncurses.h"
 #else
 #include <ncursesw/ncurses.h>
-#endif
+#endif //MINGW32_BUILD
 
 void kls_show_toWin(Koliseo* kls, WINDOW* win);
 void kls_showList_toWin(Koliseo* kls, WINDOW* win);
 void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
-#endif
+#endif //KOLISEO_CURSES_H_
 
-#endif
+#endif //KOLISEO_HAS_CURSES
 
 Koliseo_Temp* kls_temp_start(Koliseo* kls);
 void kls_temp_end(Koliseo_Temp* tmp_kls);
