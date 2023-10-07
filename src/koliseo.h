@@ -12,7 +12,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 2 /**< Represents current minor release.*/
-#define KLS_PATCH 2 /**< Represents current patch release.*/
+#define KLS_PATCH 3 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -33,7 +33,7 @@ extern int KOLISEO_AUTOSET_TEMP_REGIONS;
 extern FILE* KOLISEO_DEBUG_FP;
 
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
-static const char KOLISEO_API_VERSION_STRING[] = "0.2.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.2.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -168,15 +168,15 @@ void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize);
 #include "ncurses.h"
 #else
 #include <ncursesw/ncurses.h>
-#endif
+#endif //MINGW32_BUILD
 
 void kls_show_toWin(Koliseo* kls, WINDOW* win);
 void kls_showList_toWin(Koliseo* kls, WINDOW* win);
 void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
-#endif
+#endif //KOLISEO_CURSES_H_
 
-#endif
+#endif //KOLISEO_HAS_CURSES
 
 Koliseo_Temp* kls_temp_start(Koliseo* kls);
 void kls_temp_end(Koliseo_Temp* tmp_kls);
