@@ -21,7 +21,7 @@
 ## Basic example <a name = "basic_example"></a>
 
   This is a basic usage example, initialising a Koliseo and then pushing an example pointer.
-  For a more complete example, check out [demo.c](./static/demo.c)
+  For a more complete example, including `Koliseo_Temp` usage, check out [demo.c](./static/demo.c) provided in `static` folder.
 
 ```c
 
