@@ -1,7 +1,7 @@
 #include "koliseo.h"
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
-int KOLISEO_AUTOSET_REGIONS = 1;
+int KOLISEO_AUTOSET_REGIONS = 0;
 int KOLISEO_AUTOSET_TEMP_REGIONS = 0;
 FILE* KOLISEO_DEBUG_FP = NULL;
 
@@ -343,7 +343,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
-	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",h_size);
+	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
 	}
@@ -411,7 +411,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
-	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",h_size);
+	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
 	}
@@ -486,7 +486,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
-	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",h_size);
+	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
 	}
