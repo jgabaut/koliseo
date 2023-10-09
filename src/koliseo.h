@@ -12,7 +12,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 2 /**< Represents current minor release.*/
-#define KLS_PATCH 3 /**< Represents current patch release.*/
+#define KLS_PATCH 4 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -33,7 +33,7 @@ extern int KOLISEO_AUTOSET_TEMP_REGIONS;
 extern FILE* KOLISEO_DEBUG_FP;
 
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
-static const char KOLISEO_API_VERSION_STRING[] = "0.2.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.2.4"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -89,7 +89,7 @@ static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents def
 
 #ifndef KOLISEO_LIST_H_
 #define KOLISEO_LIST_H_
-#include "stdbool.h"
+#include <stdbool.h>
 
 typedef Region* element;
 
@@ -119,6 +119,18 @@ typedef struct Koliseo {
 	int has_temp; /**< When == 1, a Koliseo_Temp is currently active on this Koliseo.*/
 	struct Koliseo_Temp* t_kls; /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
 } Koliseo;
+
+/**
+ * Defines a format string for Koliseo.
+ * @see KLSArg()
+ */
+#define KLSFmt "KLS {size: %i, curr: %i, has_temp: %i}"
+
+/**
+ * Defines a format macro for Koliseo args.
+ * @see KLSFmt
+ */
+#define KLS_Arg(kls) (kls->size),(kls->offset),(kls->has_temp)
 
 /**
  * Represents a savestate for a Koliseo.
