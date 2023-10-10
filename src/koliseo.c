@@ -138,6 +138,10 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->prev_offset = kls->offset;
 		kls->has_temp = 0;
 		kls->t_kls = NULL;
+		#ifdef KLS_DEBUG_CORE
+	    kls_log("KLS","KLS offset: { %p }.", kls);
+	    kls_log("KLS","Allocation begin offset: { %p }.", kls + kls->offset);
+		#endif
 		if (KOLISEO_AUTOSET_REGIONS == 1) {
 			#ifdef KLS_DEBUG_CORE
 			kls_log("KLS","Init of Region_List for kls.");
@@ -227,13 +231,14 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	}
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
-		fprintf(stderr,"[KLS] Failed kls_pop() call.\n");
+		fprintf(stderr,"[KLS] Failed kls_temp_pop() call.\n");
 		abort();
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->prev_offset = kls->offset;
 	kls->offset -= padding + size*count;
 	#ifdef KLS_DEBUG_CORE
+	kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log("KLS","API Level { %i } -> Popped (%li) for Temp_KLS.", int_koliseo_version(), size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -283,10 +288,11 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	char h_size[200];
-	kls_formatSize(size,h_size,sizeof(h_size));
+	kls_formatSize(size*count,h_size,sizeof(h_size));
 	//sprintf(msg,"Pushed size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
+	kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log("KLS","API Level { %i } -> Pushed size (%s) for KLS.", int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -339,10 +345,11 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	char h_size[200];
-	kls_formatSize(size,h_size,sizeof(h_size));
+	kls_formatSize(size*count,h_size,sizeof(h_size));
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
+	kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -407,10 +414,11 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	}
 
 	char h_size[200];
-	kls_formatSize(size,h_size,sizeof(h_size));
+	kls_formatSize(size*count,h_size,sizeof(h_size));
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
+	kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.",int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -482,10 +490,11 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	}
 
 	char h_size[200];
-	kls_formatSize(size,h_size,sizeof(h_size));
+	kls_formatSize(size*count,h_size,sizeof(h_size));
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
+	kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",int_koliseo_version(), h_size);
 	if (KOLISEO_DEBUG == 1) {
 		print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -550,10 +559,11 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		kls->regs = kls_append(reglist, kls->regs);
 
 		char h_size[200];
-		kls_formatSize(size,h_size,sizeof(h_size));
+		kls_formatSize(size*count,h_size,sizeof(h_size));
 		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 		//kls_log("KLS",msg);
 		#ifdef KLS_DEBUG_CORE
+	    kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
 		if (KOLISEO_DEBUG == 1) {
 			print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -633,6 +643,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 		//kls_log("KLS",msg);
 		#ifdef KLS_DEBUG_CORE
+	    kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.", int_koliseo_version(), h_size);
 		if (KOLISEO_DEBUG == 1) {
 			print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -699,10 +710,11 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		kls->regs = kls_append(reglist, kls->regs);
 
 		char h_size[200];
-		kls_formatSize(size,h_size,sizeof(h_size));
+		kls_formatSize(size*count,h_size,sizeof(h_size));
 		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 		//kls_log("KLS",msg);
 		#ifdef KLS_DEBUG_CORE
+	    kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for KLS.", int_koliseo_version(), h_size);
 		if (KOLISEO_DEBUG == 1) {
 			print_kls_2file(KOLISEO_DEBUG_FP,kls);
@@ -777,10 +789,11 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
 
 		char h_size[200];
-		kls_formatSize(size,h_size,sizeof(h_size));
+		kls_formatSize(size*count,h_size,sizeof(h_size));
 		//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 		//kls_log("KLS",msg);
 		#ifdef KLS_DEBUG_CORE
+	    kls_log("KLS","Curr offset: { %p }.", kls + kls->offset);
 		kls_log("KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.", int_koliseo_version(), h_size);
 		if (KOLISEO_DEBUG == 1) {
 			print_kls_2file(KOLISEO_DEBUG_FP,kls);
