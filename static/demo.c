@@ -208,9 +208,12 @@ int main(int argc, char** argv) {
 
   print_dbg_kls(kls);
 
+  printf(KLSFmt "\n", KLS_Arg(kls));
+
   printf("[Clear Koliseo]\n");
   kls_clear(kls);
   print_dbg_kls(kls);
+
 
   //This should also clean up an eventual Koliseo_Temp
   printf("[Free Koliseo]\n");
