@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
@@ -71,7 +72,14 @@ typedef struct KLS_Temp_Conf {
  */
 #define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions)
 
+/**
+ * Defines current API version number from KLS_MAJOR, KLS_MINOR and KLS_PATCH.
+ */
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
+
+/**
+ * Defines current API version string.
+ */
 static const char KOLISEO_API_VERSION_STRING[] = "0.2.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
@@ -79,7 +87,7 @@ const char* string_koliseo_version(void);
 const int int_koliseo_version(void);
 
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
-extern char* kls_title[KLS_TITLEROWS+1];
+extern char* kls_title[KLS_TITLEROWS+1]; /**< Contains title banner.*/
 
 void kls_print_title_2file(FILE* fp); /**< Prints the title banner to the passed FILE.*/
 void kls_print_title(void);
@@ -124,11 +132,6 @@ typedef struct KLS_Region {
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
-
-
-#ifndef KOLISEO_LIST_H_
-#define KOLISEO_LIST_H_
-#include <stdbool.h>
 
 typedef KLS_Region* KLS_list_element;
 
@@ -199,7 +202,7 @@ typedef struct Koliseo_Temp {
 ptrdiff_t kls_get_pos(Koliseo* kls);
 
 Koliseo* kls_new(ptrdiff_t size);
-int kls_set_conf(Koliseo* kls, KLS_Conf conf);
+bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
@@ -243,7 +246,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 #endif //KOLISEO_HAS_CURSES
 
 Koliseo_Temp* kls_temp_start(Koliseo* kls);
-int kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
+bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
 void kls_temp_end(Koliseo_Temp* tmp_kls);
 void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
@@ -293,7 +296,5 @@ double kls_usageShare(KLS_list_element, Koliseo*);
 void kls_usageReport_toFile(Koliseo*,FILE*);
 void kls_usageReport(Koliseo*);
 ptrdiff_t kls_type_usage(int, Koliseo*);
-
-#endif
 
 #endif

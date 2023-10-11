@@ -208,7 +208,14 @@ Koliseo* kls_new(ptrdiff_t size) {
  */
 Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf) {
     Koliseo* k = kls_new(size);
-    kls_set_conf(k, conf);
+    bool conf_res = kls_set_conf(k, conf);
+    if (!conf_res) {
+        fprintf(stderr,"[ERROR] [%s()]: Failed to set config for new Koliseo.\n", __func__);
+        #ifdef KLS_DEBUG_CORE
+        kls_log("ERROR","[%s()]: Failes to set config for new Koliseo.", __func__);
+        #endif
+        exit(EXIT_FAILURE);
+    }
     return k;
 }
 
@@ -216,20 +223,20 @@ Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf) {
  * Updates the KLS_Conf for the passed Koliseo pointer.
  * @param kls The Koliseo pointer to update.
  * @param conf The KLS_Conf to set.
- * @return 0 for success, a negative value for errors.
+ * @return A bool representing success.
  */
-int kls_set_conf(Koliseo* kls, KLS_Conf conf) {
+bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
         //TODO: is it better to exit() here?
-        return -1;
+        return false;
 	}
 
     kls->conf = conf;
-    return 0;
+    return true;
 }
 
 /**
@@ -1444,20 +1451,20 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
  * Updates the KLS_Temp_Conf for the passed Koliseo_Temp pointer.
  * @param t_kls The Koliseo_Temp pointer to update.
  * @param conf The KLS_Temp_Conf to set.
- * @return 0 for success, a negative value for errors.
+ * @return A bool representing success.
  */
-int kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf) {
+bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf) {
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
         //TODO: is it better to exit() here?
-        return -1;
+        return false;
 	}
 
     t_kls->conf = conf;
-    return 0;
+    return true;
 }
 
 /**
