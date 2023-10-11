@@ -129,10 +129,13 @@ void kls_log(const char* tag, const char* format, ...) {
 Koliseo* kls_new(ptrdiff_t size) {
 	if (size < (ptrdiff_t)sizeof(Koliseo)) {
         #ifndef _WIN32
-        fprintf(stderr,"Error at %s():  invalid requested kls size (%li). Min accepted is: (%li).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        fprintf(stderr,"[ERROR] at %s():  invalid requested kls size (%li). Min accepted is: (%li).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
         #else
-        fprintf(stderr,"Error at %s():  invalid requested kls size (%lli). Min accepted is: (%lli).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        fprintf(stderr,"[ERROR] at %s():  invalid requested kls size (%lli). Min accepted is: (%lli).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
         #endif
+		#ifdef KLS_DEBUG_CORE
+		kls_log("KLS","API Level { %i } ->  Failed init of new KLS.",int_koliseo_version());
+		#endif
         //TODO Is it better to abort the program?
         return NULL;
     }
