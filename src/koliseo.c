@@ -195,7 +195,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
  * @param kls The Koliseo at hand.
  * @param size The size for data to pop.
  * @param align The alignment for data to pop.
@@ -228,7 +228,7 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 }
 
 /**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to abort() if the operation fails.
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
  * @param t_kls The Koliseo_Temp at hand.
  * @param size The size for data to pop.
  * @param align The alignment for data to pop.
@@ -270,7 +270,7 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it does NOT zero the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
@@ -324,7 +324,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
@@ -381,7 +381,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
@@ -449,7 +449,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	return p;
 }
 /**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * @param t_kls The Koliseo_Temp at hand.
  * @param size The size for data to push.
@@ -526,7 +526,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
@@ -596,7 +596,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 }
 
 /**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
  * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param t_kls The Koliseo_Temp at hand.
@@ -676,7 +676,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 }
 
 /**
- * Takes a Koliseo pointer, a KLS_Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, a KLS_Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
@@ -747,7 +747,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 }
 
 /**
- * Takes a Koliseo_Temp, a KLS_Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo_Temp, a KLS_Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
  * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param t_kls The Koliseo_Temp at hand.
