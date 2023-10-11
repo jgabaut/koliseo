@@ -1,6 +1,8 @@
 #include "koliseo.h"
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
+
+//FIXME: ATM this file pointer is not correctly closed when an error causes an exit() call.
 FILE* KOLISEO_DEBUG_FP = NULL;
 
 KLS_Conf KLS_DEFAULT_CONF = {
