@@ -28,12 +28,8 @@ int main(int argc, char** argv) {
 
   #ifndef MINGW32_BUILD
   KOLISEO_DEBUG = 1;
-  //KOLISEO_AUTOSET_REGIONS = 1;
-  //KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #else
-  KOLISEO_DEBUG = 0;
-  //KOLISEO_AUTOSET_REGIONS = 1;
-  //KOLISEO_AUTOSET_TEMP_REGIONS = 1;
+  KOLISEO_DEBUG = 1;
   #endif
 
   kls_print_title();
@@ -62,6 +58,8 @@ int main(int argc, char** argv) {
 
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
+  kls->conf.kls_autoset_regions = 1;
+  kls->conf.kls_autoset_temp_regions = 1;
 
   printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
