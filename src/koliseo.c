@@ -204,7 +204,7 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -237,7 +237,7 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -245,7 +245,7 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -280,7 +280,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -334,7 +334,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -391,7 +391,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -459,7 +459,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -467,7 +467,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -537,7 +537,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -607,7 +607,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -616,7 +616,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -688,7 +688,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -759,7 +759,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -767,7 +767,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -868,7 +868,7 @@ void print_dbg_kls(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -1309,7 +1309,7 @@ void kls_clear(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -1330,7 +1330,7 @@ void kls_free(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -1359,7 +1359,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
@@ -1764,7 +1764,7 @@ ptrdiff_t kls_type_usage(int type, Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
 		exit(EXIT_FAILURE);
 	}
