@@ -1,9 +1,12 @@
 #include "koliseo.h"
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
-int KOLISEO_AUTOSET_REGIONS = 0;
-int KOLISEO_AUTOSET_TEMP_REGIONS = 0;
 FILE* KOLISEO_DEBUG_FP = NULL;
+
+KLS_Conf KLS_DEFAULT_CONF = {
+    .kls_autoset_regions = 0,
+    .kls_autoset_temp_regions = 0,
+};
 
 /**
  * Defines titlescreen.
@@ -112,11 +115,14 @@ void kls_log(const char* tag, const char* format, ...) {
 
 
 /**
- * Takes a ptrdiff_t size and allocates the backing memory for a Koliseo. Sets the fields with appropriate values if memory allocation was successful, goes to abort() otherwise.
+ * Takes a ptrdiff_t size and allocates the backing memory for a Koliseo.
+ * Sets the KLS_Conf field to KLS_DEFAULT_CONF.
+ * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
  * @param size The size for Koliseo data field.
  * @return A pointer to the initialised Koliseo struct.
  * @see Koliseo
  * @see Koliseo_Temp
+ * @see KLS_DEFAULT_CONF
  * @see kls_temp_start()
  * @see kls_temp_end()
  */
@@ -146,11 +152,12 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->prev_offset = kls->offset;
 		kls->has_temp = 0;
 		kls->t_kls = NULL;
+        kls-> conf = KLS_DEFAULT_CONF;
 		#ifdef KLS_DEBUG_CORE
 	    kls_log("KLS","KLS offset: { %p }.", kls);
 	    kls_log("KLS","Allocation begin offset: { %p }.", kls + kls->offset);
 		#endif
-		if (KOLISEO_AUTOSET_REGIONS == 1) {
+		if (kls->conf.kls_autoset_regions == 1) {
 			#ifdef KLS_DEBUG_CORE
 			kls_log("KLS","Init of KLS_Region_List for kls.");
 			#endif
@@ -167,7 +174,9 @@ Koliseo* kls_new(ptrdiff_t size) {
 			  fprintf(stderr,"[KLS] kls_new() failed to get a KLS_Region_List.\n");
 			  exit(EXIT_FAILURE);
 			}
-		}
+		} else {
+            kls->regs = NULL;
+        }
 	} else {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
 		exit(EXIT_FAILURE);
@@ -409,7 +418,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
+	if (kls->conf.kls_autoset_regions == 1) {
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -485,7 +494,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+	if (t_kls->conf.kls_autoset_regions == 1) {
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -555,7 +564,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
+	if (kls->conf.kls_autoset_regions == 1) {
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -635,7 +644,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+	if (t_kls->conf.kls_autoset_regions == 1) {
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -706,7 +715,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
+	if (kls->conf.kls_autoset_regions == 1) {
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -785,7 +794,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+	if (t_kls->conf.kls_autoset_regions == 1) {
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
@@ -1359,9 +1368,10 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	tmp->kls = kls;
 	tmp->prev_offset = prev;
 	tmp->offset = off;
+    tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = kls->conf.kls_autoset_temp_regions};
 	kls->has_temp = 1;
 	kls->t_kls = tmp;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+	if (kls->conf.kls_autoset_temp_regions == 1) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("KLS","Init of KLS_Region_List for temp kls.");
 		#endif
@@ -1378,7 +1388,9 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a KLS_Region_List.\n");
 		  exit(EXIT_FAILURE);
 		}
-	}
+	} else {
+        tmp->t_regs = NULL;
+    }
 	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Prepared new Temp KLS.");
 	#endif
@@ -1390,7 +1402,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
  * @param tmp_kls The Koliseo_Temp at hand.
  */
 void kls_temp_end(Koliseo_Temp* tmp_kls) {
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+	if (tmp_kls->conf.kls_autoset_regions == 1) {
 		kls_freeList(tmp_kls->t_regs);
 	}
 	#ifdef KLS_DEBUG_CORE

@@ -28,20 +28,18 @@ int main(int argc, char** argv) {
 
   #ifndef MINGW32_BUILD
   KOLISEO_DEBUG = 1;
-  KOLISEO_AUTOSET_REGIONS = 1;
-  KOLISEO_AUTOSET_TEMP_REGIONS = 1;
+  //KOLISEO_AUTOSET_REGIONS = 1;
+  //KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #else
   KOLISEO_DEBUG = 0;
-  KOLISEO_AUTOSET_REGIONS = 1;
-  KOLISEO_AUTOSET_TEMP_REGIONS = 1;
+  //KOLISEO_AUTOSET_REGIONS = 1;
+  //KOLISEO_AUTOSET_TEMP_REGIONS = 1;
   #endif
 
   kls_print_title();
   printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n", int_koliseo_version(), string_koliseo_version());
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
   printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
-  printf("KOLISEO_AUTOSET_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_REGIONS);
-  printf("KOLISEO_AUTOSET_TEMP_REGIONS is [%i]\n\n", KOLISEO_AUTOSET_TEMP_REGIONS);
   //Reset debug log file
   if (KOLISEO_DEBUG == 1) {
 	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","w");
@@ -64,6 +62,8 @@ int main(int argc, char** argv) {
 
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
+
+  printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
   #ifndef MINGW32_BUILD
   printf("[Current position in Koliseo] [pos: %li]\n",kls_get_pos(kls));
@@ -88,6 +88,8 @@ int main(int argc, char** argv) {
   #else
   printf("[Started Koliseo_Temp] [pos: %lli]\n",kls_get_pos(temp_kls->kls));
   #endif
+
+  printf(KLS_Temp_Conf_Fmt "\n", KLS_Temp_Conf_Arg(temp_kls->conf));
 
   int minusone = -1;
   int* p = &minusone;

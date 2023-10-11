@@ -18,19 +18,57 @@
  * Global variable for debug flag.
  */
 extern int KOLISEO_DEBUG;
-/**
- * Global variable for auto-setting of KLS_Regions flag.
- */
-extern int KOLISEO_AUTOSET_REGIONS;
-/**
- * Global variable for auto-setting of Koliseo_Temp KLS_Regions flag.
- */
-extern int KOLISEO_AUTOSET_TEMP_REGIONS;
 
 /**
  * Global variable for debug file pointer.
  */
 extern FILE* KOLISEO_DEBUG_FP;
+
+/**
+ * Defines flags for Koliseo.
+ */
+typedef struct KLS_Conf {
+    int kls_autoset_regions;
+    int kls_autoset_temp_regions;
+} KLS_Conf;
+
+/**
+ * Default KLS_Conf used by kls_new().
+ * @see kls_new()
+ * @see KLS_Conf
+ */
+extern KLS_Conf KLS_DEFAULT_CONF;
+
+/**
+ * Defines a format string for KLS_Conf.
+ * @see KLS_Conf_Arg()
+ */
+#define KLS_Conf_Fmt "KLS_Conf {autoset_regions: %i, autoset_temp_regions: %i}"
+
+/**
+ * Defines a format macro for KLS_Conf args.
+ * @see KLS_Conf_Fmt
+ */
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions)
+
+/**
+ * Defines flags for Koliseo_Temp.
+ */
+typedef struct KLS_Temp_Conf {
+    int kls_autoset_regions;
+} KLS_Temp_Conf;
+
+/**
+ * Defines a format string for KLS_Temp_Conf.
+ * @see KLS_Temp_Conf_Arg()
+ */
+#define KLS_Temp_Conf_Fmt "KLS_Temp_Conf {autoset_regions: %i}"
+
+/**
+ * Defines a format macro for KLS_Conf args.
+ * @see KLS_Temp_Conf_Fmt
+ */
+#define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions)
 
 static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KLS_PATCH*100); /**< Represents current version with numeric format.*/
 static const char KOLISEO_API_VERSION_STRING[] = "0.2.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
@@ -39,10 +77,10 @@ const char* string_koliseo_version(void);
 
 const int int_koliseo_version(void);
 
-#define KLS_TITLEROWS 33
+#define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
 extern char* kls_title[KLS_TITLEROWS+1];
 
-void kls_print_title_2file(FILE* fp);
+void kls_print_title_2file(FILE* fp); /**< Prints the title banner to the passed FILE.*/
 void kls_print_title(void);
 
 void kls_log(const char* tag, const char* format, ...);
@@ -93,11 +131,16 @@ static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents def
 
 typedef KLS_Region* KLS_list_element;
 
+/**
+ * Defines the node for a KLS_Region_List.
+ * @see KLS_list_element
+ */
 typedef struct KLS_list_region
 {
-	KLS_list_element value;
-	struct KLS_list_region *next;
+	KLS_list_element value; /**< The KLS_Region value.*/
+	struct KLS_list_region *next; /**< Pointer to the next node int the list.*/
 } KLS_region_list_item;
+
 typedef KLS_region_list_item *KLS_Region_List;
 
 struct Koliseo_Temp; //Forward declaration for Koliseo itself
@@ -117,6 +160,7 @@ typedef struct Koliseo {
 	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
 	KLS_Region_List regs; /**< List of allocated Regions*/
 	int has_temp; /**< When == 1, a Koliseo_Temp is currently active on this Koliseo.*/
+    KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
 	struct Koliseo_Temp* t_kls; /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
 } Koliseo;
 
@@ -148,6 +192,7 @@ typedef struct Koliseo_Temp {
 	ptrdiff_t offset; /**< Current position of memory pointer.*/
 	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
 	KLS_Region_List t_regs; /**< List of temporarily allocated Regions*/
+    KLS_Temp_Conf conf; /**< Contains flags to change the Koliseo_Temp behaviour.*/
 } Koliseo_Temp;
 
 ptrdiff_t kls_get_pos(Koliseo* kls);
