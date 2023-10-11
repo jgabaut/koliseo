@@ -1456,7 +1456,9 @@ KLS_Region_List kls_tail(KLS_Region_List l) {
 }
 KLS_Region_List kls_cons(KLS_list_element e, KLS_Region_List l) {
 	if (e == NULL) {
+      #ifdef KLS_DEBUG_CORE
 	  kls_log("KLS","kls_cons():  KLS_list_element was NULL");
+      #endif
 	}
 	KLS_Region_List t;
 	t = (KLS_Region_List)malloc(sizeof(KLS_region_list_item));
@@ -1742,11 +1744,15 @@ double kls_usageShare(KLS_Region* r, Koliseo* kls) {
 
 void kls_usageReport_toFile(Koliseo* kls, FILE* fp) {
 	if (fp == NULL) {
+        #ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","kls_usageReport_toFile():  passed file was NULL");
+        #endif
 		return;
 	}
 	if (kls == NULL) {
+        #ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","kls_usageReport_toFile():  passed Koliseo was NULL");
+        #endif
 		return;
 	}
 	KLS_Region_List rl = kls_copy(kls->regs);
