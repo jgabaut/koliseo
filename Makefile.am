@@ -83,6 +83,16 @@ cleanob:
 	-rm static/*.o
 	@echo -e "\033[1;33mDone.\e[0m"
 
+bad_size.k:
+	@echo -en "Building bad_size.k test"
+	$(CCOMP) tests/error/bad_size.c src/koliseo.c -o tests/error/bad_size.k -DKLS_DEBUG_CORE
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+anviltest: bad_size.k
+	@echo -en "Running anvil tests.\n"
+	./anvil -tX
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
 pack: rebuild
 	@echo -e "Packing koliseo:  make pack for $(VERSION)"
 	@echo -e "\033[1;32m[TREE] Prepping tree, pack for $(VERSION):\e[0m"
