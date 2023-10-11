@@ -1,7 +1,6 @@
 #include "koliseo.h"
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
-
 //FIXME: ATM this file pointer is not correctly closed when an error causes an exit() call.
 FILE* KOLISEO_DEBUG_FP = NULL;
 
@@ -11,7 +10,7 @@ KLS_Conf KLS_DEFAULT_CONF = {
 };
 
 /**
- * Defines titlescreen.
+ * Defines title banner.
  */
 char* kls_title[KLS_TITLEROWS+1] = {
 	"                               .',,,.                                                               ",
@@ -49,6 +48,11 @@ char* kls_title[KLS_TITLEROWS+1] = {
 	".;:;;;;;;:::::::::cc:::::::::c:;;;;,;ccc:;,,,,:cccc:;;;;;ccc:;,,,,,;;;clloooooooooooooooooollcc:;,. "
 };
 
+/**
+ * Prints the title banner to the passed FILE pointer.
+ * @see kls_title
+ * @param fp The FILE to print to.
+ */
 void kls_print_title_2file(FILE* fp) {
 	if (fp == NULL) {
 		fprintf(stderr,"[KLS] kls_print_title_2file():  Passed file pointer was NULL.\n");
@@ -59,6 +63,10 @@ void kls_print_title_2file(FILE* fp) {
   	}
 }
 
+/**
+ * Prints the title banner to stdout.
+ * @see kls_title
+ */
 void kls_print_title(void) {
 	kls_print_title_2file(stdout);
 }

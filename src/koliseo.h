@@ -133,7 +133,7 @@ typedef struct KLS_Region {
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
 
-typedef KLS_Region* KLS_list_element;
+typedef KLS_Region* KLS_list_element; /**< Redundant typedef to better denote the actual value field of a KLS_region_list_item.*/
 
 /**
  * Defines the node for a KLS_Region_List.
@@ -226,7 +226,7 @@ void print_kls_2file(FILE* fp, Koliseo* kls);
 void print_dbg_kls(Koliseo* kls);
 void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize);
 
-#ifdef KOLISEO_HAS_CURSES
+#ifdef KOLISEO_HAS_CURSES /**< This definition controls the inclusion of ncurses functions.*/
 
 #ifndef KOLISEO_CURSES_H_
 #define KOLISEO_CURSES_H_
