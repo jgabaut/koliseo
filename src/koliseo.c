@@ -47,7 +47,7 @@ char* kls_title[KLS_TITLEROWS+1] = {
 void kls_print_title_2file(FILE* fp) {
 	if (fp == NULL) {
 		fprintf(stderr,"[KLS] kls_print_title_2file():  Passed file pointer was NULL.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
   	for (int i = 0; i < KLS_TITLEROWS; i++) {
 		fprintf(fp,"%s\n",kls_title[i]);
@@ -121,7 +121,15 @@ void kls_log(const char* tag, const char* format, ...) {
  * @see kls_temp_end()
  */
 Koliseo* kls_new(ptrdiff_t size) {
-	assert(size >= (ptrdiff_t)sizeof(Koliseo));
+	if (size < (ptrdiff_t)sizeof(Koliseo)) {
+        #ifndef _WIN32
+        fprintf(stderr,"Error at %s():  invalid requested kls size (%li). Min accepted is: (%li).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        #else
+        fprintf(stderr,"Error at %s():  invalid requested kls size (%lli). Min accepted is: (%lli).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        #endif
+        //TODO Is it better to abort the program?
+        return NULL;
+    }
 	void *p = malloc(size);
 	if (p) {
 		//sprintf(msg,"Allocated (%li) for new KLS.",size);
@@ -157,12 +165,12 @@ Koliseo* kls_new(ptrdiff_t size) {
 			kls->regs = reglist;
 			if (kls->regs == NULL) {
 			  fprintf(stderr,"[KLS] kls_new() failed to get a KLS_Region_List.\n");
-			  abort();
+			  exit(EXIT_FAILURE);
 			}
 		}
 	} else {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	#ifdef KLS_DEBUG_CORE
 	if (KOLISEO_DEBUG == 1) {
@@ -186,12 +194,12 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
 		fprintf(stderr,"[KLS] Failed kls_pop() call.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->prev_offset = kls->offset;
@@ -219,7 +227,7 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
@@ -227,12 +235,12 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
 		fprintf(stderr,"[KLS] Failed kls_temp_pop() call.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->prev_offset = kls->offset;
@@ -262,7 +270,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -282,7 +290,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		}
 		fprintf(stderr,"[KLS] Failed kls_push() call.\n");
         kls_free(kls);
-		abort();
+        exit(EXIT_FAILURE);
 	}
 	char* p = kls->data + kls->offset + padding;
 	kls->prev_offset = kls->offset;
@@ -316,7 +324,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -336,7 +344,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -373,7 +381,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -393,7 +401,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -441,7 +449,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
@@ -449,7 +457,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -469,7 +477,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -519,7 +527,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -539,7 +547,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -589,7 +597,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	Koliseo* kls = t_kls->kls;
@@ -598,7 +606,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	ptrdiff_t available = kls->size - kls->offset;
@@ -619,7 +627,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -670,7 +678,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -690,7 +698,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -741,7 +749,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
@@ -749,7 +757,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -769,7 +777,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -850,7 +858,7 @@ void print_dbg_kls(Koliseo* kls) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
     print_kls_2file(stderr,kls);
 }
@@ -948,7 +956,7 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_show_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -956,7 +964,7 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_show_toWin(): passed Koliseo was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -1027,7 +1035,7 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_show_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (t_kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -1035,7 +1043,7 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_show_toWin(): passed Koliseo_Temp was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
@@ -1044,7 +1052,7 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_show_toWin(): referred Koliseo was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -1127,7 +1135,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_showList_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -1135,7 +1143,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_showList_toWin(): passed Koliseo was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -1209,7 +1217,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_showList_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (t_kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -1217,7 +1225,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_showList_toWin(): passed Koliseo_Temp was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -1291,7 +1299,7 @@ void kls_clear(Koliseo* kls) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	//Reset pointer
 	kls->prev_offset = kls->offset;
@@ -1312,7 +1320,7 @@ void kls_free(Koliseo* kls) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (kls->has_temp == 1) {
 		#ifdef KLS_DEBUG_CORE
@@ -1341,7 +1349,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	assert(kls->has_temp == 0); //TODO handle this more gracefully
 	ptrdiff_t prev = kls->prev_offset;
@@ -1368,7 +1376,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		tmp->t_regs = reglist;
 		if (tmp->t_regs == NULL) {
 		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a KLS_Region_List.\n");
-		  abort();
+		  exit(EXIT_FAILURE);
 		}
 	}
 	#ifdef KLS_DEBUG_CORE
@@ -1412,7 +1420,7 @@ bool kls_empty(KLS_Region_List l) {
 KLS_list_element kls_head(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
@@ -1422,7 +1430,7 @@ KLS_list_element kls_head(KLS_Region_List l) {
 KLS_Region_List kls_tail(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
@@ -1463,7 +1471,7 @@ void kls_freeList(KLS_Region_List l) {
 void kls_showList_toFile(KLS_Region_List l, FILE* fp) {
 	if (fp == NULL) {
 		fprintf(stderr,"[KLS]  kls_showList_toFile():  passed file was NULL.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	fprintf(fp,"{");
 	while (!kls_empty(l))
@@ -1743,7 +1751,7 @@ ptrdiff_t kls_type_usage(int type, Koliseo* kls) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	KLS_Region_List rl = kls_copy(kls->regs);
 
