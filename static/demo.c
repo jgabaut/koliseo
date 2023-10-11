@@ -58,8 +58,8 @@ int main(int argc, char** argv) {
 
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
-  kls->conf.kls_autoset_regions = 1;
-  kls->conf.kls_autoset_temp_regions = 1;
+  KLS_Conf kls_config = {.kls_autoset_regions = 1, .kls_autoset_temp_regions = 1};
+  kls_set_conf(kls,kls_config);
 
   printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 

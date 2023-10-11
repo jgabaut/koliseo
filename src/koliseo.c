@@ -195,6 +195,26 @@ Koliseo* kls_new(ptrdiff_t size) {
 }
 
 /**
+ * Updates the KLS_Conf for the passed Koliseo pointer.
+ * @param kls The Koliseo pointer to update.
+ * @param conf The KLS_Conf to set.
+ * @return 0 for success, a negative value for errors.
+ */
+int kls_set_conf(Koliseo* kls, KLS_Conf conf) {
+	if (kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
+		#endif
+        //TODO: is it better to exit() here?
+        return -1;
+	}
+
+    kls->conf = conf;
+    return 0;
+}
+
+/**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
  * @param kls The Koliseo at hand.
  * @param size The size for data to pop.
@@ -1400,6 +1420,26 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	kls_log("KLS","Prepared new Temp KLS.");
 	#endif
 	return tmp;
+}
+
+/**
+ * Updates the KLS_Temp_Conf for the passed Koliseo_Temp pointer.
+ * @param t_kls The Koliseo_Temp pointer to update.
+ * @param conf The KLS_Temp_Conf to set.
+ * @return 0 for success, a negative value for errors.
+ */
+int kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf) {
+	if (t_kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
+		#endif
+        //TODO: is it better to exit() here?
+        return -1;
+	}
+
+    t_kls->conf = conf;
+    return 0;
 }
 
 /**

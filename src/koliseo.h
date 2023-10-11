@@ -199,6 +199,7 @@ typedef struct Koliseo_Temp {
 ptrdiff_t kls_get_pos(Koliseo* kls);
 
 Koliseo* kls_new(ptrdiff_t size);
+int kls_set_conf(Koliseo* kls, KLS_Conf conf);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
@@ -241,6 +242,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 #endif //KOLISEO_HAS_CURSES
 
 Koliseo_Temp* kls_temp_start(Koliseo* kls);
+int kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
 void kls_temp_end(Koliseo_Temp* tmp_kls);
 void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
