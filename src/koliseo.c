@@ -195,6 +195,24 @@ Koliseo* kls_new(ptrdiff_t size) {
 }
 
 /**
+ * Takes a ptrdiff_t size and a KLS_Conf to configure the new Koliseo.
+ * Calls kls_new() to initialise the Koliseo, the calls kls_set_conf() to update the config before returning the new Koliseo.
+ * @param size The size for Koliseo data field.
+ * @param conf The KLS_Conf for the new Koliseo.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see KLS_DEFAULT_CONF
+ * @see kls_new()
+ * @see kls_set_conf()
+ */
+Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf) {
+    Koliseo* k = kls_new(size);
+    kls_set_conf(k, conf);
+    return k;
+}
+
+/**
  * Updates the KLS_Conf for the passed Koliseo pointer.
  * @param kls The Koliseo pointer to update.
  * @param conf The KLS_Conf to set.
