@@ -31,4 +31,4 @@ tests# tests folder name
 0.2.3# Add missing NULL checks, bump amboso to 1.6.6
 0.2.4# Add KLSFmt and KLS_Arg(), fix missing fprintf() args
 0.2.5# Fix push sizes in logs, add address logging
-0.3.0#
+0.3.0# Clean namespace, add KLS_Conf and KLS_Temp_Conf. Drops KOLISEO_AUTOSET_REGIONS and KOLISEO_AUTOSET_TEMP_REGIONS globals.
