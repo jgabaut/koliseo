@@ -1,12 +1,16 @@
 #include "koliseo.h"
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
-int KOLISEO_AUTOSET_REGIONS = 0;
-int KOLISEO_AUTOSET_TEMP_REGIONS = 0;
+//FIXME: ATM this file pointer is not correctly closed when an error causes an exit() call.
 FILE* KOLISEO_DEBUG_FP = NULL;
 
+KLS_Conf KLS_DEFAULT_CONF = {
+    .kls_autoset_regions = 0,
+    .kls_autoset_temp_regions = 0,
+};
+
 /**
- * Defines titlescreen.
+ * Defines title banner.
  */
 char* kls_title[KLS_TITLEROWS+1] = {
 	"                               .',,,.                                                               ",
@@ -44,16 +48,25 @@ char* kls_title[KLS_TITLEROWS+1] = {
 	".;:;;;;;;:::::::::cc:::::::::c:;;;;,;ccc:;,,,,:cccc:;;;;;ccc:;,,,,,;;;clloooooooooooooooooollcc:;,. "
 };
 
+/**
+ * Prints the title banner to the passed FILE pointer.
+ * @see kls_title
+ * @param fp The FILE to print to.
+ */
 void kls_print_title_2file(FILE* fp) {
 	if (fp == NULL) {
 		fprintf(stderr,"[KLS] kls_print_title_2file():  Passed file pointer was NULL.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
   	for (int i = 0; i < KLS_TITLEROWS; i++) {
 		fprintf(fp,"%s\n",kls_title[i]);
   	}
 }
 
+/**
+ * Prints the title banner to stdout.
+ * @see kls_title
+ */
 void kls_print_title(void) {
 	kls_print_title_2file(stdout);
 }
@@ -112,16 +125,30 @@ void kls_log(const char* tag, const char* format, ...) {
 
 
 /**
- * Takes a ptrdiff_t size and allocates the backing memory for a Koliseo. Sets the fields with appropriate values if memory allocation was successful, goes to abort() otherwise.
+ * Takes a ptrdiff_t size and allocates the backing memory for a Koliseo.
+ * Sets the KLS_Conf field to KLS_DEFAULT_CONF.
+ * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
  * @param size The size for Koliseo data field.
  * @return A pointer to the initialised Koliseo struct.
  * @see Koliseo
  * @see Koliseo_Temp
+ * @see KLS_DEFAULT_CONF
  * @see kls_temp_start()
  * @see kls_temp_end()
  */
 Koliseo* kls_new(ptrdiff_t size) {
-	assert(size >= (ptrdiff_t)sizeof(Koliseo));
+	if (size < (ptrdiff_t)sizeof(Koliseo)) {
+        #ifndef _WIN32
+        fprintf(stderr,"[ERROR] at %s():  invalid requested kls size (%li). Min accepted is: (%li).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        #else
+        fprintf(stderr,"[ERROR] at %s():  invalid requested kls size (%lli). Min accepted is: (%lli).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        #endif
+		#ifdef KLS_DEBUG_CORE
+		kls_log("KLS","API Level { %i } ->  Failed init of new KLS.",int_koliseo_version());
+		#endif
+        //TODO Is it better to abort the program?
+        return NULL;
+    }
 	void *p = malloc(size);
 	if (p) {
 		//sprintf(msg,"Allocated (%li) for new KLS.",size);
@@ -138,31 +165,34 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->prev_offset = kls->offset;
 		kls->has_temp = 0;
 		kls->t_kls = NULL;
+        kls-> conf = KLS_DEFAULT_CONF;
 		#ifdef KLS_DEBUG_CORE
 	    kls_log("KLS","KLS offset: { %p }.", kls);
 	    kls_log("KLS","Allocation begin offset: { %p }.", kls + kls->offset);
 		#endif
-		if (KOLISEO_AUTOSET_REGIONS == 1) {
+		if (kls->conf.kls_autoset_regions == 1) {
 			#ifdef KLS_DEBUG_CORE
-			kls_log("KLS","Init of Region_List for kls.");
+			kls_log("KLS","Init of KLS_Region_List for kls.");
 			#endif
-			Region* kls_header = (Region*) malloc(sizeof(Region));
+			KLS_Region* kls_header = (KLS_Region*) malloc(sizeof(KLS_Region));
 			kls_header->begin_offset = 0;
 			kls_header->end_offset = kls->offset;
 			kls_header->type = KLS_Header;
 			strcpy(kls_header->name,"KLS Header");
 			strcpy(kls_header->desc,"Denotes Space occupied by the Koliseo header.");
-			Region_List reglist = kls_emptyList();
+			KLS_Region_List reglist = kls_emptyList();
 			reglist = kls_cons(kls_header,reglist);
 			kls->regs = reglist;
 			if (kls->regs == NULL) {
-			  fprintf(stderr,"[KLS] kls_new() failed to get a Region_List.\n");
-			  abort();
+			  fprintf(stderr,"[KLS] kls_new() failed to get a KLS_Region_List.\n");
+			  exit(EXIT_FAILURE);
 			}
-		}
+		} else {
+            kls->regs = NULL;
+        }
 	} else {
 		fprintf(stderr,"[KLS] Failed kls_new() call.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	#ifdef KLS_DEBUG_CORE
 	if (KOLISEO_DEBUG == 1) {
@@ -173,7 +203,52 @@ Koliseo* kls_new(ptrdiff_t size) {
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to abort() if the operation fails.
+ * Takes a ptrdiff_t size and a KLS_Conf to configure the new Koliseo.
+ * Calls kls_new() to initialise the Koliseo, the calls kls_set_conf() to update the config before returning the new Koliseo.
+ * @param size The size for Koliseo data field.
+ * @param conf The KLS_Conf for the new Koliseo.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see KLS_DEFAULT_CONF
+ * @see kls_new()
+ * @see kls_set_conf()
+ */
+Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf) {
+    Koliseo* k = kls_new(size);
+    bool conf_res = kls_set_conf(k, conf);
+    if (!conf_res) {
+        fprintf(stderr,"[ERROR] [%s()]: Failed to set config for new Koliseo.\n", __func__);
+        #ifdef KLS_DEBUG_CORE
+        kls_log("ERROR","[%s()]: Failes to set config for new Koliseo.", __func__);
+        #endif
+        exit(EXIT_FAILURE);
+    }
+    return k;
+}
+
+/**
+ * Updates the KLS_Conf for the passed Koliseo pointer.
+ * @param kls The Koliseo pointer to update.
+ * @param conf The KLS_Conf to set.
+ * @return A bool representing success.
+ */
+bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
+	if (kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
+		#endif
+        //TODO: is it better to exit() here?
+        return false;
+	}
+
+    kls->conf = conf;
+    return true;
+}
+
+/**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
  * @param kls The Koliseo at hand.
  * @param size The size for data to pop.
  * @param align The alignment for data to pop.
@@ -184,14 +259,14 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
 		fprintf(stderr,"[KLS] Failed kls_pop() call.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->prev_offset = kls->offset;
@@ -206,7 +281,7 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 }
 
 /**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to abort() if the operation fails.
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
  * @param t_kls The Koliseo_Temp at hand.
  * @param size The size for data to pop.
  * @param align The alignment for data to pop.
@@ -217,22 +292,22 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
 		fprintf(stderr,"[KLS] Failed kls_temp_pop() call.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
 	kls->prev_offset = kls->offset;
@@ -248,7 +323,7 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it does NOT zero the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
@@ -260,9 +335,9 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -282,7 +357,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		}
 		fprintf(stderr,"[KLS] Failed kls_push() call.\n");
         kls_free(kls);
-		abort();
+        exit(EXIT_FAILURE);
 	}
 	char* p = kls->data + kls->offset + padding;
 	kls->prev_offset = kls->offset;
@@ -302,7 +377,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
@@ -314,9 +389,9 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -336,7 +411,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -359,7 +434,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
@@ -371,9 +446,9 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -393,7 +468,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -401,14 +476,14 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
-		Region* reg = (Region*) malloc(sizeof(Region));
+	if (kls->conf.kls_autoset_regions == 1) {
+		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
-		reg->type = None;
+		reg->type = KLS_None;
 		strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
 		strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
-		Region_List reglist = kls_emptyList();
+		KLS_Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
 		kls->regs = kls_append(reglist, kls->regs);
 	}
@@ -427,7 +502,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	return p;
 }
 /**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * @param t_kls The Koliseo_Temp at hand.
  * @param size The size for data to push.
@@ -439,17 +514,17 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -469,7 +544,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -477,14 +552,14 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
-		Region* reg = (Region*) malloc(sizeof(Region));
+	if (t_kls->conf.kls_autoset_regions == 1) {
+		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
-		reg->type = None;
+		reg->type = KLS_None;
 		strcpy(reg->name, KOLISEO_DEFAULT_REGION_NAME);
 		strcpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC);
-		Region_List reglist = kls_emptyList();
+		KLS_Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
 		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
 	}
@@ -504,8 +579,8 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
- * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
@@ -517,9 +592,9 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -539,7 +614,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -547,14 +622,14 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
-		Region* reg = (Region*) malloc(sizeof(Region));
+	if (kls->conf.kls_autoset_regions == 1) {
+		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
-		reg->type = None;
+		reg->type = KLS_None;
 		strcpy(reg->name,name);
 		strcpy(reg->desc,desc);
-		Region_List reglist = kls_emptyList();
+		KLS_Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
 		kls->regs = kls_append(reglist, kls->regs);
 
@@ -574,8 +649,8 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 }
 
 /**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
- * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param t_kls The Koliseo_Temp at hand.
  * @param size The size for data to push.
@@ -587,18 +662,18 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	ptrdiff_t available = kls->size - kls->offset;
@@ -619,7 +694,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -627,14 +702,14 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
-		Region* reg = (Region*) malloc(sizeof(Region));
+	if (t_kls->conf.kls_autoset_regions == 1) {
+		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
-		reg->type = None;
+		reg->type = KLS_None;
 		strcpy(reg->name,name);
 		strcpy(reg->desc,desc);
-		Region_List reglist = kls_emptyList();
+		KLS_Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
 		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
 
@@ -654,23 +729,23 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 }
 
 /**
- * Takes a Koliseo pointer, a Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to abort() if the operation fails.
- * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Takes a Koliseo pointer, a KLS_Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
- * @param type The type index for pushed Region.
+ * @param type The type index for pushed KLS_Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -690,7 +765,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -698,14 +773,14 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_REGIONS == 1) {
-		Region* reg = (Region*) malloc(sizeof(Region));
+	if (kls->conf.kls_autoset_regions == 1) {
+		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
 		reg->type = type;
 		strcpy(reg->name,name);
 		strcpy(reg->desc,desc);
-		Region_List reglist = kls_emptyList();
+		KLS_Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
 		kls->regs = kls_append(reglist, kls->regs);
 
@@ -725,31 +800,31 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 }
 
 /**
- * Takes a Koliseo_Temp, a Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to abort() if the operation fails.
- * Uses the passed name and desc fields to initialise the allocated Region fields.
+ * Takes a Koliseo_Temp, a KLS_Region_Type index, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
+ * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
  * Notably, it zeroes the memory region.
  * @param t_kls The Koliseo_Temp at hand.
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
- * @param type The type index for pushed Region.
+ * @param type The type index for pushed KLS_Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Referred Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
@@ -769,7 +844,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
         kls_free(kls);
-		abort();
+		exit(EXIT_FAILURE);
 		//return 0;
 	}
 	char* p = kls->data + kls->offset + padding;
@@ -777,14 +852,14 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
-		Region* reg = (Region*) malloc(sizeof(Region));
+	if (t_kls->conf.kls_autoset_regions == 1) {
+		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
 		reg->type = type;
 		strcpy(reg->name,name);
 		strcpy(reg->desc,desc);
-		Region_List reglist = kls_emptyList();
+		KLS_Region_List reglist = kls_emptyList();
 		reglist = kls_cons(reg,reglist);
 		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
 
@@ -848,9 +923,9 @@ void print_dbg_kls(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
     print_kls_2file(stderr,kls);
 }
@@ -937,7 +1012,7 @@ void kls_formatSize(ptrdiff_t size, char* outputBuffer, size_t bufferSize) {
 
 #ifdef KOLISEO_HAS_CURSES
 /**
- * Prints fields and eventually Region_List from the passed Koliseo pointer, to the passed WINDOW pointer.
+ * Prints fields and eventually KLS_Region_List from the passed Koliseo pointer, to the passed WINDOW pointer.
  * @param kls The Koliseo at hand.
  * @param win The Window at hand.
  */
@@ -948,7 +1023,7 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_show_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -956,7 +1031,7 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_show_toWin(): passed Koliseo was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -986,12 +1061,12 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 	#else
 	mvwprintw(win, y++, x, "Prev_Offset: { %lli }", kls->prev_offset);
 	#endif
-	mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(kls->regs));
+	mvwprintw(win, y++, x, "KLS_Region_List len: { %i }", kls_length(kls->regs));
 	mvwprintw(win, y++, x, "Current usage: { %.3f%% }", (kls->offset * 100.0 ) / kls->size );
 	mvwprintw(win, y++, x, "%s","");
 	mvwprintw(win, y++, x, "q or Enter to quit.");
 	/*
-	Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls->regs);
 	while (!kls_empty(rl)) {
 	  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
 	}
@@ -1016,7 +1091,7 @@ void kls_show_toWin(Koliseo* kls, WINDOW* win) {
 }
 
 /**
- * Takes a Koliseo_Temp pointer and prints fields and eventually Region_List from the referred Koliseo pointer, to the passed WINDOW pointer.
+ * Takes a Koliseo_Temp pointer and prints fields and eventually KLS_Region_List from the referred Koliseo pointer, to the passed WINDOW pointer.
  * @param t_kls The Koliseo_Temp at hand.
  * @param win The Window at hand.
  */
@@ -1027,7 +1102,7 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_show_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (t_kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -1035,7 +1110,7 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_show_toWin(): passed Koliseo_Temp was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	Koliseo* kls = t_kls->kls;
 	if (kls == NULL) {
@@ -1044,7 +1119,7 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_show_toWin(): referred Koliseo was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -1084,14 +1159,14 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 	mvwprintw(win, y++, x, "Inner Prev_Offset: { %lli }", kls->prev_offset);
 	mvwprintw(win, y++, x, "Temp Prev_Offset: { %lli }", t_kls->prev_offset);
 	#endif
-	mvwprintw(win, y++, x, "Refer Region_List len: { %i }", kls_length(kls->regs));
-	mvwprintw(win, y++, x, "Temp Region_List len: { %i }", kls_length(t_kls->t_regs));
+	mvwprintw(win, y++, x, "Refer KLS_Region_List len: { %i }", kls_length(kls->regs));
+	mvwprintw(win, y++, x, "Temp KLS_Region_List len: { %i }", kls_length(t_kls->t_regs));
 	mvwprintw(win, y++, x, "Current inner usage: { %.3f%% }", (kls->offset * 100.0 ) / kls->size );
 	mvwprintw(win, y++, x, "Current refer usage: { %.3f%% }", (t_kls->offset * 100.0 ) / kls->size );
 	mvwprintw(win, y++, x, "%s","");
 	mvwprintw(win, y++, x, "q or Enter to quit.");
 	/*
-	Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls->regs);
 	while (!kls_empty(rl)) {
 	  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
 	}
@@ -1116,7 +1191,7 @@ void kls_temp_show_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 }
 
 /**
- * Displays a slideshow of Region_List from passed Koliseo, to the passed WINDOW pointer.
+ * Displays a slideshow of KLS_Region_List from passed Koliseo, to the passed WINDOW pointer.
  * @param kls The Koliseo at hand.
  * @param win The Window at hand.
  */
@@ -1127,7 +1202,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_showList_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -1135,7 +1210,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_showList_toWin(): passed Koliseo was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -1143,12 +1218,12 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 	int y = 2;
 	int x = 2;
 	int quit = 0;
-	mvwprintw(win, y++, x, "Region_List data:");
-	Region_List rl = kls_copy(kls->regs);
+	mvwprintw(win, y++, x, "KLS_Region_List data:");
+	KLS_Region_List rl = kls_copy(kls->regs);
 	do {
 		wclear(win);
 		y = 3;
-		element e = kls_head(rl);
+		KLS_list_element e = kls_head(rl);
 		mvwprintw(win, y++, x, "Name: { %s }", e->name);
 		mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
 		#ifndef MINGW32_BUILD
@@ -1156,7 +1231,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		#else
 		mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset, e->end_offset);
 		#endif
-		mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(kls->regs));
+		mvwprintw(win, y++, x, "KLS_Region_List len: { %i }", kls_length(kls->regs));
 		mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
 		char h_size[200];
 		ptrdiff_t reg_size = e->end_offset - e->begin_offset;
@@ -1165,7 +1240,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		mvwprintw(win, y++, x, "%s","");
 		mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
 		/*
-		Region_List rl = kls_copy(kls->regs);
+		KLS_Region_List rl = kls_copy(kls->regs);
 		while (!kls_empty(rl)) {
 		  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
 		}
@@ -1198,7 +1273,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 }
 
 /**
- * Displays a slideshow of Region_List from passed Koliseo_Temp, to the passed WINDOW pointer.
+ * Displays a slideshow of KLS_Region_List from passed Koliseo_Temp, to the passed WINDOW pointer.
  * @param t_kls The Koliseo_Temp at hand.
  * @param win The Window at hand.
  */
@@ -1209,7 +1284,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_showList_toWin(): passed WINDOW was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (t_kls == NULL) {
 		#ifdef KLS_DEBUG_CORE
@@ -1217,7 +1292,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		fprintf(stderr,"kls_temp_showList_toWin(): passed Koliseo_Temp was null.");
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	wclear(win);
 	box(win,0,0);
@@ -1225,12 +1300,12 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 	int y = 2;
 	int x = 2;
 	int quit = 0;
-	mvwprintw(win, y++, x, "Region_List data:");
-	Region_List rl = kls_copy(t_kls->t_regs);
+	mvwprintw(win, y++, x, "KLS_Region_List data:");
+	KLS_Region_List rl = kls_copy(t_kls->t_regs);
 	do {
 		wclear(win);
 		y = 3;
-		element e = kls_head(rl);
+		KLS_list_element e = kls_head(rl);
 		mvwprintw(win, y++, x, "Name: { %s }", e->name);
 		mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
 		#ifndef MINGW32_BUILD
@@ -1238,7 +1313,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		#else
 		mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset, e->end_offset);
 		#endif
-		mvwprintw(win, y++, x, "Region_List len: { %i }", kls_length(t_kls->t_regs));
+		mvwprintw(win, y++, x, "KLS_Region_List len: { %i }", kls_length(t_kls->t_regs));
 		//mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
 		char h_size[200];
 		ptrdiff_t reg_size = e->end_offset - e->begin_offset;
@@ -1247,7 +1322,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		mvwprintw(win, y++, x, "%s","");
 		mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
 		/*
-		Region_List rl = kls_copy(kls->regs);
+		KLS_Region_List rl = kls_copy(kls->regs);
 		while (!kls_empty(rl)) {
 		  mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
 		}
@@ -1289,9 +1364,9 @@ void kls_clear(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	//Reset pointer
 	kls->prev_offset = kls->offset;
@@ -1310,9 +1385,9 @@ void kls_free(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if (kls->has_temp == 1) {
 		#ifdef KLS_DEBUG_CORE
@@ -1339,9 +1414,9 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	assert(kls->has_temp == 0); //TODO handle this more gracefully
 	ptrdiff_t prev = kls->prev_offset;
@@ -1351,26 +1426,29 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	tmp->kls = kls;
 	tmp->prev_offset = prev;
 	tmp->offset = off;
+    tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = kls->conf.kls_autoset_temp_regions};
 	kls->has_temp = 1;
 	kls->t_kls = tmp;
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+	if (kls->conf.kls_autoset_temp_regions == 1) {
 		#ifdef KLS_DEBUG_CORE
-		kls_log("KLS","Init of Region_List for temp kls.");
+		kls_log("KLS","Init of KLS_Region_List for temp kls.");
 		#endif
-		Region* temp_kls_header = (Region*) malloc(sizeof(Region));
+		KLS_Region* temp_kls_header = (KLS_Region*) malloc(sizeof(KLS_Region));
 		temp_kls_header->begin_offset = tmp->prev_offset;
 		temp_kls_header->end_offset = tmp->offset;
 		temp_kls_header->type = Temp_KLS_Header;
 		strcpy(temp_kls_header->name,"Temp KLS Header");
 		strcpy(temp_kls_header->desc,"Denotes last region before starting the Koliseo_Temp.");
-		Region_List reglist = kls_emptyList();
+		KLS_Region_List reglist = kls_emptyList();
 		reglist = kls_cons(temp_kls_header,reglist);
 		tmp->t_regs = reglist;
 		if (tmp->t_regs == NULL) {
-		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a Region_List.\n");
-		  abort();
+		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a KLS_Region_List.\n");
+		  exit(EXIT_FAILURE);
 		}
-	}
+	} else {
+        tmp->t_regs = NULL;
+    }
 	#ifdef KLS_DEBUG_CORE
 	kls_log("KLS","Prepared new Temp KLS.");
 	#endif
@@ -1378,11 +1456,31 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 }
 
 /**
+ * Updates the KLS_Temp_Conf for the passed Koliseo_Temp pointer.
+ * @param t_kls The Koliseo_Temp pointer to update.
+ * @param conf The KLS_Temp_Conf to set.
+ * @return A bool representing success.
+ */
+bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf) {
+	if (t_kls == NULL) {
+		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
+		#ifdef KLS_DEBUG_CORE
+		kls_log("ERROR","[%s()]: Passed Koliseo_Temp was NULL.",__func__);
+		#endif
+        //TODO: is it better to exit() here?
+        return false;
+	}
+
+    t_kls->conf = conf;
+    return true;
+}
+
+/**
  * Ends passed Koliseo_Temp pointer.
  * @param tmp_kls The Koliseo_Temp at hand.
  */
 void kls_temp_end(Koliseo_Temp* tmp_kls) {
-	if (KOLISEO_AUTOSET_TEMP_REGIONS == 1) {
+	if (tmp_kls->conf.kls_autoset_regions == 1) {
 		kls_freeList(tmp_kls->t_regs);
 	}
 	#ifdef KLS_DEBUG_CORE
@@ -1395,11 +1493,11 @@ void kls_temp_end(Koliseo_Temp* tmp_kls) {
 }
 
 
-Region_List kls_emptyList(void)
+KLS_Region_List kls_emptyList(void)
 {
 	return NULL;
 }
-bool kls_empty(Region_List l) {
+bool kls_empty(KLS_Region_List l) {
 	if (l==NULL)
 	{
 		return true;
@@ -1409,38 +1507,40 @@ bool kls_empty(Region_List l) {
 		return false;
 	}
 }
-element kls_head(Region_List l) {
+KLS_list_element kls_head(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
 		return l->value;
 	}
 }
-Region_List kls_tail(Region_List l) {
+KLS_Region_List kls_tail(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
 		return l->next;
 	}
 }
-Region_List kls_cons(element e, Region_List l) {
+KLS_Region_List kls_cons(KLS_list_element e, KLS_Region_List l) {
 	if (e == NULL) {
-	  kls_log("KLS","kls_cons():  element was NULL");
+      #ifdef KLS_DEBUG_CORE
+	  kls_log("KLS","kls_cons():  KLS_list_element was NULL");
+      #endif
 	}
-	Region_List t;
-	t = (Region_List)malloc(sizeof(region_list_item));
+	KLS_Region_List t;
+	t = (KLS_Region_List)malloc(sizeof(KLS_region_list_item));
 	t->value = e;
 	t->next = l;
 	return t;
 }
 
-void kls_freeList(Region_List l) {
+void kls_freeList(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
 		return;
@@ -1449,21 +1549,21 @@ void kls_freeList(Region_List l) {
 	{
 		kls_freeList(kls_tail(l));
 		#ifdef KLS_DEBUG_CORE
-		kls_log("KLS","Freeing Region_List->value");
+		kls_log("KLS","Freeing KLS_Region_List->value");
 		#endif
 		free(l->value);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("KLS","Freeing Region_List");
+		kls_log("KLS","Freeing KLS_Region_List");
 		#endif
 		free(l);
 	}
 	return;
 }
 
-void kls_showList_toFile(Region_List l, FILE* fp) {
+void kls_showList_toFile(KLS_Region_List l, FILE* fp) {
 	if (fp == NULL) {
 		fprintf(stderr,"[KLS]  kls_showList_toFile():  passed file was NULL.\n");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	fprintf(fp,"{");
 	while (!kls_empty(l))
@@ -1475,7 +1575,7 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 		fprintf(fp,"{ %lli } -> { %lli }",kls_head(l)->begin_offset,kls_head(l)->end_offset);
 		#endif
 		#ifdef KLS_DEBUG_CORE
-		kls_log("KLS-Region","    Region {");
+		kls_log("KLS-Region","    KLS_Region {");
 		kls_log("KLS-Region","{ %s }, { %s }",kls_head(l)->name,kls_head(l)->desc);
 		char h_size[200];
 		ptrdiff_t r_size = kls_head(l)->end_offset - kls_head(l)->begin_offset;
@@ -1494,11 +1594,11 @@ void kls_showList_toFile(Region_List l, FILE* fp) {
 	fprintf(fp,"\n}\n");
 }
 
-void kls_showList(Region_List l) {
+void kls_showList(KLS_Region_List l) {
 	kls_showList_toFile(l,stdout);
 }
 
-bool kls_member(element el, Region_List l) {
+bool kls_member(KLS_list_element el, KLS_Region_List l) {
 	if (kls_empty(l))
 	{
 		return false;
@@ -1515,7 +1615,7 @@ bool kls_member(element el, Region_List l) {
 		}
 	}
 }
-int kls_length(Region_List l) {
+int kls_length(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
 		return 0;
@@ -1525,7 +1625,7 @@ int kls_length(Region_List l) {
 		return 1 + kls_length(kls_tail(l));
 	}
 }
-Region_List kls_append(Region_List l1, Region_List l2) {
+KLS_Region_List kls_append(KLS_Region_List l1, KLS_Region_List l2) {
 	if (kls_empty(l1))
 	{
 		return l2;
@@ -1535,7 +1635,7 @@ Region_List kls_append(Region_List l1, Region_List l2) {
 		return kls_cons(kls_head(l1), kls_append(kls_tail(l1), l2));
 	}
 }
-Region_List kls_reverse(Region_List l) {
+KLS_Region_List kls_reverse(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
 		return kls_emptyList();
@@ -1545,7 +1645,7 @@ Region_List kls_reverse(Region_List l) {
 		return kls_append(kls_reverse(kls_tail(l)), kls_cons(kls_head(l), kls_emptyList()));
 	}
 }
-Region_List kls_copy(Region_List l) {
+KLS_Region_List kls_copy(KLS_Region_List l) {
 	if (kls_empty(l))
 	{
 		return l;
@@ -1555,7 +1655,7 @@ Region_List kls_copy(Region_List l) {
 		return kls_cons(kls_head(l), kls_copy(kls_tail(l)));
 	}
 }
-Region_List kls_delete(element el, Region_List l) {
+KLS_Region_List kls_delete(KLS_list_element el, KLS_Region_List l) {
 	if (kls_empty(l))
 	{
 		return kls_emptyList();
@@ -1573,14 +1673,14 @@ Region_List kls_delete(element el, Region_List l) {
 	}
 }
 
-Region_List kls_insord(element el, Region_List l) {
+KLS_Region_List kls_insord(KLS_list_element el, KLS_Region_List l) {
 	if (kls_empty(l))
 	{
 		return kls_cons(el, l);
 	}
 	else
 	{
-		//Insert element according to its begin_offset
+		//Insert KLS_list_element according to its begin_offset
 		if (el->begin_offset <= kls_head(l)->begin_offset)
 		{
 			return kls_cons(el, l);
@@ -1592,8 +1692,8 @@ Region_List kls_insord(element el, Region_List l) {
 	}
 }
 
-Region_List kls_insord_p(element el, Region_List l) {
-	Region_List pprec, patt = l, paux;
+KLS_Region_List kls_insord_p(KLS_list_element el, KLS_Region_List l) {
+	KLS_Region_List pprec, patt = l, paux;
 	bool found = false;
 	pprec = NULL;
 
@@ -1608,7 +1708,7 @@ Region_List kls_insord_p(element el, Region_List l) {
 			pprec = patt; patt = patt->next;
 		}
 	}
-	paux = (Region_List) malloc(sizeof(region_list_item));
+	paux = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
 	paux->value = el;
 	paux->next = patt;
 	if (patt == l)
@@ -1621,7 +1721,7 @@ Region_List kls_insord_p(element el, Region_List l) {
 		return l;
 	}
 }
-Region_List kls_mergeList(Region_List l1, Region_List l2) {
+KLS_Region_List kls_mergeList(KLS_Region_List l1, KLS_Region_List l2) {
 	if (kls_empty(l1))
 	{
 		return l2;
@@ -1652,7 +1752,7 @@ Region_List kls_mergeList(Region_List l1, Region_List l2) {
 		}
 	}
 }
-Region_List kls_intersect(Region_List l1, Region_List l2) {
+KLS_Region_List kls_intersect(KLS_Region_List l1, KLS_Region_List l2) {
 	if (kls_empty(l1) || kls_empty(l2))
 	{
 		return kls_emptyList();
@@ -1668,7 +1768,7 @@ Region_List kls_intersect(Region_List l1, Region_List l2) {
 		return kls_intersect(kls_tail(l1), l2);
 	}
 }
-Region_List kls_diff(Region_List l1, Region_List l2) {
+KLS_Region_List kls_diff(KLS_Region_List l1, KLS_Region_List l2) {
 	if (kls_empty(l1) || kls_empty(l2))
 	{
 		return l1;
@@ -1687,23 +1787,23 @@ Region_List kls_diff(Region_List l1, Region_List l2) {
 	}
 }
 
-bool kls_isLess(Region* r1, Region* r2) {
+bool kls_isLess(KLS_Region* r1, KLS_Region* r2) {
   //Compare regions by their effective size
   ptrdiff_t s1 = r1->end_offset - r1->begin_offset;
   ptrdiff_t s2 = r2->end_offset - r2->begin_offset;
   return (s1 < s2);
 }
 
-bool kls_isEqual(Region* r1, Region* r2) {
+bool kls_isEqual(KLS_Region* r1, KLS_Region* r2) {
   //Compare regions by their effective size
   ptrdiff_t s1 = r1->end_offset - r1->begin_offset;
   ptrdiff_t s2 = r2->end_offset - r2->begin_offset;
   return (s1 == s2);
 }
 
-double kls_usageShare(Region* r, Koliseo* kls) {
+double kls_usageShare(KLS_Region* r, Koliseo* kls) {
 	if (r == NULL) {
-		kls_log("ERROR","kls_usageShare():  passed Region was NULL");
+		kls_log("ERROR","kls_usageShare():  passed KLS_Region was NULL");
 		return -1;
 	}
 	if (kls == NULL) {
@@ -1717,14 +1817,18 @@ double kls_usageShare(Region* r, Koliseo* kls) {
 
 void kls_usageReport_toFile(Koliseo* kls, FILE* fp) {
 	if (fp == NULL) {
+        #ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","kls_usageReport_toFile():  passed file was NULL");
+        #endif
 		return;
 	}
 	if (kls == NULL) {
+        #ifdef KLS_DEBUG_CORE
 		kls_log("ERROR","kls_usageReport_toFile():  passed Koliseo was NULL");
+        #endif
 		return;
 	}
-	Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls->regs);
 	int i = 0;
 	while(!kls_empty(rl)) {
 		fprintf(fp,"Usage for region (%i) [%s]:  [%.3f%%]\n", i, rl->value->name, kls_usageShare(rl->value,kls));
@@ -1741,16 +1845,16 @@ ptrdiff_t kls_type_usage(int type, Koliseo* kls) {
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		#ifdef KLS_DEBUG_CORE
-		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.\n",__func__);
+		kls_log("ERROR","[%s()]: Passed Koliseo was NULL.",__func__);
 		#endif
-		abort();
+		exit(EXIT_FAILURE);
 	}
-	Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls->regs);
 
 	ptrdiff_t res = 0;
 
 	while (!kls_empty(rl)) {
-		element h = kls_head(rl);
+		KLS_list_element h = kls_head(rl);
 		if (h->type == type) {
 			res += (h->end_offset - h->begin_offset);
 		}
