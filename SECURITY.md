@@ -4,6 +4,8 @@
 
   This table shows the support level meaning.
 
+| Support level | Meaning          |
+| ------- | ------------------ |
 | :heavy_check_mark: | Full support |
 | :white_check_mark: | Should receive backported fixes |
 | :warning: | Deprecated, will fall to low support soon |
