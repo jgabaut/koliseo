@@ -21,12 +21,6 @@
 extern int KOLISEO_DEBUG;
 
 /**
- * Global variable for debug file pointer.
- * FIXME: ATM this file pointer is not correctly closed when an error causes an exit() call.
- */
-extern FILE* KOLISEO_DEBUG_FP;
-
-/**
  * Defines flags for Koliseo.
  */
 typedef struct KLS_Conf {

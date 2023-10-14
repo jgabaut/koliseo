@@ -1,8 +1,6 @@
 #include "koliseo.h"
 //Default settings for global vars.
 int KOLISEO_DEBUG = 0;
-//FIXME: ATM this file pointer is not correctly closed when an error causes an exit() call.
-FILE* KOLISEO_DEBUG_FP = NULL;
 
 KLS_Conf KLS_DEFAULT_CONF = {
     .kls_autoset_regions = 0,
@@ -200,7 +198,8 @@ Koliseo* kls_new(ptrdiff_t size) {
 	}
 	#ifdef KLS_DEBUG_CORE
 	if (KOLISEO_DEBUG == 1) {
-		print_kls_2file(KOLISEO_DEBUG_FP,p);
+        Koliseo* kls_ref = p;
+		print_kls_2file(kls_ref->conf.kls_log_fp,p);
 	}
 	#endif
 	return p;
@@ -269,7 +268,7 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	#ifdef KLS_DEBUG_CORE
 	kls_log(kls,"KLS","API Level { %i } -> Popped (%li) for KLS.", int_koliseo_version(), size);
 	if (KOLISEO_DEBUG == 1) {
-		print_kls_2file(KOLISEO_DEBUG_FP,kls);
+		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
 	#endif
 	return p;
@@ -841,7 +840,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 void print_kls_2file(FILE* fp, Koliseo* kls) {
 	if (fp == NULL) {
 		fprintf(stderr,"print_kls_2file():  fp was NULL.\n");
-		exit(EXIT_FAILURE);
+        return;
 	}
 	if (kls == NULL) {
 		fprintf(fp,"[KLS] kls was NULL.\n");

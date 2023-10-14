@@ -37,26 +37,27 @@ int main(int argc, char** argv) {
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
   printf("KOLISEO_DEBUG is [%i]\n\n", KOLISEO_DEBUG);
   //Reset debug log file
+  FILE* kls_logfile = NULL;
   if (KOLISEO_DEBUG == 1) {
-	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","w");
-	  if (KOLISEO_DEBUG_FP == NULL) {
+	  kls_logfile = fopen("./static/debug_log.txt","w");
+	  if (kls_logfile == NULL) {
 		fprintf(stderr,"[KLS]    Failed to open debug logfile.\n");
 		exit(EXIT_FAILURE);
 	  }
-	  fprintf(KOLISEO_DEBUG_FP,"KLS-DEMO    New demo run.\n");
+	  fprintf(kls_logfile,"KLS-DEMO    New demo run.\n");
   }
   if (KOLISEO_DEBUG == 1) {
-	  fclose(KOLISEO_DEBUG_FP);
+	  fclose(kls_logfile);
   }
   if (KOLISEO_DEBUG == 1) {
-	  KOLISEO_DEBUG_FP = fopen("./static/debug_log.txt","a");
-	  if (KOLISEO_DEBUG_FP == NULL) {
+	  kls_logfile = fopen("./static/debug_log.txt","a");
+	  if (kls_logfile == NULL) {
 		fprintf(stderr,"[KLS]    Failed to open debug logfile.\n");
 		exit(EXIT_FAILURE);
 	  }
   }
 
-  KLS_Conf kls_config = {.kls_autoset_regions = 1, .kls_autoset_temp_regions = 1, .kls_log_fp = KOLISEO_DEBUG_FP};
+  KLS_Conf kls_config = {.kls_autoset_regions = 1, .kls_autoset_temp_regions = 1, .kls_log_fp = kls_logfile};
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
@@ -221,7 +222,7 @@ int main(int argc, char** argv) {
   printf("[End of demo]\n");
   printf("[End of demo for Koliseo, API lvl [%i] v%s ]\n", int_koliseo_version(), string_koliseo_version());
   if (KOLISEO_DEBUG == 1) {
-	  fclose(KOLISEO_DEBUG_FP);
+	  fclose(kls_logfile);
   }
 
   printf("Press Enter to quit.\n");
