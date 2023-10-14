@@ -2,9 +2,14 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+  This table shows the support level meaning.
 
+| :heavy_check_mark: | Full support |
+| :white_check_mark: | Should receive backported fixes |
+| :warning: | Deprecated, will fall to low support soon |
+| :question: | Low support, should comply with most API expectations |
+| :grey_question: | Low support, custom patches needed |
+| :x: | Unsupported |
 
 ### Linux
 
