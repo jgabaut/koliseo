@@ -40,13 +40,13 @@ extern KLS_Conf KLS_DEFAULT_CONF;
  * Defines a format string for KLS_Conf.
  * @see KLS_Conf_Arg()
  */
-#define KLS_Conf_Fmt "KLS_Conf {autoset_regions: %i, autoset_temp_regions: %i}"
+#define KLS_Conf_Fmt "KLS_Conf {autoset_regions: %i, autoset_temp_regions: %i, log_fp: %p}"
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions),(void*)(conf.kls_log_fp)
 
 /**
  * Defines flags for Koliseo_Temp.
