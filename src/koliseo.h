@@ -17,14 +17,29 @@
 
 /**
  * Defines flags for Koliseo.
+ * @see Koliseo
  */
 typedef struct KLS_Conf {
-    int kls_autoset_regions;
-    int kls_autoset_temp_regions;
-    int kls_verbose_lvl;
-    FILE* kls_log_fp;
-    const char* kls_log_filepath;
+    int kls_autoset_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage.*/
+    int kls_autoset_temp_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage when operating on a Koliseo_Temp instance.*/
+    int kls_collect_stats; /**< If set to 1, make the Koliseo collect performance stats.*/
+    int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
+    FILE* kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
+    const char* kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
 } KLS_Conf;
+
+/**
+ * Defines a stat struct for Koliseo.
+ * @see Koliseo
+ */
+typedef struct KLS_Stats {
+    int tot_pushes; /**< Total PUSH calls done.*/
+    int tot_pops; /**< Total POP calls done.*/
+    int tot_logcalls; /**< Total kls_log() calls done.*/
+    int tot_hiccups; /**< Total hiccups encountered.*/
+    double worst_pushcall_time; /**< Longest time taken by a PUSH call.*/
+    double best_pushcall_time; /**< Shortest time taken by a PUSH call.*/
+} KLS_Stats;
 
 /**
  * Default KLS_Conf used by kls_new().
@@ -32,6 +47,13 @@ typedef struct KLS_Conf {
  * @see KLS_Conf
  */
 extern KLS_Conf KLS_DEFAULT_CONF;
+
+/**
+ * Default KLS_Stats values, used by kls_new().
+ * @see kls_new()
+ * @see KLS_Stats
+ */
+extern KLS_Stats KLS_STATS_DEFAULT;
 
 /**
  * Defines a format string for KLS_Conf.
@@ -47,6 +69,9 @@ extern KLS_Conf KLS_DEFAULT_CONF;
 
 /**
  * Defines flags for Koliseo_Temp.
+ * @see Koliseo_Temp
+ * @see kls_temp_start()
+ * @see KLS_Conf
  */
 typedef struct KLS_Temp_Conf {
     int kls_autoset_regions;
@@ -156,6 +181,7 @@ typedef struct Koliseo {
 	KLS_Region_List regs; /**< List of allocated Regions*/
 	int has_temp; /**< When == 1, a Koliseo_Temp is currently active on this Koliseo.*/
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
+    KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
 	struct Koliseo_Temp* t_kls; /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
 } Koliseo;
 

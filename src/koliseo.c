@@ -3,10 +3,21 @@
 KLS_Conf KLS_DEFAULT_CONF = {
     .kls_autoset_regions = 0,
     .kls_autoset_temp_regions = 0,
+    .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
 };
+
+KLS_Stats KLS_STATS_DEFAULT = {
+    .tot_pushes = 0,
+    .tot_pops = 0,
+    .tot_logcalls = 0,
+    .tot_hiccups = 0,
+    .worst_pushcall_time = -1,
+    .best_pushcall_time = -1,
+};
+
 
 bool kls_set_conf(Koliseo* kls, KLS_Conf conf); //Declare function used internally by kls_new() and kls_new_conf()
                                                 //
@@ -167,6 +178,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->has_temp = 0;
 		kls->t_kls = NULL;
         kls_set_conf(kls,KLS_DEFAULT_CONF);
+        kls->stats = KLS_STATS_DEFAULT;
         kls->conf.kls_log_fp = stderr;
 		#ifdef KLS_DEBUG_CORE
 		kls_log(kls,"KLS","API Level { %i } ->  Allocated (%s) for new KLS.",int_koliseo_version(),h_size);
