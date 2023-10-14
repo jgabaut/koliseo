@@ -307,6 +307,9 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
 	#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pops += 1;
+    }
 	return p;
 }
 
@@ -394,6 +397,9 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
 	#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pushes += 1;
+    }
 	return p;
 }
 
@@ -448,6 +454,9 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
 	#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pushes += 1;
+    }
 	return p;
 }
 
@@ -514,6 +523,9 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
 	#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pushes += 1;
+    }
 	return p;
 }
 /**
@@ -651,6 +663,9 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		#endif
 	}
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pushes += 1;
+    }
 	return p;
 }
 
@@ -793,6 +808,9 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		#endif
 	}
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pushes += 1;
+    }
 	return p;
 }
 

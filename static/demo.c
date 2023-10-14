@@ -182,6 +182,7 @@ int main(int argc, char** argv) {
   print_dbg_kls(kls);
 
   printf(KLSFmt "\n", KLS_Arg(kls));
+  printf(KLS_Stats_Fmt "\n", KLS_Stats_Arg(kls->stats));
 
   printf("[Clear Koliseo]\n");
   kls_clear(kls);

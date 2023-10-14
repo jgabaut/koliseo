@@ -68,6 +68,18 @@ extern KLS_Stats KLS_STATS_DEFAULT;
 #define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
 
 /**
+ * Defines a format string for KLS_Stats.
+ * @see KLS_Stats_Arg()
+ */
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_hiccups: %i, worst_push_time: %f, best_push_time: %f }"
+
+/**
+ * Defines a format macro for KLS_Stats args.
+ * @see KLS_Stats_Fmt
+ */
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_hiccups),(stats.worst_pushcall_time),(stats.best_pushcall_time)
+
+/**
  * Defines flags for Koliseo_Temp.
  * @see Koliseo_Temp
  * @see kls_temp_start()
