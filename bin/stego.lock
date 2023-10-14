@@ -32,4 +32,4 @@ tests# tests folder name
 0.2.4# Add KLSFmt and KLS_Arg(), fix missing fprintf() args
 0.2.5# Fix push sizes in logs, add address logging
 0.3.0# Clean namespace, add KLS_Conf and KLS_Temp_Conf. Drops KOLISEO_AUTOSET_REGIONS and KOLISEO_AUTOSET_TEMP_REGIONS globals.
-0.3.1#
+0.3.1# Close kls logfile on kls_free(). Drops KOLISEO_DEBUG, KOLISEO_DEBUG_FP globals. Extend KLS_Conf, remove kls_set_conf() from header.
