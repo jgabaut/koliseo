@@ -5,6 +5,7 @@ int KOLISEO_DEBUG = 0;
 KLS_Conf KLS_DEFAULT_CONF = {
     .kls_autoset_regions = 0,
     .kls_autoset_temp_regions = 0,
+    .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
 };
@@ -244,25 +245,27 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
 
     kls->conf = conf;
 
-    if (kls->conf.kls_log_fp != NULL) {
-        kls_log(kls,"WARN","[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.", __func__);
-    }
+    if (kls->conf.kls_verbose_lvl > 0) {
+        if (kls->conf.kls_log_fp != NULL) {
+            kls_log(kls,"WARN","[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.", __func__);
+        }
 
-    FILE* log_fp = NULL;
-    log_fp = fopen(kls->conf.kls_log_filepath,"w");
-    if (!log_fp) {
-        fprintf(stderr,"[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [write].\n",__func__, kls->conf.kls_log_filepath);
-        return false;
-    } else {
-        fprintf(log_fp,"%s",""); //Reset log_fp
-        fclose(log_fp);
-    }
-    log_fp = fopen(kls->conf.kls_log_filepath,"a");
-    if (!log_fp) {
-        fprintf(stderr,"[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [append].\n",__func__, kls->conf.kls_log_filepath);
-        return false;
-    } else {
-        kls->conf.kls_log_fp = log_fp;
+        FILE* log_fp = NULL;
+        log_fp = fopen(kls->conf.kls_log_filepath,"w");
+        if (!log_fp) {
+            fprintf(stderr,"[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [write].\n",__func__, kls->conf.kls_log_filepath);
+            return false;
+        } else {
+            fprintf(log_fp,"%s",""); //Reset log_fp
+            fclose(log_fp);
+        }
+        log_fp = fopen(kls->conf.kls_log_filepath,"a");
+        if (!log_fp) {
+            fprintf(stderr,"[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [append].\n",__func__, kls->conf.kls_log_filepath);
+            return false;
+        } else {
+            kls->conf.kls_log_fp = log_fp;
+        }
     }
     return true;
 }
@@ -1351,7 +1354,10 @@ void kls_free(Koliseo* kls) {
 	}
 	kls_clear(kls);
 	kls_freeList(kls->regs);
-    if (kls->conf.kls_log_fp != NULL) {
+	#ifdef KLS_DEBUG_CORE
+	kls_log(kls,"KLS","API Level { %i } -> Freeing KLS.", int_koliseo_version());
+	#endif
+    if (kls->conf.kls_log_fp != NULL && kls->conf.kls_log_fp != stdout && kls->conf.kls_log_fp != stderr) {
 	    #ifdef KLS_DEBUG_CORE
 	    kls_log(kls,"KLS","Closing kls log file. Path: {\"%s\"}.", kls->conf.kls_log_filepath);
 	    #endif
@@ -1359,10 +1365,9 @@ void kls_free(Koliseo* kls) {
         if (close_res != 0) {
             fprintf(stderr,"[ERROR]    %s(): Failed fclose() on log_fp. Path: {\"%s\"}.", __func__, kls->conf.kls_log_filepath);
         }
+    } else if (kls->conf.kls_log_fp == stdout || kls->conf.kls_log_fp == stderr){
+        fprintf(stderr,"[INFO]    %s(): kls->conf.kls_log_fp is %s. Not closing it.\n", __func__, (kls->conf.kls_log_fp == stdout ? "stdout" : "stderr"));
     }
-	#ifdef KLS_DEBUG_CORE
-	kls_log(kls,"KLS","API Level { %i } -> Freeing KLS.", int_koliseo_version());
-	#endif
 	free(kls);
 }
 
