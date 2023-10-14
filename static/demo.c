@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 		fprintf(stderr,"[KLS]    Failed to open debug logfile.\n");
 		exit(EXIT_FAILURE);
 	  }
-	  kls_log("KLS-DEMO","New demo run.");
+	  fprintf(KOLISEO_DEBUG_FP,"KLS-DEMO    New demo run.\n");
   }
   if (KOLISEO_DEBUG == 1) {
 	  fclose(KOLISEO_DEBUG_FP);
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 	  }
   }
 
-  KLS_Conf kls_config = {.kls_autoset_regions = 1, .kls_autoset_temp_regions = 1};
+  KLS_Conf kls_config = {.kls_autoset_regions = 1, .kls_autoset_temp_regions = 1, .kls_log_fp = KOLISEO_DEBUG_FP};
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 

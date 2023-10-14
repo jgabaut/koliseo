@@ -13,7 +13,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 0 /**< Represents current patch release.*/
+#define KLS_PATCH 1 /**< Represents current patch release.*/
 
 /**
  * Global variable for debug flag.
@@ -32,6 +32,7 @@ extern FILE* KOLISEO_DEBUG_FP;
 typedef struct KLS_Conf {
     int kls_autoset_regions;
     int kls_autoset_temp_regions;
+    FILE* kls_log_fp;
 } KLS_Conf;
 
 /**
@@ -80,7 +81,7 @@ static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KL
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.0"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -92,7 +93,6 @@ extern char* kls_title[KLS_TITLEROWS+1]; /**< Contains title banner.*/
 void kls_print_title_2file(FILE* fp); /**< Prints the title banner to the passed FILE.*/
 void kls_print_title(void);
 
-void kls_log(const char* tag, const char* format, ...);
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 
@@ -199,10 +199,11 @@ typedef struct Koliseo_Temp {
     KLS_Temp_Conf conf; /**< Contains flags to change the Koliseo_Temp behaviour.*/
 } Koliseo_Temp;
 
+void kls_log(Koliseo* kls, const char* tag, const char* format, ...);
 ptrdiff_t kls_get_pos(Koliseo* kls);
 
 Koliseo* kls_new(ptrdiff_t size);
-bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
+//bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
@@ -246,7 +247,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 #endif //KOLISEO_HAS_CURSES
 
 Koliseo_Temp* kls_temp_start(Koliseo* kls);
-bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
+//bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
 void kls_temp_end(Koliseo_Temp* tmp_kls);
 void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
