@@ -9,17 +9,17 @@ currently being supported with security updates.
 | Os: Linux, macOS          |
 | Version | Supported          |
 | ------- | ------------------ |
-| >= 0.3.1   | :green_check_mark: |
+| >= 0.3.1   | :heavy_check_mark: |
 | >= 0.3.x   | :white_check_mark: |
-| >= 0.2.3, < 0.3.x   | :!: |
+| >= 0.2.3, < 0.3.x   | :warning: |
 | < 0.2.3   | :x: |
 
 | Os: Windows          |
 | Version | Supported          |
 | ------- | ------------------ |
-| >= 0.3.1   | :green_check_mark: |
+| >= 0.3.1   | :heavy_check_mark: |
 | >= 0.3.x   | :white_check_mark: |
-| >= 0.2.4, < 0.3.x   | :!: |
+| >= 0.2.4, < 0.3.x   | :warning: |
 | < 0.2.4   | :x: |
 
 ## Reporting a Vulnerability
