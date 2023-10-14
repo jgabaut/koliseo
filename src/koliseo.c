@@ -6,6 +6,7 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_autoset_regions = 0,
     .kls_autoset_temp_regions = 0,
     .kls_log_fp = NULL,
+    .kls_log_filepath = "",
 };
 
 bool kls_set_conf(Koliseo* kls, KLS_Conf conf); //Declare function used internally by kls_new() and kls_new_conf()
@@ -167,6 +168,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->has_temp = 0;
 		kls->t_kls = NULL;
         kls_set_conf(kls,KLS_DEFAULT_CONF);
+        kls->conf.kls_log_fp = stderr;
 		#ifdef KLS_DEBUG_CORE
 		kls_log(kls,"KLS","API Level { %i } ->  Allocated (%s) for new KLS.",int_koliseo_version(),h_size);
 	    kls_log(kls,"KLS","KLS offset: { %p }.", kls);
@@ -241,6 +243,27 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
 	}
 
     kls->conf = conf;
+
+    if (kls->conf.kls_log_fp != NULL) {
+        kls_log(kls,"WARN","[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.", __func__);
+    }
+
+    FILE* log_fp = NULL;
+    log_fp = fopen(kls->conf.kls_log_filepath,"w");
+    if (!log_fp) {
+        fprintf(stderr,"[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [write].\n",__func__, kls->conf.kls_log_filepath);
+        return false;
+    } else {
+        fprintf(log_fp,"%s",""); //Reset log_fp
+        fclose(log_fp);
+    }
+    log_fp = fopen(kls->conf.kls_log_filepath,"a");
+    if (!log_fp) {
+        fprintf(stderr,"[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [append].\n",__func__, kls->conf.kls_log_filepath);
+        return false;
+    } else {
+        kls->conf.kls_log_fp = log_fp;
+    }
     return true;
 }
 
@@ -1328,6 +1351,15 @@ void kls_free(Koliseo* kls) {
 	}
 	kls_clear(kls);
 	kls_freeList(kls->regs);
+    if (kls->conf.kls_log_fp != NULL) {
+	    #ifdef KLS_DEBUG_CORE
+	    kls_log(kls,"KLS","Closing kls log file. Path: {\"%s\"}.", kls->conf.kls_log_filepath);
+	    #endif
+        int close_res = fclose(kls->conf.kls_log_fp);
+        if (close_res != 0) {
+            fprintf(stderr,"[ERROR]    %s(): Failed fclose() on log_fp. Path: {\"%s\"}.", __func__, kls->conf.kls_log_filepath);
+        }
+    }
 	#ifdef KLS_DEBUG_CORE
 	kls_log(kls,"KLS","API Level { %i } -> Freeing KLS.", int_koliseo_version());
 	#endif
