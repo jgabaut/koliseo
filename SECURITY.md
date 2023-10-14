@@ -12,9 +12,19 @@ currently being supported with security updates.
 | ------- | ------------------ |
 | >= 0.3.1   | :heavy_check_mark: |
 | >= 0.3.x   | :white_check_mark: |
-| >= 0.2.3, < 0.3.x   | :warning: |
-| < 0.2.3 , > 0.1.6   | :question: |
+| >= 0.2.3   | :warning: |
+| > 0.1.6   | :question: |
 | < 0.1.6   | :x: |
+
+### macOS
+
+| Version | Supported          |
+| ------- | ------------------ |
+| >= 0.3.1   | :heavy_check_mark: |
+| >= 0.3.x   | :white_check_mark: |
+| >= 0.2.3   | :warning: |
+| >= 0.2.1   | :question: |
+| < 0.2.1   | :x: |
 
 ### Windows
 
@@ -22,9 +32,9 @@ currently being supported with security updates.
 | ------- | ------------------ |
 | >= 0.3.1   | :heavy_check_mark: |
 | >= 0.3.x   | :white_check_mark: |
-| >= 0.2.3, < 0.3.x   | :warning: |
-| < 0.2.3 , >= 0.2.1  | :question: |
-| < 0.2.1 , >= 0.1.21  | :grey_question: |
+| >= 0.2.3   | :warning: |
+| >= 0.2.1  | :question: |
+| < 0.2.1  | :grey_question: |
 | < 0.1.21 | :x: |
 
 ## Reporting a Vulnerability
