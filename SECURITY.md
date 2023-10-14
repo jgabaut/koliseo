@@ -6,21 +6,24 @@ Use this section to tell people about which versions of your project are
 currently being supported with security updates.
 
 
-| Os: Linux, macOS          |
+| Os: Linux          |
 | Version | Supported          |
 | ------- | ------------------ |
 | >= 0.3.1   | :heavy_check_mark: |
 | >= 0.3.x   | :white_check_mark: |
 | >= 0.2.3, < 0.3.x   | :warning: |
-| < 0.2.3   | :x: |
+| < 0.2.3 , > 0.1.6   | :question: |
+| < 0.1.6   | :x: |
 
 | Os: Windows          |
 | Version | Supported          |
 | ------- | ------------------ |
 | >= 0.3.1   | :heavy_check_mark: |
 | >= 0.3.x   | :white_check_mark: |
-| >= 0.2.4, < 0.3.x   | :warning: |
-| < 0.2.4   | :x: |
+| >= 0.2.3, < 0.3.x   | :warning: |
+| < 0.2.3 , >= 0.2.1  | :question: |
+| < 0.2.1 , >= 0.1.21  | :gray_question: |
+| < 0.1.21 | :x: |
 
 ## Reporting a Vulnerability
 
