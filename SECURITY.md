@@ -6,7 +6,8 @@ Use this section to tell people about which versions of your project are
 currently being supported with security updates.
 
 
-| Os: Linux          |
+### Linux
+
 | Version | Supported          |
 | ------- | ------------------ |
 | >= 0.3.1   | :heavy_check_mark: |
@@ -15,7 +16,8 @@ currently being supported with security updates.
 | < 0.2.3 , > 0.1.6   | :question: |
 | < 0.1.6   | :x: |
 
-| Os: Windows          |
+### Windows
+
 | Version | Supported          |
 | ------- | ------------------ |
 | >= 0.3.1   | :heavy_check_mark: |
