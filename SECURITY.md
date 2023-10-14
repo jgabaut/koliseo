@@ -24,7 +24,8 @@ currently being supported with security updates.
 | >= 0.3.x   | :white_check_mark: |
 | >= 0.2.3   | :warning: |
 | >= 0.2.1   | :question: |
-| < 0.2.1   | :x: |
+| < 0.2.1  | :grey_question: |
+| < 0.1.6   | :x: |
 
 ### Windows
 
