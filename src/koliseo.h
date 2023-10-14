@@ -16,11 +16,6 @@
 #define KLS_PATCH 1 /**< Represents current patch release.*/
 
 /**
- * Global variable for debug flag.
- */
-extern int KOLISEO_DEBUG;
-
-/**
  * Defines flags for Koliseo.
  */
 typedef struct KLS_Conf {
