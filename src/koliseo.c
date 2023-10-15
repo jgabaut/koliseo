@@ -276,6 +276,9 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
     if (kls->conf.kls_verbose_lvl > 0) {
         if (kls->conf.kls_log_fp != NULL) {
             kls_log(kls,"WARN","[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.", __func__);
+            if (kls->conf.kls_collect_stats == 1) {
+                kls->stats.tot_hiccups += 1;
+            }
         }
 
         FILE* log_fp = NULL;
