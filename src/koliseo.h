@@ -10,29 +10,46 @@
 #include <time.h>
 #include <stdbool.h>
 
+#ifdef KLS_DEBUG_CORE
+#include <time.h>
+
+#ifdef _WIN32
+#include <windows.h> //Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
+#endif
+#endif //KLS_DEBUG_CORE
+
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 0 /**< Represents current patch release.*/
-
-/**
- * Global variable for debug flag.
- */
-extern int KOLISEO_DEBUG;
-
-/**
- * Global variable for debug file pointer.
- * FIXME: ATM this file pointer is not correctly closed when an error causes an exit() call.
- */
-extern FILE* KOLISEO_DEBUG_FP;
+#define KLS_PATCH 1 /**< Represents current patch release.*/
 
 /**
  * Defines flags for Koliseo.
+ * @see Koliseo
  */
 typedef struct KLS_Conf {
-    int kls_autoset_regions;
-    int kls_autoset_temp_regions;
+    int kls_autoset_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage.*/
+    int kls_autoset_temp_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage when operating on a Koliseo_Temp instance.*/
+    int kls_collect_stats; /**< If set to 1, make the Koliseo collect performance stats.*/
+    int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
+    FILE* kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
+    const char* kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
 } KLS_Conf;
+
+/**
+ * Defines a stat struct for Koliseo.
+ * @see Koliseo
+ */
+typedef struct KLS_Stats {
+    int tot_pushes; /**< Total PUSH calls done.*/
+    int tot_temp_pushes; /**< Total PUSH_T calls done.*/
+    int tot_pops; /**< Total POP calls done.*/
+    int tot_temp_pops; /**< Total POP_T calls done.*/
+    int tot_logcalls; /**< Total kls_log() calls done.*/
+    int tot_hiccups; /**< Total hiccups encountered.*/
+    ptrdiff_t avg_region_size; /**< Average size for allocated KLS_Region.*/
+    double worst_pushcall_time; /**< Longest time taken by a PUSH call.*/
+} KLS_Stats;
 
 /**
  * Default KLS_Conf used by kls_new().
@@ -42,19 +59,45 @@ typedef struct KLS_Conf {
 extern KLS_Conf KLS_DEFAULT_CONF;
 
 /**
+ * Default KLS_Stats values, used by kls_new().
+ * @see kls_new()
+ * @see KLS_Stats
+ */
+extern KLS_Stats KLS_STATS_DEFAULT;
+
+/**
  * Defines a format string for KLS_Conf.
  * @see KLS_Conf_Arg()
  */
-#define KLS_Conf_Fmt "KLS_Conf {autoset_regions: %i, autoset_temp_regions: %i}"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+
+/**
+ * Defines a format string for KLS_Stats.
+ * @see KLS_Stats_Arg()
+ */
+#ifndef _WIN32
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %li, tot_hiccups: %i, worst_push_time: %.9f }"
+#else
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %lli, tot_hiccups: %i, worst_push_time: %.7f }"
+#endif
+
+/**
+ * Defines a format macro for KLS_Stats args.
+ * @see KLS_Stats_Fmt
+ */
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.avg_region_size),(stats.tot_hiccups),(stats.worst_pushcall_time)
 
 /**
  * Defines flags for Koliseo_Temp.
+ * @see Koliseo_Temp
+ * @see kls_temp_start()
+ * @see KLS_Conf
  */
 typedef struct KLS_Temp_Conf {
     int kls_autoset_regions;
@@ -80,7 +123,7 @@ static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KL
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.0"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -92,7 +135,6 @@ extern char* kls_title[KLS_TITLEROWS+1]; /**< Contains title banner.*/
 void kls_print_title_2file(FILE* fp); /**< Prints the title banner to the passed FILE.*/
 void kls_print_title(void);
 
-void kls_log(const char* tag, const char* format, ...);
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 
@@ -165,6 +207,7 @@ typedef struct Koliseo {
 	KLS_Region_List regs; /**< List of allocated Regions*/
 	int has_temp; /**< When == 1, a Koliseo_Temp is currently active on this Koliseo.*/
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
+    KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
 	struct Koliseo_Temp* t_kls; /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
 } Koliseo;
 
@@ -199,11 +242,13 @@ typedef struct Koliseo_Temp {
     KLS_Temp_Conf conf; /**< Contains flags to change the Koliseo_Temp behaviour.*/
 } Koliseo_Temp;
 
+void kls_log(Koliseo* kls, const char* tag, const char* format, ...);
 ptrdiff_t kls_get_pos(Koliseo* kls);
 
 Koliseo* kls_new(ptrdiff_t size);
-bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
+//bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf);
+Koliseo* kls_new_traced(ptrdiff_t size, const char* output_path);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
@@ -246,7 +291,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win);
 #endif //KOLISEO_HAS_CURSES
 
 Koliseo_Temp* kls_temp_start(Koliseo* kls);
-bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
+//bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
 void kls_temp_end(Koliseo_Temp* tmp_kls);
 void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc);
@@ -293,6 +338,8 @@ KLS_Region_List kls_diff(KLS_Region_List, KLS_Region_List);
 bool kls_isLess(KLS_list_element, KLS_list_element);
 bool kls_isEqual(KLS_list_element, KLS_list_element);
 double kls_usageShare(KLS_list_element, Koliseo*);
+ptrdiff_t kls_regionSize(KLS_list_element);
+ptrdiff_t kls_avg_regionSize(Koliseo*);
 void kls_usageReport_toFile(Koliseo*,FILE*);
 void kls_usageReport(Koliseo*);
 ptrdiff_t kls_type_usage(int, Koliseo*);
