@@ -241,7 +241,25 @@ Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf) {
 }
 
 /**
- * Updates the KLS_Conf for the passed Koliseo pointer.
+ * Takes a ptrdiff_t size and a filepath for the trace output file, and returns a pointer to the prepared Koliseo.
+ * Calls kls_new_conf() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * @param size The size for Koliseo data field.
+ * @param output_path The filepath for log output.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf()
+ */
+Koliseo* kls_new_traced(ptrdiff_t size, const char* output_path) {
+    #ifndef KLS_DEBUG_CORE
+    fprintf(stderr,"[WARN]    %s(): KLS_DEBUG_CORE is not defined. No tracing allowed.\n", __func__);
+    #endif
+    KLS_Conf k = (KLS_Conf) {.kls_verbose_lvl = 1, .kls_log_filepath = output_path};
+    return kls_new_conf(size,k);
+}
+
+/**
+ * Updates the KLS_Conf for the passed Koliseo pointer. Internal usage.
  * @param kls The Koliseo pointer to update.
  * @param conf The KLS_Conf to set.
  * @return A bool representing success.
