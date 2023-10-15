@@ -10,6 +10,14 @@
 #include <time.h>
 #include <stdbool.h>
 
+#ifdef KLS_DEBUG_CORE
+#include <time.h>
+
+#ifdef _WIN32
+#include <windows.h> //Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
+#endif
+#endif //KLS_DEBUG_CORE
+
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
@@ -40,7 +48,6 @@ typedef struct KLS_Stats {
     int tot_logcalls; /**< Total kls_log() calls done.*/
     int tot_hiccups; /**< Total hiccups encountered.*/
     double worst_pushcall_time; /**< Longest time taken by a PUSH call.*/
-    double best_pushcall_time; /**< Shortest time taken by a PUSH call.*/
 } KLS_Stats;
 
 /**
@@ -73,13 +80,17 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format string for KLS_Stats.
  * @see KLS_Stats_Arg()
  */
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %f, best_push_time: %f }"
+#ifndef _WIN32
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %.9f }"
+#else
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %.7f }"
+#endif
 
 /**
  * Defines a format macro for KLS_Stats args.
  * @see KLS_Stats_Fmt
  */
-#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups),(stats.worst_pushcall_time),(stats.best_pushcall_time)
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups),(stats.worst_pushcall_time)
 
 /**
  * Defines flags for Koliseo_Temp.

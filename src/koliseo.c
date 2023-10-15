@@ -17,12 +17,11 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .tot_logcalls = 0,
     .tot_hiccups = 0,
     .worst_pushcall_time = -1,
-    .best_pushcall_time = -1,
 };
 
 
 bool kls_set_conf(Koliseo* kls, KLS_Conf conf); //Declare function used internally by kls_new() and kls_new_conf()
-                                                //
+
 /**
  * Defines title banner.
  */
@@ -275,6 +274,12 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
 
     kls->conf = conf;
 
+    #ifndef KLS_DEBUG_CORE
+    if (kls->conf.kls_collect_stats == 1) {
+       fprintf(stderr,"[WARN]    [%s()]: KLS_DEBUG_CORE is not defined. Stats may not be collected in full.\n", __func__);
+    }
+    #endif
+
     if (kls->conf.kls_verbose_lvl > 0) {
         if (kls->conf.kls_log_fp != NULL) {
             kls_log(kls,"WARN","[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.", __func__);
@@ -385,6 +390,18 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
+
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
@@ -422,6 +439,18 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	if (kls->conf.kls_verbose_lvl > 0) {
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
@@ -439,6 +468,18 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
+
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
@@ -479,6 +520,18 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
 	if (kls->conf.kls_verbose_lvl > 0) {
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
@@ -496,10 +549,23 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
+
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
 	}
+
 	ptrdiff_t available = kls->size - kls->offset;
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (available - padding) < (size*count)) {
@@ -548,6 +614,18 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
 	if (kls->conf.kls_verbose_lvl > 0) {
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
@@ -564,6 +642,18 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
+
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
@@ -616,6 +706,18 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	//sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
 	//kls_log("KLS",msg);
 	#ifdef KLS_DEBUG_CORE
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
 	kls_log(kls,"KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log(kls,"KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",int_koliseo_version(), h_size);
 	if (kls->conf.kls_verbose_lvl > 0) {
@@ -639,6 +741,18 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc) {
+
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
+
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
@@ -692,6 +806,20 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		#endif
 	}
+    #ifdef KLS_DEBUG_CORE
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
+    #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
     }
@@ -709,6 +837,18 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, char* name, char* desc) {
+
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
+
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
@@ -769,6 +909,20 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		#endif
 	}
+    #ifdef KLS_DEBUG_CORE
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
+    #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_temp_pushes += 1;
     }
@@ -787,6 +941,16 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
 	if (kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
@@ -840,6 +1004,20 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		}
 		#endif
 	}
+    #ifdef KLS_DEBUG_CORE
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
+    #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
     }
@@ -858,6 +1036,18 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, int type, char* name, char* desc) {
+
+    #ifdef KLS_DEBUG_CORE
+    #ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    #else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+    #endif
+    #endif
+
 	if (t_kls == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
@@ -916,6 +1106,20 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		#endif
 	}
+    #ifdef KLS_DEBUG_CORE
+    if (kls->conf.kls_collect_stats == 1) {
+        #ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time); // %.9f
+        double elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        #else
+        QueryPerformanceCounter(&end_time); // %.7f
+        double elapsed_time = (double)(end_time.QuadPart - start_time.QuadPart) / frequency.QuadPart;
+        #endif
+        if (elapsed_time > kls->stats.worst_pushcall_time) {
+            kls->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
+    #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_temp_pushes += 1;
     }
@@ -1515,8 +1719,8 @@ void kls_temp_end(Koliseo_Temp* tmp_kls) {
 	if (tmp_kls->conf.kls_autoset_regions == 1) {
 		kls_freeList(tmp_kls->t_regs);
 	}
-	#ifdef KLS_DEBUG_CORE
     Koliseo* kls_ref = tmp_kls->kls;
+	#ifdef KLS_DEBUG_CORE
 	if (kls_ref == NULL) {
 		fprintf(stderr,"[ERROR] [%s()]: Referred Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
