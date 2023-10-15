@@ -256,7 +256,7 @@ Koliseo* kls_new_traced(ptrdiff_t size, const char* output_path) {
     #ifndef KLS_DEBUG_CORE
     fprintf(stderr,"[WARN]    %s(): KLS_DEBUG_CORE is not defined. No tracing allowed.\n", __func__);
     #endif
-    KLS_Conf k = (KLS_Conf) {.kls_verbose_lvl = 1, .kls_log_filepath = output_path};
+    KLS_Conf k = (KLS_Conf) {.kls_collect_stats = 1, .kls_verbose_lvl = 1, .kls_log_filepath = output_path};
     return kls_new_conf(size,k);
 }
 
