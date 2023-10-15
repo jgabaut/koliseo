@@ -11,7 +11,9 @@ KLS_Conf KLS_DEFAULT_CONF = {
 
 KLS_Stats KLS_STATS_DEFAULT = {
     .tot_pushes = 0,
+    .tot_temp_pushes = 0,
     .tot_pops = 0,
+    .tot_temp_pops = 0,
     .tot_logcalls = 0,
     .tot_hiccups = 0,
     .worst_pushcall_time = -1,
@@ -367,6 +369,9 @@ void* kls_temp_pop(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
 	#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_temp_pops += 1;
+    }
 	return p;
 }
 
@@ -617,6 +622,9 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 		print_kls_2file(kls->conf.kls_log_fp,kls);
 	}
 	#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_temp_pushes += 1;
+    }
 	return p;
 }
 
@@ -761,6 +769,9 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		#endif
 	}
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_temp_pushes += 1;
+    }
 	return p;
 }
 
@@ -905,6 +916,9 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		}
 		#endif
 	}
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_temp_pushes += 1;
+    }
 	return p;
 }
 
@@ -921,6 +935,8 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
 		fprintf(fp,"[KLS] kls was NULL.\n");
 	} else {
 		fprintf(fp,"\n[KLS] API Level: { %i }\n", int_koliseo_version());
+        fprintf(fp,"\n[INFO] Conf: { " KLS_Conf_Fmt " }\n", KLS_Conf_Arg(kls->conf));
+        fprintf(fp,"\n[INFO] Stats: { " KLS_Stats_Fmt " }\n", KLS_Stats_Arg(kls->stats));
 		#ifndef MINGW32_BUILD
 		fprintf(fp,"\n[KLS] Size: { %li }\n", kls->size);
 		#else
@@ -1512,6 +1528,10 @@ void kls_temp_end(Koliseo_Temp* tmp_kls) {
 	tmp_kls->kls->prev_offset = tmp_kls->prev_offset;
 	tmp_kls->kls->offset = tmp_kls->offset;
     tmp_kls = NULL;
+    if (kls_ref->conf.kls_collect_stats == 1) {
+        kls_ref->stats.tot_temp_pushes = 0;
+        kls_ref->stats.tot_temp_pops = 0;
+    }
 }
 
 

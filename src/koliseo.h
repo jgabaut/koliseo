@@ -34,7 +34,9 @@ typedef struct KLS_Conf {
  */
 typedef struct KLS_Stats {
     int tot_pushes; /**< Total PUSH calls done.*/
+    int tot_temp_pushes; /**< Total PUSH_T calls done.*/
     int tot_pops; /**< Total POP calls done.*/
+    int tot_temp_pops; /**< Total POP_T calls done.*/
     int tot_logcalls; /**< Total kls_log() calls done.*/
     int tot_hiccups; /**< Total hiccups encountered.*/
     double worst_pushcall_time; /**< Longest time taken by a PUSH call.*/
@@ -59,25 +61,25 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format string for KLS_Conf.
  * @see KLS_Conf_Arg()
  */
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, autoset_temp_regions: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
 
 /**
  * Defines a format string for KLS_Stats.
  * @see KLS_Stats_Arg()
  */
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_hiccups: %i, worst_push_time: %f, best_push_time: %f }"
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %f, best_push_time: %f }"
 
 /**
  * Defines a format macro for KLS_Stats args.
  * @see KLS_Stats_Fmt
  */
-#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_hiccups),(stats.worst_pushcall_time),(stats.best_pushcall_time)
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups),(stats.worst_pushcall_time),(stats.best_pushcall_time)
 
 /**
  * Defines flags for Koliseo_Temp.
