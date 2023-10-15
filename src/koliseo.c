@@ -945,7 +945,7 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
 		char human_size[200];
 		char curr_size[200];
 		kls_formatSize(kls->size,human_size,sizeof(human_size));
-		fprintf(fp,"[KLS] Human: { %s }\n", human_size);
+		fprintf(fp,"[KLS] Size (Human): { %s }\n", human_size);
 		kls_formatSize(kls->offset,curr_size,sizeof(curr_size));
 		fprintf(fp,"[KLS] Used (Human): { %s }\n", curr_size);
 		#ifndef MINGW32_BUILD
