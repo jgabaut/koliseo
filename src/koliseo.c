@@ -16,6 +16,7 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .tot_temp_pops = 0,
     .tot_logcalls = 0,
     .tot_hiccups = 0,
+    .avg_region_size = 0,
     .worst_pushcall_time = -1,
 };
 
@@ -450,6 +451,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -531,6 +533,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -625,6 +628,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -717,6 +721,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	kls_log(kls,"KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log(kls,"KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",int_koliseo_version(), h_size);
@@ -818,6 +823,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -921,6 +927,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -1016,6 +1023,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -1118,6 +1126,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -2061,6 +2070,36 @@ double kls_usageShare(KLS_Region* r, Koliseo* kls) {
 	ptrdiff_t r_size = r->end_offset - r->begin_offset;
 	double res = (r_size * 100.0) / kls->size;
 	return res;
+}
+
+ptrdiff_t kls_regionSize(KLS_Region* r) {
+    return r->end_offset - r->begin_offset;
+}
+
+ptrdiff_t kls_avg_regionSize(Koliseo* kls) {
+	if (kls == NULL) {
+	    fprintf(stderr,"[KLS]    %s():  passed Koliseo was NULL.\n", __func__);
+		return -1;
+	}
+	KLS_Region_List rl = kls_copy(kls->regs);
+    ptrdiff_t res = 0;
+    int tot_regs = kls_length(rl);
+    if (tot_regs > 0) {
+        int tot_size = 0;
+        while(!kls_empty(rl)) {
+            ptrdiff_t curr_size = 0;
+            if (rl->value->size > 0) {
+                curr_size = rl->value->size;
+            } else {
+                curr_size = kls_regionSize(rl->value);
+                rl->value->size = curr_size;
+            }
+            tot_size += curr_size;
+            rl = kls_tail(rl);
+        }
+        res = (ptrdiff_t)((double) tot_size / tot_regs);
+    }
+    return res;
 }
 
 void kls_usageReport_toFile(Koliseo* kls, FILE* fp) {

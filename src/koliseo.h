@@ -47,6 +47,7 @@ typedef struct KLS_Stats {
     int tot_temp_pops; /**< Total POP_T calls done.*/
     int tot_logcalls; /**< Total kls_log() calls done.*/
     int tot_hiccups; /**< Total hiccups encountered.*/
+    ptrdiff_t avg_region_size; /**< Average size for allocated KLS_Region.*/
     double worst_pushcall_time; /**< Longest time taken by a PUSH call.*/
 } KLS_Stats;
 
@@ -81,16 +82,16 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Stats_Arg()
  */
 #ifndef _WIN32
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %.9f }"
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %li, tot_hiccups: %i, worst_push_time: %.9f }"
 #else
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %.7f }"
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %lli, tot_hiccups: %i, worst_push_time: %.7f }"
 #endif
 
 /**
  * Defines a format macro for KLS_Stats args.
  * @see KLS_Stats_Fmt
  */
-#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups),(stats.worst_pushcall_time)
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.avg_region_size),(stats.tot_hiccups),(stats.worst_pushcall_time)
 
 /**
  * Defines flags for Koliseo_Temp.
@@ -337,6 +338,8 @@ KLS_Region_List kls_diff(KLS_Region_List, KLS_Region_List);
 bool kls_isLess(KLS_list_element, KLS_list_element);
 bool kls_isEqual(KLS_list_element, KLS_list_element);
 double kls_usageShare(KLS_list_element, Koliseo*);
+ptrdiff_t kls_regionSize(KLS_list_element);
+ptrdiff_t kls_avg_regionSize(Koliseo*);
 void kls_usageReport_toFile(Koliseo*,FILE*);
 void kls_usageReport(Koliseo*);
 ptrdiff_t kls_type_usage(int, Koliseo*);
