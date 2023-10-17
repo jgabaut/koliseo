@@ -90,7 +90,7 @@ bad_size.k:
 
 big_size.k:
 	@echo -en "Building big_size.k test"
-	$(CCOMP) tests/error/big_size.c src/koliseo.c -o tests/error/big_size.k -DKLS_DEBUG_CORE
+	$(CCOMP) tests/ok/big_size.c src/koliseo.c -o tests/ok/big_size.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 basic_run.k:
