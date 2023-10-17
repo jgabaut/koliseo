@@ -3,6 +3,7 @@
 KLS_Conf KLS_DEFAULT_CONF = {
     .kls_autoset_regions = 0,
     .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
+    .kls_reglist_kls_size = 0,
     .kls_autoset_temp_regions = 0,
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
@@ -181,6 +182,7 @@ Koliseo* kls_new(ptrdiff_t size) {
 		kls->has_temp = 0;
 		kls->t_kls = NULL;
 		kls->reglist_kls = NULL;
+        kls->max_regions_kls_alloc_basic = 0;
         kls_set_conf(kls,KLS_DEFAULT_CONF);
         kls->stats = KLS_STATS_DEFAULT;
         kls->conf.kls_log_fp = stderr;
@@ -292,16 +294,19 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
 
                 kls_freeList(kls->regs);
 
-                Koliseo* reglist_kls = kls_new(KLS_REGLIST_ALLOC_KLS_BASIC_SIZE);
+                Koliseo* reglist_kls = NULL;
+                reglist_kls = kls_new(kls->conf.kls_reglist_kls_size);
+
                 if (!reglist_kls) {
                     fprintf(stderr,"[ERROR] [%s()]: Failed to allocate reglist_kls for new Koliseo.\n", __func__);
                     kls_free(kls);
                     exit(EXIT_FAILURE);
                 }
                 kls->reglist_kls = reglist_kls;
+                kls->max_regions_kls_alloc_basic = reglist_kls->size/(sizeof(KLS_Region_List) + sizeof(KLS_Region));
 
                 #ifdef KLS_DEBUG_CORE
-                kls_log(kls,"KLS","Re-Init of KLS_Region_List for kls.");
+                kls_log(kls,"KLS","%s():  Re-Init of KLS_Region_List for kls. Max regions: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                 #endif
                 KLS_Region* kls_header = (KLS_Region*) KLS_PUSH(kls->reglist_kls,KLS_Region, 1);
                 kls_header->begin_offset = 0;
@@ -661,7 +666,13 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
             }
             break;
             case KLS_REGLIST_ALLOC_KLS_BASIC: {
-                reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
+                if (kls_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
+                    reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
+                } else {
+                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+                    kls_free(kls);
+                    exit(EXIT_FAILURE);
+                }
             }
             break;
             default: {
@@ -870,7 +881,33 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	if (kls->conf.kls_autoset_regions == 1) {
-		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+        KLS_Region* reg = NULL;
+        switch (kls->conf.kls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: {
+                reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+            }
+            break;
+            case KLS_REGLIST_ALLOC_KLS_BASIC: {
+                if (kls_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
+                    reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
+                } else {
+                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+                    kls_free(kls);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            break;
+            default: {
+                fprintf(stderr,"[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls,"ERROR","%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.", __func__, kls->conf.kls_reglist_alloc_backend);
+                #endif
+                kls_free(kls);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
+
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
 		reg->type = KLS_None;
@@ -1074,7 +1111,33 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	if (kls->conf.kls_autoset_regions == 1) {
-		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+        KLS_Region* reg = NULL;
+        switch (kls->conf.kls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: {
+                reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+            }
+            break;
+            case KLS_REGLIST_ALLOC_KLS_BASIC: {
+                if (kls_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
+                    reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
+                } else {
+                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+                    kls_free(kls);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            break;
+            default: {
+                fprintf(stderr,"[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls,"ERROR","%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.", __func__, kls->conf.kls_reglist_alloc_backend);
+                #endif
+                kls_free(kls);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
+
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
 		reg->type = type;
@@ -1252,14 +1315,14 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
 		fprintf(fp,"[KLS] Used (Human): { %s }\n", curr_size);
 		#ifndef MINGW32_BUILD
 		fprintf(fp,"[KLS] Offset: { %li }\n", kls->offset);
-		#else
-		fprintf(fp,"[KLS] Offset: { %lli }\n", kls->offset);
-		#endif
-		#ifndef MINGW32_BUILD
 		fprintf(fp,"[KLS] Prev_Offset: { %li }\n\n", kls->prev_offset);
 		#else
+		fprintf(fp,"[KLS] Offset: { %lli }\n", kls->offset);
 		fprintf(fp,"[KLS] Prev_Offset: { %lli }\n\n", kls->prev_offset);
 		#endif
+        if (kls->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
+		    fprintf(fp,"[KLS] Max Regions: { %i }\n", kls->max_regions_kls_alloc_basic);
+        }
 	}
 }
 
