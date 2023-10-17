@@ -21,7 +21,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 1 /**< Represents current patch release.*/
+#define KLS_PATCH 2 /**< Represents current patch release.*/
 
 /**
  * Defines flags for Koliseo.
@@ -123,7 +123,7 @@ static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KL
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -158,6 +158,9 @@ typedef enum KLS_Region_Type {
  */
 #define KLS_REGIONTYPE_MAX KLS_Header
 
+#define KLS_REGION_MAX_NAME_SIZE 15
+#define KLS_REGION_MAX_DESC_SIZE 20
+
 /**
  * Represents an allocated memory region in a Koliseo.
  * @see KLS_PUSH()
@@ -167,10 +170,12 @@ typedef struct KLS_Region {
 	ptrdiff_t begin_offset; /**< Starting offset of memory region.*/
 	ptrdiff_t end_offset; /**< Ending offset of memory region.*/
 	ptrdiff_t size; /**< Size of memory for the KLS_Region.*/
-	char name[255]; /**< Name field for the KLS_Region.*/
-	char desc[255]; /**< Description field for the KLS_Region.*/
+	char name[KLS_REGION_MAX_NAME_SIZE+1]; /**< Name field for the KLS_Region.*/
+	char desc[KLS_REGION_MAX_DESC_SIZE+1]; /**< Description field for the KLS_Region.*/
 	int type; /**< Used to identify which type the KLS_Region holds.*/
 } KLS_Region;
+
+#define KLS_REGIONS_MAX_IMPL(kls) (kls->size)/sizeof(KLS_Region)
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/

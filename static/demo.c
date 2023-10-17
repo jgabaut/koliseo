@@ -34,6 +34,11 @@ int main(int argc, char** argv) {
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
+  #ifndef _WIN32
+  printf("kls size: (%li) kls_region size: (%li)\n", kls->size, sizeof(KLS_Region));
+  printf("Max KLS_Region on this size: %li\n", KLS_REGIONS_MAX_IMPL(kls));
+  #endif
+
   printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
   #ifndef MINGW32_BUILD
