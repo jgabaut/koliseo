@@ -267,6 +267,32 @@ Koliseo* kls_new_traced(ptrdiff_t size, const char* output_path) {
 }
 
 /**
+ * Takes a ptrdiff_t size and a filepath for the trace output file, and the needed parameters for a successful init of the prepared Koliseo.
+ * Calls kls_new_conf() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * @param size The size for Koliseo data field.
+ * @param output_path The filepath for log output.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf()
+ */
+Koliseo* kls_new_traced_AR_KLS(ptrdiff_t size, const char* output_path, ptrdiff_t reglist_kls_size) {
+    #ifndef KLS_DEBUG_CORE
+    fprintf(stderr,"[WARN]    %s(): KLS_DEBUG_CORE is not defined. No tracing allowed.\n", __func__);
+    #endif
+    KLS_Conf k = (KLS_Conf) {
+        .kls_collect_stats = 1,
+        .kls_verbose_lvl = 1,
+        .kls_log_filepath = output_path,
+        .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
+        .kls_reglist_kls_size = reglist_kls_size,
+        .kls_autoset_regions = 1,
+        .kls_autoset_temp_regions = 0,
+    };
+    return kls_new_conf(size,k);
+}
+
+/**
  * Updates the KLS_Conf for the passed Koliseo pointer. Internal usage.
  * @param kls The Koliseo pointer to update.
  * @param conf The KLS_Conf to set.
@@ -677,6 +703,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
                 } else {
                     fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
                         print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
                     }
@@ -903,6 +930,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                 } else {
                     fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
                         print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
                     }
@@ -1137,6 +1165,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                 } else {
                     fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
                         print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
                     }

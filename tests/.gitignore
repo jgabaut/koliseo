@@ -1,5 +1,2 @@
 #ignore test executables
 *.k
-
-#ignore especially long test outputs...
-many_regions.k.stderr

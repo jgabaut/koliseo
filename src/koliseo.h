@@ -279,6 +279,7 @@ Koliseo* kls_new(ptrdiff_t size);
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf);
 Koliseo* kls_new_traced(ptrdiff_t size, const char* output_path);
+Koliseo* kls_new_traced_AR_KLS(ptrdiff_t size, const char* output_path, ptrdiff_t reglist_kls_size);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);

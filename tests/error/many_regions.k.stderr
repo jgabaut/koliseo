@@ -1,0 +1,6 @@
+[KLS       ] [17:13:14] [[kls_set_conf()]:  Preliminary set of conf.kls_log_fp to stderr.]$
+[KLS       ] [17:13:14] [[kls_set_conf()]:  Prepping reglist_kls. Cleaning previous malloc allocation.]$
+[KLS       ] [17:13:14] [kls_set_conf():  Re-Init of KLS_Region_List for kls. Max regions: {204}.]$
+[WARN      ] [17:13:14] [[kls_set_conf()]: kls->conf.kls_log_fp was not NULL. Overriding it.]$
+[ERROR] [kls_push_zero_AR()]:  Exceeding kls->max_regions_kls_alloc_basic: {204}.$
+[INFO]    kls_free(): kls->conf.kls_log_fp is stderr. Not closing it.$
