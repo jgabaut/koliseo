@@ -1,3 +1,6 @@
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef KOLISEO_H_
 #define KOLISEO_H_
 #include <stdio.h>

@@ -1,3 +1,6 @@
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
+
 typedef struct Example {
     int val;
 } Example;
