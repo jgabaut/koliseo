@@ -158,7 +158,15 @@ typedef enum KLS_Region_Type {
  */
 #define KLS_REGIONTYPE_MAX KLS_Header
 
+/**
+ * Defines max size for KLS_Region's name field.
+ * @see KLS_Region
+ */
 #define KLS_REGION_MAX_NAME_SIZE 15
+/**
+ * Defines max size for KLS_Region's desc field.
+ * @see KLS_Region
+ */
 #define KLS_REGION_MAX_DESC_SIZE 20
 
 /**
