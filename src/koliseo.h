@@ -26,12 +26,19 @@
 #define KLS_MINOR 3 /**< Represents current minor release.*/
 #define KLS_PATCH 2 /**< Represents current patch release.*/
 
+typedef enum KLS_RegList_Alloc_Backend {
+    KLS_REGLIST_ALLOC_LIBC=0,
+    KLS_REGLIST_ALLOC_KLS_BASIC,
+    KLS_REGLIST_TOTAL_BACKENDS
+} KLS_RegList_Alloc_Backend;
+
 /**
  * Defines flags for Koliseo.
  * @see Koliseo
  */
 typedef struct KLS_Conf {
     int kls_autoset_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage.*/
+    KLS_RegList_Alloc_Backend kls_reglist_alloc_backend; /**< Sets the backend for the KLS_Regions allocation.*/
     int kls_autoset_temp_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage when operating on a Koliseo_Temp instance.*/
     int kls_collect_stats; /**< If set to 1, make the Koliseo collect performance stats.*/
     int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
@@ -72,13 +79,13 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format string for KLS_Conf.
  * @see KLS_Conf_Arg()
  */
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %i, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_reglist_alloc_backend),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
 
 /**
  * Defines a format string for KLS_Stats.
@@ -140,6 +147,8 @@ void kls_print_title(void);
 
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
+
+#define KLS_REGLIST_ALLOC_KLS_BASIC_SIZE KLS_DEFAULT_SIZE
 
 #ifndef KLS_DEFAULT_ALIGNMENT
 #define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
@@ -225,6 +234,7 @@ typedef struct Koliseo {
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
     KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
 	struct Koliseo_Temp* t_kls; /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
+    struct Koliseo* reglist_kls; /**< When conf.kls_reglist_alloc_backend is KLS_REGLIST_ALLOC_KLS_BASIC, points to the backing kls for regs list.*/
 } Koliseo;
 
 /**
