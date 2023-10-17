@@ -88,6 +88,11 @@ bad_size.k:
 	$(CCOMP) tests/error/bad_size.c src/koliseo.c -o tests/error/bad_size.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
+many_regions.k:
+	@echo -en "Building many_regions.k test"
+	$(CCOMP) tests/error/many_regions.c src/koliseo.c -o tests/error/many_regions.k -DKLS_DEBUG_CORE
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
 big_size.k:
 	@echo -en "Building big_size.k test"
 	$(CCOMP) tests/ok/big_size.c src/koliseo.c -o tests/ok/big_size.k -DKLS_DEBUG_CORE
@@ -98,7 +103,7 @@ basic_run.k:
 	$(CCOMP) tests/ok/basic_run.c src/koliseo.c -o tests/ok/basic_run.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_size.k basic_run.k big_size.k
+anviltest: bad_size.k basic_run.k big_size.k many_regions.k
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"

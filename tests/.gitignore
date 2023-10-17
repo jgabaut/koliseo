@@ -1,4 +1,5 @@
 #ignore test executables
-bad_size.k
-big_size.k
-basic_run.k
+*.k
+
+#ignore especially long test outputs...
+many_regions.k.stderr

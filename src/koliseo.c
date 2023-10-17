@@ -280,6 +280,12 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
 	}
 
     kls->conf = conf;
+    if (kls->conf.kls_log_fp == NULL) {
+        kls->conf.kls_log_fp = stderr;
+        #ifdef KLS_DEBUG_CORE
+        kls_log(kls, "KLS", "[%s()]:  Preliminary set of conf.kls_log_fp to stderr.", __func__);
+        #endif
+    }
 
     switch (kls->conf.kls_reglist_alloc_backend) {
         case KLS_REGLIST_ALLOC_LIBC: {
@@ -670,6 +676,10 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
                     reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
                 } else {
                     fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
+                        print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
+                    }
                     kls_free(kls);
                     exit(EXIT_FAILURE);
                 }
@@ -892,6 +902,10 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                     reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
                 } else {
                     fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
+                        print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
+                    }
                     kls_free(kls);
                     exit(EXIT_FAILURE);
                 }
@@ -1122,6 +1136,10 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                     reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
                 } else {
                     fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
+                        print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
+                    }
                     kls_free(kls);
                     exit(EXIT_FAILURE);
                 }

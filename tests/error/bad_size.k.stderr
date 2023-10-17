@@ -1,2 +1,2 @@
-[ERROR] at kls_new():  invalid requested kls size (-1). Min accepted is: (128).$
+[ERROR] at kls_new():  invalid requested kls size (-1). Min accepted is: (160).$
 [ERROR] [kls_push_zero_AR()]: Passed Koliseo was NULL.$
