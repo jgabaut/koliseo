@@ -69,6 +69,7 @@ int main(int argc, char** argv) {
   KLS_ECHOLIST(kls_reverse(kls,kls->regs));
 
   Koliseo_Temp* temp_kls = kls_temp_start(kls);
+  //temp_kls->conf.kls_autoset_regions = 1; TODO why does this crash?
 
   #ifndef MINGW32_BUILD
   printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls->kls));
