@@ -342,7 +342,7 @@ KLS_Region_List kls_emptyList(void);
 bool kls_empty(KLS_Region_List);
 KLS_list_element kls_head(KLS_Region_List);
 KLS_Region_List kls_tail(KLS_Region_List);
-KLS_Region_List kls_cons(KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_cons(Koliseo*,KLS_list_element, KLS_Region_List);
 
 void kls_freeList(KLS_Region_List);
 #define KLS_FREELIST(kls_list) kls_freeList(kls_list)
@@ -352,18 +352,18 @@ void kls_showList_toFile(KLS_Region_List, FILE* fp);
 #define KLS_PRINTLIST(kls_list,file) kls_showList_toFile(kls_list,file)
 bool kls_member(KLS_list_element, KLS_Region_List);
 int kls_length(KLS_Region_List);
-KLS_Region_List kls_append(KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_reverse(KLS_Region_List);
-KLS_Region_List kls_copy(KLS_Region_List);
-KLS_Region_List kls_delete(KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_append(Koliseo*,KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_reverse(Koliseo*,KLS_Region_List);
+KLS_Region_List kls_copy(Koliseo*,KLS_Region_List);
+KLS_Region_List kls_delete(Koliseo*,KLS_list_element, KLS_Region_List);
 
-KLS_Region_List kls_insord(KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_insord(Koliseo*,KLS_list_element, KLS_Region_List);
 #define KLS_PUSHLIST(reg,kls_list) kls_insord(reg,kls_list)
 KLS_Region_List kls_insord_p(KLS_list_element, KLS_Region_List);
 #define KLS_PUSHLIST_P(reg,kls_list) kls_insord_p(reg,kls_list)
-KLS_Region_List kls_mergeList(KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_intersect(KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_diff(KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_mergeList(Koliseo*,KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_intersect(Koliseo*,KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_diff(Koliseo*,KLS_Region_List, KLS_Region_List);
 
 #define KLS_DIFF(kls_list1,kls_list2) kls_diff(kls_list1,kls_list2)
 bool kls_isLess(KLS_list_element, KLS_list_element);

@@ -6,7 +6,7 @@ int main(void) {
 
     int iter=1;
     while(true) {
-        int* dummy = KLS_PUSH(kls,int,1);
+        int* dummy = KLS_PUSH_TYPED(kls,int,1, KLS_None, "foo", "bar");
     }
     kls_free(kls);
     return 0;

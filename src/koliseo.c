@@ -186,6 +186,7 @@ Koliseo* kls_new(ptrdiff_t size) {
         kls_set_conf(kls,KLS_DEFAULT_CONF);
         kls->stats = KLS_STATS_DEFAULT;
         kls->conf.kls_log_fp = stderr;
+        kls->regs = NULL;
 		#ifdef KLS_DEBUG_CORE
 		kls_log(kls,"KLS","API Level { %i } ->  Allocated (%s) for new KLS.",int_koliseo_version(),h_size);
 	    kls_log(kls,"KLS","KLS offset: { %p }.", kls);
@@ -203,11 +204,12 @@ Koliseo* kls_new(ptrdiff_t size) {
             kls_header->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
 			strncpy(kls_header->desc,"Sizeof Koliseo header",KLS_REGION_MAX_DESC_SIZE);
             kls_header->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-			KLS_Region_List reglist = kls_emptyList();
-			reglist = kls_cons(kls_header,reglist);
-			kls->regs = reglist;
+			//KLS_Region_List reglist = kls_emptyList();
+			//reglist = kls_cons(kls,kls_header,reglist);
+			//kls->regs = reglist;
+			kls->regs = kls_cons(kls,kls_header,kls->regs);
 			if (kls->regs == NULL) {
-			  fprintf(stderr,"[KLS] kls_new() failed to get a KLS_Region_List.\n");
+			  fprintf(stderr,"[KLS] [%s()]: failed to get a KLS_Region_List.\n", __func__);
 			  exit(EXIT_FAILURE);
 			}
 		} else {
@@ -335,11 +337,12 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
                     exit(EXIT_FAILURE);
                 }
                 kls->reglist_kls = reglist_kls;
-                kls->max_regions_kls_alloc_basic = reglist_kls->size/(sizeof(KLS_Region_List) + sizeof(KLS_Region));
+                kls->max_regions_kls_alloc_basic = (reglist_kls->size - sizeof(Koliseo))/(sizeof(KLS_region_list_item) + sizeof(KLS_Region));
 
                 #ifdef KLS_DEBUG_CORE
                 kls_log(kls,"KLS","%s():  Re-Init of KLS_Region_List for kls. Max regions: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                 #endif
+                kls->regs = NULL;
                 KLS_Region* kls_header = (KLS_Region*) KLS_PUSH(kls->reglist_kls,KLS_Region, 1);
                 kls_header->begin_offset = 0;
                 kls_header->end_offset = kls->offset;
@@ -348,9 +351,10 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
                 kls_header->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
                 strncpy(kls_header->desc,"Sizeof Koliseo header",KLS_REGION_MAX_DESC_SIZE);
                 kls_header->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-                KLS_Region_List reglist = kls_emptyList();
-                reglist = kls_cons(kls_header,reglist);
-                kls->regs = reglist;
+                //KLS_Region_List reglist = kls_emptyList();
+                //reglist = kls_cons(kls,kls_header,reglist);
+                //kls->regs = reglist;
+                kls->regs = kls_cons(kls,kls_header,kls->regs);
                 if (kls->regs == NULL) {
                   fprintf(stderr,"[KLS] %s() failed to get a KLS_Region_List.\n.", __func__);
                   kls_free(kls);
@@ -378,7 +382,9 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
 
     if (kls->conf.kls_verbose_lvl > 0) {
         if (kls->conf.kls_log_fp != NULL) {
+            #ifdef KLS_DEBUG_CORE
             kls_log(kls,"WARN","[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.", __func__);
+            #endif
             if (kls->conf.kls_collect_stats == 1) {
                 kls->stats.tot_hiccups += 1;
             }
@@ -729,9 +735,10 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
 		strncpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC,KLS_REGION_MAX_DESC_SIZE);
         reg->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(reg,reglist);
-		kls->regs = kls_append(reglist, kls->regs);
+		//KLS_Region_List reglist = kls_emptyList();
+		//reglist = kls_cons(kls,reg,reglist);
+		//kls->regs = kls_append(kls,reglist, kls->regs);
+		kls->regs = kls_cons(kls,reg,kls->regs);
 	}
 
 	char h_size[200];
@@ -755,7 +762,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -829,9 +836,10 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
 		strncpy(reg->desc,KOLISEO_DEFAULT_REGION_DESC, KLS_REGION_MAX_DESC_SIZE);
         reg->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(reg,reglist);
-		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
+		//KLS_Region_List reglist = kls_emptyList();
+		//reglist = kls_cons(kls,reg,reglist);
+		//t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
+		t_kls->t_regs = kls_cons(kls,reg,t_kls->t_regs);
 	}
 
 	char h_size[200];
@@ -957,9 +965,10 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
 		strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
         reg->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(reg,reglist);
-		kls->regs = kls_append(reglist, kls->regs);
+		//KLS_Region_List reglist = kls_emptyList();
+		//reglist = kls_cons(kls,reg,reglist);
+		//kls->regs = kls_append(kls,reglist, kls->regs);
+		kls->regs = kls_cons(kls,reg,kls->regs);
 
 		char h_size[200];
 		kls_formatSize(size*count,h_size,sizeof(h_size));
@@ -985,7 +994,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -1063,9 +1072,10 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
 		strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
         reg->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(reg,reglist);
-		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
+		//KLS_Region_List reglist = kls_emptyList();
+		//reglist = kls_cons(kls,reg,reglist);
+		//t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
+		t_kls->t_regs = kls_cons(kls,reg,t_kls->t_regs);
 
 		char h_size[200];
 		kls_formatSize(size,h_size,sizeof(h_size));
@@ -1091,7 +1101,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -1192,9 +1202,10 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
 		strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
         reg->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(reg,reglist);
-		kls->regs = kls_append(reglist, kls->regs);
+		//KLS_Region_List reglist = kls_emptyList();
+		//reglist = kls_cons(kls,reg,reglist);
+		//kls->regs = kls_append(kls,reglist, kls->regs);
+		kls->regs = kls_cons(kls,reg,kls->regs);
 
 		char h_size[200];
 		kls_formatSize(size*count,h_size,sizeof(h_size));
@@ -1220,7 +1231,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -1297,9 +1308,10 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
 		strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
         reg->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
-		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(reg,reglist);
-		t_kls->t_regs = kls_append(reglist, t_kls->t_regs);
+		//KLS_Region_List reglist = kls_emptyList();
+		//reglist = kls_cons(kls,reg,reglist);
+		//t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
+		t_kls->t_regs = kls_cons(kls,reg,t_kls->t_regs);
 
 		char h_size[200];
 		kls_formatSize(size*count,h_size,sizeof(h_size));
@@ -1325,7 +1337,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -1362,13 +1374,15 @@ void print_kls_2file(FILE* fp, Koliseo* kls) {
 		fprintf(fp,"[KLS] Used (Human): { %s }\n", curr_size);
 		#ifndef MINGW32_BUILD
 		fprintf(fp,"[KLS] Offset: { %li }\n", kls->offset);
-		fprintf(fp,"[KLS] Prev_Offset: { %li }\n\n", kls->prev_offset);
+		fprintf(fp,"[KLS] Prev_Offset: { %li }\n", kls->prev_offset);
 		#else
 		fprintf(fp,"[KLS] Offset: { %lli }\n", kls->offset);
-		fprintf(fp,"[KLS] Prev_Offset: { %lli }\n\n", kls->prev_offset);
+		fprintf(fp,"[KLS] Prev_Offset: { %lli }\n", kls->prev_offset);
 		#endif
         if (kls->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
-		    fprintf(fp,"[KLS] Max Regions: { %i }\n", kls->max_regions_kls_alloc_basic);
+		    fprintf(fp,"[KLS] Max Regions: { %i }\n\n", kls->max_regions_kls_alloc_basic);
+        } else {
+		    fprintf(fp,"\n");
         }
 	}
 }
@@ -1658,7 +1672,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 	int x = 2;
 	int quit = 0;
 	mvwprintw(win, y++, x, "KLS_Region_List data:");
-	KLS_Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls,kls->regs);
 	do {
 		wclear(win);
 		y = 3;
@@ -1741,7 +1755,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 	int x = 2;
 	int quit = 0;
 	mvwprintw(win, y++, x, "KLS_Region_List data:");
-	KLS_Region_List rl = kls_copy(t_kls->t_regs);
+	KLS_Region_List rl = kls_copy(kls_ref,t_kls->t_regs);
 	do {
 		wclear(win);
 		y = 3;
@@ -1846,6 +1860,7 @@ void kls_free(Koliseo* kls) {
     }
     if (kls->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
         kls_free(kls->reglist_kls);
+        //free(kls->reglist_kls);
     } else {
 	    kls_freeList(kls->regs);
     }
@@ -1872,7 +1887,27 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	tmp->kls = kls;
 	tmp->prev_offset = prev;
 	tmp->offset = off;
-    tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = kls->conf.kls_autoset_temp_regions};
+    switch (kls->conf.kls_reglist_alloc_backend) {
+        case KLS_REGLIST_ALLOC_LIBC: {
+            tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = kls->conf.kls_autoset_temp_regions};
+        }
+        break;
+        case KLS_REGLIST_ALLOC_KLS_BASIC: {
+            #ifdef KLS_DEBUG_CORE
+            if (kls->conf.kls_autoset_temp_regions == 1) {
+                fprintf(stderr,"[WARN] [%s()]: Won't autoset regions for Koliseo_Temp under KLS_BASIC reglist alloc backend.\n", __func__);
+            }
+            #endif
+            tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = 0};
+        }
+        break;
+        default: {
+            fprintf(stderr,"[ERROR] [%s()]: Invalid kls->conf.kls_reglist_alloc_backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
+            kls_free(kls);
+            exit(EXIT_FAILURE);
+        }
+        break;
+    }
 	kls->has_temp = 1;
 	kls->t_kls = tmp;
 	if (kls->conf.kls_autoset_temp_regions == 1) {
@@ -1888,7 +1923,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		strncpy(temp_kls_header->desc,"Last Reg b4 KLS_T", KLS_REGION_MAX_DESC_SIZE);
         temp_kls_header->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
 		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(temp_kls_header,reglist);
+		reglist = kls_cons(kls,temp_kls_header,reglist);
 		tmp->t_regs = reglist;
 		if (tmp->t_regs == NULL) {
 		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a KLS_Region_List.\n");
@@ -1987,14 +2022,36 @@ KLS_Region_List kls_tail(KLS_Region_List l) {
 		return l->next;
 	}
 }
-KLS_Region_List kls_cons(KLS_list_element e, KLS_Region_List l) {
+KLS_Region_List kls_cons(Koliseo* kls, KLS_list_element e, KLS_Region_List l) {
 	if (e == NULL) {
       #ifdef KLS_DEBUG_CORE
       fprintf(stderr,"[KLS]    %s():  KLS_list_element was NULL.\n", __func__);
       #endif
 	}
+    if (kls == NULL) {
+      fprintf(stderr,"[KLS]    %s():  Koliseo was NULL.\n", __func__);
+      exit(EXIT_FAILURE);
+    }
 	KLS_Region_List t;
-	t = (KLS_Region_List)malloc(sizeof(KLS_region_list_item));
+    switch (kls->conf.kls_reglist_alloc_backend) {
+        case KLS_REGLIST_ALLOC_LIBC: {
+	        t = (KLS_Region_List)malloc(sizeof(KLS_region_list_item));
+        }
+        break;
+        case KLS_REGLIST_ALLOC_KLS_BASIC: {
+	        t = KLS_PUSH(kls->reglist_kls,KLS_region_list_item,1);
+        }
+        break;
+        default: {
+            fprintf(stderr,"[ERROR]    %s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
+            #ifdef KLS_DEBUG_CORE
+            kls_log(kls,"ERROR", "%s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
+            #endif
+            kls_free(kls);
+            exit(EXIT_FAILURE);
+        }
+        break;
+    }
 	t->value = e;
 	t->next = l;
 	return t;
@@ -2087,37 +2144,53 @@ int kls_length(KLS_Region_List l) {
 		return 1 + kls_length(kls_tail(l));
 	}
 }
-KLS_Region_List kls_append(KLS_Region_List l1, KLS_Region_List l2) {
+KLS_Region_List kls_append(Koliseo* kls, KLS_Region_List l1, KLS_Region_List l2) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l1))
 	{
 		return l2;
 	}
 	else
 	{
-		return kls_cons(kls_head(l1), kls_append(kls_tail(l1), l2));
+		return kls_cons(kls,kls_head(l1), kls_append(kls,kls_tail(l1), l2));
 	}
 }
-KLS_Region_List kls_reverse(KLS_Region_List l) {
+KLS_Region_List kls_reverse(Koliseo* kls, KLS_Region_List l) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l))
 	{
 		return kls_emptyList();
 	}
 	else
 	{
-		return kls_append(kls_reverse(kls_tail(l)), kls_cons(kls_head(l), kls_emptyList()));
+		return kls_append(kls,kls_reverse(kls,kls_tail(l)), kls_cons(kls,kls_head(l), kls_emptyList()));
 	}
 }
-KLS_Region_List kls_copy(KLS_Region_List l) {
+KLS_Region_List kls_copy(Koliseo* kls, KLS_Region_List l) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l))
 	{
 		return l;
 	}
 	else
 	{
-		return kls_cons(kls_head(l), kls_copy(kls_tail(l)));
+		return kls_cons(kls, kls_head(l), kls_copy(kls,kls_tail(l)));
 	}
 }
-KLS_Region_List kls_delete(KLS_list_element el, KLS_Region_List l) {
+KLS_Region_List kls_delete(Koliseo* kls, KLS_list_element el, KLS_Region_List l) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l))
 	{
 		return kls_emptyList();
@@ -2130,26 +2203,30 @@ KLS_Region_List kls_delete(KLS_list_element el, KLS_Region_List l) {
 		}
 		else
 		{
-			return kls_cons(kls_head(l), kls_delete(el, kls_tail(l)));
+			return kls_cons(kls,kls_head(l), kls_delete(kls,el, kls_tail(l)));
 		}
 	}
 }
 
-KLS_Region_List kls_insord(KLS_list_element el, KLS_Region_List l) {
+KLS_Region_List kls_insord(Koliseo* kls, KLS_list_element el, KLS_Region_List l) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l))
 	{
-		return kls_cons(el, l);
+		return kls_cons(kls, el, l);
 	}
 	else
 	{
 		//Insert KLS_list_element according to its begin_offset
 		if (el->begin_offset <= kls_head(l)->begin_offset)
 		{
-			return kls_cons(el, l);
+			return kls_cons(kls,el, l);
 		}
 		else
 		{
-			return kls_cons(kls_head(l),kls_insord(el, kls_tail(l)));
+			return kls_cons(kls,kls_head(l),kls_insord(kls,el, kls_tail(l)));
 		}
 	}
 }
@@ -2183,7 +2260,11 @@ KLS_Region_List kls_insord_p(KLS_list_element el, KLS_Region_List l) {
 		return l;
 	}
 }
-KLS_Region_List kls_mergeList(KLS_Region_List l1, KLS_Region_List l2) {
+KLS_Region_List kls_mergeList(Koliseo* kls, KLS_Region_List l1, KLS_Region_List l2) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l1))
 	{
 		return l2;
@@ -2198,23 +2279,27 @@ KLS_Region_List kls_mergeList(KLS_Region_List l1, KLS_Region_List l2) {
 		{
 			if (kls_isLess(kls_head(l1), kls_head(l2)))
 			{
-				return kls_cons(kls_head(l1), kls_mergeList(kls_tail(l1), l2));
+				return kls_cons(kls,kls_head(l1), kls_mergeList(kls,kls_tail(l1), l2));
 			}
 			else
 			{
 				if (kls_isEqual(kls_head(l1), kls_head(l2)))
 				{
-					return kls_cons(kls_head(l1), kls_mergeList(kls_tail(l1), kls_tail(l2)));
+					return kls_cons(kls, kls_head(l1), kls_mergeList(kls, kls_tail(l1), kls_tail(l2)));
 				}
 				else
 				{
-					return kls_cons(kls_head(l2), kls_mergeList(l1, kls_tail(l2)));
+					return kls_cons(kls, kls_head(l2), kls_mergeList(kls, l1, kls_tail(l2)));
 				}
 			}
 		}
 	}
 }
-KLS_Region_List kls_intersect(KLS_Region_List l1, KLS_Region_List l2) {
+KLS_Region_List kls_intersect(Koliseo* kls, KLS_Region_List l1, KLS_Region_List l2) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l1) || kls_empty(l2))
 	{
 		return kls_emptyList();
@@ -2222,15 +2307,19 @@ KLS_Region_List kls_intersect(KLS_Region_List l1, KLS_Region_List l2) {
 
 	if (kls_member(kls_head(l1), l2) && !kls_member(kls_head(l1), kls_tail(l1)))
 	{
-		return kls_cons(kls_head(l1), kls_intersect(kls_tail(l1), l2));
+		return kls_cons(kls,kls_head(l1), kls_intersect(kls, kls_tail(l1), l2));
 	}
 
 	else
 	{
-		return kls_intersect(kls_tail(l1), l2);
+		return kls_intersect(kls,kls_tail(l1), l2);
 	}
 }
-KLS_Region_List kls_diff(KLS_Region_List l1, KLS_Region_List l2) {
+KLS_Region_List kls_diff(Koliseo* kls, KLS_Region_List l1, KLS_Region_List l2) {
+    if (kls == NULL) {
+        fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
 	if (kls_empty(l1) || kls_empty(l2))
 	{
 		return l1;
@@ -2240,11 +2329,11 @@ KLS_Region_List kls_diff(KLS_Region_List l1, KLS_Region_List l2) {
 	{
 		if (!kls_member(kls_head(l1), l2) && !kls_member(kls_head(l1), kls_tail(l1)))
 		{
-			return kls_cons(kls_head(l1), kls_diff(kls_tail(l1), l2));
+			return kls_cons(kls, kls_head(l1), kls_diff(kls, kls_tail(l1), l2));
 		}
 		else
 		{
-			return kls_diff(kls_tail(l1), l2);
+			return kls_diff(kls, kls_tail(l1), l2);
 		}
 	}
 }
@@ -2286,7 +2375,7 @@ ptrdiff_t kls_avg_regionSize(Koliseo* kls) {
 	    fprintf(stderr,"[KLS]    %s():  passed Koliseo was NULL.\n", __func__);
 		return -1;
 	}
-	KLS_Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls,kls->regs);
     ptrdiff_t res = 0;
     int tot_regs = kls_length(rl);
     if (tot_regs > 0) {
@@ -2320,7 +2409,7 @@ void kls_usageReport_toFile(Koliseo* kls, FILE* fp) {
         #endif
 		return;
 	}
-	KLS_Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls,kls->regs);
 	int i = 0;
 	while(!kls_empty(rl)) {
 		fprintf(fp,"Usage for region (%i) [%s]:  [%.3f%%]\n", i, rl->value->name, kls_usageShare(rl->value,kls));
@@ -2338,7 +2427,7 @@ ptrdiff_t kls_type_usage(int type, Koliseo* kls) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
 	}
-	KLS_Region_List rl = kls_copy(kls->regs);
+	KLS_Region_List rl = kls_copy(kls,kls->regs);
 
 	ptrdiff_t res = 0;
 

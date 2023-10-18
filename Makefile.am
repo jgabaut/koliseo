@@ -90,7 +90,17 @@ bad_size.k:
 
 many_regions.k:
 	@echo -en "Building many_regions.k test"
-	$(CCOMP) tests/error/many_regions.c src/koliseo.c -o tests/error/many_regions.k -DKLS_DEBUG_CORE
+	$(CCOMP) tests/error/many_regions.c src/koliseo.c -o tests/error/many_regions.k
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+many_regions_named.k:
+	@echo -en "Building many_regions_named.k test"
+	$(CCOMP) tests/error/many_regions_named.c src/koliseo.c -o tests/error/many_regions_named.k
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+many_regions_typed.k:
+	@echo -en "Building many_regions_typed.k test"
+	$(CCOMP) tests/error/many_regions_typed.c src/koliseo.c -o tests/error/many_regions_typed.k
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 big_size.k:
@@ -103,7 +113,7 @@ basic_run.k:
 	$(CCOMP) tests/ok/basic_run.c src/koliseo.c -o tests/ok/basic_run.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_size.k basic_run.k big_size.k many_regions.k
+anviltest: bad_size.k basic_run.k big_size.k many_regions.k many_regions_named.k many_regions_typed.k
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"

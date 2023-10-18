@@ -35,6 +35,7 @@ int main(int argc, char** argv) {
 
   KLS_Conf kls_config = {
       .kls_autoset_regions = 1,
+      //.kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
       .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
       .kls_reglist_kls_size = KLS_DEFAULT_SIZE,
       .kls_autoset_temp_regions = 1,
@@ -65,7 +66,7 @@ int main(int argc, char** argv) {
   printf("[Show reversed Region list for Koliseo] [pos: %lli]\n",kls_get_pos(kls));
   #endif
 
-  KLS_ECHOLIST(kls_reverse(kls->regs));
+  KLS_ECHOLIST(kls_reverse(kls,kls->regs));
 
   Koliseo_Temp* temp_kls = kls_temp_start(kls);
 
@@ -135,7 +136,7 @@ int main(int argc, char** argv) {
   printf("[Show reversed Region list for Koliseo] [pos: %lli]\n",kls_get_pos(kls));
   #endif
 
-  KLS_ECHOLIST(kls_reverse(kls->regs));
+  KLS_ECHOLIST(kls_reverse(kls,kls->regs));
   printf("[%i] List size\n",kls_length(kls->regs));
 
   printf("[Usage report for Koliseo]\n");
@@ -199,6 +200,9 @@ int main(int argc, char** argv) {
   printf(KLSFmt "\n", KLS_Arg(kls));
   printf(KLS_Stats_Fmt "\n", KLS_Stats_Arg(kls->stats));
 
+  printf("[see Koliseo]\n");
+  print_dbg_kls(kls);
+  print_dbg_kls(kls->reglist_kls);
   printf("[Clear Koliseo]\n");
   kls_clear(kls);
   print_dbg_kls(kls);
