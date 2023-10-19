@@ -193,6 +193,7 @@ typedef struct KLS_Region {
 	ptrdiff_t begin_offset; /**< Starting offset of memory region.*/
 	ptrdiff_t end_offset; /**< Ending offset of memory region.*/
 	ptrdiff_t size; /**< Size of memory for the KLS_Region.*/
+	ptrdiff_t padding; /**< Size of padding for the KLS_Region.*/
 	char name[KLS_REGION_MAX_NAME_SIZE+1]; /**< Name field for the KLS_Region.*/
 	char desc[KLS_REGION_MAX_DESC_SIZE+1]; /**< Description field for the KLS_Region.*/
 	int type; /**< Used to identify which type the KLS_Region holds.*/

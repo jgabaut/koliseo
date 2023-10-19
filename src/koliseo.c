@@ -199,6 +199,8 @@ Koliseo* kls_new(ptrdiff_t size) {
 			KLS_Region* kls_header = (KLS_Region*) malloc(sizeof(KLS_Region));
 			kls_header->begin_offset = 0;
 			kls_header->end_offset = kls->offset;
+			kls_header->size = kls_header->end_offset - kls_header->begin_offset;
+			kls_header->padding = 0;
 			kls_header->type = KLS_Header;
 			strncpy(kls_header->name,"KLS_Header",KLS_REGION_MAX_NAME_SIZE);
             kls_header->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -346,6 +348,8 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
                 KLS_Region* kls_header = (KLS_Region*) KLS_PUSH(kls->reglist_kls,KLS_Region, 1);
                 kls_header->begin_offset = 0;
                 kls_header->end_offset = kls->offset;
+			    kls_header->size = kls_header->end_offset - kls_header->begin_offset;
+			    kls_header->padding = 0;
                 kls_header->type = KLS_Header;
                 strncpy(kls_header->name,"KLS_Header",KLS_REGION_MAX_NAME_SIZE);
                 kls_header->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -363,6 +367,16 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
             } else {
                 #ifdef KLS_DEBUG_CORE
                 kls_log(kls, "KLS", "[%s()]:  Skip prepping reglist_kls. Autoset Regions was: {%i}.", __func__, kls->conf.kls_autoset_regions);
+                #endif
+            }
+            if (kls->conf.kls_autoset_temp_regions == 1) {
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls, "WARN", "[%s()]:  Refusing to autoset_temp_regions.", __func__);
+                #endif
+                kls->conf.kls_autoset_temp_regions = 0;
+            } else {
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls, "WARN", "[%s()]:  No autoset_temp_regions.", __func__);
                 #endif
             }
         }
@@ -425,7 +439,7 @@ void* kls_pop(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
 	}
 	ptrdiff_t padding = -kls->offset & (align -1);
 	if (count > PTRDIFF_MAX/size || (kls->size + kls->offset) < (size*count)) {
-		fprintf(stderr,"[KLS] Failed kls_pop() call.\n");
+		fprintf(stderr,"[KLS] Failed %s() call.\n",__func__);
 		exit(EXIT_FAILURE);
 	}
 	char* p = kls->data + kls->offset - padding - size*count;
@@ -731,6 +745,8 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
         }
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
+		reg->size = reg->end_offset - reg->begin_offset;
+		reg->padding = padding;
 		reg->type = KLS_None;
 		strncpy(reg->name, KOLISEO_DEFAULT_REGION_NAME,KLS_REGION_MAX_NAME_SIZE);
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -832,6 +848,8 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
+		reg->size = reg->end_offset - reg->begin_offset;
+		reg->padding = padding;
 		reg->type = KLS_None;
 		strncpy(reg->name, KOLISEO_DEFAULT_REGION_NAME, KLS_REGION_MAX_NAME_SIZE);
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -962,6 +980,8 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
+		reg->size = reg->end_offset - reg->begin_offset;
+		reg->padding = padding;
 		reg->type = KLS_None;
 		strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -1069,6 +1089,8 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
+		reg->size = reg->end_offset - reg->begin_offset;
+		reg->padding = padding;
 		reg->type = KLS_None;
 		strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -1200,6 +1222,8 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
 
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
+		reg->size = reg->end_offset - reg->begin_offset;
+		reg->padding = padding;
 		reg->type = type;
 		strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -1306,6 +1330,8 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
+        reg->size = reg->end_offset - reg->begin_offset;
+        reg->padding = padding;
 		reg->type = type;
 		strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
         reg->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
@@ -1676,7 +1702,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 	int quit = 0;
 	mvwprintw(win, y++, x, "KLS_Region_List data:");
 	KLS_Region_List rl = kls->regs;
-	do {
+	while (!quit && !kls_empty(rl)) {
 		wclear(win);
 		y = 3;
 		KLS_list_element e = kls_head(rl);
@@ -1684,8 +1710,12 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 		mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
 		#ifndef MINGW32_BUILD
 		mvwprintw(win, y++, x, "Offsets: { %li } -> { %li }", e->begin_offset, e->end_offset);
+		mvwprintw(win, y++, x, "Size: { %li }", e->size);
+		mvwprintw(win, y++, x, "Padding: { %li }", e->padding);
 		#else
 		mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset, e->end_offset);
+		mvwprintw(win, y++, x, "Size: { %lli }", e->size);
+		mvwprintw(win, y++, x, "Padding: { %lli }", e->padding);
 		#endif
 		mvwprintw(win, y++, x, "KLS_Region_List len: { %i }", kls_length(kls->regs));
 		mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
@@ -1725,7 +1755,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 				break;
 			}
 		} while (!quit && !picked);
-	} while (!quit && !kls_empty(rl));
+	}
 }
 
 /**
@@ -1759,7 +1789,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 	int quit = 0;
 	mvwprintw(win, y++, x, "KLS_Region_List data:");
 	KLS_Region_List rl = t_kls->t_regs;
-	do {
+	while (!quit && !kls_empty(rl)) {
 		wclear(win);
 		y = 3;
 		KLS_list_element e = kls_head(rl);
@@ -1767,8 +1797,12 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 		mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
 		#ifndef MINGW32_BUILD
 		mvwprintw(win, y++, x, "Offsets: { %li } -> { %li }", e->begin_offset, e->end_offset);
+		mvwprintw(win, y++, x, "Size: { %li }", e->size);
+		mvwprintw(win, y++, x, "Padding: { %li }", e->padding);
 		#else
 		mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset, e->end_offset);
+		mvwprintw(win, y++, x, "Size: { %lli }", e->size);
+		mvwprintw(win, y++, x, "Padding: { %lli }", e->padding);
 		#endif
 		mvwprintw(win, y++, x, "KLS_Region_List len: { %i }", kls_length(t_kls->t_regs));
 		//mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
@@ -1808,7 +1842,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 				break;
 			}
 		} while (!quit && !picked);
-	} while (!quit && !kls_empty(rl));
+	}
 }
 #endif
 
@@ -1918,9 +1952,31 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		#ifdef KLS_DEBUG_CORE
 		kls_log(kls,"KLS","Init of KLS_Region_List for temp kls.");
 		#endif
-		KLS_Region* temp_kls_header = (KLS_Region*) malloc(sizeof(KLS_Region));
+		KLS_Region* temp_kls_header = NULL;
+        switch (kls->conf.kls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: {
+                temp_kls_header = (KLS_Region*) malloc(sizeof(KLS_Region));
+            }
+            break;
+            case KLS_REGLIST_ALLOC_KLS_BASIC: {
+                kls_free(kls);
+                assert(0);
+            }
+            break;
+            default: {
+                fprintf(stderr,"[ERROR]    %s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls,"ERROR", "%s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
+                #endif
+                kls_free(kls);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
 		temp_kls_header->begin_offset = tmp->prev_offset;
 		temp_kls_header->end_offset = tmp->offset;
+        temp_kls_header->size = temp_kls_header->end_offset - temp_kls_header->begin_offset;
+        //TODO Padding??
 		temp_kls_header->type = Temp_KLS_Header;
 		strncpy(temp_kls_header->name,"T_KLS_Header", KLS_REGION_MAX_NAME_SIZE);
         temp_kls_header->name[KLS_REGION_MAX_NAME_SIZE-1] = '\0';
