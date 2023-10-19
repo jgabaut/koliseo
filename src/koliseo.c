@@ -552,11 +552,11 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -634,11 +634,11 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -712,6 +712,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
                         kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
                         print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
+                        print_kls_2file(kls->conf.kls_log_fp,kls);
                     }
                     kls_free(kls);
                     exit(EXIT_FAILURE);
@@ -762,11 +763,11 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -858,7 +859,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	kls_log(kls,"KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log(kls,"KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",int_koliseo_version(), h_size);
@@ -941,6 +942,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                         kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
                         print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
+                        print_kls_2file(kls->conf.kls_log_fp,kls);
                     }
                     kls_free(kls);
                     exit(EXIT_FAILURE);
@@ -994,11 +996,11 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -1101,11 +1103,11 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_temp_pushes += 1;
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -1178,6 +1180,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                         kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
                         print_kls_2file(kls->conf.kls_log_fp,kls->reglist_kls);
+                        print_kls_2file(kls->conf.kls_log_fp,kls);
                     }
                     kls_free(kls);
                     exit(EXIT_FAILURE);
@@ -1231,11 +1234,11 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -1337,11 +1340,11 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
     #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_temp_pushes += 1;
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -1672,7 +1675,7 @@ void kls_showList_toWin(Koliseo* kls, WINDOW* win) {
 	int x = 2;
 	int quit = 0;
 	mvwprintw(win, y++, x, "KLS_Region_List data:");
-	KLS_Region_List rl = kls_copy(kls,kls->regs);
+	KLS_Region_List rl = kls->regs;
 	do {
 		wclear(win);
 		y = 3;
@@ -1755,7 +1758,7 @@ void kls_temp_showList_toWin(Koliseo_Temp* t_kls, WINDOW* win) {
 	int x = 2;
 	int quit = 0;
 	mvwprintw(win, y++, x, "KLS_Region_List data:");
-	KLS_Region_List rl = kls_copy(kls_ref,t_kls->t_regs);
+	KLS_Region_List rl = t_kls->t_regs;
 	do {
 		wclear(win);
 		y = 3;
@@ -2375,7 +2378,7 @@ ptrdiff_t kls_avg_regionSize(Koliseo* kls) {
 	    fprintf(stderr,"[KLS]    %s():  passed Koliseo was NULL.\n", __func__);
 		return -1;
 	}
-	KLS_Region_List rl = kls_copy(kls,kls->regs);
+	KLS_Region_List rl = kls->regs;
     ptrdiff_t res = 0;
     int tot_regs = kls_length(rl);
     if (tot_regs > 0) {
@@ -2409,7 +2412,7 @@ void kls_usageReport_toFile(Koliseo* kls, FILE* fp) {
         #endif
 		return;
 	}
-	KLS_Region_List rl = kls_copy(kls,kls->regs);
+	KLS_Region_List rl = kls->regs;
 	int i = 0;
 	while(!kls_empty(rl)) {
 		fprintf(fp,"Usage for region (%i) [%s]:  [%.3f%%]\n", i, rl->value->name, kls_usageShare(rl->value,kls));
@@ -2427,7 +2430,7 @@ ptrdiff_t kls_type_usage(int type, Koliseo* kls) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
 	}
-	KLS_Region_List rl = kls_copy(kls,kls->regs);
+	KLS_Region_List rl = kls->regs;
 
 	ptrdiff_t res = 0;
 
