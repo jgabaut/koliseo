@@ -552,7 +552,7 @@ void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -634,7 +634,7 @@ void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t cou
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	#endif
     if (kls->conf.kls_collect_stats == 1) {
@@ -858,7 +858,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+        //kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	kls_log(kls,"KLS","Curr offset: { %p }.", kls + kls->offset);
 	kls_log(kls,"KLS","API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",int_koliseo_version(), h_size);
