@@ -1899,6 +1899,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
             #ifdef KLS_DEBUG_CORE
             if (kls->conf.kls_autoset_temp_regions == 1) {
                 fprintf(stderr,"[WARN] [%s()]: Won't autoset regions for Koliseo_Temp under KLS_BASIC reglist alloc backend.\n", __func__);
+                kls_log(kls,"WARN","[%s()]: Won't autoset regions for Koliseo_Temp under KLS_BASIC reglist alloc backend.", __func__);
             }
             #endif
             tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = 0};
