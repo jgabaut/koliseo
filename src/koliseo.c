@@ -2022,8 +2022,9 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
             tmp->conf = (KLS_Temp_Conf){
                 .kls_autoset_regions = kls->conf.kls_autoset_temp_regions,
                 .tkls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
+                .kls_reglist_kls_size = kls->conf.kls_reglist_kls_size,
             };
-            tmp->reglist_kls = kls_new(KLS_DEFAULT_SIZE);
+            tmp->reglist_kls = kls_new(tmp->conf.kls_reglist_kls_size);
             tmp->max_regions_kls_alloc_basic = (tmp->reglist_kls->size - sizeof(Koliseo))/(sizeof(KLS_region_list_item) + sizeof(KLS_Region));
         }
         break;
