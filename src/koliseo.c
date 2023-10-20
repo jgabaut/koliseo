@@ -161,9 +161,9 @@ void kls_log(Koliseo* kls, const char* tag, const char* format, ...) {
 Koliseo* kls_new(ptrdiff_t size) {
 	if (size < (ptrdiff_t)sizeof(Koliseo)) {
         #ifndef _WIN32
-        fprintf(stderr,"[ERROR] at %s():  invalid requested kls size (%li). Min accepted is: (%li).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        fprintf(stderr,"[ERROR]    at %s():  invalid requested kls size (%li). Min accepted is: (%li).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
         #else
-        fprintf(stderr,"[ERROR] at %s():  invalid requested kls size (%lli). Min accepted is: (%lli).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
+        fprintf(stderr,"[ERROR]    at %s():  invalid requested kls size (%lli). Min accepted is: (%lli).\n",__func__,size, (ptrdiff_t) sizeof(Koliseo));
         #endif
         //TODO Is it better to abort the program?
         return NULL;
@@ -711,7 +711,7 @@ void* kls_push_zero_AR(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t 
                 if (kls_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
                     reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
                 } else {
-                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+                    fprintf(stderr,"[ERROR]    [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
                         kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
@@ -845,7 +845,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
                 if (kls_length(t_kls->t_regs) < t_kls->max_regions_kls_alloc_basic) {
                     reg = KLS_PUSH(t_kls->reglist_kls,KLS_Region,1);
                 } else {
-                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
+                    fprintf(stderr,"[ERROR]    [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
                         kls_log(kls,"ERROR","[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.", __func__, t_kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(t_kls->t_regs,kls->conf.kls_log_fp);
@@ -976,7 +976,7 @@ void* kls_push_zero_named(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                 if (kls_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
                     reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
                 } else {
-                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+                    fprintf(stderr,"[ERROR]    [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
                         kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
@@ -1117,7 +1117,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
                 if (kls_length(t_kls->t_regs) < t_kls->max_regions_kls_alloc_basic) {
                     reg = KLS_PUSH(t_kls->reglist_kls,KLS_Region,1);
                 } else {
-                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
+                    fprintf(stderr,"[ERROR]    [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
                         kls_log(kls,"ERROR","[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.", __func__, t_kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(t_kls->t_regs,kls->conf.kls_log_fp);
@@ -1249,7 +1249,7 @@ void* kls_push_zero_typed(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff
                 if (kls_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
                     reg = KLS_PUSH(kls->reglist_kls,KLS_Region,1);
                 } else {
-                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
+                    fprintf(stderr,"[ERROR]    [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
                         kls_log(kls,"ERROR","[%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(kls->regs,kls->conf.kls_log_fp);
@@ -1389,7 +1389,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
                 if (kls_length(t_kls->t_regs) < t_kls->max_regions_kls_alloc_basic) {
                     reg = KLS_PUSH(t_kls->reglist_kls,KLS_Region,1);
                 } else {
-                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
+                    fprintf(stderr,"[ERROR]    [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
 	                if (kls->conf.kls_verbose_lvl > 0) {
                         kls_log(kls,"ERROR","[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.", __func__, t_kls->max_regions_kls_alloc_basic);
                         kls_showList_toFile(t_kls->t_regs,kls->conf.kls_log_fp);

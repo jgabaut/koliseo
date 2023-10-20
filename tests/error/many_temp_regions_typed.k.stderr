@@ -1,4 +1,5 @@
 [WARN]    kls_new_traced_AR_KLS(): KLS_DEBUG_CORE is not defined. No tracing allowed.$
 [WARN]    [kls_set_conf()]: KLS_DEBUG_CORE is not defined. Stats may not be collected in full.$
-[ERROR]    [kls_push_zero_AR()]:  Exceeding kls->max_regions_kls_alloc_basic: {169}.$
+[ERROR]    [kls_temp_push_zero_typed()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {169}.$
+[INFO]    kls_free(): kls->conf.kls_log_fp is stderr. Not closing it.$
 [INFO]    kls_free(): kls->conf.kls_log_fp is stderr. Not closing it.$
