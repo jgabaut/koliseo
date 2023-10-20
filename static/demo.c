@@ -1,3 +1,6 @@
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <stdio.h>
 #include <locale.h>
 #include "../src/koliseo.h"
@@ -30,9 +33,23 @@ int main(int argc, char** argv) {
   printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n", int_koliseo_version(), string_koliseo_version());
   printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
 
-  KLS_Conf kls_config = {.kls_autoset_regions = 1, .kls_autoset_temp_regions = 1, .kls_collect_stats = 1, .kls_log_filepath = "./static/debug_log.txt"};
+  KLS_Conf kls_config = {
+      .kls_autoset_regions = 1,
+      //.kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
+      .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
+      .kls_reglist_kls_size = KLS_DEFAULT_SIZE,
+      .kls_autoset_temp_regions = 1,
+      .kls_collect_stats = 1,
+      .kls_log_filepath = "./static/debug_log.txt",
+      .kls_verbose_lvl = 1,
+  };
   printf("[Init Koliseo] [size: %i]\n",KLS_DEFAULT_SIZE);
   Koliseo* kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
+
+  #ifndef _WIN32
+  printf("kls size: (%li) kls_region size: (%li)\n", kls->size, sizeof(KLS_Region));
+  printf("Max KLS_Region on this size: %li\n", KLS_REGIONS_MAX_IMPL(kls));
+  #endif
 
   printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
@@ -45,14 +62,15 @@ int main(int argc, char** argv) {
   print_dbg_kls(kls);
 
   #ifndef MINGW32_BUILD
-  printf("[Show reversed Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
+  printf("[Show Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
   #else
-  printf("[Show reversed Region list for Koliseo] [pos: %lli]\n",kls_get_pos(kls));
+  printf("[Show Region list for Koliseo] [pos: %lli]\n",kls_get_pos(kls));
   #endif
 
-  KLS_ECHOLIST(kls_reverse(kls->regs));
+  KLS_ECHOLIST(kls->regs);
 
   Koliseo_Temp* temp_kls = kls_temp_start(kls);
+  //temp_kls->conf.kls_autoset_regions = 1; TODO why does this crash?
 
   #ifndef MINGW32_BUILD
   printf("[Started Koliseo_Temp] [pos: %li]\n",kls_get_pos(temp_kls->kls));
@@ -115,13 +133,16 @@ int main(int argc, char** argv) {
   printf("\n*p3 is [%i] after KLS_PUSH\n",*p3);
 
   #ifndef MINGW32_BUILD
-  printf("[Show reversed Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
+  printf("[Show Region list for Koliseo] [pos: %li]\n",kls_get_pos(kls));
   #else
-  printf("[Show reversed Region list for Koliseo] [pos: %lli]\n",kls_get_pos(kls));
+  printf("[Show Region list for Koliseo] [pos: %lli]\n",kls_get_pos(kls));
   #endif
 
-  KLS_ECHOLIST(kls_reverse(kls->regs));
+  KLS_ECHOLIST(kls->regs);
   printf("[%i] List size\n",kls_length(kls->regs));
+
+  KLS_ECHOLIST(temp_kls->t_regs);
+  printf("[%i] Temp List size\n",kls_length(temp_kls->t_regs));
 
   printf("[Usage report for Koliseo]\n");
   kls_usageReport(kls);
@@ -184,6 +205,15 @@ int main(int argc, char** argv) {
   printf(KLSFmt "\n", KLS_Arg(kls));
   printf(KLS_Stats_Fmt "\n", KLS_Stats_Arg(kls->stats));
 
+  printf("[Koliseo Info]\n");
+  print_dbg_kls(kls);
+  print_dbg_kls(kls->reglist_kls);
+  KLS_ECHOLIST(kls->regs);
+  printf("[Koliseo_Temp Info]\n");
+  KLS_ECHOLIST(temp_kls->t_regs);
+  print_dbg_kls(temp_kls->reglist_kls);
+  printf("[%i] List size for Koliseo\n",kls_length(kls->regs));
+  printf("[%i] List size for Koliseo_Temp\n",kls_length(temp_kls->t_regs));
   printf("[Clear Koliseo]\n");
   kls_clear(kls);
   print_dbg_kls(kls);

@@ -1,3 +1,6 @@
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef KOLISEO_H_
 #define KOLISEO_H_
 #include <stdio.h>
@@ -21,7 +24,24 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 1 /**< Represents current patch release.*/
+#define KLS_PATCH 2 /**< Represents current patch release.*/
+
+/*! \mainpage Koliseo index page
+ *
+ * \section intro_sec Intro
+ *
+ * Koliseo is a C arena allocator library.
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ *
+ * Check it out on [github](https://github.com/jgabaut/koliseo).
+ */
+
+typedef enum KLS_RegList_Alloc_Backend {
+    KLS_REGLIST_ALLOC_LIBC=0,
+    KLS_REGLIST_ALLOC_KLS_BASIC,
+    KLS_REGLIST_TOTAL_BACKENDS
+} KLS_RegList_Alloc_Backend;
 
 /**
  * Defines flags for Koliseo.
@@ -29,6 +49,8 @@
  */
 typedef struct KLS_Conf {
     int kls_autoset_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage.*/
+    KLS_RegList_Alloc_Backend kls_reglist_alloc_backend; /**< Sets the backend for the KLS_Regions allocation.*/
+    ptrdiff_t kls_reglist_kls_size; /**< Sets the size for reglist_kls when on KLS_REGLIST_ALLOC_KLS_BASIC.*/
     int kls_autoset_temp_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage when operating on a Koliseo_Temp instance.*/
     int kls_collect_stats; /**< If set to 1, make the Koliseo collect performance stats.*/
     int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
@@ -69,13 +91,17 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format string for KLS_Conf.
  * @see KLS_Conf_Arg()
  */
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#ifndef _WIN32
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %i, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#else
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %i, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#endif
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_reglist_alloc_backend),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
 
 /**
  * Defines a format string for KLS_Stats.
@@ -100,20 +126,21 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Conf
  */
 typedef struct KLS_Temp_Conf {
-    int kls_autoset_regions;
+    int kls_autoset_regions; /**< Sets if the Koliseo_Temp will use regions.*/
+    KLS_RegList_Alloc_Backend tkls_reglist_alloc_backend; /**< Sets the backend for the KLS_Regions allocation.*/
 } KLS_Temp_Conf;
 
 /**
  * Defines a format string for KLS_Temp_Conf.
  * @see KLS_Temp_Conf_Arg()
  */
-#define KLS_Temp_Conf_Fmt "KLS_Temp_Conf {autoset_regions: %i}"
+#define KLS_Temp_Conf_Fmt "KLS_Temp_Conf {autoset_regions: %i, tkls_reglist_alloc_backend: %i}"
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Temp_Conf_Fmt
  */
-#define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions)
+#define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.tkls_reglist_alloc_backend)
 
 /**
  * Defines current API version number from KLS_MAJOR, KLS_MINOR and KLS_PATCH.
@@ -123,7 +150,7 @@ static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KL
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -159,6 +186,17 @@ typedef enum KLS_Region_Type {
 #define KLS_REGIONTYPE_MAX KLS_Header
 
 /**
+ * Defines max size for KLS_Region's name field.
+ * @see KLS_Region
+ */
+#define KLS_REGION_MAX_NAME_SIZE 15
+/**
+ * Defines max size for KLS_Region's desc field.
+ * @see KLS_Region
+ */
+#define KLS_REGION_MAX_DESC_SIZE 20
+
+/**
  * Represents an allocated memory region in a Koliseo.
  * @see KLS_PUSH()
  * @see KLS_PUSH_NAMED()
@@ -167,10 +205,13 @@ typedef struct KLS_Region {
 	ptrdiff_t begin_offset; /**< Starting offset of memory region.*/
 	ptrdiff_t end_offset; /**< Ending offset of memory region.*/
 	ptrdiff_t size; /**< Size of memory for the KLS_Region.*/
-	char name[255]; /**< Name field for the KLS_Region.*/
-	char desc[255]; /**< Description field for the KLS_Region.*/
+	ptrdiff_t padding; /**< Size of padding for the KLS_Region.*/
+	char name[KLS_REGION_MAX_NAME_SIZE+1]; /**< Name field for the KLS_Region.*/
+	char desc[KLS_REGION_MAX_DESC_SIZE+1]; /**< Description field for the KLS_Region.*/
 	int type; /**< Used to identify which type the KLS_Region holds.*/
 } KLS_Region;
+
+#define KLS_REGIONS_MAX_IMPL(kls) (kls->size)/sizeof(KLS_Region)
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
@@ -209,6 +250,8 @@ typedef struct Koliseo {
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
     KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
 	struct Koliseo_Temp* t_kls; /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
+    struct Koliseo* reglist_kls; /**< When conf.kls_reglist_alloc_backend is KLS_REGLIST_ALLOC_KLS_BASIC, points to the backing kls for regs list.*/
+    int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
 } Koliseo;
 
 /**
@@ -240,6 +283,8 @@ typedef struct Koliseo_Temp {
 	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
 	KLS_Region_List t_regs; /**< List of temporarily allocated Regions*/
     KLS_Temp_Conf conf; /**< Contains flags to change the Koliseo_Temp behaviour.*/
+    Koliseo* reglist_kls; /**< Reference to the supporting Koliseo when conf.tkls_reglist_alloc_backend is KLS_BASIC.*/
+    int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
 } Koliseo_Temp;
 
 void kls_log(Koliseo* kls, const char* tag, const char* format, ...);
@@ -249,6 +294,7 @@ Koliseo* kls_new(ptrdiff_t size);
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo* kls_new_conf(ptrdiff_t size, KLS_Conf conf);
 Koliseo* kls_new_traced(ptrdiff_t size, const char* output_path);
+Koliseo* kls_new_traced_AR_KLS(ptrdiff_t size, const char* output_path, ptrdiff_t reglist_kls_size);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void* kls_push_zero(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
@@ -311,7 +357,8 @@ KLS_Region_List kls_emptyList(void);
 bool kls_empty(KLS_Region_List);
 KLS_list_element kls_head(KLS_Region_List);
 KLS_Region_List kls_tail(KLS_Region_List);
-KLS_Region_List kls_cons(KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_cons(Koliseo*,KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_t_cons(Koliseo_Temp*,KLS_list_element, KLS_Region_List);
 
 void kls_freeList(KLS_Region_List);
 #define KLS_FREELIST(kls_list) kls_freeList(kls_list)
@@ -321,18 +368,18 @@ void kls_showList_toFile(KLS_Region_List, FILE* fp);
 #define KLS_PRINTLIST(kls_list,file) kls_showList_toFile(kls_list,file)
 bool kls_member(KLS_list_element, KLS_Region_List);
 int kls_length(KLS_Region_List);
-KLS_Region_List kls_append(KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_reverse(KLS_Region_List);
-KLS_Region_List kls_copy(KLS_Region_List);
-KLS_Region_List kls_delete(KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_append(Koliseo*,KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_reverse(Koliseo*,KLS_Region_List);
+KLS_Region_List kls_copy(Koliseo*,KLS_Region_List);
+KLS_Region_List kls_delete(Koliseo*,KLS_list_element, KLS_Region_List);
 
-KLS_Region_List kls_insord(KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_insord(Koliseo*,KLS_list_element, KLS_Region_List);
 #define KLS_PUSHLIST(reg,kls_list) kls_insord(reg,kls_list)
 KLS_Region_List kls_insord_p(KLS_list_element, KLS_Region_List);
 #define KLS_PUSHLIST_P(reg,kls_list) kls_insord_p(reg,kls_list)
-KLS_Region_List kls_mergeList(KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_intersect(KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_diff(KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_mergeList(Koliseo*,KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_intersect(Koliseo*,KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_diff(Koliseo*,KLS_Region_List, KLS_Region_List);
 
 #define KLS_DIFF(kls_list1,kls_list2) kls_diff(kls_list1,kls_list2)
 bool kls_isLess(KLS_list_element, KLS_list_element);
