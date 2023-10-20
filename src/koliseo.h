@@ -26,6 +26,17 @@
 #define KLS_MINOR 3 /**< Represents current minor release.*/
 #define KLS_PATCH 2 /**< Represents current patch release.*/
 
+/*! \mainpage Koliseo index page
+ *
+ * \section intro_sec Intro
+ *
+ * Koliseo is a C arena allocator library.
+ *
+ * SPDX-License-Identifier: GPL-3.0-only
+ *
+ * Check it out on [github](https://github.com/jgabaut/koliseo).
+ */
+
 typedef enum KLS_RegList_Alloc_Backend {
     KLS_REGLIST_ALLOC_LIBC=0,
     KLS_REGLIST_ALLOC_KLS_BASIC,
