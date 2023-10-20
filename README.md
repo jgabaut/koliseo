@@ -6,6 +6,7 @@
 
 + [What is this thing?](#witt)
   + [Basic example](#basic_example)
+  + [Documentation](#docs)
   + [Prerequisites](#prerequisites)
   + [Configuration](#config)
   + [Building](#building)
@@ -52,6 +53,13 @@ int main(void)
     return 0;
 }
 ```
+## Documentation <a name = "docs"></a>
+
+  HTML docs are available at [this Github Pages link](https://jgabaut.github.io/koliseo-docs/index.html).
+
+  You can also get the ready pdf version of the docs from the latest release.
+
+  If you have `doxygen` you can generate the HTML yourself, or even the pdf if you have `doxygen-latex` or equivalents.
 
 ## Prerequisites <a name = "prerequisites"></a>
 
