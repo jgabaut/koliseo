@@ -115,20 +115,21 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Conf
  */
 typedef struct KLS_Temp_Conf {
-    int kls_autoset_regions;
+    int kls_autoset_regions; /**< Sets if the Koliseo_Temp will use regions.*/
+    KLS_RegList_Alloc_Backend tkls_reglist_alloc_backend; /**< Sets the backend for the KLS_Regions allocation.*/
 } KLS_Temp_Conf;
 
 /**
  * Defines a format string for KLS_Temp_Conf.
  * @see KLS_Temp_Conf_Arg()
  */
-#define KLS_Temp_Conf_Fmt "KLS_Temp_Conf {autoset_regions: %i}"
+#define KLS_Temp_Conf_Fmt "KLS_Temp_Conf {autoset_regions: %i, tkls_reglist_alloc_backend: %i}"
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Temp_Conf_Fmt
  */
-#define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions)
+#define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.tkls_reglist_alloc_backend)
 
 /**
  * Defines current API version number from KLS_MAJOR, KLS_MINOR and KLS_PATCH.
@@ -271,6 +272,8 @@ typedef struct Koliseo_Temp {
 	ptrdiff_t prev_offset; /**< Previous position of memory pointer.*/
 	KLS_Region_List t_regs; /**< List of temporarily allocated Regions*/
     KLS_Temp_Conf conf; /**< Contains flags to change the Koliseo_Temp behaviour.*/
+    Koliseo* reglist_kls; /**< Reference to the supporting Koliseo when conf.tkls_reglist_alloc_backend is KLS_BASIC.*/
+    int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
 } Koliseo_Temp;
 
 void kls_log(Koliseo* kls, const char* tag, const char* format, ...);
@@ -344,6 +347,7 @@ bool kls_empty(KLS_Region_List);
 KLS_list_element kls_head(KLS_Region_List);
 KLS_Region_List kls_tail(KLS_Region_List);
 KLS_Region_List kls_cons(Koliseo*,KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_t_cons(Koliseo_Temp*,KLS_list_element, KLS_Region_List);
 
 void kls_freeList(KLS_Region_List);
 #define KLS_FREELIST(kls_list) kls_freeList(kls_list)

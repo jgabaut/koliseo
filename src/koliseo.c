@@ -291,7 +291,7 @@ Koliseo* kls_new_traced_AR_KLS(ptrdiff_t size, const char* output_path, ptrdiff_
         .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
         .kls_reglist_kls_size = reglist_kls_size,
         .kls_autoset_regions = 1,
-        .kls_autoset_temp_regions = 0,
+        .kls_autoset_temp_regions = 1,
     };
     return kls_new_conf(size,k);
 }
@@ -367,16 +367,6 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
             } else {
                 #ifdef KLS_DEBUG_CORE
                 kls_log(kls, "KLS", "[%s()]:  Skip prepping reglist_kls. Autoset Regions was: {%i}.", __func__, kls->conf.kls_autoset_regions);
-                #endif
-            }
-            if (kls->conf.kls_autoset_temp_regions == 1) {
-                #ifdef KLS_DEBUG_CORE
-                kls_log(kls, "WARN", "[%s()]:  Refusing to autoset_temp_regions.", __func__);
-                #endif
-                kls->conf.kls_autoset_temp_regions = 0;
-            } else {
-                #ifdef KLS_DEBUG_CORE
-                kls_log(kls, "WARN", "[%s()]:  No autoset_temp_regions.", __func__);
                 #endif
             }
         }
@@ -844,8 +834,39 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 	memset(p, 0, size*count);
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
+    KLS_Region* reg = NULL;
 	if (t_kls->conf.kls_autoset_regions == 1) {
-		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+        switch (t_kls->conf.tkls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: {
+		        reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+            }
+            break;
+            case KLS_REGLIST_ALLOC_KLS_BASIC: {
+                if (kls_length(t_kls->t_regs) < t_kls->max_regions_kls_alloc_basic) {
+                    reg = KLS_PUSH(t_kls->reglist_kls,KLS_Region,1);
+                } else {
+                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
+	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_log(kls,"ERROR","[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.", __func__, t_kls->max_regions_kls_alloc_basic);
+                        kls_showList_toFile(t_kls->t_regs,kls->conf.kls_log_fp);
+                        print_kls_2file(kls->conf.kls_log_fp,t_kls->reglist_kls);
+                        print_kls_2file(kls->conf.kls_log_fp,kls);
+                    }
+                    kls_free(kls);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            break;
+            default: {
+                fprintf(stderr,"[ERROR]    %s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls,"ERROR", "%s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+                #endif
+                kls_free(kls);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
 		reg->size = reg->end_offset - reg->begin_offset;
@@ -858,7 +879,7 @@ void* kls_temp_push_zero_AR(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align
 		//KLS_Region_List reglist = kls_emptyList();
 		//reglist = kls_cons(kls,reg,reglist);
 		//t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
-		t_kls->t_regs = kls_cons(kls,reg,t_kls->t_regs);
+		t_kls->t_regs = kls_t_cons(t_kls,reg,t_kls->t_regs);
 	}
 
 	char h_size[200];
@@ -1075,7 +1096,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 			fprintf(stderr, "[KLS]  Out of memory. size*count [%lli] was bigger than available-padding [%lli].\n", size*count, available-padding);
 			#endif
 		}
-		fprintf(stderr,"[KLS] Failed kls_push_zero() call.\n");
+		fprintf(stderr,"[KLS] Failed %s() call.\n",__func__);
         kls_free(kls);
 		exit(EXIT_FAILURE);
 		//return 0;
@@ -1086,7 +1107,39 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	if (t_kls->conf.kls_autoset_regions == 1) {
-		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+        KLS_Region* reg = NULL;
+        switch (t_kls->conf.tkls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: {
+		        reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+            }
+            break;
+            case KLS_REGLIST_ALLOC_KLS_BASIC: {
+                if (kls_length(t_kls->t_regs) < t_kls->max_regions_kls_alloc_basic) {
+                    reg = KLS_PUSH(t_kls->reglist_kls,KLS_Region,1);
+                } else {
+                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
+	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_log(kls,"ERROR","[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.", __func__, t_kls->max_regions_kls_alloc_basic);
+                        kls_showList_toFile(t_kls->t_regs,kls->conf.kls_log_fp);
+                        print_kls_2file(kls->conf.kls_log_fp,t_kls->reglist_kls);
+                        print_kls_2file(kls->conf.kls_log_fp,kls);
+                    }
+                    kls_free(kls);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            break;
+            default: {
+                fprintf(stderr,"[ERROR]    %s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls,"ERROR", "%s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+                #endif
+                kls_free(kls);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
+
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
 		reg->size = reg->end_offset - reg->begin_offset;
@@ -1099,7 +1152,7 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		//KLS_Region_List reglist = kls_emptyList();
 		//reglist = kls_cons(kls,reg,reglist);
 		//t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
-		t_kls->t_regs = kls_cons(kls,reg,t_kls->t_regs);
+		t_kls->t_regs = kls_t_cons(t_kls,reg,t_kls->t_regs);
 
 		char h_size[200];
 		kls_formatSize(size,h_size,sizeof(h_size));
@@ -1129,7 +1182,6 @@ void* kls_temp_push_zero_named(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
     #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_temp_pushes += 1;
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
     }
 	return p;
 }
@@ -1327,7 +1379,38 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 	kls->prev_offset = kls->offset;
 	kls->offset += padding + size*count;
 	if (t_kls->conf.kls_autoset_regions == 1) {
-		KLS_Region* reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+        KLS_Region* reg = NULL;
+        switch (t_kls->conf.tkls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: {
+		        reg = (KLS_Region*) malloc(sizeof(KLS_Region));
+            }
+            break;
+            case KLS_REGLIST_ALLOC_KLS_BASIC: {
+                if (kls_length(t_kls->t_regs) < t_kls->max_regions_kls_alloc_basic) {
+                    reg = KLS_PUSH(t_kls->reglist_kls,KLS_Region,1);
+                } else {
+                    fprintf(stderr,"[ERROR] [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n", __func__, t_kls->max_regions_kls_alloc_basic);
+	                if (kls->conf.kls_verbose_lvl > 0) {
+                        kls_log(kls,"ERROR","[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.", __func__, t_kls->max_regions_kls_alloc_basic);
+                        kls_showList_toFile(t_kls->t_regs,kls->conf.kls_log_fp);
+                        print_kls_2file(kls->conf.kls_log_fp,t_kls->reglist_kls);
+                        print_kls_2file(kls->conf.kls_log_fp,kls);
+                    }
+                    kls_free(kls);
+                    exit(EXIT_FAILURE);
+                }
+            }
+            break;
+            default: {
+                fprintf(stderr,"[ERROR]    %s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+                #ifdef KLS_DEBUG_CORE
+                kls_log(kls,"ERROR", "%s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+                #endif
+                kls_free(kls);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
 		reg->begin_offset = kls->prev_offset;
 		reg->end_offset = kls->offset;
         reg->size = reg->end_offset - reg->begin_offset;
@@ -1340,7 +1423,7 @@ void* kls_temp_push_zero_typed(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t al
 		//KLS_Region_List reglist = kls_emptyList();
 		//reglist = kls_cons(kls,reg,reglist);
 		//t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
-		t_kls->t_regs = kls_cons(kls,reg,t_kls->t_regs);
+		t_kls->t_regs = kls_t_cons(t_kls,reg,t_kls->t_regs);
 
 		char h_size[200];
 		kls_formatSize(size*count,h_size,sizeof(h_size));
@@ -1924,19 +2007,24 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 	tmp->kls = kls;
 	tmp->prev_offset = prev;
 	tmp->offset = off;
+    #ifdef KLS_DEBUG_CORE
+    kls_log(kls, "INFO", "Passed kls conf: " KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
+    #endif
     switch (kls->conf.kls_reglist_alloc_backend) {
         case KLS_REGLIST_ALLOC_LIBC: {
-            tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = kls->conf.kls_autoset_temp_regions};
+            tmp->conf = (KLS_Temp_Conf){
+                .kls_autoset_regions = kls->conf.kls_autoset_temp_regions,
+                .tkls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
+            };
         }
         break;
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
-            #ifdef KLS_DEBUG_CORE
-            if (kls->conf.kls_autoset_temp_regions == 1) {
-                fprintf(stderr,"[WARN] [%s()]: Won't autoset regions for Koliseo_Temp under KLS_BASIC reglist alloc backend.\n", __func__);
-                kls_log(kls,"WARN","[%s()]: Won't autoset regions for Koliseo_Temp under KLS_BASIC reglist alloc backend.", __func__);
-            }
-            #endif
-            tmp->conf = (KLS_Temp_Conf){.kls_autoset_regions = 0};
+            tmp->conf = (KLS_Temp_Conf){
+                .kls_autoset_regions = kls->conf.kls_autoset_temp_regions,
+                .tkls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
+            };
+            tmp->reglist_kls = kls_new(KLS_DEFAULT_SIZE);
+            tmp->max_regions_kls_alloc_basic = (tmp->reglist_kls->size - sizeof(Koliseo))/(sizeof(KLS_region_list_item) + sizeof(KLS_Region));
         }
         break;
         default: {
@@ -1953,14 +2041,13 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		kls_log(kls,"KLS","Init of KLS_Region_List for temp kls.");
 		#endif
 		KLS_Region* temp_kls_header = NULL;
-        switch (kls->conf.kls_reglist_alloc_backend) {
+        switch (tmp->conf.tkls_reglist_alloc_backend) {
             case KLS_REGLIST_ALLOC_LIBC: {
                 temp_kls_header = (KLS_Region*) malloc(sizeof(KLS_Region));
             }
             break;
             case KLS_REGLIST_ALLOC_KLS_BASIC: {
-                kls_free(kls);
-                assert(0);
+                temp_kls_header = KLS_PUSH(tmp->reglist_kls,KLS_Region,1);
             }
             break;
             default: {
@@ -1983,10 +2070,10 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		strncpy(temp_kls_header->desc,"Last Reg b4 KLS_T", KLS_REGION_MAX_DESC_SIZE);
         temp_kls_header->desc[KLS_REGION_MAX_DESC_SIZE-1] = '\0';
 		KLS_Region_List reglist = kls_emptyList();
-		reglist = kls_cons(kls,temp_kls_header,reglist);
+		reglist = kls_t_cons(tmp,temp_kls_header,reglist);
 		tmp->t_regs = reglist;
 		if (tmp->t_regs == NULL) {
-		  fprintf(stderr,"[KLS] kls_temp_start() failed to get a KLS_Region_List.\n");
+		  fprintf(stderr,"[KLS] [%s()]: failed to get a KLS_Region_List.\n", __func__);
 		  exit(EXIT_FAILURE);
 		}
 	} else {
@@ -2026,7 +2113,25 @@ void kls_temp_end(Koliseo_Temp* tmp_kls) {
 	}
 
 	if (tmp_kls->conf.kls_autoset_regions == 1) {
-		kls_freeList(tmp_kls->t_regs);
+        switch (tmp_kls->conf.tkls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: {
+                kls_freeList(tmp_kls->t_regs);
+            }
+            break;
+            case KLS_REGLIST_ALLOC_KLS_BASIC: {
+                kls_free(tmp_kls->reglist_kls);
+            }
+            break;
+            default: {
+                fprintf(stderr,"[ERROR]    %s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, tmp_kls->conf.tkls_reglist_alloc_backend);
+                #ifdef KLS_DEBUG_CORE
+                kls_log(tmp_kls->kls,"ERROR", "%s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, tmp_kls->conf.tkls_reglist_alloc_backend);
+                #endif
+                kls_free(tmp_kls->kls);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
 	}
     Koliseo* kls_ref = tmp_kls->kls;
 	#ifdef KLS_DEBUG_CORE
@@ -2108,6 +2213,41 @@ KLS_Region_List kls_cons(Koliseo* kls, KLS_list_element e, KLS_Region_List l) {
             kls_log(kls,"ERROR", "%s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n", __func__, kls->conf.kls_reglist_alloc_backend);
             #endif
             kls_free(kls);
+            exit(EXIT_FAILURE);
+        }
+        break;
+    }
+	t->value = e;
+	t->next = l;
+	return t;
+}
+
+KLS_Region_List kls_t_cons(Koliseo_Temp* t_kls, KLS_list_element e , KLS_Region_List l) {
+	if (e == NULL) {
+      #ifdef KLS_DEBUG_CORE
+      fprintf(stderr,"[KLS]    %s():  KLS_list_element was NULL.\n", __func__);
+      #endif
+	}
+    if (t_kls == NULL) {
+      fprintf(stderr,"[KLS]    %s():  Koliseo_Temp was NULL.\n", __func__);
+      exit(EXIT_FAILURE);
+    }
+	KLS_Region_List t;
+    switch (t_kls->conf.tkls_reglist_alloc_backend) {
+        case KLS_REGLIST_ALLOC_LIBC: {
+	        t = (KLS_Region_List)malloc(sizeof(KLS_region_list_item));
+        }
+        break;
+        case KLS_REGLIST_ALLOC_KLS_BASIC: {
+	        t = KLS_PUSH(t_kls->reglist_kls,KLS_region_list_item,1);
+        }
+        break;
+        default: {
+            fprintf(stderr,"[ERROR]    %s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+            #ifdef KLS_DEBUG_CORE
+            kls_log(t_kls->kls,"ERROR", "%s():  Invalid conf.tkls_reglist_alloc_backend value: {%i}.\n", __func__, t_kls->conf.tkls_reglist_alloc_backend);
+            #endif
+            kls_free(t_kls->kls);
             exit(EXIT_FAILURE);
         }
         break;
