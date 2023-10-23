@@ -2258,6 +2258,14 @@ KLS_Region_List kls_cons(Koliseo* kls, KLS_list_element e, KLS_Region_List l) {
         }
         break;
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
+		if (kls->reglist_kls == NULL) {
+			fprintf(stderr,"[ERROR]   at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+			#ifdef KLS_DEBUG_CORE
+			kls_log(kls,"ERROR","at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+			#endif
+			kls_free(kls);
+			exit(EXIT_FAILURE);
+		}
 	        t = KLS_PUSH(kls->reglist_kls,KLS_region_list_item,1);
         }
         break;
@@ -2485,7 +2493,11 @@ KLS_Region_List kls_insord(Koliseo* kls, KLS_list_element el, KLS_Region_List l)
 	}
 }
 
-KLS_Region_List kls_insord_p(KLS_list_element el, KLS_Region_List l) {
+KLS_Region_List kls_insord_p(Koliseo* kls, KLS_list_element el, KLS_Region_List l) {
+	if (kls == NULL) {
+       	    fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+            exit(EXIT_FAILURE);
+    	}
 	KLS_Region_List pprec, patt = l, paux;
 	bool found = false;
 	pprec = NULL;
@@ -2501,7 +2513,34 @@ KLS_Region_List kls_insord_p(KLS_list_element el, KLS_Region_List l) {
 			pprec = patt; patt = patt->next;
 		}
 	}
-	paux = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
+	switch (kls->conf.kls_reglist_alloc_backend) {
+		case KLS_REGLIST_ALLOC_LIBC: {
+			paux = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
+		}
+		break;
+		case KLS_REGLIST_ALLOC_KLS_BASIC: {
+			if (kls->reglist_kls == NULL) {
+				fprintf(stderr,"[ERROR]   at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+				#ifdef KLS_DEBUG_CORE
+				kls_log(kls,"ERROR","at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+				#endif
+				kls_free(kls);
+				exit(EXIT_FAILURE);
+			}
+			paux = KLS_PUSH(kls->reglist_kls,KLS_region_list_item,1);
+		}
+		break;
+		default: {
+			fprintf(stderr,"[ERROR]    at %s(): Unexpected conf.kls_reglist_alloc_backend value: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend);
+			#ifdef KLS_DEBUG_CORE
+			if (kls->conf.kls_verbose_lvl == 1) {
+				kls_log(kls,"ERROR","at %s(): Unexpected conf.kls_reglist_alloc_backend value: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend);
+			}
+			kls_free(kls);
+			exit(EXIT_FAILURE);
+		}
+		break;
+	}
 	paux->value = el;
 	paux->next = patt;
 	if (patt == l)
