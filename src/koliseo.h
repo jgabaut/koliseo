@@ -216,8 +216,6 @@ typedef struct KLS_Region {
 	int type; /**< Used to identify which type the KLS_Region holds.*/
 } KLS_Region;
 
-#define KLS_REGIONS_MAX_IMPL(kls) (kls->size - sizeof(Koliseo))/(sizeof(KLS_Region) + sizeof(KLS_Region_list_item))
-
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
 
@@ -294,6 +292,7 @@ typedef struct Koliseo_Temp {
 
 void kls_log(Koliseo* kls, const char* tag, const char* format, ...);
 ptrdiff_t kls_get_pos(Koliseo* kls);
+int kls_get_maxRegions_KLS_BASIC(Koliseo* kls);
 
 Koliseo* kls_new(ptrdiff_t size);
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
