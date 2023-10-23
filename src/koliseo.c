@@ -365,7 +365,7 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
                     exit(EXIT_FAILURE);
                 }
                 kls->reglist_kls = reglist_kls;
-                kls->max_regions_kls_alloc_basic = kls_maxRegions_KLS_BASIC(kls);
+                kls->max_regions_kls_alloc_basic = kls_get_maxRegions_KLS_BASIC(kls);
 
                 #ifdef KLS_DEBUG_CORE
                 kls_log(kls,"KLS","%s():  Re-Init of KLS_Region_List for kls. Max regions: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
