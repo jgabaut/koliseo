@@ -2533,9 +2533,8 @@ KLS_Region_List kls_insord_p(Koliseo* kls, KLS_list_element el, KLS_Region_List 
 		default: {
 			fprintf(stderr,"[ERROR]    at %s(): Unexpected conf.kls_reglist_alloc_backend value: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend);
 			#ifdef KLS_DEBUG_CORE
-			if (kls->conf.kls_verbose_lvl == 1) {
-				kls_log(kls,"ERROR","at %s(): Unexpected conf.kls_reglist_alloc_backend value: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend);
-			}
+			kls_log(kls,"ERROR","at %s(): Unexpected conf.kls_reglist_alloc_backend value: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend);
+			#endif
 			kls_free(kls);
 			exit(EXIT_FAILURE);
 		}
