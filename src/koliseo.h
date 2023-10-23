@@ -216,7 +216,7 @@ typedef struct KLS_Region {
 	int type; /**< Used to identify which type the KLS_Region holds.*/
 } KLS_Region;
 
-#define KLS_REGIONS_MAX_IMPL(kls) (kls->size)/sizeof(KLS_Region)
+#define KLS_REGIONS_MAX_IMPL(kls) (kls->size - sizeof(Koliseo))/(sizeof(KLS_Region) + sizeof(KLS_Region_list_item))
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
