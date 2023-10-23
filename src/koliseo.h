@@ -293,6 +293,7 @@ typedef struct Koliseo_Temp {
 void kls_log(Koliseo* kls, const char* tag, const char* format, ...);
 ptrdiff_t kls_get_pos(Koliseo* kls);
 int kls_get_maxRegions_KLS_BASIC(Koliseo* kls);
+int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp* t_kls);
 
 Koliseo* kls_new(ptrdiff_t size);
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
