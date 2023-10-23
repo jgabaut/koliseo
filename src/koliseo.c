@@ -114,6 +114,59 @@ ptrdiff_t kls_get_pos(Koliseo* kls) {
 }
 
 /**
+ * Calcs the max number of possible KLS_PUSH ops when using KLS_BASIC reglist alloc backend.
+ * @return The max number of push ops possible, or -1 in case of error.
+ */
+int kls_get_maxRegions_KLS_BASIC(Koliseo* kls) {
+	if (kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): passed Koliseo was NULL.\n",__func__);
+		#endif
+		return -1;
+	}
+	if (kls->conf.kls_reglist_alloc_backend != KLS_REGLIST_ALLOC_KLS_BASIC) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): conf.kls_reglist_backend was {%i}, expected KLS_REGLIST_ALLOC_KLS_BASIC: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend, KLS_REGLIST_ALLOC_KLS_BASIC);
+		#endif
+		return -1;
+	}
+	if (kls->reglist_kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): passed Koliseo->reglist_kls was NULL.\n",__func__);
+		#endif
+		return -1;
+	}
+	return (kls->reglist_kls->size - sizeof(Koliseo)) / (sizeof(KLS_Region) + sizeof(KLS_region_list_item));
+}
+
+
+/**
+ * Calcs the max number of possible KLS_PUSH_T ops when using KLS_BASIC reglist alloc backend.
+ * @return The max number of temp push ops possible, or -1 in case of error.
+ */
+int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp* t_kls) {
+	if (t_kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): passed Koliseo_Temp was NULL.\n",__func__);
+		#endif
+		return -1;
+	}
+	if (t_kls->conf.tkls_reglist_alloc_backend != KLS_REGLIST_ALLOC_KLS_BASIC) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): conf.tkls_reglist_backend was {%i}, expected KLS_REGLIST_ALLOC_KLS_BASIC: {%i}.\n",__func__,t_kls->conf.tkls_reglist_alloc_backend, KLS_REGLIST_ALLOC_KLS_BASIC);
+		#endif
+		return -1;
+	}
+	if (t_kls->reglist_kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): passed Koliseo_Temp->reglist_kls was NULL.\n",__func__);
+		#endif
+		return -1;
+	}
+	return (t_kls->reglist_kls->size - sizeof(Koliseo)) / (sizeof(KLS_Region) + sizeof(KLS_region_list_item));
+}
+
+/**
  * Logs a message to the log_fp FILE field of the passed Koliseo pointer, if its conf.kls_verbose_lvl is >0.
  * @param kls The Koliseo pointer hosting the log_fp FILE pointer.
  * @param tag Tag for a message.
@@ -339,7 +392,7 @@ bool kls_set_conf(Koliseo* kls, KLS_Conf conf) {
                     exit(EXIT_FAILURE);
                 }
                 kls->reglist_kls = reglist_kls;
-                kls->max_regions_kls_alloc_basic = (reglist_kls->size - sizeof(Koliseo))/(sizeof(KLS_region_list_item) + sizeof(KLS_Region));
+                kls->max_regions_kls_alloc_basic = kls_get_maxRegions_KLS_BASIC(kls);
 
                 #ifdef KLS_DEBUG_CORE
                 kls_log(kls,"KLS","%s():  Re-Init of KLS_Region_List for kls. Max regions: {%i}.", __func__, kls->max_regions_kls_alloc_basic);
@@ -2025,7 +2078,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
                 .kls_reglist_kls_size = kls->conf.kls_reglist_kls_size,
             };
             tmp->reglist_kls = kls_new(tmp->conf.kls_reglist_kls_size);
-            tmp->max_regions_kls_alloc_basic = (tmp->reglist_kls->size - sizeof(Koliseo))/(sizeof(KLS_region_list_item) + sizeof(KLS_Region));
+            tmp->max_regions_kls_alloc_basic = kls_temp_get_maxRegions_KLS_BASIC(tmp);
         }
         break;
         default: {
@@ -2205,6 +2258,14 @@ KLS_Region_List kls_cons(Koliseo* kls, KLS_list_element e, KLS_Region_List l) {
         }
         break;
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
+		if (kls->reglist_kls == NULL) {
+			fprintf(stderr,"[ERROR]   at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+			#ifdef KLS_DEBUG_CORE
+			kls_log(kls,"ERROR","at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+			#endif
+			kls_free(kls);
+			exit(EXIT_FAILURE);
+		}
 	        t = KLS_PUSH(kls->reglist_kls,KLS_region_list_item,1);
         }
         break;
@@ -2432,7 +2493,11 @@ KLS_Region_List kls_insord(Koliseo* kls, KLS_list_element el, KLS_Region_List l)
 	}
 }
 
-KLS_Region_List kls_insord_p(KLS_list_element el, KLS_Region_List l) {
+KLS_Region_List kls_insord_p(Koliseo* kls, KLS_list_element el, KLS_Region_List l) {
+	if (kls == NULL) {
+       	    fprintf(stderr,"[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
+            exit(EXIT_FAILURE);
+    	}
 	KLS_Region_List pprec, patt = l, paux;
 	bool found = false;
 	pprec = NULL;
@@ -2448,7 +2513,33 @@ KLS_Region_List kls_insord_p(KLS_list_element el, KLS_Region_List l) {
 			pprec = patt; patt = patt->next;
 		}
 	}
-	paux = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
+	switch (kls->conf.kls_reglist_alloc_backend) {
+		case KLS_REGLIST_ALLOC_LIBC: {
+			paux = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
+		}
+		break;
+		case KLS_REGLIST_ALLOC_KLS_BASIC: {
+			if (kls->reglist_kls == NULL) {
+				fprintf(stderr,"[ERROR]   at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+				#ifdef KLS_DEBUG_CORE
+				kls_log(kls,"ERROR","at %s(): Koliseo->reglist_kls was NULL.\n",__func__);
+				#endif
+				kls_free(kls);
+				exit(EXIT_FAILURE);
+			}
+			paux = KLS_PUSH(kls->reglist_kls,KLS_region_list_item,1);
+		}
+		break;
+		default: {
+			fprintf(stderr,"[ERROR]    at %s(): Unexpected conf.kls_reglist_alloc_backend value: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend);
+			#ifdef KLS_DEBUG_CORE
+			kls_log(kls,"ERROR","at %s(): Unexpected conf.kls_reglist_alloc_backend value: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend);
+			#endif
+			kls_free(kls);
+			exit(EXIT_FAILURE);
+		}
+		break;
+	}
 	paux->value = el;
 	paux->next = patt;
 	if (patt == l)

@@ -48,7 +48,10 @@ int main(int argc, char** argv) {
 
   #ifndef _WIN32
   printf("kls size: (%li) kls_region size: (%li)\n", kls->size, sizeof(KLS_Region));
-  printf("Max KLS_Region on this size: %li\n", KLS_REGIONS_MAX_IMPL(kls));
+  printf("Max KLS_Region on this size, when reglist alloc backend is KLS_BASIC: %i\n", kls_get_maxRegions_KLS_BASIC(kls));
+  #else
+  printf("kls size: (%lli) kls_region size: (%lli)\n", kls->size, sizeof(KLS_Region));
+  printf("Max KLS_Region on this size, when reglist alloc backend is KLS_BASIC: %i\n", kls_get_maxRegions_KLS_BASIC(kls));
   #endif
 
   printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));

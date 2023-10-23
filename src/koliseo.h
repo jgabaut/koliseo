@@ -24,7 +24,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 3 /**< Represents current patch release.*/
+#define KLS_PATCH 4 /**< Represents current patch release.*/
 
 /*! \mainpage Koliseo index page
  *
@@ -155,7 +155,7 @@ static const int KOLISEO_API_VERSION_INT = (KLS_MAJOR*1000000+KLS_MINOR*10000+KL
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.4"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char* string_koliseo_version(void);
 
@@ -215,8 +215,6 @@ typedef struct KLS_Region {
 	char desc[KLS_REGION_MAX_DESC_SIZE+1]; /**< Description field for the KLS_Region.*/
 	int type; /**< Used to identify which type the KLS_Region holds.*/
 } KLS_Region;
-
-#define KLS_REGIONS_MAX_IMPL(kls) (kls->size)/sizeof(KLS_Region)
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
 static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
@@ -294,6 +292,8 @@ typedef struct Koliseo_Temp {
 
 void kls_log(Koliseo* kls, const char* tag, const char* format, ...);
 ptrdiff_t kls_get_pos(Koliseo* kls);
+int kls_get_maxRegions_KLS_BASIC(Koliseo* kls);
+int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp* t_kls);
 
 Koliseo* kls_new(ptrdiff_t size);
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
@@ -379,14 +379,14 @@ KLS_Region_List kls_copy(Koliseo*,KLS_Region_List);
 KLS_Region_List kls_delete(Koliseo*,KLS_list_element, KLS_Region_List);
 
 KLS_Region_List kls_insord(Koliseo*,KLS_list_element, KLS_Region_List);
-#define KLS_PUSHLIST(reg,kls_list) kls_insord(reg,kls_list)
-KLS_Region_List kls_insord_p(KLS_list_element, KLS_Region_List);
-#define KLS_PUSHLIST_P(reg,kls_list) kls_insord_p(reg,kls_list)
+#define KLS_PUSHLIST(kls,reg,kls_list) kls_insord(kls,reg,kls_list)
+KLS_Region_List kls_insord_p(Koliseo*,KLS_list_element, KLS_Region_List);
+#define KLS_PUSHLIST_P(kls,reg,kls_list) kls_insord_p(kls,reg,kls_list)
 KLS_Region_List kls_mergeList(Koliseo*,KLS_Region_List, KLS_Region_List);
 KLS_Region_List kls_intersect(Koliseo*,KLS_Region_List, KLS_Region_List);
 KLS_Region_List kls_diff(Koliseo*,KLS_Region_List, KLS_Region_List);
 
-#define KLS_DIFF(kls_list1,kls_list2) kls_diff(kls_list1,kls_list2)
+#define KLS_DIFF(kls,kls_list1,kls_list2) kls_diff(kls,kls_list1,kls_list2)
 bool kls_isLess(KLS_list_element, KLS_list_element);
 bool kls_isEqual(KLS_list_element, KLS_list_element);
 double kls_usageShare(KLS_list_element, Koliseo*);
