@@ -2078,7 +2078,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
                 .kls_reglist_kls_size = kls->conf.kls_reglist_kls_size,
             };
             tmp->reglist_kls = kls_new(tmp->conf.kls_reglist_kls_size);
-            tmp->max_regions_kls_alloc_basic = kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp* t_kls);
+            tmp->max_regions_kls_alloc_basic = kls_temp_get_maxRegions_KLS_BASIC(t_kls);
         }
         break;
         default: {
