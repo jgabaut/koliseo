@@ -136,7 +136,7 @@ int kls_get_maxRegions_KLS_BASIC(Koliseo* kls) {
 		#endif
 		return -1;
 	}
-	return (kls->reglist_kls->size - sizeof(Koliseo)) / ((sizeof(KLS_Region) + sizeof(KLS_Region_list_item));
+	return (kls->reglist_kls->size - sizeof(Koliseo)) / (sizeof(KLS_Region) + sizeof(KLS_region_list_item));
 }
 
 
@@ -163,7 +163,7 @@ int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp* t_kls) {
 		#endif
 		return -1;
 	}
-	return (t_kls->reglist_kls->size - sizeof(Koliseo)) / ((sizeof(KLS_Region) + sizeof(KLS_Region_list_item));
+	return (t_kls->reglist_kls->size - sizeof(Koliseo)) / (sizeof(KLS_Region) + sizeof(KLS_region_list_item));
 }
 
 /**
@@ -2078,7 +2078,7 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
                 .kls_reglist_kls_size = kls->conf.kls_reglist_kls_size,
             };
             tmp->reglist_kls = kls_new(tmp->conf.kls_reglist_kls_size);
-            tmp->max_regions_kls_alloc_basic = kls_temp_get_maxRegions_KLS_BASIC(t_kls);
+            tmp->max_regions_kls_alloc_basic = kls_temp_get_maxRegions_KLS_BASIC(tmp);
         }
         break;
         default: {
