@@ -114,6 +114,32 @@ ptrdiff_t kls_get_pos(Koliseo* kls) {
 }
 
 /**
+ * Calcs the max number of possible KLS_PUSH ops when using KLS_BASIC reglist alloc backend.
+ * @return The max number of push ops possible, or -1 in case of error.
+ */
+int kls_get_maxRegions_KLS_BASIC(Koliseo* kls) {
+	if (kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): passed Koliseo was NULL.\n",__func__);
+		#endif
+		return -1;
+	}
+	if (kls->conf.kls_reglist_alloc_backend != KLS_REGLIST_ALLOC_KLS_BASIC) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): conf.kls_reglist_backend was {%i}, expected KLS_REGLIST_ALLOC_KLS_BASIC: {%i}.\n",__func__,kls->conf.kls_reglist_alloc_backend, KLS_REGLIST_ALLOC_KLS_BASIC);
+		#endif
+		return -1;
+	}
+	if (kls->reglist_kls == NULL) {
+		#ifdef KLS_DEBUG_CORE
+		fprintf(stderr,"[ERROR]    %s(): passed Koliseo->reglist_kls was NULL.\n",__func__);
+		#endif
+		return -1;
+	}
+	return (kls->reglist_kls->size - sizeof(Koliseo)) / ((sizeof(KLS_Region) + sizeof(KLS_Region_list_item));
+}
+
+/**
  * Logs a message to the log_fp FILE field of the passed Koliseo pointer, if its conf.kls_verbose_lvl is >0.
  * @param kls The Koliseo pointer hosting the log_fp FILE pointer.
  * @param tag Tag for a message.
