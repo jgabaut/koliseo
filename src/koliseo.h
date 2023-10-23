@@ -379,14 +379,14 @@ KLS_Region_List kls_copy(Koliseo*,KLS_Region_List);
 KLS_Region_List kls_delete(Koliseo*,KLS_list_element, KLS_Region_List);
 
 KLS_Region_List kls_insord(Koliseo*,KLS_list_element, KLS_Region_List);
-#define KLS_PUSHLIST(reg,kls_list) kls_insord(reg,kls_list)
-KLS_Region_List kls_insord_p(KLS_list_element, KLS_Region_List);
-#define KLS_PUSHLIST_P(reg,kls_list) kls_insord_p(reg,kls_list)
+#define KLS_PUSHLIST(kls,reg,kls_list) kls_insord(kls,reg,kls_list)
+KLS_Region_List kls_insord_p(Koliseo*,KLS_list_element, KLS_Region_List);
+#define KLS_PUSHLIST_P(kls,reg,kls_list) kls_insord_p(kls,reg,kls_list)
 KLS_Region_List kls_mergeList(Koliseo*,KLS_Region_List, KLS_Region_List);
 KLS_Region_List kls_intersect(Koliseo*,KLS_Region_List, KLS_Region_List);
 KLS_Region_List kls_diff(Koliseo*,KLS_Region_List, KLS_Region_List);
 
-#define KLS_DIFF(kls_list1,kls_list2) kls_diff(kls_list1,kls_list2)
+#define KLS_DIFF(kls,kls_list1,kls_list2) kls_diff(kls,kls_list1,kls_list2)
 bool kls_isLess(KLS_list_element, KLS_list_element);
 bool kls_isEqual(KLS_list_element, KLS_list_element);
 double kls_usageShare(KLS_list_element, Koliseo*);
