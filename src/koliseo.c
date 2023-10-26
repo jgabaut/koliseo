@@ -2029,7 +2029,9 @@ void kls_free(Koliseo* kls) {
             fprintf(stderr,"[ERROR]    %s(): Failed fclose() on log_fp. Path: {\"%s\"}.", __func__, kls->conf.kls_log_filepath);
         }
     } else if (kls->conf.kls_log_fp == stdout || kls->conf.kls_log_fp == stderr){
-        fprintf(stderr,"[INFO]    %s(): kls->conf.kls_log_fp is %s. Not closing it.\n", __func__, (kls->conf.kls_log_fp == stdout ? "stdout" : "stderr"));
+        if (kls->conf.kls_verbose_lvl > 1) {
+            fprintf(stderr,"[INFO]    %s(): kls->conf.kls_log_fp is %s. Not closing it.\n", __func__, (kls->conf.kls_log_fp == stdout ? "stdout" : "stderr"));
+        }
     }
     if (kls->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
         kls_free(kls->reglist_kls);
@@ -2052,7 +2054,16 @@ Koliseo_Temp* kls_temp_start(Koliseo* kls) {
 		fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo was NULL.\n",__func__);
 		exit(EXIT_FAILURE);
 	}
-	assert(kls->has_temp == 0); //TODO handle this more gracefully
+	if (kls->has_temp != 0) {
+        fprintf(stderr,"[ERROR] [%s()]: Passed Koliseo->has_temp is not 0. {%i}\n",__func__, kls->has_temp);
+        #ifdef KLS_DEBUG_CORE
+        kls_log(kls,"ERROR","[%s()]: Passed Koliseo->has_temp != 0 . {%i}",__func__,kls->has_temp);
+        #endif
+        if (kls->conf.kls_collect_stats == 1) {
+            kls->stats.tot_hiccups += 1;
+        }
+        return NULL;
+    }
 	ptrdiff_t prev = kls->prev_offset;
 	ptrdiff_t off = kls->offset;
 
