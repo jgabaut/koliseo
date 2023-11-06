@@ -48,7 +48,7 @@ PROJECT_NAME           = "koliseo"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = "0.3.5"
+PROJECT_NUMBER         = "0.3.6"
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -1503,7 +1503,7 @@ DOCSET_PUBLISHER_NAME  = Publisher
 # a.o. the download links, offline the HTML help workshop was already many years
 # in maintenance mode). You can download the HTML help workshop from the web
 # archives at Installation executable (see:
-# http://web.archive.org/web/20160201063255/http://download.microsoft.com/downlo
+# http://web.archive.org/web/201602010.3.65/http://download.microsoft.com/downlo
 # ad/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe).
 #
 # The HTML Help Workshop contains a compiler that can convert all HTML output

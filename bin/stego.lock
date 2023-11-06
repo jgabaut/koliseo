@@ -37,3 +37,4 @@ tests# tests folder name
 0.3.3# Fix Koliseo_Temp reglist_kls having a static size
 0.3.4# Add kls_maxRegions_KLS_BASIC, handle KLS_BASIC in kls_insord_p(), fix list macros args
 0.3.5# Shush stderr message, return null on bad kls_temp_start()
+0.3.6#
