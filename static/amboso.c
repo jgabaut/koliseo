@@ -1,5 +1,6 @@
 #include "amboso.h"
 
-char* getAmbosoVersion(void) {
+char *getAmbosoVersion(void)
+{
     return AMBOSO_CV;
 }
