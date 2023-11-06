@@ -39,3 +39,4 @@ tests# tests folder name
 0.3.5# Shush stderr message, return null on bad kls_temp_start()
 0.3.6# Run indent -i4 -linux on all source files
 0.3.7# Switch to astyle for format, bump amboso to 1.6.10
+0.3.8# Bump amboso to 1.6.11
