@@ -151,12 +151,12 @@ typedef struct KLS_Temp_Conf {
  */
 static const int KOLISEO_API_VERSION_INT =
     (KLS_MAJOR * 1000000 + KLS_MINOR * 10000 + KLS_PATCH * 100);
-											      /**< Represents current version with numeric format.*/
+/**< Represents current version with numeric format.*/
 
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.7"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char *string_koliseo_version(void);
 
@@ -164,7 +164,7 @@ const int int_koliseo_version(void);
 
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
 extern char *kls_title[KLS_TITLEROWS + 1];
-					 /**< Contains title banner.*/
+/**< Contains title banner.*/
 
 void kls_print_title_2file(FILE * fp);/**< Prints the title banner to the passed FILE.*/
 void kls_print_title(void);
@@ -300,17 +300,17 @@ Koliseo *kls_new(ptrdiff_t size);
 Koliseo *kls_new_conf(ptrdiff_t size, KLS_Conf conf);
 Koliseo *kls_new_traced(ptrdiff_t size, const char *output_path);
 Koliseo *kls_new_traced_AR_KLS(ptrdiff_t size, const char *output_path,
-			       ptrdiff_t reglist_kls_size);
+                               ptrdiff_t reglist_kls_size);
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void *kls_push_zero(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-		    ptrdiff_t count);
+                    ptrdiff_t count);
 void *kls_push_zero_AR(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-		       ptrdiff_t count);
+                       ptrdiff_t count);
 void *kls_push_zero_named(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-			  ptrdiff_t count, char *name, char *desc);
+                          ptrdiff_t count, char *name, char *desc);
 void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-			  ptrdiff_t count, int type, char *name, char *desc);
+                          ptrdiff_t count, int type, char *name, char *desc);
 void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
 #define KLS_PUSH(kls, type, count) (type*)kls_push_zero_AR(kls, sizeof(type), _Alignof(type), count)
@@ -350,15 +350,15 @@ Koliseo_Temp *kls_temp_start(Koliseo * kls);
 //bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
 void kls_temp_end(Koliseo_Temp * tmp_kls);
 void *kls_temp_push_zero_AR(Koliseo_Temp * t_kls, ptrdiff_t size,
-			    ptrdiff_t align, ptrdiff_t count);
+                            ptrdiff_t align, ptrdiff_t count);
 void *kls_temp_push_zero_named(Koliseo_Temp * t_kls, ptrdiff_t size,
-			       ptrdiff_t align, ptrdiff_t count, char *name,
-			       char *desc);
+                               ptrdiff_t align, ptrdiff_t count, char *name,
+                               char *desc);
 void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
-			       ptrdiff_t align, ptrdiff_t count, int type,
-			       char *name, char *desc);
+                               ptrdiff_t align, ptrdiff_t count, int type,
+                               char *name, char *desc);
 void *kls_temp_pop(Koliseo_Temp * t_kls, ptrdiff_t size, ptrdiff_t align,
-		   ptrdiff_t count);
+                   ptrdiff_t count);
 void print_temp_kls_2file(FILE * fp, Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 
