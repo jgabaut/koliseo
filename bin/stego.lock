@@ -40,3 +40,4 @@ tests# tests folder name
 0.3.6# Run indent -i4 -linux on all source files
 0.3.7# Switch to astyle for format, bump amboso to 1.6.10
 0.3.8# Bump amboso to 1.6.11
+0.3.9# Bump amboso to 1.6.12
