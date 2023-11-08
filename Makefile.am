@@ -128,7 +128,12 @@ basic_run.k:
 	$(CCOMP) tests/ok/basic_run.c src/koliseo.c -o tests/ok/basic_run.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_size.k basic_run.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k
+basic_gulp.k:
+	@echo -en "Building basic_gulp.k test"
+	$(CCOMP) tests/ok/basic_gulp.c src/koliseo.c -o tests/ok/basic_gulp.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+anviltest: bad_size.k basic_run.k basic_gulp.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"
