@@ -3117,12 +3117,14 @@ const char* gulp_res_names[TOT_GULP_RES+1] = {
     [TOT_GULP_RES] = "Total of Gulp_Res values",
 };
 
-const char* string_from_Gulp_Res(Gulp_Res g) {
+const char* string_from_Gulp_Res(Gulp_Res g)
+{
     assert(g >= 0 && g < TOT_GULP_RES && "Unexpected Gulp_Res value");
     return gulp_res_names[g];
 }
 
-static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...) {
+static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...)
+{
     if (!kls) {
         *err = GULP_FILE_KLS_NULL;
         return NULL;
@@ -3157,8 +3159,8 @@ static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, s
             read_length = fread(buffer, 1, length, f);
 
             if (length != read_length) {
-                 *err = GULP_FILE_READ_ERROR;
-                 return NULL;
+                *err = GULP_FILE_READ_ERROR;
+                return NULL;
             }
         }
 
@@ -3167,8 +3169,7 @@ static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, s
         *err = GULP_FILE_OK;
         buffer[length] = '\0';
         *f_size = length;
-    }
-    else {
+    } else {
         *err = GULP_FILE_NOT_EXIST;
 
         return NULL;
@@ -3182,25 +3183,26 @@ static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, s
     }
 }
 
-char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size) {
+char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size)
+{
     static_assert(TOT_GULP_RES == 6, "Number of Gulp_Res changed");
     size_t f_size;
     char * data = NULL;
     data = kls_read_file(kls, filepath, err, &f_size, max_size);
     if (*err != GULP_FILE_OK) {
         switch (*err) {
-            case GULP_FILE_NOT_EXIST:
-            case GULP_FILE_TOO_LARGE:
-            case GULP_FILE_READ_ERROR:
-            case GULP_FILE_CONTAINS_NULLCHAR:
-            case GULP_FILE_KLS_NULL: {
-                fprintf(stderr,"[ERROR]    %s():  {" Gulp_Res_Fmt "}.\n",__func__, Gulp_Res_Arg(*err));
-            }
-            break;
-            default: {
-                fprintf(stderr,"[ERROR]    %s():  Unexpected error {%i}.\n",__func__, *err);
-            }
-            break;
+        case GULP_FILE_NOT_EXIST:
+        case GULP_FILE_TOO_LARGE:
+        case GULP_FILE_READ_ERROR:
+        case GULP_FILE_CONTAINS_NULLCHAR:
+        case GULP_FILE_KLS_NULL: {
+            fprintf(stderr,"[ERROR]    %s():  {" Gulp_Res_Fmt "}.\n",__func__, Gulp_Res_Arg(*err));
+        }
+        break;
+        default: {
+            fprintf(stderr,"[ERROR]    %s():  Unexpected error {%i}.\n",__func__, *err);
+        }
+        break;
         }
         if (*err != GULP_FILE_CONTAINS_NULLCHAR) return NULL;
     } else {
@@ -3214,7 +3216,8 @@ char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, 
     return data;
 }
 
-char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size) {
+char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size)
+{
     Gulp_Res err = -1;
 
     char* res = kls_gulp_file_sized(kls, filepath, &err, max_size);
