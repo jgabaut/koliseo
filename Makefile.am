@@ -27,7 +27,7 @@ AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall
 
 if DEBUG_BUILD
 AM_LDFLAGS += -ggdb -O0
-AM_CFLAGS += -DKLS_DEBUG_CORE
+AM_CFLAGS += -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
 else
 # Linker flag to strip symbols
 AM_LDFLAGS += -s

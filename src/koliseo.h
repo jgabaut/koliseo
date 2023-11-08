@@ -406,4 +406,37 @@ void kls_usageReport_toFile(Koliseo *, FILE *);
 void kls_usageReport(Koliseo *);
 ptrdiff_t kls_type_usage(int, Koliseo *);
 
-#endif
+#ifdef KOLISEO_HAS_GULP /**< This definition controls the inclusion of gulp functions.*/
+
+#ifndef KOLISEO_GULP_H_
+#define KOLISEO_GULP_H_
+
+#define ONEGB_DEC_INT 1073741824
+#define GULP_MAX_FILE_SIZE ONEGB_DEC_INT
+
+typedef enum Gulp_Res {
+    GULP_FILE_OK=0,
+    GULP_FILE_NOT_EXIST,
+    GULP_FILE_TOO_LARGE,
+    GULP_FILE_READ_ERROR,
+    GULP_FILE_CONTAINS_NULLCHAR,
+    GULP_FILE_KLS_NULL,
+    TOT_GULP_RES
+} Gulp_Res;
+
+#define Gulp_Res_Fmt "%s"
+#define Gulp_Res_Arg(gr) (string_from_Gulp_Res((gr)))
+
+extern const char* gulp_res_names[TOT_GULP_RES+1];
+const char* string_from_Gulp_Res(Gulp_Res g);
+
+//static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...);
+char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size);
+char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size);
+#define KLS_GULP_FILE(kls, filepath) try_kls_gulp_file((kls),(filepath), GULP_MAX_FILE_SIZE)
+
+#endif				//KOLISEO_GULP_H_
+
+#endif				//KOLISEO_HAS_GULP
+
+#endif //KOLISEO_H_
