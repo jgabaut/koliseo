@@ -374,7 +374,8 @@ Koliseo *kls_new_traced(ptrdiff_t size, const char *output_path)
  * @see KLS_Conf
  * @see kls_new_conf()
  */
-Koliseo *kls_new_dbg(ptrdiff_t size) {
+Koliseo *kls_new_dbg(ptrdiff_t size)
+{
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
             "[WARN]    %s(): KLS_DEBUG_CORE is not defined. No debugging support.\n",
