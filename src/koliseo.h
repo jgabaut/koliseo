@@ -23,7 +23,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 8 /**< Represents current patch release.*/
+#define KLS_PATCH 9 /**< Represents current patch release.*/
 
 /*! \mainpage Koliseo index page
  *
@@ -156,7 +156,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.8"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.9"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 const char *string_koliseo_version(void);
 
@@ -299,6 +299,7 @@ Koliseo *kls_new(ptrdiff_t size);
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo *kls_new_conf(ptrdiff_t size, KLS_Conf conf);
 Koliseo *kls_new_traced(ptrdiff_t size, const char *output_path);
+Koliseo *kls_new_dbg(ptrdiff_t size);
 Koliseo *kls_new_traced_AR_KLS(ptrdiff_t size, const char *output_path,
                                ptrdiff_t reglist_kls_size);
 
@@ -406,4 +407,37 @@ void kls_usageReport_toFile(Koliseo *, FILE *);
 void kls_usageReport(Koliseo *);
 ptrdiff_t kls_type_usage(int, Koliseo *);
 
-#endif
+#ifdef KOLISEO_HAS_GULP /**< This definition controls the inclusion of gulp functions.*/
+
+#ifndef KOLISEO_GULP_H_
+#define KOLISEO_GULP_H_
+
+#define ONEGB_DEC_INT 1073741824
+#define GULP_MAX_FILE_SIZE ONEGB_DEC_INT
+
+typedef enum Gulp_Res {
+    GULP_FILE_OK=0,
+    GULP_FILE_NOT_EXIST,
+    GULP_FILE_TOO_LARGE,
+    GULP_FILE_READ_ERROR,
+    GULP_FILE_CONTAINS_NULLCHAR,
+    GULP_FILE_KLS_NULL,
+    TOT_GULP_RES
+} Gulp_Res;
+
+#define Gulp_Res_Fmt "%s"
+#define Gulp_Res_Arg(gr) (string_from_Gulp_Res((gr)))
+
+extern const char* gulp_res_names[TOT_GULP_RES+1];
+const char* string_from_Gulp_Res(Gulp_Res g);
+
+//static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...);
+char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size);
+char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size);
+#define KLS_GULP_FILE(kls, filepath) try_kls_gulp_file((kls),(filepath), GULP_MAX_FILE_SIZE)
+
+#endif				//KOLISEO_GULP_H_
+
+#endif				//KOLISEO_HAS_GULP
+
+#endif //KOLISEO_H_
