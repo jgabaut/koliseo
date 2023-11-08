@@ -3188,7 +3188,6 @@ char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, 
     char * data = NULL;
     data = kls_read_file(kls, filepath, err, &f_size, max_size);
     if (*err != GULP_FILE_OK) {
-        // process error
         switch (*err) {
             case GULP_FILE_NOT_EXIST:
             case GULP_FILE_TOO_LARGE:
@@ -3205,8 +3204,6 @@ char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, 
         }
         if (*err != GULP_FILE_CONTAINS_NULLCHAR) return NULL;
     } else {
-        // process data
-        //
         assert(strlen(data) == f_size && "data len should be equal to f_size here!");
         if (!data) {
             assert(0 && "kls_read_file() failed\n");
