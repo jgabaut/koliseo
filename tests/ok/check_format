@@ -1,10 +1,12 @@
 #!/bin/bash
 
+
+pwd
 # Define the source directory
-SRC_DIR="src"
+SRC_DIR="./src"
 
 # Specify the path to the configuration file
-CONFIG_FILE=".astylerc"
+CONFIG_FILE="./.astylerc"
 
 # List of source files
 kls_SOURCES=("$SRC_DIR"/*.c "$SRC_DIR"/*.h)
