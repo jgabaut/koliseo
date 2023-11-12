@@ -454,9 +454,11 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     if (kls->conf.kls_log_fp == NULL) {
         kls->conf.kls_log_fp = stderr;
 #ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
         kls_log(kls, "KLS",
                 "[%s()]:  Preliminary set of conf.kls_log_fp to stderr.",
                 __func__);
+#endif
 #endif
     }
 
@@ -468,9 +470,11 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
         if (kls->conf.kls_autoset_regions == 1) {
 
 #ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
             kls_log(kls, "KLS",
                     "[%s()]:  Prepping reglist_kls. Cleaning previous malloc allocation.",
                     __func__);
+#endif
 #endif
 
             kls_freeList(kls->regs);
@@ -490,9 +494,11 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
                 kls_get_maxRegions_KLS_BASIC(kls);
 
 #ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
             kls_log(kls, "KLS",
                     "%s():  Re-Init of KLS_Region_List for kls. Max regions: {%i}.",
                     __func__, kls->max_regions_kls_alloc_basic);
+#endif
 #endif
             kls->regs = NULL;
             KLS_Region *kls_header =
@@ -522,9 +528,11 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
             }
         } else {
 #ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
             kls_log(kls, "KLS",
                     "[%s()]:  Skip prepping reglist_kls. Autoset Regions was: {%i}.",
                     __func__, kls->conf.kls_autoset_regions);
+#endif
 #endif
         }
     }
@@ -549,9 +557,11 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     if (kls->conf.kls_verbose_lvl > 0) {
         if (kls->conf.kls_log_fp != NULL) {
 #ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
             kls_log(kls, "WARN",
                     "[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.",
                     __func__);
+#endif
 #endif
             if (kls->conf.kls_collect_stats == 1) {
                 kls->stats.tot_hiccups += 1;

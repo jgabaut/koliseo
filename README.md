@@ -19,6 +19,9 @@
   This is a C library for an arena allocator, whose arenas are named Koliseo.
   It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
 
+  It also has a tagging system to type/name your references, and a couple functions to help you estimate relative memory usage by some particular type of object.
+  You can also use it to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+
 ## Basic example <a name = "basic_example"></a>
 
   This is a basic usage example, initialising a Koliseo and then pushing an example pointer.
@@ -53,6 +56,7 @@ int main(void)
     return 0;
 }
 ```
+
 ## Documentation <a name = "docs"></a>
 
   HTML docs are available at [this Github Pages link](https://jgabaut.github.io/koliseo-docs/index.html).
@@ -74,14 +78,19 @@ int main(void)
 
   To prepare the files needed by `autotools`, run:
 
-  - `autoreconf`, which will complain about missing files
-  - `automake --add-missing`, which should provide the missing files
-  - `autoreconf`, which should work now.
+  ```sh
+  aclocal
+  autoconf
+  automake --add-missing
+  ./configure # Optionally, with --enable-debug=yes or --host
+  make
+  ```
 
   You will get a `./configure` script, which you can use to enable debug mode or other features.
 
   - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
   - Run `./configure --enable-debug=yes` to setup the `Makefile` appropriately and build the `demo` binary with `-DKLS_DEBUG_CORE` flag.
+    - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
 
 
 ## Building <a name = "building"></a>
