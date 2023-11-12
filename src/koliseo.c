@@ -1,3 +1,20 @@
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+    Copyright (C) 2023  jgabaut
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 #include "koliseo.h"
 
 KLS_Conf KLS_DEFAULT_CONF = {
@@ -3207,6 +3224,15 @@ static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, s
     }
 }
 
+/**
+ * Tries mapping the passed file on the Koliseo.
+ * Sets the passed Gulp_Res to the result of the operation, .
+ * @param kls The Koliseo to push to.
+ * @param filepath Path to the file to gulp.
+ * @param err Pointer to the Gulp_Res variable to store result.
+ * @param max_size Max size allowed for the read file.
+ * @see KLS_GULP_FILE()
+ */
 char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size)
 {
     static_assert(TOT_GULP_RES == 6, "Number of Gulp_Res changed");
@@ -3240,6 +3266,14 @@ char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, 
     return data;
 }
 
+/**
+ * Tries mapping the passed file on the Koliseo.
+ * @param kls The Koliseo to push to.
+ * @param filepath Path to the file to gulp.
+ * @param max_size Max size allowed for the read file.
+ * @see KLS_GULP_FILE()
+ * @return A pointer to the string with file contents.
+ */
 char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size)
 {
     Gulp_Res err = -1;
