@@ -1,5 +1,20 @@
 // jgabaut @ github.com/jgabaut
 // SPDX-License-Identifier: GPL-3.0-only
+/*
+    Copyright (C) 2023  jgabaut
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 #ifndef KOLISEO_H_
 #define KOLISEO_H_
@@ -23,7 +38,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 9 /**< Represents current patch release.*/
+#define KLS_PATCH 10 /**< Represents current patch release.*/
 
 /*! \mainpage Koliseo index page
  *
@@ -36,6 +51,11 @@
  * Check it out on [github](https://github.com/jgabaut/koliseo).
  */
 
+/**
+ * Defines allocation backend for KLS_Region_List items.
+ * @see Koliseo
+ * @see kls_new_traced_AR_KLS()
+ */
 typedef enum KLS_RegList_Alloc_Backend {
     KLS_REGLIST_ALLOC_LIBC = 0,
     KLS_REGLIST_ALLOC_KLS_BASIC,
@@ -156,10 +176,16 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.9"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.10"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
+/**
+ * Returns current koliseo version as a string.
+ */
 const char *string_koliseo_version(void);
 
+/**
+ * Returns current koliseo version as an integer.
+ */
 const int int_koliseo_version(void);
 
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
@@ -314,9 +340,22 @@ void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc);
 void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
+/**
+ * Macro used to request memory from a Koliseo.
+ */
 #define KLS_PUSH(kls, type, count) (type*)kls_push_zero_AR(kls, sizeof(type), _Alignof(type), count)
+/**
+ * Macro used to request memory from a Koliseo, and assign a name and a description to the region item.
+ */
 #define KLS_PUSH_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named(kls, sizeof(type), _Alignof(type), count, name, desc)
+/**
+ * Macro used to request memory from a Koliseo, and assign a a type, a name and a description to the region item.
+ */
 #define KLS_PUSH_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed(kls, sizeof(type), _Alignof(type), count, region_type, name, desc)
+/**
+ * Macro used to "remove" memory from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
 #define KLS_POP(kls, type, count) (type*)kls_pop(kls, sizeof(type), _Alignof(type), count)
 
 #define KLS_PUSH_ARRAY(kls, type, count) (type*)kls_push_zero(kls, sizeof(type)*(count), _Alignof(type), count)
@@ -412,9 +451,25 @@ ptrdiff_t kls_type_usage(int, Koliseo *);
 #ifndef KOLISEO_GULP_H_
 #define KOLISEO_GULP_H_
 
+/**
+ * Defines a one GB size as decimal integer representation.
+ * @see GULP_MAX_FILE_SIZE
+ * @see GULP_FILE_TOO_LARGE
+ * @see kls_gulp_file_sized()
+ * @see KLS_GULP_FILE()
+ */
 #define ONEGB_DEC_INT 1073741824
+
+/**
+ * Defines max size allowed for a file passed to KLS_GULP_FILE().
+ * Use try_kls_gulp_file() if you want a different upper limit.
+ */
 #define GULP_MAX_FILE_SIZE ONEGB_DEC_INT
 
+/**
+ * Defines possible results for kls_gulp_file_sized().
+ * @see kls_gulp_file_sized().
+ */
 typedef enum Gulp_Res {
     GULP_FILE_OK=0,
     GULP_FILE_NOT_EXIST,
@@ -425,9 +480,19 @@ typedef enum Gulp_Res {
     TOT_GULP_RES
 } Gulp_Res;
 
+/**
+ * Format macro for a Gulp_Res.
+ */
 #define Gulp_Res_Fmt "%s"
+/**
+ * Format matching macro for a Gulp_Res.
+ */
 #define Gulp_Res_Arg(gr) (string_from_Gulp_Res((gr)))
 
+/**
+ * String array for representations of Gulp_Res.
+ * @see string_from_Gulp_Res()
+ */
 extern const char* gulp_res_names[TOT_GULP_RES+1];
 const char* string_from_Gulp_Res(Gulp_Res g);
 
