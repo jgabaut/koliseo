@@ -23,7 +23,7 @@ LDADD = $(KOLISEO_LDFLAGS)
 AM_LDFLAGS = -O2
 
 # Compiler flags
-AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall
+AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall --std=c11
 
 if DEBUG_BUILD
 AM_LDFLAGS += -ggdb -O0

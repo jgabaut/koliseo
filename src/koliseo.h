@@ -17,7 +17,14 @@
 */
 
 #ifndef KOLISEO_H_
+
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) //We need C11
 #define KOLISEO_H_
+
+#ifndef _WIN32
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -504,5 +511,9 @@ char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size);
 #endif				//KOLISEO_GULP_H_
 
 #endif				//KOLISEO_HAS_GULP
+
+#else
+#error "This code requires C11 or later.\n    _Alignof() is not available"
+#endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
 
 #endif //KOLISEO_H_
