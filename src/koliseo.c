@@ -3043,6 +3043,12 @@ KLS_Region_List kls_diff(Koliseo *kls, KLS_Region_List l1, KLS_Region_List l2)
     }
 }
 
+/**
+ * Compares two regions and returns true if the first one has a smaller size.
+ * @param r1 The KLS_Region expected to be smaller
+ * @param r2 The KLS_Region expected to be bigger
+ * @return True if first region size is less than second region size.
+ */
 bool kls_isLess(KLS_Region *r1, KLS_Region *r2)
 {
     //Compare regions by their effective size
@@ -3051,6 +3057,12 @@ bool kls_isLess(KLS_Region *r1, KLS_Region *r2)
     return (s1 < s2);
 }
 
+/**
+ * Compares two regions and returns true if their size is equal.
+ * @param r1 The first KLS_Region
+ * @param r2 The second KLS_Region
+ * @return True if first region size is equal than second region size.
+ */
 bool kls_isEqual(KLS_Region *r1, KLS_Region *r2)
 {
     //Compare regions by their effective size
@@ -3059,6 +3071,12 @@ bool kls_isEqual(KLS_Region *r1, KLS_Region *r2)
     return (s1 == s2);
 }
 
+/**
+ * Returns the ratio of memory used by the passed KLS_Region relative to the passed Koliseo as a double.
+ * @param r The KLS_Region to check relative size for.
+ * @param kls The Koliseo to check on.
+ * @return A double representing percentage usage.
+ */
 double kls_usageShare(KLS_Region *r, Koliseo *kls)
 {
     if (kls == NULL) {
@@ -3074,11 +3092,21 @@ double kls_usageShare(KLS_Region *r, Koliseo *kls)
     return res;
 }
 
+/**
+ * Return size of a passed KLS_Region. Sugar.
+ * @passed r The KLS_Region.
+ * @return Region size as ptrdiff_t.
+ */
 ptrdiff_t kls_regionSize(KLS_Region *r)
 {
     return r->end_offset - r->begin_offset;
 }
 
+/**
+ * Return average region size in usage for the passed Koliseo.
+ * @passed kls The Koliseo to check usage for.
+ * @return Average region size as ptrdiff_t.
+ */
 ptrdiff_t kls_avg_regionSize(Koliseo *kls)
 {
     if (kls == NULL) {
@@ -3106,6 +3134,12 @@ ptrdiff_t kls_avg_regionSize(Koliseo *kls)
     return res;
 }
 
+/**
+ * Prints an usage report for the passed Koliseo to the passed file.
+ * @see kls_usageShare()
+ * @param kls The Koliseo to check.
+ * @param fp The file pointer to print to.
+ */
 void kls_usageReport_toFile(Koliseo *kls, FILE *fp)
 {
     if (kls == NULL) {
@@ -3131,11 +3165,23 @@ void kls_usageReport_toFile(Koliseo *kls, FILE *fp)
     }
 }
 
+/**
+ * Print usage report for passed Koliseo to stdout.
+ * @see kls_usageReport_toFile()
+ * @param kls The Koliseo to print info for.
+ */
 void kls_usageReport(Koliseo *kls)
 {
     kls_usageReport_toFile(kls, stdout);
 }
 
+/**
+ * Calc memory used by the specific type of KLS_list_element.
+ * @see KLS_Region_List
+ * @param type The integer corresponding to element->type
+ * @param kls The Koliseo to check usage for.
+ * @return The used memory size as ptrdiff_t.
+ */
 ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 {
     if (kls == NULL) {
@@ -3158,6 +3204,11 @@ ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 }
 
 #ifdef KOLISEO_HAS_GULP
+
+/**
+ * Contains the constant string representation of Gulp_Res values.
+ * @see Gulp_Res
+ */
 const char* gulp_res_names[TOT_GULP_RES+1] = {
     [GULP_FILE_OK] = "Success",
     [GULP_FILE_NOT_EXIST] = "File does not exist",
@@ -3168,6 +3219,13 @@ const char* gulp_res_names[TOT_GULP_RES+1] = {
     [TOT_GULP_RES] = "Total of Gulp_Res values",
 };
 
+/**
+ * Return a constant string for the passed Gulp_Res.
+ * @see gulp_res_names
+ * @see Gulp_Res
+ * @param g The Gulp_Res to get a string for.
+ * @return A constant string representation of passed Gulp_Res.
+ */
 const char* string_from_Gulp_Res(Gulp_Res g)
 {
     assert(g >= 0 && g < TOT_GULP_RES && "Unexpected Gulp_Res value");
