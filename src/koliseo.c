@@ -3232,6 +3232,13 @@ const char* string_from_Gulp_Res(Gulp_Res g)
     return gulp_res_names[g];
 }
 
+/**
+ * Returns a new Kstr with the passed args set.
+ * @see Kstr
+ * @param data The string pointer to set.
+ * @param len The len to set.
+ * @return The resulting Kstr.
+ */
 Kstr kstr_new(const char* data, size_t len)
 {
     return (Kstr) {
@@ -3240,12 +3247,26 @@ Kstr kstr_new(const char* data, size_t len)
     };
 }
 
+/**
+ * Returns a new Kstr from the passed null-terminated string.
+ * @see Kstr
+ * @param c_lit The cstring pointer to set.
+ * @return The resulting Kstr.
+ */
 Kstr kstr_from_c_lit(const char* c_lit)
 {
     return kstr_new(c_lit, strlen(c_lit));
 }
 
-bool kstr_eq(Kstr left, Kstr right) {
+/**
+ * Checks if the two passed Kstr have exactly equal data.
+ * @see Kstr
+ * @param left The first Kstr to compare.
+ * @param right The second Kstr to compare.
+ * @return A bool result for the comparation.
+ */
+bool kstr_eq(Kstr left, Kstr right)
+{
     if (left.len != right.len) {
         return false;
     }
@@ -3256,7 +3277,15 @@ bool kstr_eq(Kstr left, Kstr right) {
     return true;
 }
 
-bool kstr_eq_ignorecase(Kstr left, Kstr right) {
+/**
+ * Checks if the two passed Kstr have equal data, ignoring case.
+ * @see Kstr
+ * @param left The first Kstr to compare.
+ * @param right The second Kstr to compare.
+ * @return A bool result for the comparation.
+ */
+bool kstr_eq_ignorecase(Kstr left, Kstr right)
+{
     if (left.len != right.len) {
         return false;
     }
@@ -3274,6 +3303,49 @@ bool kstr_eq_ignorecase(Kstr left, Kstr right) {
     return true;
 }
 
+/**
+ * Cuts the passed Kstr by up to n chars, from the left. Returns cut portion as a new Kstr.
+ * @see Kstr
+ * @param k The Kstr to cut.
+ * @param n How many chars to cut.
+ * @return The cut part as a new Kstr.
+ */
+Kstr kstr_cut_l(Kstr *k, size_t n)
+{
+    if (n > k->len) {
+        n = k->len;
+    }
+    Kstr res = kstr_new(k->data, n);
+    k->data += n;
+    k->len -= n;
+
+    return res;
+}
+
+/**
+ * Cuts the passed Kstr by up to n chars, from the right. Returns cut portion as a new Kstr.
+ * @see Kstr
+ * @param k The Kstr to cut.
+ * @param n How many chars to cut.
+ * @return The cut part as a new Kstr.
+ */
+Kstr kstr_cut_r(Kstr *k, size_t n)
+{
+    if (n > k->len) {
+        n = k->len;
+    }
+    Kstr res = kstr_new(k->data + k->len - n, n);
+    k->len -= n;
+
+    return res;
+}
+
+/**
+ * Returns a new Kstr after removing heading spaces from the passed one.
+ * @see Kstr
+ * @param kstr The Kstr to trim.
+ * @return The resulting Kstr.
+ */
 Kstr kstr_trim_left(Kstr kstr)
 {
     size_t i = 0;
@@ -3282,6 +3354,13 @@ Kstr kstr_trim_left(Kstr kstr)
     }
     return kstr_new(kstr.data + i, kstr.len - i);
 }
+
+/**
+ * Returns a new Kstr after removing trailing spaces from the passed one.
+ * @see Kstr
+ * @param kstr The Kstr to trim.
+ * @return The resulting Kstr.
+ */
 Kstr kstr_trim_right(Kstr kstr)
 {
     size_t i = 0;
@@ -3290,6 +3369,15 @@ Kstr kstr_trim_right(Kstr kstr)
     }
     return kstr_new(kstr.data, kstr.len - i);
 }
+
+/**
+ * Returns a new Kstr after removing heading and trailing spaces from the passed one.
+ * @see Kstr
+ * @see kstr_trim_l()
+ * @see kstr_trim_r()
+ * @param kstr The Kstr to trim.
+ * @return The resulting Kstr.
+ */
 Kstr kstr_trim(Kstr kstr)
 {
     return kstr_trim_left(kstr_trim_right(kstr));

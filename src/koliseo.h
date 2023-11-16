@@ -469,6 +469,8 @@ Kstr kstr_new(const char* str, size_t len);
 Kstr kstr_from_c_lit(const char* c_lit);
 bool kstr_eq(Kstr left, Kstr right);
 bool kstr_eq_ignorecase(Kstr left, Kstr right);
+Kstr kstr_cut_l(Kstr *k, size_t n);
+Kstr kstr_cut_r(Kstr *k, size_t n);
 Kstr kstr_trim_left(Kstr kstr);
 Kstr kstr_trim_right(Kstr kstr);
 Kstr kstr_trim(Kstr kstr);
@@ -484,7 +486,6 @@ Kstr kstr_trim(Kstr kstr);
  * Format matching macro for a Kstr.
  */
 #define Kstr_Arg(kstr) (int) (kstr.len), (kstr.data)
-
 
 /**
  * Defines a one GB size as decimal integer representation.
