@@ -45,7 +45,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 10 /**< Represents current patch release.*/
+#define KLS_PATCH 11 /**< Represents current patch release.*/
 
 /*! \mainpage Koliseo index page
  *
@@ -183,7 +183,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.10"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.11"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -458,6 +458,14 @@ ptrdiff_t kls_type_usage(int, Koliseo *);
 #ifndef KOLISEO_GULP_H_
 #define KOLISEO_GULP_H_
 
+typedef struct Kstr {
+    const char* data;
+    size_t len;
+} Kstr;
+
+Kstr kstr_new(const char* str, size_t len);
+Kstr kstr_from_c_lit(const char* c_lit);
+
 /**
  * Defines a one GB size as decimal integer representation.
  * @see GULP_MAX_FILE_SIZE
@@ -507,6 +515,10 @@ const char* string_from_Gulp_Res(Gulp_Res g);
 char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size);
 char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size);
 #define KLS_GULP_FILE(kls, filepath) try_kls_gulp_file((kls),(filepath), GULP_MAX_FILE_SIZE)
+//Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...);
+Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size);
+Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max_size);
+#define KLS_GULP_FILE_KSTR(kls, filepath) try_kls_gulp_file_to_kstr((kls),(filepath), GULP_MAX_FILE_SIZE)
 
 #endif				//KOLISEO_GULP_H_
 

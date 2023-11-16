@@ -3232,6 +3232,19 @@ const char* string_from_Gulp_Res(Gulp_Res g)
     return gulp_res_names[g];
 }
 
+Kstr kstr_new(const char* data, size_t len)
+{
+    return (Kstr) {
+        .data = data,
+        .len = len,
+    };
+}
+
+Kstr kstr_from_c_lit(const char* c_lit)
+{
+    return kstr_new(c_lit, strlen(c_lit));
+}
+
 static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...)
 {
     if (!kls) {
@@ -3239,7 +3252,7 @@ static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, s
         return NULL;
     }
     char * buffer;
-    size_t length;
+    size_t length = 0;
     FILE * f = fopen(f_name, "rb");
     size_t read_length;
 
@@ -3350,6 +3363,140 @@ char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size)
 
     if (err != GULP_FILE_OK && err != GULP_FILE_CONTAINS_NULLCHAR) {
         fprintf(stderr, "%s():  kls_gulp_file_sized() failed with err {%s}.\n",__func__,string_from_Gulp_Res(err));
+    }
+
+    return res;
+}
+
+static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...)
+{
+    if (!kls) {
+        *err = GULP_FILE_KLS_NULL;
+        return NULL;
+    }
+    char * buffer;
+    size_t length = 0;
+    FILE * f = fopen(f_name, "rb");
+    size_t read_length;
+
+    if (f) {
+        fseek(f, 0, SEEK_END);
+        length = ftell(f);
+        fseek(f, 0, SEEK_SET);
+
+        va_list args;
+        va_start(args, f_size);
+        size_t max_size = va_arg(args, size_t);
+        if (length > max_size) {
+            *err = GULP_FILE_TOO_LARGE;
+
+            return NULL;
+        }
+        va_end(args);
+
+        buffer = KLS_PUSH_NAMED(kls,char,length + 1,"char*","Buffer for file gulp");
+
+        if (buffer == NULL) {
+            assert(0 && "KLS_PUSH_NAMED() failed\n");
+        }
+
+        if (length) {
+            read_length = fread(buffer, 1, length, f);
+
+            if (length != read_length) {
+                *err = GULP_FILE_READ_ERROR;
+                return NULL;
+            }
+        }
+
+        fclose(f);
+
+        *err = GULP_FILE_OK;
+        buffer[length] = '\0';
+        *f_size = length;
+    } else {
+        *err = GULP_FILE_NOT_EXIST;
+
+        return NULL;
+    }
+
+    if (strlen(buffer) == length) {
+    } else {
+        *err = GULP_FILE_CONTAINS_NULLCHAR;
+    }
+    Kstr * res = KLS_PUSH_NAMED(kls,Kstr,1,"Kstr","Kstr for file gulp");
+    if (res == NULL) {
+        assert(0 && "KLS_PUSH_NAMED() failed\n");
+    }
+    res->data = buffer;
+    if (*err == GULP_FILE_CONTAINS_NULLCHAR) {
+        res->len = length;
+    } else {
+        res->len = strlen(buffer);
+    }
+    return res;
+}
+
+/**
+ * Tries mapping the passed file on the Koliseo.
+ * Sets the passed Gulp_Res to the result of the operation.
+ * @param kls The Koliseo to push to.
+ * @param filepath Path to the file to gulp.
+ * @param err Pointer to the Gulp_Res variable to store result.
+ * @param max_size Max size allowed for the read file.
+ * @see KLS_GULP_FILE()
+ * @return A Kstr for the passed filepath contents.
+ */
+Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size)
+{
+    static_assert(TOT_GULP_RES == 6, "Number of Gulp_Res changed");
+    size_t f_size;
+    Kstr * data = NULL;
+    data = kls_read_file_to_kstr(kls, filepath, err, &f_size, max_size);
+    if (*err != GULP_FILE_OK) {
+        switch (*err) {
+        case GULP_FILE_NOT_EXIST:
+        case GULP_FILE_TOO_LARGE:
+        case GULP_FILE_READ_ERROR:
+        case GULP_FILE_CONTAINS_NULLCHAR:
+        case GULP_FILE_KLS_NULL: {
+            fprintf(stderr,"[ERROR]    %s():  {" Gulp_Res_Fmt "}.\n",__func__, Gulp_Res_Arg(*err));
+        }
+        break;
+        default: {
+            fprintf(stderr,"[ERROR]    %s():  Unexpected error {%i}.\n",__func__, *err);
+        }
+        break;
+        }
+        return data;
+    } else {
+        assert(data->len == f_size && "data len should be equal to f_size here!");
+        if (!data) {
+            assert(0 && "kls_read_file_to_kstr() failed\n");
+        }
+        //printf("%s\n\n",data->data);
+        //printf("SIZE: {%i}\n",f_size);
+    }
+    return data;
+}
+
+/**
+ * Tries mapping the passed file on the Koliseo.
+ * @param kls The Koliseo to push to.
+ * @param filepath Path to the file to gulp.
+ * @param max_size Max size allowed for the read file.
+ * @see KLS_GULP_FILE()
+ * @return A pointer to the Kstr with file contents.
+ */
+Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max_size)
+{
+    Gulp_Res err = -1;
+
+    Kstr * res = NULL;
+    res = kls_gulp_file_sized_to_kstr(kls, filepath, &err, max_size);
+
+    if (err != GULP_FILE_OK) {
+        fprintf(stderr, "%s():  kls_gulp_file_sized_to_kstr() failed with err {%s}.\n",__func__,string_from_Gulp_Res(err));
     }
 
     return res;
