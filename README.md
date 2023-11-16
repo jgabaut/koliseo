@@ -111,4 +111,6 @@ int main(void)
 
   Thanks to [Mako](https://www.instagram.com/mako_x_tattoo/) for the repo banner.
 
+  Thanks to [Tsoding](https://github.com/tsoding) for its creative string view library ([repo](https://github.com/tsoding/sv)), which indeed does things so simply you mostly can't do anything different.
+
 ## Todo <a name = "todo"></a>
