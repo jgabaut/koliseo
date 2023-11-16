@@ -3383,7 +3383,6 @@ Kstr kstr_trim(Kstr kstr)
     return kstr_trim_left(kstr_trim_right(kstr));
 }
 
-
 /**
  * Checks if passed Kstr contains the passed char, and if so, sets the value pointed by idx to the first occurrence.
  * @see Kstr
@@ -3392,7 +3391,8 @@ Kstr kstr_trim(Kstr kstr)
  * @param idx Pointer to the value to be set as index.
  * @return false if the passed Kstr doesn't contain the passed char, true otherwise.
  */
-bool kstr_indexof(Kstr k, char c, int* idx) {
+bool kstr_indexof(Kstr k, char c, int* idx)
+{
     if (k.len == 0) {
         return false;
     } else {
@@ -3417,7 +3417,8 @@ bool kstr_indexof(Kstr k, char c, int* idx) {
  * @param part The Kstr to set to the original data, if the delimiter is found.
  * @return false if the passed Kstr doesn't contain the passed char, true otherwise.
  */
-bool kstr_try_token(Kstr *k, char delim, Kstr* part) {
+bool kstr_try_token(Kstr *k, char delim, Kstr* part)
+{
     size_t i = 0;
     while (i < k->len && k->data[i] != delim) {
         i++;
@@ -3444,7 +3445,8 @@ bool kstr_try_token(Kstr *k, char delim, Kstr* part) {
  * @param delim The char to look for.
  * @return A new Kstr with the original data.
  */
-Kstr kstr_token(Kstr *k, char delim) {
+Kstr kstr_token(Kstr *k, char delim)
+{
     size_t i = 0;
     while (i < k->len && k->data[i] != delim) {
         i++;
@@ -3463,7 +3465,8 @@ Kstr kstr_token(Kstr *k, char delim) {
     return res;
 }
 
-Kstr kstr_token_kstr(Kstr* k, Kstr delim) {
+Kstr kstr_token_kstr(Kstr* k, Kstr delim)
+{
 
     //Kstr to scroll k data, sized as the delimiter
     Kstr win = kstr_new(k->data, delim.len);
@@ -3472,7 +3475,7 @@ Kstr kstr_token_kstr(Kstr* k, Kstr delim) {
 
     //Loop checking if k data can still be scrolled and if current window is equal to the delimiter
     while (i + delim.len < k->len &&
-            !(kstr_eq(win, delim))) {
+           !(kstr_eq(win, delim))) {
         i++;
         win.data++;
     }
