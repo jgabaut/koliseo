@@ -516,9 +516,9 @@ char * kls_gulp_file_sized(Koliseo* kls, const char * filepath, Gulp_Res * err, 
 char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size);
 #define KLS_GULP_FILE(kls, filepath) try_kls_gulp_file((kls),(filepath), GULP_MAX_FILE_SIZE)
 //Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...);
-Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size);
-Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max_size);
-#define KLS_GULP_FILE_KSTR(kls, filepath) try_kls_gulp_file_to_kstr((kls),(filepath), GULP_MAX_FILE_SIZE)
+Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size, bool allow_nullchar);
+Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max_size, bool allow_nullchar);
+#define KLS_GULP_FILE_KSTR(kls, filepath) try_kls_gulp_file_to_kstr((kls),(filepath), GULP_MAX_FILE_SIZE, false)
 
 #endif				//KOLISEO_GULP_H_
 

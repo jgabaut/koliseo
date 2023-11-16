@@ -3374,10 +3374,11 @@ static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res 
         *err = GULP_FILE_KLS_NULL;
         return NULL;
     }
-    char * buffer;
+    char * buffer = NULL;
     size_t length = 0;
     FILE * f = fopen(f_name, "rb");
     size_t read_length;
+    bool allow_nullchar = false;
 
     if (f) {
         fseek(f, 0, SEEK_END);
@@ -3392,6 +3393,8 @@ static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res 
 
             return NULL;
         }
+        bool allow_nulls = va_arg(args, int);
+        allow_nullchar = allow_nulls;
         va_end(args);
 
         buffer = KLS_PUSH_NAMED(kls,char,length + 1,"char*","Buffer for file gulp");
@@ -3423,6 +3426,9 @@ static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res 
     if (strlen(buffer) == length) {
     } else {
         *err = GULP_FILE_CONTAINS_NULLCHAR;
+        if (!allow_nullchar) {
+            return NULL;
+        }
     }
     Kstr * res = KLS_PUSH_NAMED(kls,Kstr,1,"Kstr","Kstr for file gulp");
     if (res == NULL) {
@@ -3444,15 +3450,16 @@ static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res 
  * @param filepath Path to the file to gulp.
  * @param err Pointer to the Gulp_Res variable to store result.
  * @param max_size Max size allowed for the read file.
+ * @param allow_nullchar Bool to avoid returning NULL for a binary file.
  * @see KLS_GULP_FILE()
  * @return A Kstr for the passed filepath contents.
  */
-Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size)
+Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size, bool allow_nullchar)
 {
     static_assert(TOT_GULP_RES == 6, "Number of Gulp_Res changed");
     size_t f_size;
     Kstr * data = NULL;
-    data = kls_read_file_to_kstr(kls, filepath, err, &f_size, max_size);
+    data = kls_read_file_to_kstr(kls, filepath, err, &f_size, max_size, allow_nullchar);
     if (*err != GULP_FILE_OK) {
         switch (*err) {
         case GULP_FILE_NOT_EXIST:
@@ -3485,15 +3492,16 @@ Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res
  * @param kls The Koliseo to push to.
  * @param filepath Path to the file to gulp.
  * @param max_size Max size allowed for the read file.
+ * @param allow_nullchar Boolean to avoid returning NULL for a binary file.
  * @see KLS_GULP_FILE()
  * @return A pointer to the Kstr with file contents.
  */
-Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max_size)
+Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max_size, bool allow_nullchar)
 {
     Gulp_Res err = -1;
 
     Kstr * res = NULL;
-    res = kls_gulp_file_sized_to_kstr(kls, filepath, &err, max_size);
+    res = kls_gulp_file_sized_to_kstr(kls, filepath, &err, max_size, allow_nullchar);
 
     if (err != GULP_FILE_OK) {
         fprintf(stderr, "%s():  kls_gulp_file_sized_to_kstr() failed with err {%s}.\n",__func__,string_from_Gulp_Res(err));
