@@ -474,6 +474,10 @@ Kstr kstr_cut_r(Kstr *k, size_t n);
 Kstr kstr_trim_left(Kstr kstr);
 Kstr kstr_trim_right(Kstr kstr);
 Kstr kstr_trim(Kstr kstr);
+bool kstr_indexof(Kstr k, char c, int* idx);
+Kstr kstr_token(Kstr* k, char delim);
+bool kstr_try_token(Kstr* k, char delim, Kstr* part);
+Kstr kstr_token_kstr(Kstr* k, Kstr delim);
 
 #define KSTR(c_lit) kstr_new(c_lit, sizeof(c_lit) - 1)
 #define KSTR_NULL kstr_new(NULL, 0)

@@ -3383,6 +3383,115 @@ Kstr kstr_trim(Kstr kstr)
     return kstr_trim_left(kstr_trim_right(kstr));
 }
 
+
+/**
+ * Checks if passed Kstr contains the passed char, and if so, sets the value pointed by idx to the first occurrence.
+ * @see Kstr
+ * @param k The Kstr to scan.
+ * @param c The char to look for.
+ * @param idx Pointer to the value to be set as index.
+ * @return false if the passed Kstr doesn't contain the passed char, true otherwise.
+ */
+bool kstr_indexof(Kstr k, char c, int* idx) {
+    if (k.len == 0) {
+        return false;
+    } else {
+        size_t i = 0;
+        while (i < k.len) {
+            if (k.data[i] == c) {
+                *idx = i;
+                return true;
+            }
+
+            i++;
+        }
+        return false;
+    }
+}
+
+/**
+ * Scans the first passed Kstr and if the passed char is present, the old Kstr is set to second pointer and the first one is cut at the first occurrence of it.
+ * @see Kstr
+ * @param k The Kstr to scan.
+ * @param delim The char to look for.
+ * @param part The Kstr to set to the original data, if the delimiter is found.
+ * @return false if the passed Kstr doesn't contain the passed char, true otherwise.
+ */
+bool kstr_try_token(Kstr *k, char delim, Kstr* part) {
+    size_t i = 0;
+    while (i < k->len && k->data[i] != delim) {
+        i++;
+    }
+
+    Kstr res = kstr_new(k->data,i);
+
+    if (i < k->len) {
+        k->len -= i +1;
+        k->data += i +1;
+        if (part) {
+            *part = res;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Scans the passed Kstr and cuts it up to the first occurrence of passed char, even if it is not present. Returns a new Kstr with the original data.
+ * @see Kstr
+ * @param k The Kstr to scan.
+ * @param delim The char to look for.
+ * @return A new Kstr with the original data.
+ */
+Kstr kstr_token(Kstr *k, char delim) {
+    size_t i = 0;
+    while (i < k->len && k->data[i] != delim) {
+        i++;
+    }
+
+    Kstr res = kstr_new(k->data,i);
+
+    if (i < k->len) {
+        k->len -= i +1;
+        k->data += i +1;
+    } else {
+        k->len -= i;
+        k->data += i;
+    }
+
+    return res;
+}
+
+Kstr kstr_token_kstr(Kstr* k, Kstr delim) {
+
+    //Kstr to scroll k data, sized as the delimiter
+    Kstr win = kstr_new(k->data, delim.len);
+
+    size_t i = 0;
+
+    //Loop checking if k data can still be scrolled and if current window is equal to the delimiter
+    while (i + delim.len < k->len &&
+            !(kstr_eq(win, delim))) {
+        i++;
+        win.data++;
+    }
+
+    //New Kstr just up to the delimiter position
+    Kstr res = kstr_new(k->data, i);
+
+    //If we don't cleanly empty k, we increase result len so that it holds the remaining chars
+    if (i + delim.len == k->len) {
+        res.len += delim.len;
+    }
+
+    //Advance k by the delimiter size, plus its starting position
+    k->data += i + delim.len;
+    k->len += i + delim.len;
+
+    return res;
+}
+
 static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...)
 {
     if (!kls) {
