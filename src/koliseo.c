@@ -3245,6 +3245,38 @@ Kstr kstr_from_c_lit(const char* c_lit)
     return kstr_new(c_lit, strlen(c_lit));
 }
 
+bool kstr_eq(Kstr left, Kstr right) {
+    if (left.len != right.len) {
+        return false;
+    }
+
+    for (int i=0; i < left.len; i++) {
+        if (left.data[i] != right.data[i]) return false;
+    }
+    return true;
+}
+
+Kstr kstr_trim_left(Kstr kstr)
+{
+    size_t i = 0;
+    while ( i < kstr.len && isspace(kstr.data[i])) {
+        i++;
+    }
+    return kstr_new(kstr.data + i, kstr.len - i);
+}
+Kstr kstr_trim_right(Kstr kstr)
+{
+    size_t i = 0;
+    while ( i < kstr.len && isspace(kstr.data[kstr.len - i - 1])) {
+        i++;
+    }
+    return kstr_new(kstr.data, kstr.len - i);
+}
+Kstr kstr_trim(Kstr kstr)
+{
+    return kstr_trim_left(kstr_trim_right(kstr));
+}
+
 static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...)
 {
     if (!kls) {

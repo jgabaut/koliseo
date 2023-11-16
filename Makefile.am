@@ -138,7 +138,12 @@ kstr_gulp.k:
 	$(CCOMP) tests/ok/kstr_gulp.c src/koliseo.c -o tests/ok/kstr_gulp.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_size.k basic_run.k basic_gulp.k kstr_gulp.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k
+kstr_test.k:
+	@echo -en "Building kstr_test.k test"
+	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+anviltest: bad_size.k basic_run.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"

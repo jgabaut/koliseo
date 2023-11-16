@@ -458,6 +458,8 @@ ptrdiff_t kls_type_usage(int, Koliseo *);
 #ifndef KOLISEO_GULP_H_
 #define KOLISEO_GULP_H_
 
+#include "ctype.h" // Needed for isspace()...
+
 typedef struct Kstr {
     const char* data;
     size_t len;
@@ -465,6 +467,23 @@ typedef struct Kstr {
 
 Kstr kstr_new(const char* str, size_t len);
 Kstr kstr_from_c_lit(const char* c_lit);
+bool kstr_eq(Kstr left, Kstr right);
+Kstr kstr_trim_left(Kstr kstr);
+Kstr kstr_trim_right(Kstr kstr);
+Kstr kstr_trim(Kstr kstr);
+
+#define KSTR(c_lit) kstr_new(c_lit, sizeof(c_lit) - 1)
+#define KSTR_NULL kstr_new(NULL, 0)
+
+/**
+ * Format macro for a Kstr.
+ */
+#define Kstr_Fmt "%.*s"
+/**
+ * Format matching macro for a Kstr.
+ */
+#define Kstr_Arg(kstr) (int) (kstr.len), (kstr.data)
+
 
 /**
  * Defines a one GB size as decimal integer representation.
