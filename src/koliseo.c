@@ -3250,8 +3250,26 @@ bool kstr_eq(Kstr left, Kstr right) {
         return false;
     }
 
-    for (int i=0; i < left.len; i++) {
+    for (size_t i=0; i < left.len; i++) {
         if (left.data[i] != right.data[i]) return false;
+    }
+    return true;
+}
+
+bool kstr_eq_ignorecase(Kstr left, Kstr right) {
+    if (left.len != right.len) {
+        return false;
+    }
+
+    char l, r;
+    for (size_t i=0; i < left.len; i++) {
+        l = 'A' <= left.data[i] && 'Z' >= left.data[i]
+            ? left.data[i] + 32
+            : left.data[i];
+        r = 'A' <= right.data[i] && 'Z' >= right.data[i]
+            ? right.data[i] + 32
+            : right.data[i];
+        if (l != r) return false;
     }
     return true;
 }

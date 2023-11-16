@@ -468,6 +468,7 @@ typedef struct Kstr {
 Kstr kstr_new(const char* str, size_t len);
 Kstr kstr_from_c_lit(const char* c_lit);
 bool kstr_eq(Kstr left, Kstr right);
+bool kstr_eq_ignorecase(Kstr left, Kstr right);
 Kstr kstr_trim_left(Kstr kstr);
 Kstr kstr_trim_right(Kstr kstr);
 Kstr kstr_trim(Kstr kstr);
