@@ -3043,6 +3043,12 @@ KLS_Region_List kls_diff(Koliseo *kls, KLS_Region_List l1, KLS_Region_List l2)
     }
 }
 
+/**
+ * Compares two regions and returns true if the first one has a smaller size.
+ * @param r1 The KLS_Region expected to be smaller
+ * @param r2 The KLS_Region expected to be bigger
+ * @return True if first region size is less than second region size.
+ */
 bool kls_isLess(KLS_Region *r1, KLS_Region *r2)
 {
     //Compare regions by their effective size
@@ -3051,6 +3057,12 @@ bool kls_isLess(KLS_Region *r1, KLS_Region *r2)
     return (s1 < s2);
 }
 
+/**
+ * Compares two regions and returns true if their size is equal.
+ * @param r1 The first KLS_Region
+ * @param r2 The second KLS_Region
+ * @return True if first region size is equal than second region size.
+ */
 bool kls_isEqual(KLS_Region *r1, KLS_Region *r2)
 {
     //Compare regions by their effective size
@@ -3059,6 +3071,12 @@ bool kls_isEqual(KLS_Region *r1, KLS_Region *r2)
     return (s1 == s2);
 }
 
+/**
+ * Returns the ratio of memory used by the passed KLS_Region relative to the passed Koliseo as a double.
+ * @param r The KLS_Region to check relative size for.
+ * @param kls The Koliseo to check on.
+ * @return A double representing percentage usage.
+ */
 double kls_usageShare(KLS_Region *r, Koliseo *kls)
 {
     if (kls == NULL) {
@@ -3074,11 +3092,21 @@ double kls_usageShare(KLS_Region *r, Koliseo *kls)
     return res;
 }
 
+/**
+ * Return size of a passed KLS_Region. Sugar.
+ * @passed r The KLS_Region.
+ * @return Region size as ptrdiff_t.
+ */
 ptrdiff_t kls_regionSize(KLS_Region *r)
 {
     return r->end_offset - r->begin_offset;
 }
 
+/**
+ * Return average region size in usage for the passed Koliseo.
+ * @passed kls The Koliseo to check usage for.
+ * @return Average region size as ptrdiff_t.
+ */
 ptrdiff_t kls_avg_regionSize(Koliseo *kls)
 {
     if (kls == NULL) {
@@ -3106,6 +3134,12 @@ ptrdiff_t kls_avg_regionSize(Koliseo *kls)
     return res;
 }
 
+/**
+ * Prints an usage report for the passed Koliseo to the passed file.
+ * @see kls_usageShare()
+ * @param kls The Koliseo to check.
+ * @param fp The file pointer to print to.
+ */
 void kls_usageReport_toFile(Koliseo *kls, FILE *fp)
 {
     if (kls == NULL) {
@@ -3131,11 +3165,23 @@ void kls_usageReport_toFile(Koliseo *kls, FILE *fp)
     }
 }
 
+/**
+ * Print usage report for passed Koliseo to stdout.
+ * @see kls_usageReport_toFile()
+ * @param kls The Koliseo to print info for.
+ */
 void kls_usageReport(Koliseo *kls)
 {
     kls_usageReport_toFile(kls, stdout);
 }
 
+/**
+ * Calc memory used by the specific type of KLS_list_element.
+ * @see KLS_Region_List
+ * @param type The integer corresponding to element->type
+ * @param kls The Koliseo to check usage for.
+ * @return The used memory size as ptrdiff_t.
+ */
 ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 {
     if (kls == NULL) {
@@ -3158,6 +3204,11 @@ ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 }
 
 #ifdef KOLISEO_HAS_GULP
+
+/**
+ * Contains the constant string representation of Gulp_Res values.
+ * @see Gulp_Res
+ */
 const char* gulp_res_names[TOT_GULP_RES+1] = {
     [GULP_FILE_OK] = "Success",
     [GULP_FILE_NOT_EXIST] = "File does not exist",
@@ -3168,10 +3219,277 @@ const char* gulp_res_names[TOT_GULP_RES+1] = {
     [TOT_GULP_RES] = "Total of Gulp_Res values",
 };
 
+/**
+ * Return a constant string for the passed Gulp_Res.
+ * @see gulp_res_names
+ * @see Gulp_Res
+ * @param g The Gulp_Res to get a string for.
+ * @return A constant string representation of passed Gulp_Res.
+ */
 const char* string_from_Gulp_Res(Gulp_Res g)
 {
     assert(g >= 0 && g < TOT_GULP_RES && "Unexpected Gulp_Res value");
     return gulp_res_names[g];
+}
+
+/**
+ * Returns a new Kstr with the passed args set.
+ * @see Kstr
+ * @param data The string pointer to set.
+ * @param len The len to set.
+ * @return The resulting Kstr.
+ */
+Kstr kstr_new(const char* data, size_t len)
+{
+    return (Kstr) {
+        .data = data,
+        .len = len,
+    };
+}
+
+/**
+ * Returns a new Kstr from the passed null-terminated string.
+ * @see Kstr
+ * @param c_lit The cstring pointer to set.
+ * @return The resulting Kstr.
+ */
+Kstr kstr_from_c_lit(const char* c_lit)
+{
+    return kstr_new(c_lit, strlen(c_lit));
+}
+
+/**
+ * Checks if the two passed Kstr have exactly equal data.
+ * @see Kstr
+ * @param left The first Kstr to compare.
+ * @param right The second Kstr to compare.
+ * @return A bool result for the comparation.
+ */
+bool kstr_eq(Kstr left, Kstr right)
+{
+    if (left.len != right.len) {
+        return false;
+    }
+
+    for (size_t i=0; i < left.len; i++) {
+        if (left.data[i] != right.data[i]) return false;
+    }
+    return true;
+}
+
+/**
+ * Checks if the two passed Kstr have equal data, ignoring case.
+ * @see Kstr
+ * @param left The first Kstr to compare.
+ * @param right The second Kstr to compare.
+ * @return A bool result for the comparation.
+ */
+bool kstr_eq_ignorecase(Kstr left, Kstr right)
+{
+    if (left.len != right.len) {
+        return false;
+    }
+
+    char l, r;
+    for (size_t i=0; i < left.len; i++) {
+        l = 'A' <= left.data[i] && 'Z' >= left.data[i]
+            ? left.data[i] + 32
+            : left.data[i];
+        r = 'A' <= right.data[i] && 'Z' >= right.data[i]
+            ? right.data[i] + 32
+            : right.data[i];
+        if (l != r) return false;
+    }
+    return true;
+}
+
+/**
+ * Cuts the passed Kstr by up to n chars, from the left. Returns cut portion as a new Kstr.
+ * @see Kstr
+ * @param k The Kstr to cut.
+ * @param n How many chars to cut.
+ * @return The cut part as a new Kstr.
+ */
+Kstr kstr_cut_l(Kstr *k, size_t n)
+{
+    if (n > k->len) {
+        n = k->len;
+    }
+    Kstr res = kstr_new(k->data, n);
+    k->data += n;
+    k->len -= n;
+
+    return res;
+}
+
+/**
+ * Cuts the passed Kstr by up to n chars, from the right. Returns cut portion as a new Kstr.
+ * @see Kstr
+ * @param k The Kstr to cut.
+ * @param n How many chars to cut.
+ * @return The cut part as a new Kstr.
+ */
+Kstr kstr_cut_r(Kstr *k, size_t n)
+{
+    if (n > k->len) {
+        n = k->len;
+    }
+    Kstr res = kstr_new(k->data + k->len - n, n);
+    k->len -= n;
+
+    return res;
+}
+
+/**
+ * Returns a new Kstr after removing heading spaces from the passed one.
+ * @see Kstr
+ * @param kstr The Kstr to trim.
+ * @return The resulting Kstr.
+ */
+Kstr kstr_trim_left(Kstr kstr)
+{
+    size_t i = 0;
+    while ( i < kstr.len && isspace(kstr.data[i])) {
+        i++;
+    }
+    return kstr_new(kstr.data + i, kstr.len - i);
+}
+
+/**
+ * Returns a new Kstr after removing trailing spaces from the passed one.
+ * @see Kstr
+ * @param kstr The Kstr to trim.
+ * @return The resulting Kstr.
+ */
+Kstr kstr_trim_right(Kstr kstr)
+{
+    size_t i = 0;
+    while ( i < kstr.len && isspace(kstr.data[kstr.len - i - 1])) {
+        i++;
+    }
+    return kstr_new(kstr.data, kstr.len - i);
+}
+
+/**
+ * Returns a new Kstr after removing heading and trailing spaces from the passed one.
+ * @see Kstr
+ * @see kstr_trim_l()
+ * @see kstr_trim_r()
+ * @param kstr The Kstr to trim.
+ * @return The resulting Kstr.
+ */
+Kstr kstr_trim(Kstr kstr)
+{
+    return kstr_trim_left(kstr_trim_right(kstr));
+}
+
+
+/**
+ * Checks if passed Kstr contains the passed char, and if so, sets the value pointed by idx to the first occurrence.
+ * @see Kstr
+ * @param k The Kstr to scan.
+ * @param c The char to look for.
+ * @param idx Pointer to the value to be set as index.
+ * @return false if the passed Kstr doesn't contain the passed char, true otherwise.
+ */
+bool kstr_indexof(Kstr k, char c, int* idx) {
+    if (k.len == 0) {
+        return false;
+    } else {
+        size_t i = 0;
+        while (i < k.len) {
+            if (k.data[i] == c) {
+                *idx = i;
+                return true;
+            }
+
+            i++;
+        }
+        return false;
+    }
+}
+
+/**
+ * Scans the first passed Kstr and if the passed char is present, the old Kstr is set to second pointer and the first one is cut at the first occurrence of it.
+ * @see Kstr
+ * @param k The Kstr to scan.
+ * @param delim The char to look for.
+ * @param part The Kstr to set to the original data, if the delimiter is found.
+ * @return false if the passed Kstr doesn't contain the passed char, true otherwise.
+ */
+bool kstr_try_token(Kstr *k, char delim, Kstr* part) {
+    size_t i = 0;
+    while (i < k->len && k->data[i] != delim) {
+        i++;
+    }
+
+    Kstr res = kstr_new(k->data,i);
+
+    if (i < k->len) {
+        k->len -= i +1;
+        k->data += i +1;
+        if (part) {
+            *part = res;
+        }
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Scans the passed Kstr and cuts it up to the first occurrence of passed char, even if it is not present. Returns a new Kstr with the original data.
+ * @see Kstr
+ * @param k The Kstr to scan.
+ * @param delim The char to look for.
+ * @return A new Kstr with the original data.
+ */
+Kstr kstr_token(Kstr *k, char delim) {
+    size_t i = 0;
+    while (i < k->len && k->data[i] != delim) {
+        i++;
+    }
+
+    Kstr res = kstr_new(k->data,i);
+
+    if (i < k->len) {
+        k->len -= i +1;
+        k->data += i +1;
+    } else {
+        k->len -= i;
+        k->data += i;
+    }
+
+    return res;
+}
+
+Kstr kstr_token_kstr(Kstr* k, Kstr delim) {
+
+    //Kstr to scroll k data, sized as the delimiter
+    Kstr win = kstr_new(k->data, delim.len);
+
+    size_t i = 0;
+
+    //Loop checking if k data can still be scrolled and if current window is equal to the delimiter
+    while (i + delim.len < k->len &&
+            !(kstr_eq(win, delim))) {
+        i++;
+        win.data++;
+    }
+
+    //New Kstr just up to the delimiter position
+    Kstr res = kstr_new(k->data, i);
+
+    //If we don't cleanly empty k, we increase result len so that it holds the remaining chars
+    if (i + delim.len == k->len) {
+        res.len += delim.len;
+    }
+
+    //Advance k by the delimiter size, plus its starting position
+    k->data += i + delim.len;
+    k->len += i + delim.len;
+
+    return res;
 }
 
 static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...)
@@ -3181,7 +3499,7 @@ static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, s
         return NULL;
     }
     char * buffer;
-    size_t length;
+    size_t length = 0;
     FILE * f = fopen(f_name, "rb");
     size_t read_length;
 
@@ -3292,6 +3610,148 @@ char * try_kls_gulp_file(Koliseo* kls, const char * filepath, size_t max_size)
 
     if (err != GULP_FILE_OK && err != GULP_FILE_CONTAINS_NULLCHAR) {
         fprintf(stderr, "%s():  kls_gulp_file_sized() failed with err {%s}.\n",__func__,string_from_Gulp_Res(err));
+    }
+
+    return res;
+}
+
+static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res * err, size_t * f_size, ...)
+{
+    if (!kls) {
+        *err = GULP_FILE_KLS_NULL;
+        return NULL;
+    }
+    char * buffer = NULL;
+    size_t length = 0;
+    FILE * f = fopen(f_name, "rb");
+    size_t read_length;
+    bool allow_nullchar = false;
+
+    if (f) {
+        fseek(f, 0, SEEK_END);
+        length = ftell(f);
+        fseek(f, 0, SEEK_SET);
+
+        va_list args;
+        va_start(args, f_size);
+        size_t max_size = va_arg(args, size_t);
+        if (length > max_size) {
+            *err = GULP_FILE_TOO_LARGE;
+
+            return NULL;
+        }
+        bool allow_nulls = va_arg(args, int);
+        allow_nullchar = allow_nulls;
+        va_end(args);
+
+        buffer = KLS_PUSH_NAMED(kls,char,length + 1,"char*","Buffer for file gulp");
+
+        if (buffer == NULL) {
+            assert(0 && "KLS_PUSH_NAMED() failed\n");
+        }
+
+        if (length) {
+            read_length = fread(buffer, 1, length, f);
+
+            if (length != read_length) {
+                *err = GULP_FILE_READ_ERROR;
+                return NULL;
+            }
+        }
+
+        fclose(f);
+
+        *err = GULP_FILE_OK;
+        buffer[length] = '\0';
+        *f_size = length;
+    } else {
+        *err = GULP_FILE_NOT_EXIST;
+
+        return NULL;
+    }
+
+    if (strlen(buffer) == length) {
+    } else {
+        *err = GULP_FILE_CONTAINS_NULLCHAR;
+        if (!allow_nullchar) {
+            return NULL;
+        }
+    }
+    Kstr * res = KLS_PUSH_NAMED(kls,Kstr,1,"Kstr","Kstr for file gulp");
+    if (res == NULL) {
+        assert(0 && "KLS_PUSH_NAMED() failed\n");
+    }
+    res->data = buffer;
+    if (*err == GULP_FILE_CONTAINS_NULLCHAR) {
+        res->len = length;
+    } else {
+        res->len = strlen(buffer);
+    }
+    return res;
+}
+
+/**
+ * Tries mapping the passed file on the Koliseo.
+ * Sets the passed Gulp_Res to the result of the operation.
+ * @param kls The Koliseo to push to.
+ * @param filepath Path to the file to gulp.
+ * @param err Pointer to the Gulp_Res variable to store result.
+ * @param max_size Max size allowed for the read file.
+ * @param allow_nullchar Bool to avoid returning NULL for a binary file.
+ * @see KLS_GULP_FILE()
+ * @return A Kstr for the passed filepath contents.
+ */
+Kstr * kls_gulp_file_sized_to_kstr(Koliseo* kls, const char * filepath, Gulp_Res * err, size_t max_size, bool allow_nullchar)
+{
+    static_assert(TOT_GULP_RES == 6, "Number of Gulp_Res changed");
+    size_t f_size;
+    Kstr * data = NULL;
+    data = kls_read_file_to_kstr(kls, filepath, err, &f_size, max_size, allow_nullchar);
+    if (*err != GULP_FILE_OK) {
+        switch (*err) {
+        case GULP_FILE_NOT_EXIST:
+        case GULP_FILE_TOO_LARGE:
+        case GULP_FILE_READ_ERROR:
+        case GULP_FILE_CONTAINS_NULLCHAR:
+        case GULP_FILE_KLS_NULL: {
+            fprintf(stderr,"[ERROR]    %s():  {" Gulp_Res_Fmt "}.\n",__func__, Gulp_Res_Arg(*err));
+        }
+        break;
+        default: {
+            fprintf(stderr,"[ERROR]    %s():  Unexpected error {%i}.\n",__func__, *err);
+        }
+        break;
+        }
+        return data;
+    } else {
+        assert(data->len == f_size && "data len should be equal to f_size here!");
+        if (!data) {
+            assert(0 && "kls_read_file_to_kstr() failed\n");
+        }
+        //printf("%s\n\n",data->data);
+        //printf("SIZE: {%i}\n",f_size);
+    }
+    return data;
+}
+
+/**
+ * Tries mapping the passed file on the Koliseo.
+ * @param kls The Koliseo to push to.
+ * @param filepath Path to the file to gulp.
+ * @param max_size Max size allowed for the read file.
+ * @param allow_nullchar Boolean to avoid returning NULL for a binary file.
+ * @see KLS_GULP_FILE()
+ * @return A pointer to the Kstr with file contents.
+ */
+Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max_size, bool allow_nullchar)
+{
+    Gulp_Res err = -1;
+
+    Kstr * res = NULL;
+    res = kls_gulp_file_sized_to_kstr(kls, filepath, &err, max_size, allow_nullchar);
+
+    if (err != GULP_FILE_OK) {
+        fprintf(stderr, "%s():  kls_gulp_file_sized_to_kstr() failed with err {%s}.\n",__func__,string_from_Gulp_Res(err));
     }
 
     return res;
