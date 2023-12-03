@@ -1,51 +1,52 @@
 [ build ]
 
-source = demo.c # source file name
-bin = demo# executable file name
-make-vers = 0.1.0 # make support version
-tests = tests # tests folder name
-automake-vers = 0.1.0 # autoconf and automake support version
+source = "demo.c"
+bin = "demo"
+makevers = "0.1.0"
+tests = "tests"
+automakevers = "0.1.0"
 
 [ tests ]
 
-errortests-dir = error
-tests-dir = ok
+errortestsdir = "error"
+testsdir = "ok"
 
 [ versions ]
-0.1.0# First release - Unsupported
-0.1.1# abort() on failed operations - Unsupported
-0.1.2# print_kls_2file() - Unsupported
-0.1.3# update prev_offset on kls_push() - Unsupported
-0.1.5# add kls_log(), fixes - Unsupported
-0.1.6# functional Koliseo_Temp - Deprecated, low support
-0.1.7# add Region_List - Deprecated, low support
-0.1.8# improved Region API - Deprecated, low support
-0.1.9# add kls_usageReport() - Deprecated, low support
-0.1.10# add ncurses debug functions - Deprecated, low support
-0.1.11# add kls_formatSize() - Deprecated, low support
-0.1.12# add int API lvl, vargs log - Deprecated, low support
-0.1.13# log API level - Deprecated, low support
-0.1.15# add KLS_PUSH_TYPED() - Deprecated, low support
-0.1.16# add KLS_PUSH_T_TYPED() - Deprecated, low support
-0.1.17# add kls_type_usage() - Deprecated, low support
-0.1.18# kls_push_zero_typed() expects int - Deprecated, low support
-0.1.19# add kls_print_title() - Deprecated, low support
-0.1.20# add kls->has_temp, KLS_PUSH_T doesn't account for AUTOREGION - Deprecated, low support
-0.1.21# add MINGW32_BUILD preprocessor directives - Deprecated, low support
-0.1.22# add KLS_DEBUG_CORE preprocessor directives to enable API call logs - Deprecated, low support
-0.2.0# Reworked Koliseo_Temp API with split functions - Deprecated, low support
-0.2.1# Fix build for mingw32 - Deprecated, low support
-0.2.3# Add missing NULL checks, bump amboso to 1.6.6 - Deprecated, low support
-0.2.4# Add KLSFmt and KLS_Arg(), fix missing fprintf() args - Deprecated
-0.2.5# Fix push sizes in logs, add address logging - Deprecated
-0.3.0# Clean namespace, add KLS_Conf and KLS_Temp_Conf. Drops KOLISEO_AUTOSET_REGIONS and KOLISEO_AUTOSET_TEMP_REGIONS globals.
-0.3.1# Close kls logfile on kls_free(). Drops KOLISEO_DEBUG, KOLISEO_DEBUG_FP globals. Extend KLS_Conf, remove kls_set_conf() from header.
-0.3.2# Add backend selection for automatic KLS_Region list.
-0.3.3# Fix Koliseo_Temp reglist_kls having a static size
-0.3.4# Add kls_maxRegions_KLS_BASIC, handle KLS_BASIC in kls_insord_p(), fix list macros args
-0.3.5# Shush stderr message, return null on bad kls_temp_start()
-0.3.6# Run indent -i4 -linux on all source files
-0.3.7# Switch to astyle for format, bump amboso to 1.6.10
-0.3.8# Bump amboso to 1.6.11
-0.3.9# Add KLS_GULP_FILE(), bump amboso to 1.7.2
-0.3.10# Fill docs, bump amboso to 1.7.4
+"0.1.0" = "First release - Unsupported"
+"0.1.1" = "abort() on failed operations - Unsupported"
+"0.1.2" = "print_kls_2file() - Unsupported"
+"0.1.3" = "update prev_offset on kls_push() - Unsupported"
+"0.1.5" = "add kls_log(), fixes - Unsupported"
+"0.1.6" = "functional Koliseo_Temp - Deprecated, low support"
+"0.1.7" = "add Region_List - Deprecated, low support"
+"0.1.8" = "improved Region API - Deprecated, low support"
+"0.1.9" = "add kls_usageReport() - Deprecated, low support"
+"0.1.10" = "add ncurses debug functions - Deprecated, low support"
+"0.1.11" = "add kls_formatSize() - Deprecated, low support"
+"0.1.12" = "add int API lvl, vargs log - Deprecated, low support"
+"0.1.13" = "log API level - Deprecated, low support"
+"0.1.15" = "add KLS_PUSH_TYPED() - Deprecated, low support"
+"0.1.16" = "add KLS_PUSH_T_TYPED() - Deprecated, low support"
+"0.1.17" = "add kls_type_usage() - Deprecated, low support"
+"0.1.18" = "kls_push_zero_typed() expects int - Deprecated, low support"
+"0.1.19" = "add kls_print_title() - Deprecated, low support"
+"0.1.20" = "add kls->has_temp, KLS_PUSH_T doesn't account for AUTOREGION - Deprecated, low support"
+"0.1.21" = "add MINGW32_BUILD preprocessor directives - Deprecated, low support"
+"0.1.22" = "2add KLS_DEBUG_CORE preprocessor directives to enable API call logs - Deprecated, low support"
+"0.2.0" = "Reworked Koliseo_Temp API with split functions - Deprecated, low support"
+"0.2.1" = "Fix build for mingw32 - Deprecated, low support"
+"0.2.3" = "Add missing NULL checks, bump amboso to 1.6.6 - Deprecated, low support"
+"0.2.4" = "Add KLSFmt and KLS_Arg(), fix missing fprintf() args - Deprecated"
+"0.2.5" = "Fix push sizes in logs, add address logging - Deprecated"
+"0.3.0" = "Clean namespace, add KLS_Conf and KLS_Temp_Conf. Drops KOLISEO_AUTOSET_REGIONS and KOLISEO_AUTOSET_TEMP_REGIONS globals."
+"0.3.1" = "Close kls logfile on kls_free(). Drops KOLISEO_DEBUG, KOLISEO_DEBUG_FP globals. Extend KLS_Conf, remove kls_set_conf() from header."
+"0.3.2" = "Add backend selection for automatic KLS_Region list."
+"0.3.3" = "Fix Koliseo_Temp reglist_kls having a static size"
+"0.3.4" = "Add kls_maxRegions_KLS_BASIC, handle KLS_BASIC in kls_insord_p(), fix list macros args"
+"0.3.5" = "Shush stderr message, return null on bad kls_temp_start()"
+"0.3.6" = "Run indent -i4 -linux on all source files"
+"0.3.7" = "Switch to astyle for format, bump amboso to 1.6.10"
+"0.3.8" = "Bump amboso to 1.6.11"
+"0.3.9" = "Add KLS_GULP_FILE(), bump amboso to 1.7.2"
+"0.3.10" = "Fill docs, bump amboso to 1.7.4"
+"0.3.12" = "Bump ambso to 1.9.6"
