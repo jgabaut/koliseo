@@ -1,53 +1,53 @@
-Hello$
-Hello$
-hello$
-$
-$
-Orig: {  Hello, World  test !  $
-42$
-}$
-$
-$
-Trimmed: {Hello, World  test !  $
-42}$
-Orig after trim: {  Hello, World  test !  $
-42$
-}$
-$
-$
-Trimmed after cut_l : {, World  test !  $
-42}$
-Cut_l : {Hello}$
-$
-$
-Trimmed after cut_r : {, World  test ! }$
-Cut_r : { $
-42}$
-Orig after cuts: {  Hello, World  test !  $
-42$
-}$
-$
-$
-Retrimmed: {, World  test !}$
-Orig after retrim: {  Hello, World  test !  $
-42$
-}$
-$
-$
-Retrimmed after token: {World  test !  $
-4}$
-Orig after token: {  Hello, World  test !  $
-42$
-}$
-Token: {}$
-Res: TRUE$
-$
-$
-Retrimmed after retoken: {  $
-4}$
-Orig after retoken: {  Hello, World  test !  $
-42$
-}$
-Retoken: {World  test }$
-Retoken len: 12$
-Retrim len: 4$
+Hello
+Hello
+hello
+
+
+Orig: {  Hello, World  test !  
+42
+}
+
+
+Trimmed: {Hello, World  test !  
+42}
+Orig after trim: {  Hello, World  test !  
+42
+}
+
+
+Trimmed after cut_l : {, World  test !  
+42}
+Cut_l : {Hello}
+
+
+Trimmed after cut_r : {, World  test ! }
+Cut_r : { 
+42}
+Orig after cuts: {  Hello, World  test !  
+42
+}
+
+
+Retrimmed: {, World  test !}
+Orig after retrim: {  Hello, World  test !  
+42
+}
+
+
+Retrimmed after token: {World  test !  
+4}
+Orig after token: {  Hello, World  test !  
+42
+}
+Token: {}
+Res: TRUE
+
+
+Retrimmed after retoken: {  
+4}
+Orig after retoken: {  Hello, World  test !  
+42
+}
+Retoken: {World  test }
+Retoken len: 12
+Retrim len: 4
