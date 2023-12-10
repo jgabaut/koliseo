@@ -34,6 +34,11 @@ AM_LDFLAGS += -s
 endif
 
 
+./anvil:
+	@echo -e "\033[1;35m[Makefile]\e[0m    Bootstrapping \"./anvil\":"
+	./scripts/bootstrap_anvil.sh repo_invil
+	@echo -e "\033[1;33mDone.\e[0m"
+
 # Build rule for object files
 %.o: %.c
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
@@ -143,7 +148,7 @@ kstr_test.k:
 	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_size.k basic_run.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k
+anviltest: bad_size.k basic_run.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"

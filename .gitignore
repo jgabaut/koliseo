@@ -39,3 +39,6 @@ aclocal.m4
 configure~
 Makefile
 Makefile.in
+
+# ignore anvil symlink
+anvil
