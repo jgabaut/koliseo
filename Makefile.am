@@ -36,8 +36,7 @@ endif
 
 ./anvil:
 	@echo -e "\033[1;35m[Makefile]\e[0m    Bootstrapping \"./anvil\":"
-	git submodule update --init
-	./scripts/bootstrap_anvil.sh -i repo_invil
+	./scripts/bootstrap_anvil.sh repo_invil
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Build rule for object files
