@@ -1,3 +1,6 @@
 [submodule "amboso"]
 	path = amboso
 	url = git@github.com:jgabaut/amboso.git
+[submodule "invil"]
+	path = invil
+	url = git@github.com:jgabaut/invil

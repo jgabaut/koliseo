@@ -33,6 +33,10 @@ else
 AM_LDFLAGS += -s
 endif
 
+./anvil:
+	@echo -e "\033[1;35m[Makefile]\e[0m    Bootstrapping \"./anvil\":"
+	./scripts/bootstrap_anvil.sh -i repo_invil
+	@echo -e "\033[1;33mDone.\e[0m"
 
 # Build rule for object files
 %.o: %.c
