@@ -1,5 +1,5 @@
 # Define the package name and version
-AC_INIT([koliseo], [0.3.13], [jgabaut@github.com])
+AC_INIT([koliseo], [0.3.14], [jgabaut@github.com])
 
 # Verify automake version and enable foreign option
 AM_INIT_AUTOMAKE([foreign -Wall])
@@ -22,7 +22,7 @@ AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 if test "$host_os" = "mingw32"; then
   echo "Building for mingw32: [$host_cpu-$host_vendor-$host_os]"
   # mingw32 specific flags
-  AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD -DNCURSES_STATIC -DKOLISEO_HAS_CURSES"])
+  AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD -DNCURSES_STATIC"])
   AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -lncursesw"])
   AC_SUBST([CCOMP], ["/usr/bin/x86_64-w64-mingw32-gcc"])
   AC_SUBST([OS], ["w64-mingw32"])
@@ -31,7 +31,7 @@ fi
 if test "$host_os" = "darwin"; then
   echo "Building for macos: [$host_cpu-$host_vendor-$host_os]"
   # macOS specific flags
-  AC_SUBST([KOLISEO_CFLAGS], ["-I/opt/homebrew/opt/ncurses/include -DKOLISEO_HAS_CURSES"])
+  AC_SUBST([KOLISEO_CFLAGS], ["-I/opt/homebrew/opt/ncurses/include"])
   AC_SUBST([KOLISEO_LDFLAGS], ["-L/opt/homebrew/opt/ncurses/lib -lncurses"])
   AC_SUBST([OS], ["darwin"])
   AC_SUBST([TARGET], ["demo"])
@@ -39,7 +39,7 @@ fi
 if test "$host_os" = "linux-gnu"; then
   echo "Building for Linux: [$host_cpu-$host_vendor-$host_os]"
   # Linux specific flags
-  AC_SUBST([KOLISEO_CFLAGS], ["-DKOLISEO_HAS_CURSES"])
+  AC_SUBST([KOLISEO_CFLAGS], [""])
   AC_SUBST([KOLISEO_LDFLAGS], ["-lncurses"])
   AC_SUBST([OS], ["Linux"])
   AC_SUBST([TARGET], ["demo"])
@@ -48,7 +48,7 @@ fi
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
 if test -z "$VERSION"; then
-  VERSION="0.3.13"
+  VERSION="0.3.14"
 fi
 
 # Output variables to the config.h header
