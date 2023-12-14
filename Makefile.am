@@ -58,7 +58,7 @@ libkoliseo.so: libkoliseo.o
 %.o: %.c
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
 
-install: libkoliseo.so
+install: libkoliseo.so doc
 	@echo -en "Installing koliseo lib $(VERSION):  "
 	./installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	@echo -e "\n\033[1;33mDone.\e[0m"
