@@ -1,0 +1,188 @@
+#!/bin/bash
+
+usage() {
+  echo -e "\n  Usage: installer [-i/u] [VERSION] [TARGET-DIR] [SOURCE-DIR] [LOG-FILE]"
+}
+
+install_flag=0
+uninstall_flag=0
+help_flag=0
+while getopts "iu" opt; do
+  case $opt in
+    i )
+      install_flag=1
+      ;;
+    u )
+      uninstall_flag=1
+      ;;
+    h )
+      help_flag=1
+      ;;
+    \? )
+      echo "Invalid option: -$OPTARG. Run with -h for help." >&2
+      exit 1
+      ;;
+    : )
+      echo "Option -$OPTARG requires an argument. Run with -h for help." >&2
+      exit 1
+      ;;
+  esac
+tot_opts=$OPTIND
+done
+
+if [[ $install_flag -eq 0 && $uninstall_flag -eq 0 ]] ; then {
+   usage
+   echo -e "\n  Missing operation, -i or -u."
+   exit 1
+}
+fi
+
+#
+
+if [[ $# -ne 5 ]] ; then {
+  usage
+  exit 1
+}
+fi
+
+INSTALLER_VERSION="0.1.0"
+VERSION="$2"
+TARGET_INSTALL_DIR="$3"
+SOURCE_INSTALL_DIR="$4"
+TARGET_INCLUDE_DIR="$TARGET_INSTALL_DIR/include"
+TARGET_LIB_DIR="$TARGET_INSTALL_DIR/lib"
+TARGET_DOC_DIR="$TARGET_INSTALL_DIR/share/doc"
+LOG_FILE="$5"
+
+truncate_log() {
+  echo "" > $LOG_FILE
+}
+
+log_msg() {
+  echo -e "$1" >> $LOG_FILE
+}
+
+echo -e "\n    koliseo installer version [$INSTALLER_VERSION]"
+echo -e "      args:  ["$@"]"
+echo -e "      will install koliseo version [$VERSION] to [$TARGET_INSTALL_DIR]"
+echo -e "          install header to [$TARGET_INCLUDE_DIR]"
+echo -e "          install lib .so [$VERSION] to [$TARGET_LIB_DIR]"
+echo -e "          install doc [$VERSION] to [$TARGET_DOC_DIR]"
+
+# Function for each installation step
+verscheck() {
+	[[ -f $SOURCE_INSTALL_DIR/libkoliseo.so ]] || {
+	log_msg "\n  Can't find libkoliseo.so in source dir : [$SOURCE_INSTALL_DIR]"
+	exit 1
+    }
+
+    #TODO: check lib version
+    #readVersion=$($SOURCE_INSTALL_DIR/helapordo -v)
+    #[[ $readVersion != $VERSION ]] && {
+	#log_msg "\n  Unexpected helapordo version [$readVersion], expected [$VERSION]"
+	#exit 1
+    #}
+    #log_msg "\n  helapordo version $readVersion detected in source dir : [$SOURCE_INSTALL_DIR]."
+}
+
+#TODO: step to install demo as kls_demo?
+#
+#installgame() {
+#	install $SOURCE_INSTALL_DIR/helapordo $TARGET_INSTALL_DIR/helapordo
+#    log_msg "\n  Installing game to [$TARGET_INSTALL_DIR/helapordo]."
+#}
+
+installincludes() {
+    log_msg "\n  Installing includes to [$TARGET_INCLUDE_DIR]."
+
+    install $SOURCE_INSTALL_DIR/src/koliseo.h "$TARGET_INCLUDE_DIR"
+    log_msg "\n  Installed includes from [$SOURCE_INSTALL_DIR/src/] to [$TARGET_INCLUDE_DIR]."
+}
+
+installlib() {
+    log_msg "\n  Installing lib to [$TARGET_LIB_DIR]."
+
+    install $SOURCE_INSTALL_DIR/libkoliseo.so "$TARGET_LIB_DIR"
+    log_msg "\n  Installed lib [libkoliseo.so] to [$TARGET_LIB_DIR]."
+}
+
+installdoc() {
+    log_msg "\n  Installing doc to [$TARGET_DOC_DIR]"
+
+    if [[ -d "$TARGET_DOC_DIR" ]] ; then {
+        :
+    } elif [[ ! -e "$TARGET_DOC_DIR" ]] ; then {
+        mkdir "$TARGET_DOC_DIR"
+    }
+    fi
+    if [[ -d "$TARGET_DOC_DIR/koliseo" ]] ; then {
+        :
+    } elif [[ ! -e "$TARGET_DOC_DIR" ]] ; then {
+        mkdir "$TARGET_DOC_DIR/koliseo"
+    }
+    fi
+
+    install $SOURCE_INSTALL_DIR/README.md "$TARGET_DOC_DIR/koliseo"
+    install $SOURCE_INSTALL_DIR/docs/docs.pdf "$TARGET_DOC_DIR/koliseo"
+    log_msg "\n  Installed docs to [$TARGET_DOC_DIR]."
+}
+
+uninstallKoliseo() {
+    log_msg "\n  Uninstalling koliseo lib"
+    yes | rm -rd "$TARGET_DOC_DIR/koliseo"
+    yes | rm "$TARGET_LIB_DIR/libkoliseo.so"
+    yes | rm "$TARGET_INCLUDE_DIR/koliseo.h"
+    log_msg "\n  Done."
+}
+
+# Array of installation steps
+installSteps=("verscheck" "installincludes" "installlib" "installdoc")
+totalTasks=${#installSteps[@]}  # Total number of installation tasks
+currentTask=0  # Current task being executed
+PROGRESS_BAR_WIDTH=40  # Width of the progress bar
+
+# Function to perform the installation tasks
+installKoliseo() {
+    for step in "${installSteps[@]}"; do
+        "$step"  # Execute each installation step
+        ((currentTask++))  # Increment current task count
+
+        # Update progress bar
+        progress=$((currentTask * 100 / totalTasks))
+        filledWidth=$((progress * PROGRESS_BAR_WIDTH / 100))
+        emptyWidth=$((PROGRESS_BAR_WIDTH - filledWidth))
+
+        printf "\033[1;35m  Installing...    ["
+
+        # Draw filled portion of the progress bar
+        for ((i = 0; i < filledWidth; ++i)); do
+            printf "#"
+        done
+
+        # Draw empty portion of the progress bar
+        for ((i = 0; i < emptyWidth; ++i)); do
+            printf " "
+        done
+
+        printf "]    %d%%\r\e[0m" $progress
+
+        sleep 0.2  # Delay to visualize the progress
+    done
+}
+
+truncate_log
+
+if [[ "$install_flag" -eq 1 ]] ; then {
+    #printf "  Starting installation.\n"
+    # Install the lib
+    installKoliseo
+    #printf "  Installation complete.\n"
+} elif [[ "$uninstall_flag" -eq 1 ]] ; then {
+    printf "  Starting uninstall.\n"
+    uninstallKoliseo
+    printf "  Uninstall complete.\n"
+} else {
+    printf "\033[1;31m[ERROR]\033[0m    Failed: no op flag asserted\n"
+    exit 1
+}
+fi

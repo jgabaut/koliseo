@@ -11,10 +11,15 @@ SHELL := /bin/bash
 .ONESHELL:
 # Check system info
 MACHINE := $$(uname -m)
+TARGET_INSTALL_DIR = /usr
+SOURCE_INSTALL_DIR = "."
+INSTALLER_LOG_FILE = "./installer.log"
+# Check local version
 PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
 
 # Source files
 koliseo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
+lib_SOURCES = src/koliseo.c
 
 # Linking rule
 LDADD = $(KOLISEO_LDFLAGS)
@@ -27,7 +32,7 @@ AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall --std=c11
 
 if DEBUG_BUILD
 AM_LDFLAGS += -ggdb -O0
-AM_CFLAGS += -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP -DKLS_SETCONF_DEBUG
+AM_CFLAGS += -DKLS_DEBUG_CORE -DKOLISEO_HAS_CURSES -DKOLISEO_HAS_GULP -DKLS_SETCONF_DEBUG
 else
 # Linker flag to strip symbols
 AM_LDFLAGS += -s
@@ -39,9 +44,29 @@ endif
 	./scripts/bootstrap_anvil.sh repo_invil
 	@echo -e "\033[1;33mDone.\e[0m"
 
+libkoliseo.o: $(lib_SOURCES)
+	@echo -e "\033[1;35m[Makefile]\e[0m    Building \"$@\":"
+	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) -fPIC $< -o $@
+	@echo -e "\033[1;33mDone.\e[0m"
+
+libkoliseo.so: libkoliseo.o
+	@echo -e "\033[1;35m[Makefile]\e[0m    Building \"$@\":"
+	$(CCOMP) -shared $< -o $@
+	@echo -e "\033[1;33mDone.\e[0m"
+
 # Build rule for object files
 %.o: %.c
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
+
+install: libkoliseo.so doc
+	@echo -en "Installing koliseo lib $(VERSION):  "
+	./installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	@echo -e "\n\033[1;33mDone.\e[0m"
+
+uninstall:
+	@echo -en "Uninstalling koliseo lib:  "
+	./installer.sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	@echo -e "\033[1;33mDone.\e[0m"
 
 # Build rule for the final binary
 $(TARGET): $(koliseo_SOURCES:.c=.o)
@@ -78,14 +103,22 @@ run: demo
 clean:
 	@echo -en "Cleaning build artifacts:  "
 	-rm $(TARGET)
+	-rm ./*.o
+	-rm ./*.so
 	-rm src/*.o
+	-rm src/*.so
 	-rm static/*.o
+	-rm static/*.so
 	@echo -e "\033[1;33mDone.\e[0m"
 
 cleanob:
 	@echo -en "Cleaning object build artifacts:  "
+	-rm ./*.o
+	-rm ./*.so
 	-rm src/*.o
+	-rm src/*.so
 	-rm static/*.o
+	-rm static/*.so
 	@echo -e "\033[1;33mDone.\e[0m"
 
 bad_size.k:
@@ -180,7 +213,7 @@ pack: rebuild
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)
-all: $(TARGET)
+all: $(TARGET) libkoliseo.so
 
 # Target to clean and rebuild
 rebuild: clean all

@@ -1,5 +1,7 @@
 # ignore object files
 *.o
+# ignore shared object files
+*.so
 # also explicitly ignore our executable for good measure
 demo
 # also explicitly ignore our windows executable for good measure
@@ -12,6 +14,11 @@ basic_example
 
 #We also want to ignore the dotfile dump if we ever use anvil with -c flag
 amboso_cfg.dot
+#Ignore invil log
+invil.log
+
+#Ignore installer log
+installer.log
 
 # MacOS DS_Store ignoring
 .DS_Store
