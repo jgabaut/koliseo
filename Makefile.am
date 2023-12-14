@@ -60,7 +60,7 @@ libkoliseo.so: libkoliseo.o
 
 install: libkoliseo.so
 	@echo -en "Installing koliseo lib $(VERSION):  "
-	./installer.sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	./installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	@echo -e "\n\033[1;33mDone.\e[0m"
 
 uninstall:
