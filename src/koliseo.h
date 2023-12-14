@@ -45,7 +45,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 11 /**< Represents current patch release.*/
+#define KLS_PATCH 14 /**< Represents current patch release.*/
 
 /*! \mainpage Koliseo index page
  *
