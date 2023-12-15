@@ -10,20 +10,28 @@ echo "Host os:  $host_os"
 AM_CONDITIONAL([OS_DARWIN], [test "$host_os" = "darwin"])
 AM_CONDITIONAL([MINGW32_BUILD], [test "$host_os" = "mingw32"])
 #
-# Check for the --enable-debug option
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Enable debug build])],
   [enable_debug=$enableval],
   [enable_debug=no])
-# Define the DEBUG_BUILD conditional based on the --enable-debug option
+AC_ARG_ENABLE([curses],
+  [AS_HELP_STRING([--enable-curses], [Enable curses functions])],
+  [enable_curses=$enableval],
+  [enable_curses=no])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 
 # Define the include and library paths based on the host system
 if test "$host_os" = "mingw32"; then
   echo "Building for mingw32: [$host_cpu-$host_vendor-$host_os]"
   # mingw32 specific flags
-  AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD -DNCURSES_STATIC"])
-  AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -lncursesw"])
+  if test "$enable_curses" = "yes"; then
+      echo "Building with curses header"
+      AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD -DNCURSES_STATIC"])
+      AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -lncursesw"])
+  else
+      AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD"])
+      AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib"])
+  fi
   AC_SUBST([CCOMP], ["/usr/bin/x86_64-w64-mingw32-gcc"])
   AC_SUBST([OS], ["w64-mingw32"])
   AC_SUBST([TARGET], ["demo.exe"])
@@ -31,19 +39,31 @@ fi
 if test "$host_os" = "darwin"; then
   echo "Building for macos: [$host_cpu-$host_vendor-$host_os]"
   # macOS specific flags
-  AC_SUBST([KOLISEO_CFLAGS], ["-I/opt/homebrew/opt/ncurses/include"])
-  AC_SUBST([KOLISEO_LDFLAGS], ["-L/opt/homebrew/opt/ncurses/lib -lncurses"])
+  if test "$enable_curses" = "yes"; then
+      echo "Building with curses header"
+      AC_SUBST([KOLISEO_LDFLAGS], ["-L/opt/homebrew/opt/ncurses/lib -lncurses"])
+      AC_SUBST([KOLISEO_CFLAGS], ["-I/opt/homebrew/opt/ncurses/include"])
+  else
+      AC_SUBST([KOLISEO_LDFLAGS], [""])
+      AC_SUBST([KOLISEO_CFLAGS], [""])
+  fi
   AC_SUBST([OS], ["darwin"])
   AC_SUBST([TARGET], ["demo"])
 fi
 if test "$host_os" = "linux-gnu"; then
   echo "Building for Linux: [$host_cpu-$host_vendor-$host_os]"
   # Linux specific flags
+  if test "$enable_curses" = "yes"; then
+      echo "Building with curses header"
+      AC_SUBST([KOLISEO_LDFLAGS], ["-lncurses"])
+  else
+      AC_SUBST([KOLISEO_LDFLAGS], [""])
+  fi
   AC_SUBST([KOLISEO_CFLAGS], [""])
-  AC_SUBST([KOLISEO_LDFLAGS], ["-lncurses"])
   AC_SUBST([OS], ["Linux"])
   AC_SUBST([TARGET], ["demo"])
 fi
+AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
 
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
