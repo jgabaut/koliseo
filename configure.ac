@@ -1,5 +1,5 @@
 # Define the package name and version
-AC_INIT([koliseo], [0.3.14], [jgabaut@github.com])
+AC_INIT([koliseo], [0.3.15], [jgabaut@github.com])
 
 # Verify automake version and enable foreign option
 AM_INIT_AUTOMAKE([foreign -Wall])
@@ -68,7 +68,7 @@ AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
 if test -z "$VERSION"; then
-  VERSION="0.3.14"
+  VERSION="0.3.15"
 fi
 
 # Output variables to the config.h header
