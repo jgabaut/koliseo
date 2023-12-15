@@ -32,10 +32,14 @@ AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall --std=c11
 
 if DEBUG_BUILD
 AM_LDFLAGS += -ggdb -O0
-AM_CFLAGS += -DKLS_DEBUG_CORE -DKOLISEO_HAS_CURSES -DKOLISEO_HAS_GULP -DKLS_SETCONF_DEBUG
+AM_CFLAGS += -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP -DKLS_SETCONF_DEBUG
 else
 # Linker flag to strip symbols
 AM_LDFLAGS += -s
+endif
+
+if CURSES_BUILD
+AM_CFLAGS += -DKOLISEO_HAS_CURSES
 endif
 
 
@@ -51,7 +55,9 @@ libkoliseo.o: $(lib_SOURCES)
 
 libkoliseo.so: libkoliseo.o
 	@echo -e "\033[1;35m[Makefile]\e[0m    Building \"$@\":"
-	$(CCOMP) -shared $< -o $@
+	@echo -e "    \033[1;35mAM_CFLAGS\e[0m: [ \"\033[1;34m$(AM_CFLAGS)\e[0m\" ]"
+	@echo -e "    \033[1;35mCFLAGS\e[0m: [ \"\033[1;34m$(CFLAGS)\e[0m\" ]"
+	$(CCOMP) $(CFLAGS) $(AM_CFLAGS) -shared $< -o $@
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Build rule for object files
