@@ -19,8 +19,12 @@
   This is a C library for an arena allocator, whose arenas are named Koliseo.
   It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
 
-  It also has a tagging system to type/name your references, and a couple functions to help you estimate relative memory usage by some particular type of object.
-  You can also use it to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+  It also has:
+  - A tagging system to type/name your references and have them in a list
+    - The list can be stored either in an inner Koliseo or using the global allocator)
+  - A couple utility functions to:
+    - Help you estimate relative memory usage by some particular type of object, may prove useful in some scenarios.
+    - Memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
 
 ## Basic example <a name = "basic_example"></a>
 
@@ -72,7 +76,12 @@ int main(void)
   * `make` to build the binary
   * `gcc` or `clang`, for building `demo`
 
-  To use `./anvil` to build all amboso-supported tags for `demo` , you also need the same packages.
+
+  To bootstrap and use the `./anvil` tool to build all amboso-supported tags for `demo`, you also need either:
+
+  * `bash >4.x` if you want to use `amboso`
+  * `rustc` if you want to use `invil`
+
 
 ## Configuration <a name = "config"></a>
 
@@ -89,21 +98,24 @@ int main(void)
   You will get a `./configure` script, which you can use to enable debug mode or other features.
 
   - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
-  - Run `./configure --enable-debug=yes` to setup the `Makefile` appropriately and build the `demo` binary with `-DKLS_DEBUG_CORE` flag.
+  - Run `./configure --enable-debug=yes` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
     - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
+  - Run `./configure --enable-curses=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
+  - Run `./configure --enable-gulp=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
 
 
 ## Building <a name = "building"></a>
 
-  To build the `demo` binary, run:
+  To build both the `libkoliseo.so` lib and `demo` binary, run:
   * `./configure`, which should generate the `Makefile`. See [Configuration](#config) section.
-  * `make`, to build the binary
+  * `make`, to build all target
 
 ## Supported platforms <a name = "support"></a>
 
   ATM the code should build for:
   - `x86_64-Linux`
   - `x86_64-w64-mingw32` to target `Windows`, but ATM there is no guarantee it works as intended there.
+    - This build does not have a `.dll` target yet.
 
 ## Credits <a name = "credits"></a>
 
@@ -114,3 +126,5 @@ int main(void)
   Thanks to [Tsoding](https://github.com/tsoding) for its creative string view library ([repo](https://github.com/tsoding/sv)), which indeed does things so simply you mostly can't do anything different.
 
 ## Todo <a name = "todo"></a>
+
+  - Add target to build `.dll` for `Windows`
