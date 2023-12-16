@@ -1,5 +1,5 @@
 # Define the package name and version
-AC_INIT([koliseo], [0.3.15], [jgabaut@github.com])
+AC_INIT([koliseo], [0.3.16], [jgabaut@github.com])
 
 # Verify automake version and enable foreign option
 AM_INIT_AUTOMAKE([foreign -Wall])
@@ -18,6 +18,10 @@ AC_ARG_ENABLE([curses],
   [AS_HELP_STRING([--enable-curses], [Enable curses functions])],
   [enable_curses=$enableval],
   [enable_curses=no])
+AC_ARG_ENABLE([gulp],
+  [AS_HELP_STRING([--enable-gulp], [Enable gulp header])],
+  [enable_gulp=$enableval],
+  [enable_gulp=no])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 
 # Define the include and library paths based on the host system
@@ -64,11 +68,12 @@ if test "$host_os" = "linux-gnu"; then
   AC_SUBST([TARGET], ["demo"])
 fi
 AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
+AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
 
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
 if test -z "$VERSION"; then
-  VERSION="0.3.15"
+  VERSION="0.3.16"
 fi
 
 # Output variables to the config.h header
