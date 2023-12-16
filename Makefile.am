@@ -18,7 +18,7 @@ INSTALLER_LOG_FILE = "./installer.log"
 PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
 
 # Source files
-koliseo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
+demo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
 lib_SOURCES = src/koliseo.c
 
 # Linking rule
@@ -78,11 +78,11 @@ uninstall:
 	./installer.sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	@echo -e "\033[1;33mDone.\e[0m"
 
-# Build rule for the final binary
-$(TARGET): $(koliseo_SOURCES:.c=.o)
+# Build rule for the demo binary
+$(TARGET): $(demo_SOURCES:.c=.o)
 	@echo -e "    \033[1;35mAM_CFLAGS\e[0m: [ \"\033[1;34m$(AM_CFLAGS)\e[0m\" ]"
 	@echo -e "    \033[1;35mLDADD\e[0m: [ \"\033[1;34m$(LDADD)\e[0m\" ]"
-	$(CCOMP) $(CFLAGS) $(AM_CFLAGS) $(koliseo_SOURCES:.c=.o) -o $@ $(LDADD) $(AM_LDFLAGS)
+	$(CCOMP) $(CFLAGS) $(AM_CFLAGS) $(demo_SOURCES:.c=.o) -o $@ $(LDADD) $(AM_LDFLAGS)
 
 doc:
 	@echo -e "Using doxygen to create tex + html from $(VERSION) src/:    "
