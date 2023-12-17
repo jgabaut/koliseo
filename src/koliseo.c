@@ -2623,6 +2623,28 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
     }
 }
 
+/**
+ * Prints enabled Koliseo features to stderr.
+ */
+void kls_dbg_features(void)
+{
+    #ifdef KOLISEO_HAS_CURSES
+    fprintf(stderr, "[KLS] ncurses.h integration is enabled\n");
+    #else
+    fprintf(stderr, "[KLS] ncurses.h integration is not enabled\n");
+    #endif
+    #ifdef KOLISEO_HAS_GULP
+    fprintf(stderr, "[KLS] KLS_GULP is enabled\n");
+    #else
+    fprintf(stderr, "[KLS] KLS_GULP is not enabled\n");
+    #endif
+    #ifdef KLS_DEBUG_CORE
+    fprintf(stderr, "[KLS] Koliseo core debugging is enabled\n");
+    #else
+    fprintf(stderr, "[KLS] Koliseo core debugging is not enabled\n");
+    #endif
+}
+
 KLS_Region_List kls_emptyList(void)
 {
     return NULL;
