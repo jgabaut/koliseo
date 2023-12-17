@@ -346,6 +346,7 @@ void *kls_push_zero_named(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc);
 void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+void kls_dbg_features(void);
 
 /**
  * Macro used to request memory from a Koliseo.
