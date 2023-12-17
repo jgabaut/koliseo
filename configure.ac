@@ -1,5 +1,5 @@
 # Define the package name and version
-AC_INIT([koliseo], [0.3.17], [jgabaut@github.com])
+AC_INIT([koliseo], [0.3.18], [jgabaut@github.com])
 
 # Verify automake version and enable foreign option
 AM_INIT_AUTOMAKE([foreign -Wall])
@@ -23,18 +23,20 @@ AC_ARG_ENABLE([gulp],
   [enable_gulp=$enableval],
   [enable_gulp=no])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
+AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
+AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
 
 # Define the include and library paths based on the host system
 if test "$host_os" = "mingw32"; then
   echo "Building for mingw32: [$host_cpu-$host_vendor-$host_os]"
   # mingw32 specific flags
   if test "$enable_curses" = "yes"; then
-      echo "Building with curses header"
-      AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD -DNCURSES_STATIC"])
-      AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -lncursesw"])
+    echo "Building with curses header"
+    AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD -DNCURSES_STATIC"])
+    AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -lncursesw"])
   else
-      AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD"])
-      AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib"])
+    AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DMINGW32_BUILD"])
+    AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib"])
   fi
   AC_SUBST([CCOMP], ["/usr/bin/x86_64-w64-mingw32-gcc"])
   AC_SUBST([OS], ["w64-mingw32"])
@@ -67,13 +69,11 @@ if test "$host_os" = "linux-gnu"; then
   AC_SUBST([OS], ["Linux"])
   AC_SUBST([TARGET], ["demo"])
 fi
-AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
-AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
 
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
 if test -z "$VERSION"; then
-  VERSION="0.3.17"
+  VERSION="0.3.18"
 fi
 
 # Output variables to the config.h header
