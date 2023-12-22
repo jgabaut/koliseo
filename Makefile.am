@@ -64,6 +64,11 @@ libkoliseo.so: libkoliseo.o
 	$(CCOMP) $(CFLAGS) $(AM_CFLAGS) -shared $< -o $@
 	@echo -e "\033[1;33mDone.\e[0m"
 
+libkoliseo.a: libkoliseo.o
+	@echo -e "\033[1;35m[Makefile]\e[0m    Building \"$@\":"
+	ar rcs $@ $<
+	@echo -e "\033[1;33mDone.\e[0m"
+
 # Build rule for object files
 %.o: %.c
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
@@ -71,6 +76,7 @@ libkoliseo.so: libkoliseo.o
 install: libkoliseo.so doc
 	@echo -en "Installing koliseo lib $(VERSION):  "
 	./installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	ldconfig
 	@echo -e "\n\033[1;33mDone.\e[0m"
 
 uninstall:
@@ -210,6 +216,7 @@ pack: rebuild
 	@echo -e "\033[1;32m[TREE] Done.\e[0m"
 	@echo -e "\033[1;35m[PACK] Installing:\e[0m"
 	install $(TARGET) ~/koliseo-local/share/$(PACK_NAME)
+	install README.md ~/koliseo-local/share/$(PACK_NAME)
 	install ./src/koliseo.c ~/koliseo-local/share/$(PACK_NAME)/src
 	install ./src/koliseo.h ~/koliseo-local/share/$(PACK_NAME)/src
 
@@ -223,7 +230,7 @@ pack: rebuild
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)
-all: $(TARGET) libkoliseo.so
+all: $(TARGET) libkoliseo.so libkoliseo.a
 
 # Target to clean and rebuild
 rebuild: clean all

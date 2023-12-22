@@ -2,6 +2,8 @@
 *.o
 # ignore shared object files
 *.so
+# ignore .a files
+*.a
 # also explicitly ignore our executable for good measure
 demo
 # also explicitly ignore our windows executable for good measure
