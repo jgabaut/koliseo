@@ -64,6 +64,11 @@ libkoliseo.so: libkoliseo.o
 	$(CCOMP) $(CFLAGS) $(AM_CFLAGS) -shared $< -o $@
 	@echo -e "\033[1;33mDone.\e[0m"
 
+libkoliseo.a: libkoliseo.o
+	@echo -e "\033[1;35m[Makefile]\e[0m    Building \"$@\":"
+	ar rcs $@ $<
+	@echo -e "\033[1;33mDone.\e[0m"
+
 # Build rule for object files
 %.o: %.c
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
@@ -223,7 +228,7 @@ pack: rebuild
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)
-all: $(TARGET) libkoliseo.so
+all: $(TARGET) libkoliseo.so libkoliseo.a
 
 # Target to clean and rebuild
 rebuild: clean all
