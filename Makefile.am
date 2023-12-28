@@ -57,7 +57,7 @@ libkoliseo.o: $(lib_SOURCES)
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) -fPIC $< -o $@
 	@echo -e "\033[1;33mDone.\e[0m"
 
-libkoliseo.so: libkoliseo.o
+$(SHARED_LIB): libkoliseo.o
 	@echo -e "\033[1;35m[Makefile]\e[0m    Building \"$@\":"
 	@echo -e "    \033[1;35mAM_CFLAGS\e[0m: [ \"\033[1;34m$(AM_CFLAGS)\e[0m\" ]"
 	@echo -e "    \033[1;35mCFLAGS\e[0m: [ \"\033[1;34m$(CFLAGS)\e[0m\" ]"
@@ -73,7 +73,7 @@ libkoliseo.a: libkoliseo.o
 %.o: %.c
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
 
-install: libkoliseo.so doc
+install: $(SHARED_LIB) doc
 	@echo -en "Installing koliseo lib $(VERSION):  "
 	./installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	ldconfig
@@ -121,20 +121,26 @@ clean:
 	-rm $(TARGET)
 	-rm ./*.o
 	-rm ./*.so
+	-rm ./*.dll
 	-rm src/*.o
 	-rm src/*.so
+	-rm src/*.dll
 	-rm static/*.o
 	-rm static/*.so
+	-rm static/*.dll
 	@echo -e "\033[1;33mDone.\e[0m"
 
 cleanob:
 	@echo -en "Cleaning object build artifacts:  "
 	-rm ./*.o
 	-rm ./*.so
+	-rm ./*.dll
 	-rm src/*.o
 	-rm src/*.so
+	-rm src/*.dll
 	-rm static/*.o
 	-rm static/*.so
+	-rm static/*.dll
 	@echo -e "\033[1;33mDone.\e[0m"
 
 bad_size.k:
@@ -216,7 +222,9 @@ pack: rebuild
 	@echo -e "\033[1;32m[TREE] Done.\e[0m"
 	@echo -e "\033[1;35m[PACK] Installing:\e[0m"
 	install $(TARGET) ~/koliseo-local/share/$(PACK_NAME)
+	install $(SHARED_LIB) ~/koliseo-local/share/$(PACK_NAME)
 	install README.md ~/koliseo-local/share/$(PACK_NAME)
+	install LICENSE ~/koliseo-local/share/$(PACK_NAME)
 	install ./src/koliseo.c ~/koliseo-local/share/$(PACK_NAME)/src
 	install ./src/koliseo.h ~/koliseo-local/share/$(PACK_NAME)/src
 
@@ -230,7 +238,7 @@ pack: rebuild
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)
-all: $(TARGET) libkoliseo.so libkoliseo.a
+all: $(TARGET) $(SHARED_LIB) libkoliseo.a
 
 # Target to clean and rebuild
 rebuild: clean all
