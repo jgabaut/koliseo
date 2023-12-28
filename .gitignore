@@ -4,6 +4,8 @@
 *.so
 # ignore .a files
 *.a
+# ignore .dll files
+*.dll
 # also explicitly ignore our executable for good measure
 demo
 # also explicitly ignore our windows executable for good measure

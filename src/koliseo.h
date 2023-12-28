@@ -45,7 +45,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 19 /**< Represents current patch release.*/
+#define KLS_PATCH 20 /**< Represents current patch release.*/
 
 /*! \mainpage Koliseo index page
  *
@@ -183,7 +183,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.19"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.3.20"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -380,11 +380,11 @@ void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
 #ifndef KOLISEO_CURSES_H_
 #define KOLISEO_CURSES_H_
 
-#ifndef MINGW32_BUILD
+#ifndef WINDOWS_BUILD
 #include "ncurses.h"
 #else
 #include <ncursesw/ncurses.h>
-#endif				//MINGW32_BUILD
+#endif				//WINDOWS_BUILD
 
 void kls_show_toWin(Koliseo * kls, WINDOW * win);
 void kls_showList_toWin(Koliseo * kls, WINDOW * win);
