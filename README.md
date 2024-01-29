@@ -127,4 +127,4 @@ int main(void)
 
 ## Todo <a name = "todo"></a>
 
-  - Add target to build `.dll` for `Windows`
+  - Break up internal extensions to the core functionality
