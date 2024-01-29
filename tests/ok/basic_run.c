@@ -13,7 +13,7 @@ int main(void)
     Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
 
     //Use the arena (see demo for Koliseo_Temp usage)
-    Example* e = KLS_PUSH(kls,Example,1);
+    Example* e = KLS_PUSH(kls,Example);
     e->val = 42;
 
     //Free the arena

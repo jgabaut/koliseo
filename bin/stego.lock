@@ -1,3 +1,7 @@
+[ anvil ]
+
+version = "2.0.0"
+
 [ build ]
 
 source = "demo.c"
@@ -55,3 +59,4 @@ testsdir = "ok"
 "0.3.18" = "invil 0.1.6, fixes broken ./anvil -i"
 "0.3.19" = "Add .a rule, bump invil"
 "0.3.20" = "Improve configure.ac, refactor MINGW32_BUILD, add SHARED_LIB define"
+"0.4.0" = "Refactor usage macros, add KLS_DEFAULT_CONF__"

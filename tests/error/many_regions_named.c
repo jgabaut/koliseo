@@ -6,7 +6,7 @@ int main(void) {
 
     int iter=1;
     while(true) {
-        int* dummy = KLS_PUSH_NAMED(kls,int,1,"foo","bar");
+        int* dummy = KLS_PUSH_NAMED(kls,int,"foo","bar");
     }
     kls_free(kls);
     return 0;

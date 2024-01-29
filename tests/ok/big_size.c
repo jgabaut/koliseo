@@ -5,7 +5,7 @@
 int main(void) {
     Koliseo* k = kls_new(1024*1024*1024);
 
-    int* p = KLS_PUSH(k,int,1);
+    int* p = KLS_PUSH(k,int);
 
     kls_free(k);
     printf("That's a big Koliseo.\n");
