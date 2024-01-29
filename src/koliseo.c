@@ -422,6 +422,7 @@ Koliseo *kls_new_dbg(ptrdiff_t size)
  * Calls kls_new_conf() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
  * @param size The size for Koliseo data field.
  * @param output_path The filepath for log output.
+ * @param reglist_kls_size The size to use for the inner reglist Koliseo.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
@@ -1204,6 +1205,8 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
+ * @param name The name to assign to the resulting KLS_Region.
+ * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1362,6 +1365,8 @@ void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
+ * @param name The name to assign to the resulting KLS_Region.
+ * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 void *kls_temp_push_zero_named(Koliseo_Temp *t_kls, ptrdiff_t size,
@@ -1533,6 +1538,8 @@ void *kls_temp_push_zero_named(Koliseo_Temp *t_kls, ptrdiff_t size,
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @param type The type index for pushed KLS_Region.
+ * @param name The name to assign to the resulting KLS_Region.
+ * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1690,6 +1697,8 @@ void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @param type The type index for pushed KLS_Region.
+ * @param name The name to assign to the resulting KLS_Region.
+ * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
 void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
@@ -1852,6 +1861,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
 
 /**
  * Prints header fields from the passed Koliseo pointer, to the passed FILE pointer.
+ * @param fp The FILE pointer to print to.
  * @param kls The Koliseo at hand.
  */
 void print_kls_2file(FILE *fp, Koliseo *kls)
@@ -1910,6 +1920,7 @@ void print_dbg_kls(Koliseo *kls)
 
 /**
  * Prints header fields from the passed Koliseo_Temp pointer, to the passed FILE pointer.
+ * @param fp The FILE pointer to print to.
  * @param t_kls The Koliseo_Temp at hand.
  */
 void print_temp_kls_2file(FILE *fp, Koliseo_Temp *t_kls)
@@ -3127,7 +3138,7 @@ double kls_usageShare(KLS_Region *r, Koliseo *kls)
 
 /**
  * Return size of a passed KLS_Region. Sugar.
- * @passed r The KLS_Region.
+ * @param r The KLS_Region.
  * @return Region size as ptrdiff_t.
  */
 ptrdiff_t kls_regionSize(KLS_Region *r)
@@ -3137,7 +3148,7 @@ ptrdiff_t kls_regionSize(KLS_Region *r)
 
 /**
  * Return average region size in usage for the passed Koliseo.
- * @passed kls The Koliseo to check usage for.
+ * @param kls The Koliseo to check usage for.
  * @return Average region size as ptrdiff_t.
  */
 ptrdiff_t kls_avg_regionSize(Koliseo *kls)
