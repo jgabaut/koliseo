@@ -17,6 +17,17 @@
 */
 #include "koliseo.h"
 
+static const KLS_Conf KLS_DEFAULT_CONF__ = {
+    .kls_autoset_regions = 0,
+    .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
+    .kls_reglist_kls_size = 0,
+    .kls_autoset_temp_regions = 0,
+    .kls_collect_stats = 0,
+    .kls_verbose_lvl = 0,
+    .kls_log_fp = NULL,
+    .kls_log_filepath = "",
+};
+
 KLS_Conf KLS_DEFAULT_CONF = {
     .kls_autoset_regions = 0,
     .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
@@ -39,7 +50,7 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .worst_pushcall_time = -1,
 };
 
-bool kls_set_conf(Koliseo * kls, KLS_Conf conf);	//Declare function used internally by kls_new() and kls_new_conf()
+static bool kls_set_conf(Koliseo * kls, KLS_Conf conf);	//Declare function used internally by kls_new() and kls_new_conf()
 
 /**
  * Defines title banner.
@@ -480,7 +491,7 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
             kls_freeList(kls->regs);
 
             Koliseo *reglist_kls = NULL;
-            reglist_kls = kls_new(kls->conf.kls_reglist_kls_size);
+            reglist_kls = kls_new_conf(kls->conf.kls_reglist_kls_size, KLS_DEFAULT_CONF__);
 
             if (!reglist_kls) {
                 fprintf(stderr,
