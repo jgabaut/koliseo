@@ -50,6 +50,11 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .worst_pushcall_time = -1,
 };
 
+const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
+    [KLS_REGLIST_ALLOC_LIBC] = "LIBC",
+    [KLS_REGLIST_ALLOC_KLS_BASIC] = "KLS_BASIC",
+};
+
 static bool kls_set_conf(Koliseo * kls, KLS_Conf conf);	//Declare function used internally by kls_new() and kls_new_conf()
 
 /**
@@ -138,12 +143,9 @@ const int int_koliseo_version(void)
 const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
 {
     switch(kls_be) {
-        case KLS_REGLIST_ALLOC_LIBC: {
-            return "LIBC";
-        }
-        break;
+        case KLS_REGLIST_ALLOC_LIBC:
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
-            return "KLS_BASIC";
+            return kls_reglist_backend_strings[kls_be];
         }
         break;
         default: {

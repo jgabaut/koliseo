@@ -58,6 +58,18 @@ typedef enum KLS_RegList_Alloc_Backend {
     KLS_REGLIST_TOTAL_BACKENDS
 } KLS_RegList_Alloc_Backend;
 
+/**
+ * Defines strings for KLS_RegList_Alloc_Backend values.
+ * @see KLS_RegList_Alloc_Backend
+ * @see kls_reglist_backend_string()
+ */
+extern const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS];
+
+/**
+ * Returns the string corresponding to passed kls_be.
+ * @see KLS_RegList_Alloc_Backend
+ * @see kls_reglist_backend_strings
+ */
 const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be);
 
 /**
