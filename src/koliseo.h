@@ -58,6 +58,8 @@ typedef enum KLS_RegList_Alloc_Backend {
     KLS_REGLIST_TOTAL_BACKENDS
 } KLS_RegList_Alloc_Backend;
 
+const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be);
+
 /**
  * Defines flags for Koliseo.
  * @see Koliseo
@@ -107,16 +109,16 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Conf_Arg()
  */
 #ifndef _WIN32
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %i, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 #else
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %i, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 #endif
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_reglist_alloc_backend),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),kls_reglist_backend_string((conf.kls_reglist_alloc_backend)),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
 
 /**
  * Defines a format string for KLS_Stats.

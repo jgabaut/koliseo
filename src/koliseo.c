@@ -135,6 +135,25 @@ const int int_koliseo_version(void)
     return KOLISEO_API_VERSION_INT;
 }
 
+const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
+{
+    switch(kls_be) {
+        case KLS_REGLIST_ALLOC_LIBC: {
+            return "LIBC";
+        }
+        break;
+        case KLS_REGLIST_ALLOC_KLS_BASIC: {
+            return "KLS_BASIC";
+        }
+        break;
+        default: {
+            fprintf(stderr,"%s():    Unexpected kls_be: {%i}.\n", __func__, kls_be);
+            return "";
+        }
+        break;
+    }
+}
+
 /**
  * Returns the current offset (position of pointer bumper) for the passed Koliseo.
  * @param kls The Koliseo at hand.
