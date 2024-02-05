@@ -44,19 +44,8 @@
 #endif				//KLS_DEBUG_CORE
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
-#define KLS_MINOR 3 /**< Represents current minor release.*/
-#define KLS_PATCH 20 /**< Represents current patch release.*/
-
-/*! \mainpage Koliseo index page
- *
- * \section intro_sec Intro
- *
- * Koliseo is a C arena allocator library.
- *
- * SPDX-License-Identifier: GPL-3.0-only
- *
- * Check it out on [github](https://github.com/jgabaut/koliseo).
- */
+#define KLS_MINOR 4 /**< Represents current minor release.*/
+#define KLS_PATCH 0 /**< Represents current patch release.*/
 
 /**
  * Defines allocation backend for KLS_Region_List items.
@@ -68,6 +57,20 @@ typedef enum KLS_RegList_Alloc_Backend {
     KLS_REGLIST_ALLOC_KLS_BASIC,
     KLS_REGLIST_TOTAL_BACKENDS
 } KLS_RegList_Alloc_Backend;
+
+/**
+ * Defines strings for KLS_RegList_Alloc_Backend values.
+ * @see KLS_RegList_Alloc_Backend
+ * @see kls_reglist_backend_string()
+ */
+extern const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS];
+
+/**
+ * Returns the string corresponding to passed kls_be.
+ * @see KLS_RegList_Alloc_Backend
+ * @see kls_reglist_backend_strings
+ */
+const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be);
 
 /**
  * Defines flags for Koliseo.
@@ -118,16 +121,16 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Conf_Arg()
  */
 #ifndef _WIN32
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %i, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 #else
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %i, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 #endif
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.kls_reglist_alloc_backend),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),kls_reglist_backend_string((conf.kls_reglist_alloc_backend)),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
 
 /**
  * Defines a format string for KLS_Stats.
@@ -183,7 +186,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.3.20"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.0"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -349,25 +352,40 @@ void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void kls_dbg_features(void);
 
 /**
+ * Macro used to request memory for an array of type values from a Koliseo.
+ */
+#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_AR(kls, sizeof(type), _Alignof(type), count)
+/**
+ * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
+ */
+#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named(kls, sizeof(type), _Alignof(type), count, name, desc)
+/**
+ * Macro used to request memory for an array of type values from a Koliseo, and assign a type, a name and a description to the region item.
+ */
+#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed(kls, sizeof(type), _Alignof(type), count, region_type, name, desc)
+/**
+ * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_ARR(kls, type, count) (type*)kls_pop(kls, sizeof(type), _Alignof(type), count)
+
+/**
  * Macro used to request memory from a Koliseo.
  */
-#define KLS_PUSH(kls, type, count) (type*)kls_push_zero_AR(kls, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH(kls, type) KLS_PUSH_ARR(kls, type, 1)
 /**
  * Macro used to request memory from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named(kls, sizeof(type), _Alignof(type), count, name, desc)
+#define KLS_PUSH_NAMED(kls, type, name, desc) KLS_PUSH_ARR_NAMED(kls, type, 1, name, desc)
 /**
  * Macro used to request memory from a Koliseo, and assign a a type, a name and a description to the region item.
  */
-#define KLS_PUSH_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed(kls, sizeof(type), _Alignof(type), count, region_type, name, desc)
+#define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED(kls, type, 1, region_type, name, desc)
 /**
  * Macro used to "remove" memory from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
  * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
  */
-#define KLS_POP(kls, type, count) (type*)kls_pop(kls, sizeof(type), _Alignof(type), count)
-
-#define KLS_PUSH_ARRAY(kls, type, count) (type*)kls_push_zero(kls, sizeof(type)*(count), _Alignof(type), count)
-#define KLS_PUSH_STRUCT(kls, type) (type*)KLS_PUSH_ARRAY((kls), (type))
+#define KLS_POP(kls, type) KLS_POP_ARR(kls, type, 1)
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
@@ -410,10 +428,40 @@ void *kls_temp_pop(Koliseo_Temp * t_kls, ptrdiff_t size, ptrdiff_t align,
 void print_temp_kls_2file(FILE * fp, Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 
-#define KLS_PUSH_T(kls_temp, type, count) (type*)kls_temp_push_zero_AR(kls_temp, sizeof(type), _Alignof(type), count)
-#define KLS_PUSH_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named(kls_temp, sizeof(type), _Alignof(type), count, name, desc)
-#define KLS_PUSH_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)kls_temp_push_zero_typed(kls_temp, sizeof(type), _Alignof(type), count, region_type, name, desc)
-#define KLS_POP_T(kls_temp, type, count) (type*)kls_temp_pop(kls_temp, sizeof(type), _Alignof(type), count)
+/**
+ * Macro used to request memory for an array of type values from a Koliseo_Temp.
+ */
+#define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_AR(kls_temp, sizeof(type), _Alignof(type), count)
+/**
+ * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a name and a description to the region item.
+ */
+#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named(kls_temp, sizeof(type), _Alignof(type), count, name, desc)
+/**
+ * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a type, a name and a description to the region item.
+ */
+#define KLS_PUSH_ARR_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)kls_temp_push_zero_typed(kls_temp, sizeof(type), _Alignof(type), count, region_type, name, desc)
+/**
+ * Macro used to "remove" memory as an array from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop(kls_temp, sizeof(type), _Alignof(type), count)
+/**
+ * Macro used to request memory from a Koliseo_Temp.
+ */
+#define KLS_PUSH_T(kls_temp, type) KLS_PUSH_ARR_T(kls_temp, type, 1)
+/**
+ * Macro used to request memory from a Koliseo_Temp, and assign a name and a description to the region item.
+ */
+#define KLS_PUSH_T_NAMED(kls_temp, type, name, desc) KLS_PUSH_ARR_T_NAMED(kls_temp, type, 1, name, desc)
+/**
+ * Macro used to request memory from a Koliseo_Temp, and assign a type, a name and a description to the region item.
+ */
+#define KLS_PUSH_T_TYPED(kls_temp, type, region_type, name, desc) KLS_PUSH_ARR_T_TYPED(kls_temp, type, 1, region_type, name, desc)
+/**
+ * Macro used to "remove" memory from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_T(kls_temp, type) KLS_POP_ARR_T(kls_temp, type), 1)
 
 KLS_Region_List kls_emptyList(void);
 #define KLS_GETLIST() kls_emptyList()

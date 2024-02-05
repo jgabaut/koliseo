@@ -7,7 +7,7 @@ int main(void) {
     Koliseo_Temp* t_kls = kls_temp_start(kls);
     int iter=1;
     while(true) {
-        int* dummy = KLS_PUSH_T_TYPED(t_kls,int,1, KLS_None, "An int", "An int");
+        int* dummy = KLS_PUSH_T_TYPED(t_kls,int, KLS_None, "An int", "An int");
     }
     kls_free(kls);
     return 0;

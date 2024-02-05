@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 
     printf
 	("[This handles the Koliseo directly while we have an open Koliseo_Temp.]\n");
-    p = (int *)KLS_PUSH(kls, int, 1);
+    p = (int *)KLS_PUSH(kls, int);
 
 #ifndef WINDOWS_BUILD
     printf("[KLS_PUSH_T_NAMED for a int to Koliseo_Temp] [size: %li]\n",
@@ -118,14 +118,14 @@ int main(int argc, char **argv)
 	   sizeof(int));
 #endif
 
-    p2 = (int *)KLS_PUSH_T_NAMED(temp_kls, int, 1, "int", "Another int");
+    p2 = (int *)KLS_PUSH_T_NAMED(temp_kls, int, "int", "Another int");
 #ifndef WINDOWS_BUILD
     printf("[KLS_PUSH_T for a int to Koliseo_Temp] [size: %li]\n", sizeof(int));
 #else
     printf("[KLS_PUSH_T for a int to Koliseo_Temp] [size: %lli]\n",
 	   sizeof(int));
 #endif
-    p3 = (int *)KLS_PUSH_T(temp_kls, int, 1);
+    p3 = (int *)KLS_PUSH_T(temp_kls, int);
 
 #ifndef WINDOWS_BUILD
     printf("[Current position in Koliseo] [pos: %li]\n", kls_get_pos(kls));
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
     printf("[KLS_POP a int from Koliseo] [size: %lli]\n", sizeof(int));
 #endif
 
-    z = KLS_POP(kls, int, 1);
+    z = KLS_POP(kls, int);
 
     printf("\n*z is [%i] after KLS_POP\n", *z);
 
