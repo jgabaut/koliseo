@@ -143,16 +143,16 @@ const int int_koliseo_version(void)
 const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
 {
     switch(kls_be) {
-        case KLS_REGLIST_ALLOC_LIBC:
-        case KLS_REGLIST_ALLOC_KLS_BASIC: {
-            return kls_reglist_backend_strings[kls_be];
-        }
-        break;
-        default: {
-            fprintf(stderr,"%s():    Unexpected kls_be: {%i}.\n", __func__, kls_be);
-            return "";
-        }
-        break;
+    case KLS_REGLIST_ALLOC_LIBC:
+    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+        return kls_reglist_backend_strings[kls_be];
+    }
+    break;
+    default: {
+        fprintf(stderr,"%s():    Unexpected kls_be: {%i}.\n", __func__, kls_be);
+        return "";
+    }
+    break;
     }
 }
 
