@@ -6,6 +6,12 @@
 
 + [What is this thing?](#witt)
   + [Basic example](#basic_example)
+  + [Extra features](#extra_features)
+    + [Region](#extra_region)
+    + [Curses](#extra_curses)
+    + [Debug](#extra_debug)
+    + [Gulp](#extra_gulp)
+    + [How to use extras](#extra_howto)
   + [Documentation](#docs)
   + [Prerequisites](#prerequisites)
   + [Configuration](#config)
@@ -19,26 +25,7 @@
   This is a C library for an arena allocator, whose arenas are named Koliseo.
   It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
 
-  By default, extended functionalities are not included in the build, with each feature needing a preprocessor macro to be defined before including the library header.
-
-  At the moment, the arena can't grown its own underlying buffer.
-
-  Extra features:
-
-  - Region: a ready-to-go index for every allocation you make.
-    - It uses an intrusive linked list and (at the moment) has quite the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
-    - Offers extended API with tagging arguments, to type/name your references
-    - For now, two allocations backends can be chosen for the list, it can be stored:
-      - In an inner Koliseo (this puts an extra limit to the total number of single allocations)
-      - Using the global allocator (from malloc)
-    - Extra utility functions
-      - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
-  - Gulp: utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
-    - Also includes a minimal string-view API, in case you want to work on the file contents differently.
-  - Curses: utility functions that extend ncurses API to provide debug info.
-  - Core debug: extra debug for core calls, may be too verbose for some applications.
-
-  To aid in building with extra features, see [this section.](#config)
+  If you compile it without defining any special macros, you will get the basic functionality.
 
 ## Basic example <a name = "basic_example"></a>
 
@@ -74,6 +61,46 @@ int main(void)
     return 0;
 }
 ```
+
+## Extra features <a name = "extra_features"></a>
+
+  By default, extended functionalities are not included in the build, with each feature needing a preprocessor macro to be defined before including the library header.
+  You can find hints on configuration [here,](#config) or the list of macros [here.](#extras_howto)
+
+### Region <a name = "extra_region"></a>
+
+  A ready-to-go index for every allocation you make.
+  - It uses an intrusive linked list and (at the moment) has quite the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
+  - Offers extended API with tagging arguments, to type/name your references
+  - For now, two allocations backends can be chosen for the list, it can be stored:
+    - In an inner Koliseo (this puts an extra limit to the total number of single allocations)
+    - Using the global allocator (from malloc)
+  - Extra utility functions
+    - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
+
+### Curses <a name = "extra_curses"></a>
+
+  Utility functions that extend ncurses API to provide debug info.
+
+### Core debug <a name = "extra_debug"></a>
+
+  Extra debug for core calls, may be too verbose for some applications.
+
+### Gulp <a name = "extra_gulp"></a>
+
+  Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+  - Also includes a minimal string-view API, in case you want to work on the file contents differently.
+
+### How to enable extra features<a name = "extra_howto"></a>
+
+  To aid in building with extra features, see [this section.](#config)
+
+  The preprocessor macros to enable them manually are:
+
+  - Region: `KOLISEO_HAS_REGION`
+  - Curses: `KOLISEO_HAS_CURSES`
+  - Debug: `KLS_DEBUG_CORE`
+  - Gulp: `KOLISEO_HAS_GULP`
 
 ## Documentation <a name = "docs"></a>
 
@@ -143,3 +170,6 @@ int main(void)
 ## Todo <a name = "todo"></a>
 
   - Break up internal extensions to the core functionality
+    - Maybe move the guarded code into separate headers?
+  - At the moment, the arena can't grown its own underlying buffer.
+    - Add backwards-compatible logic to enable growable arenas.
