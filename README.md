@@ -22,8 +22,8 @@
 
 ## What is this thing? <a name = "witt"></a>
 
-  This is a C library for an arena allocator, whose arenas are named Koliseo.
-  It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
+  This is a C library for an arena allocator, whose arenas are named `Koliseo`.
+  It offers a basic API to perform initalisation, push/pop, reset and free of a `Koliseo`.
 
   If you compile it without defining any special macros, you will get the basic functionality.
 
@@ -61,6 +61,16 @@ int main(void)
     return 0;
 }
 ```
+
+  After including the `koliseo.h` header:
+
+  - `Koliseo* kls_new(size_t)` to initialise a default arena
+  - `Type* KLS_PUSH(Koliseo* kls, Type)` macro to request memory for a specific type.
+    - For C strings, you can use the `char* KLS_PUSH_STR(Koliseo* kls, char* cstring)` macro.
+    - Also, `char* KLS_STRDUP(Koliseo* kls, char* source, char* dest)` macro can be useful.
+  - `void kls_free(Koliseo* kls)` to free the arena.
+
+  For more documentation on the available functions, see [this section.](#docs)
 
 ## Extra features <a name = "extra_features"></a>
 
@@ -171,5 +181,6 @@ int main(void)
 
   - Break up internal extensions to the core functionality
     - Maybe move the guarded code into separate headers?
+  - Model `KLS_Temp_Conf` to still be included without `Region` feature
   - At the moment, the arena can't grown its own underlying buffer.
     - Add backwards-compatible logic to enable growable arenas.
