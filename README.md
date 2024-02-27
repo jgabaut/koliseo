@@ -120,7 +120,7 @@ int main(void)
 
   To bootstrap and use the `./anvil` tool to build all amboso-supported tags for `demo`, you also need either:
 
-  * `bash >4.x` if you want to use `amboso`
+  * `bash >4.x, gawk` if you want to use `amboso`
   * `rustc` if you want to use `invil`
 
 
