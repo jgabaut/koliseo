@@ -393,13 +393,13 @@ void kls_dbg_features(void);
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
  */
-#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_AR(kls, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_AR((kls), sizeof(type), _Alignof(type), (count))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
  */
 #ifdef KLS_HAS_REGLIST
-#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named(kls, sizeof(type), _Alignof(type), count, name, desc)
+#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named((kls), sizeof((type)), _Alignof((type)), (count), (name), (desc))
 #else
 #define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) KLS_PUSH_ARR((kls),(type),(count))
 #endif // KLS_HAS_REGLIST
@@ -407,7 +407,7 @@ void kls_dbg_features(void);
  * Macro used to request memory for an array of type values from a Koliseo, and assign a type, a name and a description to the region item.
  */
 #ifdef KLS_HAS_REGLIST
-#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed(kls, sizeof(type), _Alignof(type), count, region_type, name, desc)
+#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed((kls), sizeof((type)), _Alignof((type)), (count), (region_type), (name), (desc))
 #else
 #define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) KLS_PUSH_ARR((kls),(type),(count))
 #endif // KLS_HAS_REGLIST
@@ -415,27 +415,27 @@ void kls_dbg_features(void);
  * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
  * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
  */
-#define KLS_POP_ARR(kls, type, count) (type*)kls_pop(kls, sizeof(type), _Alignof(type), count)
+#define KLS_POP_ARR(kls, type, count) (type*)kls_pop((kls), sizeof(type), _Alignof(type), (count))
 
 /**
  * Macro used to request memory from a Koliseo.
  */
-#define KLS_PUSH(kls, type) KLS_PUSH_ARR(kls, type, 1)
+#define KLS_PUSH(kls, type) KLS_PUSH_ARR((kls), type, 1)
 
 /**
  * Macro used to request memory from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_NAMED(kls, type, name, desc) KLS_PUSH_ARR_NAMED(kls, type, 1, name, desc)
+#define KLS_PUSH_NAMED(kls, type, name, desc) KLS_PUSH_ARR_NAMED((kls), (type), 1, (name), (desc))
 /**
  * Macro used to request memory from a Koliseo, and assign a a type, a name and a description to the region item.
  */
-#define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED(kls, type, 1, region_type, name, desc)
+#define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), (type), 1, (region_type), (name), (desc))
 
 /**
  * Macro used to "remove" memory from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
  * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
  */
-#define KLS_POP(kls, type) KLS_POP_ARR(kls, type, 1)
+#define KLS_POP(kls, type) KLS_POP_ARR((kls), type, 1)
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
