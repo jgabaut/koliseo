@@ -2119,8 +2119,10 @@ void kls_show_toWin(Koliseo *kls, WINDOW *win)
 #else
     mvwprintw(win, y++, x, "Prev_Offset: { %lli }", kls->prev_offset);
 #endif
+#ifdef KLS_HAS_REGLIST
     mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
               kls_length(kls->regs));
+#endif
     mvwprintw(win, y++, x, "Current usage: { %.3f%% }",
               (kls->offset * 100.0) / kls->size);
     mvwprintw(win, y++, x, "%s", "");
@@ -2214,10 +2216,12 @@ void kls_temp_show_toWin(Koliseo_Temp *t_kls, WINDOW *win)
     mvwprintw(win, y++, x, "Inner Prev_Offset: { %lli }", kls->prev_offset);
     mvwprintw(win, y++, x, "Temp Prev_Offset: { %lli }", t_kls->prev_offset);
 #endif
+#ifdef KLS_HAS_REGLIST
     mvwprintw(win, y++, x, "Refer KLS_Region_List len: { %i }",
               kls_length(kls->regs));
     mvwprintw(win, y++, x, "Temp KLS_Region_List len: { %i }",
               kls_length(t_kls->t_regs));
+#endif
     mvwprintw(win, y++, x, "Current inner usage: { %.3f%% }",
               (kls->offset * 100.0) / kls->size);
     mvwprintw(win, y++, x, "Current refer usage: { %.3f%% }",
@@ -2250,6 +2254,7 @@ void kls_temp_show_toWin(Koliseo_Temp *t_kls, WINDOW *win)
     } while (!quit);
 }
 
+#ifdef KLS_HAS_REGLIST
 /**
  * Displays a slideshow of KLS_Region_List from passed Koliseo, to the passed WINDOW pointer.
  * @param kls The Koliseo at hand.
@@ -2430,6 +2435,7 @@ void kls_temp_showList_toWin(Koliseo_Temp *t_kls, WINDOW *win)
         } while (!quit && !picked);
     }
 }
+#endif // KLS_HAS_REGLIST
 #endif //KOLISEO_HAS_CURSES
 
 /**

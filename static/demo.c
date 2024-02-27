@@ -197,8 +197,10 @@ int main(int argc, char **argv)
 	kls_show_toWin(kls, win);
 	kls_temp_show_toWin(temp_kls, win);
 	refresh();
+#ifdef KLS_HAS_REGLIST
 	kls_showList_toWin(kls, win);
 	kls_temp_showList_toWin(temp_kls, win);
+#endif // KLS_HAS_REGLIST
 	delwin(win);
 	endwin();
     }

@@ -455,9 +455,11 @@ void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
 #endif				//WINDOWS_BUILD
 
 void kls_show_toWin(Koliseo * kls, WINDOW * win);
-void kls_showList_toWin(Koliseo * kls, WINDOW * win);
 void kls_temp_show_toWin(Koliseo_Temp * t_kls, WINDOW * win);
+#ifdef KLS_HAS_REGLIST
+void kls_showList_toWin(Koliseo * kls, WINDOW * win);
 void kls_temp_showList_toWin(Koliseo_Temp * t_kls, WINDOW * win);
+#endif // KLS_HAS_REGLIST
 #endif				//KOLISEO_CURSES_H_
 
 #endif				//KOLISEO_HAS_CURSES
