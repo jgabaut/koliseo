@@ -46,6 +46,10 @@ if GULP_BUILD
 AM_CFLAGS += -DKOLISEO_HAS_GULP
 endif
 
+if REGION_BUILD
+AM_CFLAGS += -DKOLISEO_HAS_REGION
+endif
+
 
 ./anvil:
 	@echo -e "\033[1;35m[Makefile]\e[0m    Bootstrapping \"./anvil\":"

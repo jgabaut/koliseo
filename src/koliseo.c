@@ -17,7 +17,7 @@
 */
 #include "koliseo.h"
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_autoset_regions = 0,
     .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
@@ -31,12 +31,12 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
 #endif
 
 KLS_Conf KLS_DEFAULT_CONF = {
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     .kls_autoset_regions = 0,
     .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
     .kls_reglist_kls_size = 0,
     .kls_autoset_temp_regions = 0,
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
@@ -50,14 +50,14 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .tot_temp_pops = 0,
     .tot_logcalls = 0,
     .tot_hiccups = 0,
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     .avg_region_size = 0,
 #endif
     .worst_pushcall_time = -1,
 };
 
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
     [KLS_REGLIST_ALLOC_LIBC] = "LIBC",
     [KLS_REGLIST_ALLOC_KLS_BASIC] = "KLS_BASIC",
@@ -149,7 +149,7 @@ const int int_koliseo_version(void)
     return KOLISEO_API_VERSION_INT;
 }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
 {
     switch(kls_be) {
@@ -165,7 +165,7 @@ const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
     break;
     }
 }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Returns the current offset (position of pointer bumper) for the passed Koliseo.
@@ -177,7 +177,7 @@ ptrdiff_t kls_get_pos(Koliseo *kls)
     return kls->offset;
 }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 /**
  * Calcs the max number of possible KLS_PUSH ops when using KLS_BASIC reglist alloc backend.
  * @return The max number of push ops possible, or -1 in case of error.
@@ -247,7 +247,7 @@ int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp *t_kls)
             sizeof
             (KLS_region_list_item));
 }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Logs a message to the log_fp FILE field of the passed Koliseo pointer, if its conf.kls_verbose_lvl is >0.
@@ -323,7 +323,7 @@ Koliseo *kls_new(ptrdiff_t size)
         kls->prev_offset = kls->offset;
         kls->has_temp = 0;
         kls->t_kls = NULL;
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         kls->reglist_kls = NULL;
         kls->regs = NULL;
         kls->max_regions_kls_alloc_basic = 0;
@@ -339,7 +339,7 @@ Koliseo *kls_new(ptrdiff_t size)
                 kls + kls->offset);
 #endif
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         if (kls->conf.kls_autoset_regions == 1) {
 #ifdef KLS_DEBUG_CORE
             kls_log(kls, "KLS", "Init of KLS_Region_List for kls.");
@@ -370,7 +370,7 @@ Koliseo *kls_new(ptrdiff_t size)
         } else {
             kls->regs = NULL;
         }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
     } else {
         fprintf(stderr, "[KLS] Failed kls_new() call.\n");
         exit(EXIT_FAILURE);
@@ -480,12 +480,12 @@ Koliseo *kls_new_traced_AR_KLS(ptrdiff_t size, const char *output_path,
         .kls_collect_stats = 1,
         .kls_verbose_lvl = 1,
         .kls_log_filepath = output_path,
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
         .kls_reglist_kls_size = reglist_kls_size,
         .kls_autoset_regions = 1,
         .kls_autoset_temp_regions = 1,
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
     };
     return kls_new_conf(size, k);
 }
@@ -516,7 +516,7 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 #endif
     }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     switch (kls->conf.kls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
     }
@@ -600,7 +600,7 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     }
     break;
     }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
 #ifndef KLS_DEBUG_CORE
     if (kls->conf.kls_collect_stats == 1) {
@@ -817,7 +817,7 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         kls->stats.avg_region_size = kls_avg_regionSize(kls);
 #endif
     }
@@ -916,7 +916,7 @@ void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         kls->stats.avg_region_size = kls_avg_regionSize(kls);
 #endif
     }
@@ -986,7 +986,7 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     if (kls->conf.kls_autoset_regions == 1) {
         KLS_Region *reg = NULL;
         switch (kls->conf.kls_reglist_alloc_backend) {
@@ -1044,7 +1044,7 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         //kls->regs = kls_append(kls,reglist, kls->regs);
         kls->regs = kls_cons(kls, reg, kls->regs);
     }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
     char h_size[200];
     kls_formatSize(size * count, h_size, sizeof(h_size));
@@ -1076,7 +1076,7 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 #endif
     if (kls->conf.kls_collect_stats == 1) {
         kls->stats.tot_pushes += 1;
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         kls->stats.avg_region_size = kls_avg_regionSize(kls);
 #endif
     }
@@ -1152,7 +1152,7 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     KLS_Region *reg = NULL;
     if (t_kls->conf.kls_autoset_regions == 1) {
         switch (t_kls->conf.tkls_reglist_alloc_backend) {
@@ -1213,7 +1213,7 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
         //t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
         t_kls->t_regs = kls_t_cons(t_kls, reg, t_kls->t_regs);
     }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
     char h_size[200];
     kls_formatSize(size * count, h_size, sizeof(h_size));
@@ -1235,7 +1235,7 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         kls->stats.avg_region_size = kls_avg_regionSize(kls);
 #endif
     }
@@ -1253,7 +1253,7 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
     return p;
 }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 /**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Uses the passed name and desc fields to initialise the allocated KLS_Region fields.
@@ -1916,7 +1916,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
     return p;
 }
 
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Prints header fields from the passed Koliseo pointer, to the passed FILE pointer.
@@ -1955,7 +1955,7 @@ void print_kls_2file(FILE *fp, Koliseo *kls)
         fprintf(fp, "[KLS] Offset: { %lli }\n", kls->offset);
         fprintf(fp, "[KLS] Prev_Offset: { %lli }\n", kls->prev_offset);
 #endif
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
         if (kls->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
             fprintf(fp, "[KLS] Max Regions: { %i }\n\n",
                     kls->max_regions_kls_alloc_basic);
@@ -1964,7 +1964,7 @@ void print_kls_2file(FILE *fp, Koliseo *kls)
         }
 #else
         fprintf(fp, "\n");
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
     }
 }
 
@@ -2119,7 +2119,7 @@ void kls_show_toWin(Koliseo *kls, WINDOW *win)
 #else
     mvwprintw(win, y++, x, "Prev_Offset: { %lli }", kls->prev_offset);
 #endif
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
               kls_length(kls->regs));
 #endif
@@ -2216,7 +2216,7 @@ void kls_temp_show_toWin(Koliseo_Temp *t_kls, WINDOW *win)
     mvwprintw(win, y++, x, "Inner Prev_Offset: { %lli }", kls->prev_offset);
     mvwprintw(win, y++, x, "Temp Prev_Offset: { %lli }", t_kls->prev_offset);
 #endif
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     mvwprintw(win, y++, x, "Refer KLS_Region_List len: { %i }",
               kls_length(kls->regs));
     mvwprintw(win, y++, x, "Temp KLS_Region_List len: { %i }",
@@ -2254,7 +2254,7 @@ void kls_temp_show_toWin(Koliseo_Temp *t_kls, WINDOW *win)
     } while (!quit);
 }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 /**
  * Displays a slideshow of KLS_Region_List from passed Koliseo, to the passed WINDOW pointer.
  * @param kls The Koliseo at hand.
@@ -2435,7 +2435,7 @@ void kls_temp_showList_toWin(Koliseo_Temp *t_kls, WINDOW *win)
         } while (!quit && !picked);
     }
 }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 #endif //KOLISEO_HAS_CURSES
 
 /**
@@ -2502,7 +2502,7 @@ void kls_free(Koliseo *kls)
                     (kls->conf.kls_log_fp == stdout ? "stdout" : "stderr"));
         }
     }
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     if (kls->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
         kls_free(kls->reglist_kls);
         //free(kls->reglist_kls);
@@ -2550,7 +2550,7 @@ Koliseo_Temp *kls_temp_start(Koliseo *kls)
     kls_log(kls, "INFO", "Passed kls conf: " KLS_Conf_Fmt "\n",
             KLS_Conf_Arg(kls->conf));
 #endif
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     switch (kls->conf.kls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
         tmp->conf = (KLS_Temp_Conf) {
@@ -2582,10 +2582,10 @@ Koliseo_Temp *kls_temp_start(Koliseo *kls)
     }
     break;
     }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
     kls->has_temp = 1;
     kls->t_kls = tmp;
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     if (kls->conf.kls_autoset_temp_regions == 1) {
 #ifdef KLS_DEBUG_CORE
         kls_log(kls, "KLS", "Init of KLS_Region_List for temp kls.");
@@ -2637,14 +2637,14 @@ Koliseo_Temp *kls_temp_start(Koliseo *kls)
     } else {
         tmp->t_regs = NULL;
     }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 #ifdef KLS_DEBUG_CORE
     kls_log(kls, "KLS", "Prepared new Temp KLS.");
 #endif
     return tmp;
 }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 /**
  * Updates the KLS_Temp_Conf for the passed Koliseo_Temp pointer.
  * @param t_kls The Koliseo_Temp pointer to update.
@@ -2663,7 +2663,7 @@ bool kls_temp_set_conf(Koliseo_Temp *t_kls, KLS_Temp_Conf conf)
     t_kls->conf = conf;
     return true;
 }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Ends passed Koliseo_Temp pointer.
@@ -2677,7 +2677,7 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         exit(EXIT_FAILURE);
     }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     if (tmp_kls->conf.kls_autoset_regions == 1) {
         switch (tmp_kls->conf.tkls_reglist_alloc_backend) {
         case KLS_REGLIST_ALLOC_LIBC: {
@@ -2703,7 +2703,7 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         break;
         }
     }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
     Koliseo *kls_ref = tmp_kls->kls;
 #ifdef KLS_DEBUG_CORE
     if (kls_ref == NULL) {
@@ -2739,7 +2739,7 @@ void kls_dbg_features(void)
 #else
     fprintf(stderr, "[KLS] KLS_GULP is not enabled\n");
 #endif
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     fprintf(stderr, "[KLS] KLS_Region_List is enabled\n");
 #else
     fprintf(stderr, "[KLS] KLS_Region_List is not enabled\n");
@@ -2751,7 +2751,7 @@ void kls_dbg_features(void)
 #endif
 }
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 
 KLS_Region_List kls_emptyList(void)
 {
@@ -3332,7 +3332,7 @@ ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 
     return res;
 }
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_GULP
 

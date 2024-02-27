@@ -37,13 +37,13 @@ int main(int argc, char **argv)
     printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
 
     KLS_Conf kls_config = {
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 	.kls_autoset_regions = 1,
 	//.kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
 	.kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
 	.kls_reglist_kls_size = KLS_DEFAULT_SIZE,
 	.kls_autoset_temp_regions = 1,
-#endif //KLS_HAS_REGLIST
+#endif //KOLISEO_HAS_REGION
 	.kls_collect_stats = 1,
 	.kls_log_filepath = "./static/debug_log.txt",
 	.kls_verbose_lvl = 1,
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 #ifndef _WIN32
     printf("kls size: (%li) kls_region size: (%li)\n", kls->size,
 	   sizeof(KLS_Region));
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	("Max KLS_Region on this size, when reglist alloc backend is KLS_BASIC: %i\n",
 	 kls_get_maxRegions_KLS_BASIC(kls));
 #endif
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
     printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
     print_dbg_kls(kls);
 
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 #ifndef WINDOWS_BUILD
     printf("[Show Region list for Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 #endif
 
     KLS_ECHOLIST(kls->regs);
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
     Koliseo_Temp *temp_kls = kls_temp_start(kls);
     //temp_kls->conf.kls_autoset_regions = 1; TODO why does this crash?
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     printf("[Started Koliseo_Temp] [pos: %lli]\n", kls_get_pos(temp_kls->kls));
 #endif
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     // TODO: still declare KLS_Temp_Conf
     printf(KLS_Temp_Conf_Fmt "\n", KLS_Temp_Conf_Arg(temp_kls->conf));
 #endif
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 	("[This handles the Koliseo directly while we have an open Koliseo_Temp.]\n");
     p = (int *)KLS_PUSH(kls, int);
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 #ifndef WINDOWS_BUILD
     printf("[KLS_PUSH_T_NAMED for a int to Koliseo_Temp] [size: %li]\n",
 	   sizeof(int));
@@ -130,7 +130,7 @@ int main(int argc, char **argv)
 #endif
 
     p2 = (int *)KLS_PUSH_T_NAMED(temp_kls, int, "int", "Another int");
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 #ifndef WINDOWS_BUILD
     printf("[KLS_PUSH_T for a int to Koliseo_Temp] [size: %li]\n", sizeof(int));
 #else
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     *p2 = 3;
     printf("\n*p3 is [%i] after KLS_PUSH\n", *p3);
 
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 #ifndef WINDOWS_BUILD
     printf("[Show Region list for Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else
@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 
     printf("[Usage report for Koliseo]\n");
     kls_usageReport(kls);
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_CURSES
     if (is_interactive == 1) {
@@ -197,10 +197,10 @@ int main(int argc, char **argv)
 	kls_show_toWin(kls, win);
 	kls_temp_show_toWin(temp_kls, win);
 	refresh();
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
 	kls_showList_toWin(kls, win);
 	kls_temp_showList_toWin(temp_kls, win);
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
 	delwin(win);
 	endwin();
     }
@@ -239,7 +239,7 @@ int main(int argc, char **argv)
 
     printf("[Koliseo Info]\n");
     print_dbg_kls(kls);
-#ifdef KLS_HAS_REGLIST
+#ifdef KOLISEO_HAS_REGION
     print_dbg_kls(kls->reglist_kls);
     KLS_ECHOLIST(kls->regs);
     printf("[Koliseo_Temp Info]\n");
@@ -247,7 +247,7 @@ int main(int argc, char **argv)
     print_dbg_kls(temp_kls->reglist_kls);
     printf("[%i] List size for Koliseo\n", kls_length(kls->regs));
     printf("[%i] List size for Koliseo_Temp\n", kls_length(temp_kls->t_regs));
-#endif // KLS_HAS_REGLIST
+#endif // KOLISEO_HAS_REGION
     printf("[Clear Koliseo]\n");
     kls_clear(kls);
     print_dbg_kls(kls);

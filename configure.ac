@@ -23,9 +23,14 @@ AC_ARG_ENABLE([gulp],
   [AS_HELP_STRING([--enable-gulp], [Enable gulp header])],
   [enable_gulp=$enableval],
   [enable_gulp=no])
+AC_ARG_ENABLE([region],
+  [AS_HELP_STRING([--enable-region], [Enable region feature])],
+  [enable_region=$enableval],
+  [enable_region=no])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
 AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
+AM_CONDITIONAL([REGION_BUILD], [test "$enable_region" = "yes"])
 
 # Define the include and library paths based on the host system
 case "${host_os}" in
