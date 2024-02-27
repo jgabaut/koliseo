@@ -166,8 +166,9 @@ int main(void)
 
   ATM the code should build for:
   - `x86_64-Linux`
-  - `x86_64-w64-mingw32` to target `Windows`, but ATM there is no guarantee it works as intended there.
-    - This build does not have a `.dll` target yet.
+  - `darwin-arm64`
+  - `x86_64-w64-mingw32` to target `Windows`.
+    - This build, while mostly identical to `Linux`/`macOS`, is less tested.
 
 ## Credits <a name = "credits"></a>
 
@@ -184,3 +185,4 @@ int main(void)
   - Model `KLS_Temp_Conf` to still be included without `Region` feature
   - At the moment, the arena can't grown its own underlying buffer.
     - Add backwards-compatible logic to enable growable arenas.
+  - Clean up the `Windows` part of the includes, to have minimal definitions from `windows.h`.
