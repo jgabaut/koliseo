@@ -31,7 +31,10 @@ int main(int argc, char **argv)
 	}
     }
 
+#ifdef KOLISEO_HAS_TITLE
     kls_print_title();
+#endif // KOLISEO_HAS_TITLE
+
     printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n",
 	   int_koliseo_version(), string_koliseo_version());
     printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());

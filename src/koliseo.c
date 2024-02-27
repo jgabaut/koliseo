@@ -65,6 +65,7 @@ const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
 
 static bool kls_set_conf(Koliseo * kls, KLS_Conf conf);	//Declare function used internally by kls_new() and kls_new_conf()
 
+#ifdef KOLISEO_HAS_TITLE
 /**
  * Defines title banner.
  */
@@ -129,6 +130,8 @@ void kls_print_title(void)
 {
     kls_print_title_2file(stdout);
 }
+
+#endif // KOLISEO_HAS_TITLE
 
 /**
  * Returns the constant string representing current version for Koliseo.

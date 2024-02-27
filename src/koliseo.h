@@ -225,12 +225,15 @@ const char *string_koliseo_version(void);
  */
 const int int_koliseo_version(void);
 
+
+#ifdef KOLISEO_HAS_TITLE
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
 extern char *kls_title[KLS_TITLEROWS + 1];
 /**< Contains title banner.*/
 
 void kls_print_title_2file(FILE * fp);/**< Prints the title banner to the passed FILE.*/
 void kls_print_title(void);
+#endif // KOLISEO_HAS_TITLE
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 

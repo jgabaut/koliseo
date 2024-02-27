@@ -27,10 +27,15 @@ AC_ARG_ENABLE([region],
   [AS_HELP_STRING([--enable-region], [Enable region feature])],
   [enable_region=$enableval],
   [enable_region=no])
+AC_ARG_ENABLE([title],
+  [AS_HELP_STRING([--enable-title], [Enable title feature])],
+  [enable_title=$enableval],
+  [enable_title=no])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
 AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
 AM_CONDITIONAL([REGION_BUILD], [test "$enable_region" = "yes"])
+AM_CONDITIONAL([TITLE_BUILD], [test "$enable_title" = "yes"])
 
 # Define the include and library paths based on the host system
 case "${host_os}" in

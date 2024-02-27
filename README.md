@@ -11,6 +11,7 @@
     + [Curses](#extra_curses)
     + [Debug](#extra_debug)
     + [Gulp](#extra_gulp)
+    + [Title banner](#extra_title)
     + [How to use extras](#extra_howto)
   + [Documentation](#docs)
   + [Prerequisites](#prerequisites)
@@ -116,6 +117,10 @@ int main(void)
   Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
   - Also includes a minimal string-view API, in case you want to work on the file contents differently.
 
+### Title banner <a name = "extra_title"></a>
+
+  Include an ASCII art string to be printed as a title banner.
+
 ### How to enable extra features<a name = "extra_howto"></a>
 
   To aid in building with extra features, see [this section.](#config)
@@ -126,6 +131,7 @@ int main(void)
   - Curses: `KOLISEO_HAS_CURSES`
   - Debug: `KLS_DEBUG_CORE`
   - Gulp: `KOLISEO_HAS_GULP`
+  - Title banner: `KOLISEO_HAS_TITLE`
 
 ## Documentation <a name = "docs"></a>
 
@@ -157,18 +163,19 @@ int main(void)
   aclocal
   autoconf
   automake --add-missing
-  ./configure # Optionally, with --enable-debug=yes or --host
+  ./configure # Optionally, with --enable-debug or --host
   make
   ```
 
   You will get a `./configure` script, which you can use to enable debug mode or other features.
 
   - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
-  - Run `./configure --enable-debug=yes` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
+  - Run `./configure --enable-debug` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
     - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
-  - Run `./configure --enable-region=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag.
-  - Run `./configure --enable-curses=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
-  - Run `./configure --enable-gulp=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
+  - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag.
+  - Run `./configure --enable-curses` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
+  - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
+  - Run `./configure --enable-title` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_TITLE` flag.
 
 
 ## Building <a name = "building"></a>
