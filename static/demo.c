@@ -51,9 +51,8 @@ int main(int argc, char **argv)
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
-    // TODO: add macro/function to wrap the string dupe use
-    char* demo_str = KLS_PUSH_STR(kls, "\nKoliseo demo\n");
-    strcpy(demo_str, "\nKoliseo demo\n");
+    char* demo_str = NULL;
+    KLS_STRDUP(kls, "\nKoliseo demo\n", demo_str);
 
     printf("%s\n", demo_str);
 

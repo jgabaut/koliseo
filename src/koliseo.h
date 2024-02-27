@@ -401,6 +401,14 @@ void kls_dbg_features(void);
 #define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr)))
 
 /**
+ * Macro to dupe a C string to a Koliseo, and copy its contents to the passed destinaton buffer.
+ */
+#define KLS_STRDUP(kls, cstr_source, dest) do {\
+    (dest) = KLS_PUSH_STR((kls), (cstr_source));\
+    strcpy((dest), (cstr_source));\
+} while (0)
+
+/**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
  */
 #ifdef KOLISEO_HAS_REGION
@@ -515,6 +523,14 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  * Macro to request memory for a C string from a Koliseo_Temp.
  */
 #define KLS_PUSH_STR_T(kls_temp, cstr) KLS_PUSH_ARR_T((kls_temp), char, strlen((cstr)))
+
+/**
+ * Macro to dupe a C string to a Koliseo_Temp, and copy its contents to the passed destinaton buffer.
+ */
+#define KLS_STRDUP_T(kls_temp, cstr_source, dest) do {\
+    (dest) = KLS_PUSH_STR_T((kls_temp), (cstr_source));\
+    strcpy((dest), (cstr_source));\
+} while (0)
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a name and a description to the region item.
