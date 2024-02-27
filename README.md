@@ -100,6 +100,7 @@ int main(void)
   - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
   - Run `./configure --enable-debug=yes` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
     - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
+  - Run `./configure --enable-region=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag.
   - Run `./configure --enable-curses=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
   - Run `./configure --enable-gulp=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
 
