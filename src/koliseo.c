@@ -1235,7 +1235,9 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
         if (elapsed_time > kls->stats.worst_pushcall_time) {
             kls->stats.worst_pushcall_time = elapsed_time;
         }
+#ifdef KLS_HAS_REGLIST
         kls->stats.avg_region_size = kls_avg_regionSize(kls);
+#endif
     }
     kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
     kls_log(kls, "KLS",
