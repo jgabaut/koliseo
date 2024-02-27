@@ -400,17 +400,32 @@ void kls_dbg_features(void);
 
 /**
  * Macro to request memory for a C string from a Koliseo.
+ * @see KLS_STRDUP()
  */
 #define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr)))
 
+
+/**
+ * Macro to copy a C string from a source buffer to a destination buffer.
+ * It assumes that the destination buffer has at least sizeof(source) space available.
+ * Used in KLS_STRDUP() and KLS_STRDUP_T().
+ * @see KLS_STRDUP()
+ * @see KLS_STRDUP_T()
+ */
+#define __KLS_STRCPY(source, dest) do {\
+    size_t __kls_str_dest_size = sizeof(source);\
+    strncpy((dest), (source), __kls_str_dest_size);\
+    (dest)[__kls_str_dest_size] = '\0';\
+} while (0)
+
 /**
  * Macro to dupe a C string to a Koliseo, and copy its contents to the passed destinaton buffer.
+ * @see KLS_PUSH_STR()
+ * @see __KLS_STRCYP()
  */
 #define KLS_STRDUP(kls, cstr_source, dest) do {\
     (dest) = KLS_PUSH_STR((kls), (cstr_source));\
-    size_t __kls_strdup_dest_size = sizeof(cstr_source);\
-    strncpy((dest), (cstr_source), __kls_strdup_dest_size);\
-    (dest)[__kls_strdup_dest_size] = '\0';\
+    __KLS_STRCPY((cstr_source), (dest));\
 } while (0)
 
 /**
@@ -526,17 +541,18 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 
 /**
  * Macro to request memory for a C string from a Koliseo_Temp.
+ * @see KLS_STRDUP_T()
  */
 #define KLS_PUSH_STR_T(kls_temp, cstr) KLS_PUSH_ARR_T((kls_temp), char, strlen((cstr)))
 
 /**
  * Macro to dupe a C string to a Koliseo_Temp, and copy its contents to the passed destinaton buffer.
+ * @see KLS_PUSH_STR_T()
+ * @see __KLS_STRCYP()
  */
 #define KLS_STRDUP_T(kls_temp, cstr_source, dest) do {\
     (dest) = KLS_PUSH_STR_T((kls_temp), (cstr_source));\
-    size_t __kls_strdup_dest_size = sizeof(cstr_source);\
-    strncpy((dest), (cstr_source), __kls_strdup_dest_size);\
-    (dest)[__kls_strdup_dest_size] = '\0';\
+    __KLS_STRCPY((cstr_source), (dest));\
 } while (0)
 
 /**
