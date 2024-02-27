@@ -403,6 +403,7 @@ void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc);
 #endif // KOLISEO_HAS_REGION
 void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void kls_dbg_features(void);
 
 /**
@@ -472,7 +473,7 @@ void kls_dbg_features(void);
  * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
  * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
  */
-#define KLS_POP_ARR(kls, type, count) (type*)kls_pop((kls), sizeof(type), _Alignof(type), (count))
+#define KLS_POP_ARR(kls, type, count) (type*)kls_pop_AR((kls), sizeof(type), _Alignof(type), (count))
 
 /**
  * Macro to "remove" the memory for a C string from a Koliseo. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo index.
@@ -543,6 +544,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
 #endif // KOLISEO_HAS_REGION
 void *kls_temp_pop(Koliseo_Temp * t_kls, ptrdiff_t size, ptrdiff_t align,
                    ptrdiff_t count);
+void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void print_temp_kls_2file(FILE * fp, Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 
@@ -599,7 +601,7 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  * Macro used to "remove" memory as an array from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
  * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
  */
-#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop((kls_temp), sizeof(type), _Alignof(type), (count))
+#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop_AR((kls_temp), sizeof(type), _Alignof(type), (count))
 
 /**
  * Macro to "remove" the memory for a C string from a Koliseo_Temp. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo_Temp index.
@@ -635,7 +637,9 @@ bool kls_empty(KLS_Region_List);
 KLS_list_element kls_head(KLS_Region_List);
 KLS_Region_List kls_tail(KLS_Region_List);
 KLS_Region_List kls_cons(Koliseo *, KLS_list_element, KLS_Region_List);
+KLS_region_list_item* kls_list_pop(Koliseo *kls);
 KLS_Region_List kls_t_cons(Koliseo_Temp *, KLS_list_element, KLS_Region_List);
+KLS_region_list_item* kls_t_list_pop(Koliseo_Temp *t_kls);
 
 void kls_freeList(KLS_Region_List);
 #define KLS_FREELIST(kls_list) kls_freeList(kls_list)
