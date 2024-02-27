@@ -76,7 +76,7 @@ int main(void)
   ```c
   char* KLS_PUSH_STR(Koliseo* kls, char* cstring)
   ```
-    - Also, a somewhat unreliable dupe utility macro:
+  - Also, a somewhat unreliable dupe utility macro:
   ```c
   char* KLS_STRDUP(Koliseo* kls, char* source, char* dest)
   ```
