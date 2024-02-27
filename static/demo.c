@@ -51,6 +51,12 @@ int main(int argc, char **argv)
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
+    // TODO: add macro/function to wrap the string dupe use
+    char* demo_str = KLS_PUSH_STR(kls, "\nKoliseo demo\n");
+    strcpy(demo_str, "\nKoliseo demo\n");
+
+    printf("%s\n", demo_str);
+
 #ifdef KOLISEO_HAS_REGION
 #ifndef _WIN32
     printf("kls size: (%li) kls_region size: (%li)\n", kls->size,
@@ -87,6 +93,7 @@ int main(int argc, char **argv)
 
     KLS_ECHOLIST(kls->regs);
 #endif // KOLISEO_HAS_REGION
+
 
     Koliseo_Temp *temp_kls = kls_temp_start(kls);
     //temp_kls->conf.kls_autoset_regions = 1; TODO why does this crash?
