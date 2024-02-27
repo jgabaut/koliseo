@@ -19,12 +19,26 @@
   This is a C library for an arena allocator, whose arenas are named Koliseo.
   It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
 
-  It also has:
-  - A tagging system to type/name your references and have them in a list
-    - The list can be stored either in an inner Koliseo or using the global allocator)
-  - A couple utility functions to:
-    - Help you estimate relative memory usage by some particular type of object, may prove useful in some scenarios.
-    - Memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+  By default, extended functionalities are not included in the build, with each feature needing a preprocessor macro to be defined before including the library header.
+
+  At the moment, the arena can't grown its own underlying buffer.
+
+  Extra features:
+
+  - Region: a ready-to-go index for every allocation you make.
+    - It uses an intrusive linked list and (at the moment) has quite the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
+    - Offers extended API with tagging arguments, to type/name your references
+    - For now, two allocations backends can be chosen for the list, it can be stored:
+      - In an inner Koliseo (this puts an extra limit to the total number of single allocations)
+      - Using the global allocator (from malloc)
+    - Extra utility functions
+      - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
+  - Gulp: utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+    - Also includes a minimal string-view API, in case you want to work on the file contents differently.
+  - Curses: utility functions that extend ncurses API to provide debug info.
+  - Core debug: extra debug for core calls, may be too verbose for some applications.
+
+  To aid in building with extra features, see [this section.](#config)
 
 ## Basic example <a name = "basic_example"></a>
 
