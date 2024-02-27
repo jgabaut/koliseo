@@ -2739,6 +2739,11 @@ void kls_dbg_features(void)
 #else
     fprintf(stderr, "[KLS] KLS_GULP is not enabled\n");
 #endif
+#ifdef KLS_HAS_REGLIST
+    fprintf(stderr, "[KLS] KLS_Region_List is enabled\n");
+#else
+    fprintf(stderr, "[KLS] KLS_Region_List is not enabled\n");
+#endif
 #ifdef KLS_DEBUG_CORE
     fprintf(stderr, "[KLS] Koliseo core debugging is enabled\n");
 #else
