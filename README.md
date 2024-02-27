@@ -64,11 +64,26 @@ int main(void)
 
   After including the `koliseo.h` header:
 
-  - `Koliseo* kls_new(size_t)` to initialise a default arena
-  - `Type* KLS_PUSH(Koliseo* kls, Type)` macro to request memory for a specific type.
-    - For C strings, you can use the `char* KLS_PUSH_STR(Koliseo* kls, char* cstring)` macro.
-    - Also, `char* KLS_STRDUP(Koliseo* kls, char* source, char* dest)` macro can be useful.
-  - `void kls_free(Koliseo* kls)` to free the arena.
+  - To initialise a default arena:
+  ```c
+  Koliseo* kls_new(size_t)
+  ```
+  - To request memory for a specific type:
+  ```c
+  Type* KLS_PUSH(Koliseo* kls, Type)
+  ```
+  - For C strings, you can use:
+  ```c
+  char* KLS_PUSH_STR(Koliseo* kls, char* cstring)
+  ```
+    - Also, a somewhat unreliable dupe utility macro:
+  ```c
+  char* KLS_STRDUP(Koliseo* kls, char* source, char* dest)
+  ```
+  - To free the arena:
+  ```c
+  void kls_free(Koliseo* kls)
+  ```
 
   For more documentation on the available functions, see [this section.](#docs)
 
