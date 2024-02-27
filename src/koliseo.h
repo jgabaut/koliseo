@@ -47,6 +47,8 @@
 #define KLS_MINOR 4 /**< Represents current minor release.*/
 #define KLS_PATCH 1 /**< Represents current patch release.*/
 
+typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
+
 #ifdef KOLISEO_HAS_REGION
 /**
  * Defines allocation backend for KLS_Region_List items.
@@ -371,13 +373,23 @@ int kls_get_maxRegions_KLS_BASIC(Koliseo * kls);
 int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp * t_kls);
 #endif
 
-Koliseo *kls_new(ptrdiff_t size);
+Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
+
+#ifndef KLS_DEFAULT_ALLOCF
+#define KLS_DEFAULT_ALLOCF malloc /**< Defines the default allocation function.*/
+#endif
+
+#define kls_new(size) kls_new_alloc((size), KLS_DEFAULT_ALLOCF)
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
-Koliseo *kls_new_conf(ptrdiff_t size, KLS_Conf conf);
-Koliseo *kls_new_traced(ptrdiff_t size, const char *output_path);
-Koliseo *kls_new_dbg(ptrdiff_t size);
-Koliseo *kls_new_traced_AR_KLS(ptrdiff_t size, const char *output_path,
-                               ptrdiff_t reglist_kls_size);
+Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func);
+#define kls_new_conf(size, conf) kls_new_conf_alloc((size), (conf), KLS_DEFAULT_ALLOCF)
+Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func);
+#define kls_new_traced(size, output_path) kls_new_traced_alloc((size), (output_path), KLS_DEFAULT_ALLOCF)
+Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
+#define kls_new_dbg(size) kls_new_dbg_alloc((size), KLS_DEFAULT_ALLOCF)
+Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
+                               ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
+#define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void *kls_push_zero(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,

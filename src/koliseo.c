@@ -286,7 +286,8 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
 }
 
 /**
- * Takes a ptrdiff_t size and allocates the backing memory for a Koliseo.
+ * Takes a ptrdiff_t size and a function pointer to the allocation function.
+ * Allocates the backing memory for a Koliseo.
  * Sets the KLS_Conf field to KLS_DEFAULT_CONF.
  * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
  * @param size The size for Koliseo data field.
@@ -294,10 +295,11 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
  * @see Koliseo
  * @see Koliseo_Temp
  * @see KLS_DEFAULT_CONF
+ * @see kls_new()
  * @see kls_temp_start()
  * @see kls_temp_end()
  */
-Koliseo *kls_new(ptrdiff_t size)
+Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 {
     if (size < (ptrdiff_t)sizeof(Koliseo)) {
 #ifndef _WIN32
@@ -312,7 +314,7 @@ Koliseo *kls_new(ptrdiff_t size)
         //TODO Is it better to abort the program?
         return NULL;
     }
-    void *p = malloc(size);
+    void *p = alloc_func(size);
     if (p) {
         //sprintf(msg,"Allocated (%li) for new KLS.",size);
         //kls_log("KLS",msg);
@@ -374,7 +376,7 @@ Koliseo *kls_new(ptrdiff_t size)
         }
 #endif // KOLISEO_HAS_REGION
     } else {
-        fprintf(stderr, "[KLS] Failed kls_new() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         exit(EXIT_FAILURE);
     }
 #ifdef KLS_DEBUG_CORE
@@ -387,20 +389,22 @@ Koliseo *kls_new(ptrdiff_t size)
 }
 
 /**
- * Takes a ptrdiff_t size and a KLS_Conf to configure the new Koliseo.
- * Calls kls_new() to initialise the Koliseo, the calls kls_set_conf() to update the config before returning the new Koliseo.
+ * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, and an allocation function pointer.
+ * Calls kls_new_alloc() to initialise the Koliseo, then calls kls_set_conf() to update the config.
+ * Returns the new Koliseo.
  * @param size The size for Koliseo data field.
  * @param conf The KLS_Conf for the new Koliseo.
+ * @param alloc_func The allocation function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
  * @see KLS_DEFAULT_CONF
- * @see kls_new()
+ * @see kls_new_alloc()
  * @see kls_set_conf()
  */
-Koliseo *kls_new_conf(ptrdiff_t size, KLS_Conf conf)
+Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func)
 {
-    Koliseo *k = kls_new(size);
+    Koliseo *k = kls_new_alloc(size, alloc_func);
     bool conf_res = kls_set_conf(k, conf);
     if (!conf_res) {
         fprintf(stderr,
@@ -412,16 +416,18 @@ Koliseo *kls_new_conf(ptrdiff_t size, KLS_Conf conf)
 }
 
 /**
- * Takes a ptrdiff_t size and a filepath for the trace output file, and returns a pointer to the prepared Koliseo.
- * Calls kls_new_conf() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * Takes a ptrdiff_t size, a filepath for the trace output file, and an allocation function pointer.
+ * Returns a pointer to the prepared Koliseo.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
  * @param size The size for Koliseo data field.
  * @param output_path The filepath for log output.
+ * @param alloc_func The allocation function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
- * @see kls_new_conf()
+ * @see kls_new_conf_alloc()
  */
-Koliseo *kls_new_traced(ptrdiff_t size, const char *output_path)
+Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -432,19 +438,20 @@ Koliseo *kls_new_traced(ptrdiff_t size, const char *output_path)
         .kls_collect_stats = 1,.kls_verbose_lvl =
                                  1,.kls_log_filepath = output_path
     };
-    return kls_new_conf(size, k);
+    return kls_new_conf_alloc(size, k, alloc_func);
 }
 
 /**
- * Takes a ptrdiff_t size and returns a pointer to the prepared Koliseo.
- * Calls kls_new_conf() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
+ * Takes a ptrdiff_t size and an allocation function pointer, and returns a pointer to the prepared Koliseo.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
  * @param size The size for Koliseo data field.
+ * @param alloc_func The allocation function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
  * @see kls_new_conf()
  */
-Koliseo *kls_new_dbg(ptrdiff_t size)
+Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -454,24 +461,25 @@ Koliseo *kls_new_dbg(ptrdiff_t size)
     KLS_Conf k = (KLS_Conf) {
         .kls_collect_stats = 1,.kls_verbose_lvl = 0
     };
-    Koliseo * kls = kls_new_conf(size, k);
+    Koliseo * kls = kls_new_conf_alloc(size, k, alloc_func);
     kls->conf.kls_verbose_lvl = 1;
     return kls;
 }
 
 /**
  * Takes a ptrdiff_t size and a filepath for the trace output file, and the needed parameters for a successful init of the prepared Koliseo.
- * Calls kls_new_conf() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
  * @param size The size for Koliseo data field.
  * @param output_path The filepath for log output.
  * @param reglist_kls_size The size to use for the inner reglist Koliseo.
+ * @param alloc_func The allocation function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
- * @see kls_new_conf()
+ * @see kls_new_conf_alloc()
  */
-Koliseo *kls_new_traced_AR_KLS(ptrdiff_t size, const char *output_path,
-                               ptrdiff_t reglist_kls_size)
+Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
+                               ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -489,7 +497,7 @@ Koliseo *kls_new_traced_AR_KLS(ptrdiff_t size, const char *output_path,
         .kls_autoset_temp_regions = 1,
 #endif // KOLISEO_HAS_REGION
     };
-    return kls_new_conf(size, k);
+    return kls_new_conf_alloc(size, k, alloc_func);
 }
 
 /**
