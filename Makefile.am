@@ -15,7 +15,7 @@ TARGET_INSTALL_DIR = /usr
 SOURCE_INSTALL_DIR = "."
 INSTALLER_LOG_FILE = "./installer.log"
 # Check local version
-PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
+PACK_NAME = $(SHARED_LIB)-$(VERSION)-$(OS)-$(MACHINE)
 
 # Source files
 demo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
