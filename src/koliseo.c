@@ -56,7 +56,6 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .worst_pushcall_time = -1,
 };
 
-
 #ifdef KOLISEO_HAS_REGION
 const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
     [KLS_REGLIST_ALLOC_LIBC] = "LIBC",
