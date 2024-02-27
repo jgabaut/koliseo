@@ -408,7 +408,9 @@ void kls_dbg_features(void);
  */
 #define KLS_STRDUP(kls, cstr_source, dest) do {\
     (dest) = KLS_PUSH_STR((kls), (cstr_source));\
-    strcpy((dest), (cstr_source));\
+    size_t dest_size = sizeof(cstr_source);\
+    strncpy((dest), (cstr_source), dest_size);\
+    (dest)[dest_size] = '\0';\
 } while (0)
 
 /**
@@ -532,7 +534,9 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  */
 #define KLS_STRDUP_T(kls_temp, cstr_source, dest) do {\
     (dest) = KLS_PUSH_STR_T((kls_temp), (cstr_source));\
-    strcpy((dest), (cstr_source));\
+    size_t dest_size = sizeof(cstr_source);\
+    strncpy((dest), (cstr_source), dest_size);\
+    (dest)[dest_size] = '\0';\
 } while (0)
 
 /**
