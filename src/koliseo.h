@@ -420,19 +420,18 @@ void kls_dbg_features(void);
 
 /**
  * Macro to copy a C string from a source buffer to a destination buffer.
- * It assumes that the destination buffer has at least sizeof(source) space available.
+ * Unsafe, do not use.
  * Used in KLS_STRDUP() and KLS_STRDUP_T().
  * @see KLS_STRDUP()
  * @see KLS_STRDUP_T()
  */
 #define __KLS_STRCPY(source, dest) do {\
-    size_t __kls_str_dest_size = sizeof(source);\
-    strncpy((dest), (source), __kls_str_dest_size);\
-    (dest)[__kls_str_dest_size] = '\0';\
+    strcpy((dest), (source));\
 } while (0)
 
 /**
- * Macro to dupe a C string to a Koliseo, and copy its contents to the passed destinaton buffer.
+ * Macro to dupe a C string to a Koliseo, and copy its contents to the passed destination buffer.
+ * Unsafe, do not use.
  * @see KLS_PUSH_STR()
  * @see __KLS_STRCYP()
  */
@@ -560,7 +559,8 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 #define KLS_PUSH_STR_T(kls_temp, cstr) KLS_PUSH_ARR_T((kls_temp), char, strlen((cstr)))
 
 /**
- * Macro to dupe a C string to a Koliseo_Temp, and copy its contents to the passed destinaton buffer.
+ * Macro to dupe a C string to a Koliseo_Temp, and copy its contents to the passed destination buffer.
+ * Unsafe, do not use.
  * @see KLS_PUSH_STR_T()
  * @see __KLS_STRCYP()
  */
