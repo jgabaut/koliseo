@@ -54,6 +54,10 @@ if TITLE_BUILD
 AM_CFLAGS += -DKOLISEO_HAS_TITLE
 endif
 
+if EXPER_BUILD
+AM_CFLAGS += -DKOLISEO_HAS_EXPER
+endif
+
 ./anvil:
 	@echo -e "\033[1;35m[Makefile]\e[0m    Bootstrapping \"./anvil\":"
 	./scripts/bootstrap_anvil.sh repo_invil

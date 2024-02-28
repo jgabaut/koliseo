@@ -12,6 +12,7 @@
     + [Debug](#extra_debug)
     + [Gulp](#extra_gulp)
     + [Title banner](#extra_title)
+    + [Experimental](#extra_exper)
     + [How to use extras](#extra_howto)
   + [Documentation](#docs)
   + [Prerequisites](#prerequisites)
@@ -121,6 +122,12 @@ int main(void)
 
   Include an ASCII art string to be printed as a title banner.
 
+### Experimental <a name = "extra_exper"></a>
+
+  Include some experimental (NOT WELL TESTED. USE WITH CAUTION) functions.
+
+  In particular, enables the dreaded `pop` operation and its functions.
+
 ### How to enable extra features<a name = "extra_howto"></a>
 
   To aid in building with extra features, see [this section.](#config)
@@ -132,6 +139,7 @@ int main(void)
   - Debug: `KLS_DEBUG_CORE`
   - Gulp: `KOLISEO_HAS_GULP`
   - Title banner: `KOLISEO_HAS_TITLE`
+  - Experimental: `KOLISEO_HAS_EXPER`
 
 ## Documentation <a name = "docs"></a>
 
@@ -176,6 +184,7 @@ int main(void)
   - Run `./configure --enable-curses` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
   - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
   - Run `./configure --enable-title` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_TITLE` flag.
+  - Run `./configure --enable-exper` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_EXPER` flag.
 
 
 ## Building <a name = "building"></a>

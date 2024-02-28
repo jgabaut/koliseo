@@ -48,9 +48,11 @@ int main(int argc, char **argv)
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
+#ifdef KOLISEO_HAS_EXPER
     char* demo_str = KLS_STRDUP(kls, "\nKoliseo demo\n");
 
     printf("%s\n", demo_str);
+#endif // KOLISEO_HAS_EXPER
 
 #ifdef KOLISEO_HAS_REGION
 #ifndef _WIN32
@@ -208,6 +210,7 @@ int main(int argc, char **argv)
     }
 #endif
 
+#ifdef KOLISEO_HAS_EXPER
     int *z = &minusone;
     printf("\n*z is [%i] before KLS_POP\n", *z);
 
@@ -220,6 +223,7 @@ int main(int argc, char **argv)
     z = KLS_POP(kls, int);
 
     printf("\n*z is [%i] after KLS_POP\n", *z);
+#endif // KOLISEO_HAS_EXPER
 
 #ifndef WINDOWS_BUILD
     printf("[Current position in Koliseo] [pos: %li]\n", kls_get_pos(kls));

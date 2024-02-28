@@ -198,6 +198,33 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
 }
 
 /**
+ * Prints enabled Koliseo features to stderr.
+ */
+void kls_dbg_features(void)
+{
+#ifdef KOLISEO_HAS_CURSES
+    fprintf(stderr, "[KLS] ncurses.h integration is enabled\n");
+#else
+    fprintf(stderr, "[KLS] ncurses.h integration is not enabled\n");
+#endif
+#ifdef KOLISEO_HAS_GULP
+    fprintf(stderr, "[KLS] KLS_GULP is enabled\n");
+#else
+    fprintf(stderr, "[KLS] KLS_GULP is not enabled\n");
+#endif
+#ifdef KOLISEO_HAS_REGION
+    fprintf(stderr, "[KLS] KLS_Region_List is enabled\n");
+#else
+    fprintf(stderr, "[KLS] KLS_Region_List is not enabled\n");
+#endif
+#ifdef KLS_DEBUG_CORE
+    fprintf(stderr, "[KLS] Koliseo core debugging is enabled\n");
+#else
+    fprintf(stderr, "[KLS] Koliseo core debugging is not enabled\n");
+#endif
+}
+
+/**
  * Returns the current offset (position of pointer bumper) for the passed Koliseo.
  * @param kls The Koliseo at hand.
  * @return A ptrdiff_t value for current position.
@@ -685,229 +712,6 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     }
     return true;
 }
-
-/**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
- * @param kls The Koliseo at hand.
- * @param size The size for data to pop.
- * @param align The alignment for data to pop.
- * @param count The multiplicative quantity to scale data size to pop for.
- * @return A void pointer to the start of memory just popped from the Koliseo.
- */
-void *kls_pop(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
-    }
-    ptrdiff_t padding = -kls->offset & (align - 1);
-    if (count > PTRDIFF_MAX / size
-        || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
-        kls_free(kls);
-        exit(EXIT_FAILURE);
-    }
-    char *p = kls->data + kls->offset - padding - size * count;
-    kls->prev_offset = kls->offset;
-    kls->offset -= padding + size * count;
-#ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
-    }
-#endif
-    if (kls->conf.kls_collect_stats == 1) {
-        kls->stats.tot_pops += 1;
-    }
-    return p;
-}
-
-/**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
- * @param kls The Koliseo at hand.
- * @param size The size for data to pop.
- * @param align The alignment for data to pop.
- * @param count The multiplicative quantity to scale data size to pop for.
- * @return A void pointer to the start of memory just popped from the Koliseo.
- */
-void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
-    }
-    ptrdiff_t padding = -kls->offset & (align - 1);
-    if (count > PTRDIFF_MAX / size
-        || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
-        kls_free(kls);
-        exit(EXIT_FAILURE);
-    }
-    char *p = kls->data + kls->offset - padding - size * count;
-    kls->prev_offset = kls->offset;
-    kls->offset -= padding + size * count;
-#ifdef KOLISEO_HAS_REGION
-    if (kls->conf.kls_autoset_regions == 1) {
-        KLS_region_list_item *reg = NULL;
-        switch (kls->conf.kls_reglist_alloc_backend) {
-            case KLS_REGLIST_ALLOC_LIBC: case KLS_REGLIST_ALLOC_KLS_BASIC: {
-            reg = kls_list_pop(kls);
-        }
-        break;
-        default: {
-            fprintf(stderr,
-                    "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
-                    __func__, kls->conf.kls_reglist_alloc_backend);
-#ifdef KLS_DEBUG_CORE
-            kls_log(kls, "ERROR",
-                    "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
-                    __func__, kls->conf.kls_reglist_alloc_backend);
-#endif
-            kls_free(kls);
-            exit(EXIT_FAILURE);
-        }
-        break;
-        }
-        //void* region_pointer = kls->begin + reg->begin_offset;
-        //TODO: do something with the region item before returning
-        (void) reg;
-    }
-#endif // KOLISEO_HAS_REGION
-#ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
-    }
-#endif
-    if (kls->conf.kls_collect_stats == 1) {
-        kls->stats.tot_pops += 1;
-#ifdef KOLISEO_HAS_REGION
-        kls->stats.avg_region_size = kls_avg_regionSize(kls);
-#endif
-    }
-    return p;
-}
-
-/**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
- * @param t_kls The Koliseo_Temp at hand.
- * @param size The size for data to pop.
- * @param align The alignment for data to pop.
- * @param count The multiplicative quantity to scale data size to pop for.
- * @return A void pointer to the start of memory just popped from the referred Koliseo.
- */
-void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
-                   ptrdiff_t count)
-{
-    if (t_kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    Koliseo *kls = t_kls->kls;
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    ptrdiff_t padding = -kls->offset & (align - 1);
-    if (count > PTRDIFF_MAX / size
-        || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
-        kls_free(kls);
-        exit(EXIT_FAILURE);
-    }
-    char *p = kls->data + kls->offset - padding - size * count;
-    kls->prev_offset = kls->offset;
-    kls->offset -= padding + size * count;
-#ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for Temp_KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
-    }
-#endif
-    if (kls->conf.kls_collect_stats == 1) {
-        kls->stats.tot_temp_pops += 1;
-    }
-    return p;
-}
-
-/**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
- * @param t_kls The Koliseo_Temp at hand.
- * @param size The size for data to pop.
- * @param align The alignment for data to pop.
- * @param count The multiplicative quantity to scale data size to pop for.
- * @return A void pointer to the start of memory just popped from the referred Koliseo.
- */
-void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
-{
-    if (t_kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    Koliseo *kls = t_kls->kls;
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    ptrdiff_t padding = -kls->offset & (align - 1);
-    if (count > PTRDIFF_MAX / size
-        || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
-        kls_free(kls);
-        exit(EXIT_FAILURE);
-    }
-    char *p = kls->data + kls->offset - padding - size * count;
-    kls->prev_offset = kls->offset;
-    kls->offset -= padding + size * count;
-#ifdef KOLISEO_HAS_REGION
-    if (t_kls->conf.kls_autoset_regions == 1) {
-        KLS_region_list_item *reg = NULL;
-        switch (t_kls->conf.tkls_reglist_alloc_backend) {
-            case KLS_REGLIST_ALLOC_LIBC: case KLS_REGLIST_ALLOC_KLS_BASIC: {
-            reg = kls_t_list_pop(t_kls);
-        }
-        break;
-        default: {
-            fprintf(stderr,
-                    "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
-                    __func__, t_kls->conf.tkls_reglist_alloc_backend);
-#ifdef KLS_DEBUG_CORE
-            kls_log(kls, "ERROR",
-                    "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
-                    __func__, t_kls->conf.tkls_reglist_alloc_backend);
-#endif
-            kls_free(t_kls->kls);
-            exit(EXIT_FAILURE);
-        }
-        break;
-        }
-        //void* region_pointer = kls->begin + reg->begin_offset;
-        //TODO: do something with the region item before returning
-        (void) reg;
-    }
-#endif // KOLISEO_HAS_REGION
-#ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for Temp_KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
-    }
-#endif
-    if (kls->conf.kls_collect_stats == 1) {
-        kls->stats.tot_temp_pops += 1;
-    }
-    return p;
-}
-
 
 /**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
@@ -2904,91 +2708,6 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
     }
 }
 
-/**
- * Function to dupe a C string to a Koliseo, and return a pointer to the allocated string.
- * Unsafe, do not use.
- * @see KLS_PUSH_STR()
- * @see __KLS_STRCPY()
- */
-char* kls_strdup(Koliseo* kls, char* source)
-{
-    char* dest = KLS_PUSH_STR(kls, source);
-    __KLS_STRCPY(dest, source);
-    return dest;
-}
-
-/**
- * Function to dupe a C string array to a Koliseo, and return a pointer to the allocated array.
- * Unsafe, do not use.
- * @see KLS_STRDUP()
- * @see __KLS_STRCPY()
- */
-char** kls_strdup_arr(Koliseo* kls, size_t count, char** source)
-{
-    char** strings = NULL;
-    strings = KLS_PUSH_ARR(kls, char*, count);
-    for (int i=0; i < count; i++) {
-        strings[i] = KLS_STRDUP(kls, source[i]);
-    }
-    return strings;
-}
-
-/**
- * Function to dupe a C string to a Koliseo_Temp, and return a pointer to the allocated string.
- * Unsafe, do not use.
- * @see KLS_PUSH_STR_T()
- * @see __KLS_STRCPY()
- */
-char* kls_t_strdup(Koliseo_Temp* t_kls, char* source)
-{
-    char* dest = KLS_PUSH_STR_T(t_kls, source);
-    __KLS_STRCPY(dest, source);
-    return dest;
-}
-
-/**
- * Function to dupe a C string array to a Koliseo_Temp, and return a pointer to the allocated array.
- * Unsafe, do not use.
- * @see KLS_STRDUP_T()
- * @see __KLS_STRCPY()
- */
-char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source)
-{
-    char** strings = NULL;
-    strings = KLS_PUSH_ARR_T(t_kls, char*, count);
-    for (int i=0; i < count; i++) {
-        strings[i] = KLS_STRDUP_T(t_kls, source[i]);
-    }
-    return strings;
-}
-
-/**
- * Prints enabled Koliseo features to stderr.
- */
-void kls_dbg_features(void)
-{
-#ifdef KOLISEO_HAS_CURSES
-    fprintf(stderr, "[KLS] ncurses.h integration is enabled\n");
-#else
-    fprintf(stderr, "[KLS] ncurses.h integration is not enabled\n");
-#endif
-#ifdef KOLISEO_HAS_GULP
-    fprintf(stderr, "[KLS] KLS_GULP is enabled\n");
-#else
-    fprintf(stderr, "[KLS] KLS_GULP is not enabled\n");
-#endif
-#ifdef KOLISEO_HAS_REGION
-    fprintf(stderr, "[KLS] KLS_Region_List is enabled\n");
-#else
-    fprintf(stderr, "[KLS] KLS_Region_List is not enabled\n");
-#endif
-#ifdef KLS_DEBUG_CORE
-    fprintf(stderr, "[KLS] Koliseo core debugging is enabled\n");
-#else
-    fprintf(stderr, "[KLS] Koliseo core debugging is not enabled\n");
-#endif
-}
-
 #ifdef KOLISEO_HAS_REGION
 
 KLS_Region_List kls_emptyList(void)
@@ -3075,6 +2794,7 @@ KLS_Region_List kls_cons(Koliseo *kls, KLS_list_element e, KLS_Region_List l)
     return t;
 }
 
+#ifdef KOLISEO_HAS_EXPER
 KLS_region_list_item* kls_list_pop(Koliseo *kls)
 {
     if (kls == NULL) {
@@ -3121,6 +2841,7 @@ KLS_region_list_item* kls_list_pop(Koliseo *kls)
     KLS_region_list_item* popped_node = KLS_POP(kls->reglist_kls, KLS_region_list_item);
     return popped_node;
 }
+#endif // KOLISEO_HAS_EXPER
 
 KLS_Region_List kls_t_cons(Koliseo_Temp *t_kls, KLS_list_element e,
                            KLS_Region_List l)
@@ -3164,6 +2885,7 @@ KLS_Region_List kls_t_cons(Koliseo_Temp *t_kls, KLS_list_element e,
     return t;
 }
 
+#ifdef KOLISEO_HAS_EXPER
 KLS_region_list_item* kls_t_list_pop(Koliseo_Temp *t_kls)
 {
     if (t_kls == NULL) {
@@ -3210,6 +2932,7 @@ KLS_region_list_item* kls_t_list_pop(Koliseo_Temp *t_kls)
     KLS_region_list_item* popped_node = KLS_POP(t_kls->reglist_kls, KLS_region_list_item);
     return popped_node;
 }
+#endif // KOLISEO_HAS_EXPER
 
 void kls_freeList(KLS_Region_List l)
 {
@@ -4224,3 +3947,285 @@ Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max
 }
 
 #endif //KOLISEO_HAS_GULP
+
+#ifdef KOLISEO_HAS_EXPER
+/**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to pop.
+ * @param align The alignment for data to pop.
+ * @param count The multiplicative quantity to scale data size to pop for.
+ * @return A void pointer to the start of memory just popped from the Koliseo.
+ */
+void *kls_pop(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
+    ptrdiff_t padding = -kls->offset & (align - 1);
+    if (count > PTRDIFF_MAX / size
+        || (kls->size + kls->offset) < (size * count)) {
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+    char *p = kls->data + kls->offset - padding - size * count;
+    kls->prev_offset = kls->offset;
+    kls->offset -= padding + size * count;
+#ifdef KLS_DEBUG_CORE
+    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for KLS.",
+            int_koliseo_version(), size);
+    if (kls->conf.kls_verbose_lvl > 0) {
+        print_kls_2file(kls->conf.kls_log_fp, kls);
+    }
+#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pops += 1;
+    }
+    return p;
+}
+
+/**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to pop.
+ * @param align The alignment for data to pop.
+ * @param count The multiplicative quantity to scale data size to pop for.
+ * @return A void pointer to the start of memory just popped from the Koliseo.
+ */
+void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
+    ptrdiff_t padding = -kls->offset & (align - 1);
+    if (count > PTRDIFF_MAX / size
+        || (kls->size + kls->offset) < (size * count)) {
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+    char *p = kls->data + kls->offset - padding - size * count;
+    kls->prev_offset = kls->offset;
+    kls->offset -= padding + size * count;
+#ifdef KOLISEO_HAS_REGION
+    if (kls->conf.kls_autoset_regions == 1) {
+        KLS_region_list_item *reg = NULL;
+        switch (kls->conf.kls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: case KLS_REGLIST_ALLOC_KLS_BASIC: {
+            reg = kls_list_pop(kls);
+        }
+        break;
+        default: {
+            fprintf(stderr,
+                    "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
+                    __func__, kls->conf.kls_reglist_alloc_backend);
+#ifdef KLS_DEBUG_CORE
+            kls_log(kls, "ERROR",
+                    "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
+                    __func__, kls->conf.kls_reglist_alloc_backend);
+#endif
+            kls_free(kls);
+            exit(EXIT_FAILURE);
+        }
+        break;
+        }
+        //void* region_pointer = kls->begin + reg->begin_offset;
+        //TODO: do something with the region item before returning
+        (void) reg;
+    }
+#endif // KOLISEO_HAS_REGION
+#ifdef KLS_DEBUG_CORE
+    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for KLS.",
+            int_koliseo_version(), size);
+    if (kls->conf.kls_verbose_lvl > 0) {
+        print_kls_2file(kls->conf.kls_log_fp, kls);
+    }
+#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_pops += 1;
+#ifdef KOLISEO_HAS_REGION
+        kls->stats.avg_region_size = kls_avg_regionSize(kls);
+#endif
+    }
+    return p;
+}
+
+/**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to pop.
+ * @param align The alignment for data to pop.
+ * @param count The multiplicative quantity to scale data size to pop for.
+ * @return A void pointer to the start of memory just popped from the referred Koliseo.
+ */
+void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
+                   ptrdiff_t count)
+{
+    if (t_kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+    Koliseo *kls = t_kls->kls;
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+    ptrdiff_t padding = -kls->offset & (align - 1);
+    if (count > PTRDIFF_MAX / size
+        || (kls->size + kls->offset) < (size * count)) {
+        fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+    char *p = kls->data + kls->offset - padding - size * count;
+    kls->prev_offset = kls->offset;
+    kls->offset -= padding + size * count;
+#ifdef KLS_DEBUG_CORE
+    kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
+    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for Temp_KLS.",
+            int_koliseo_version(), size);
+    if (kls->conf.kls_verbose_lvl > 0) {
+        print_kls_2file(kls->conf.kls_log_fp, kls);
+    }
+#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_temp_pops += 1;
+    }
+    return p;
+}
+
+/**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to pop.
+ * @param align The alignment for data to pop.
+ * @param count The multiplicative quantity to scale data size to pop for.
+ * @return A void pointer to the start of memory just popped from the referred Koliseo.
+ */
+void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
+{
+    if (t_kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+    Koliseo *kls = t_kls->kls;
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+    ptrdiff_t padding = -kls->offset & (align - 1);
+    if (count > PTRDIFF_MAX / size
+        || (kls->size + kls->offset) < (size * count)) {
+        fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+    char *p = kls->data + kls->offset - padding - size * count;
+    kls->prev_offset = kls->offset;
+    kls->offset -= padding + size * count;
+#ifdef KOLISEO_HAS_REGION
+    if (t_kls->conf.kls_autoset_regions == 1) {
+        KLS_region_list_item *reg = NULL;
+        switch (t_kls->conf.tkls_reglist_alloc_backend) {
+            case KLS_REGLIST_ALLOC_LIBC: case KLS_REGLIST_ALLOC_KLS_BASIC: {
+            reg = kls_t_list_pop(t_kls);
+        }
+        break;
+        default: {
+            fprintf(stderr,
+                    "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
+                    __func__, t_kls->conf.tkls_reglist_alloc_backend);
+#ifdef KLS_DEBUG_CORE
+            kls_log(kls, "ERROR",
+                    "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
+                    __func__, t_kls->conf.tkls_reglist_alloc_backend);
+#endif
+            kls_free(t_kls->kls);
+            exit(EXIT_FAILURE);
+        }
+        break;
+        }
+        //void* region_pointer = kls->begin + reg->begin_offset;
+        //TODO: do something with the region item before returning
+        (void) reg;
+    }
+#endif // KOLISEO_HAS_REGION
+#ifdef KLS_DEBUG_CORE
+    kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
+    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for Temp_KLS.",
+            int_koliseo_version(), size);
+    if (kls->conf.kls_verbose_lvl > 0) {
+        print_kls_2file(kls->conf.kls_log_fp, kls);
+    }
+#endif
+    if (kls->conf.kls_collect_stats == 1) {
+        kls->stats.tot_temp_pops += 1;
+    }
+    return p;
+}
+
+/**
+ * Function to dupe a C string to a Koliseo, and return a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see KLS_PUSH_STR()
+ * @see __KLS_STRCPY()
+ */
+char* kls_strdup(Koliseo* kls, char* source)
+{
+    char* dest = KLS_PUSH_STR(kls, source);
+    __KLS_STRCPY(dest, source);
+    return dest;
+}
+
+/**
+ * Function to dupe a C string array to a Koliseo, and return a pointer to the allocated array.
+ * Unsafe, do not use.
+ * @see KLS_STRDUP()
+ * @see __KLS_STRCPY()
+ */
+char** kls_strdup_arr(Koliseo* kls, size_t count, char** source)
+{
+    char** strings = NULL;
+    strings = KLS_PUSH_ARR(kls, char*, count);
+    for (int i=0; i < count; i++) {
+        strings[i] = KLS_STRDUP(kls, source[i]);
+    }
+    return strings;
+}
+
+/**
+ * Function to dupe a C string to a Koliseo_Temp, and return a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see KLS_PUSH_STR_T()
+ * @see __KLS_STRCPY()
+ */
+char* kls_t_strdup(Koliseo_Temp* t_kls, char* source)
+{
+    char* dest = KLS_PUSH_STR_T(t_kls, source);
+    __KLS_STRCPY(dest, source);
+    return dest;
+}
+
+/**
+ * Function to dupe a C string array to a Koliseo_Temp, and return a pointer to the allocated array.
+ * Unsafe, do not use.
+ * @see KLS_STRDUP_T()
+ * @see __KLS_STRCPY()
+ */
+char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source)
+{
+    char** strings = NULL;
+    strings = KLS_PUSH_ARR_T(t_kls, char*, count);
+    for (int i=0; i < count; i++) {
+        strings[i] = KLS_STRDUP_T(t_kls, source[i]);
+    }
+    return strings;
+}
+#endif // KOLISEO_HAS_EXPER

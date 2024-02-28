@@ -95,6 +95,8 @@ typedef struct KLS_Conf {
 
 KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, const char* log_filepath);
 
+void kls_dbg_features(void);
+
 /**
  * Defines a stat struct for Koliseo.
  * @see Koliseo
@@ -431,13 +433,6 @@ void *kls_push_zero_named(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc);
 #endif // KOLISEO_HAS_REGION
-void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
-void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
-void kls_dbg_features(void);
-char* kls_strdup(Koliseo* kls, char* source);
-char** kls_strdup_arr(Koliseo* kls, size_t count, char** source);
-char* kls_t_strdup(Koliseo_Temp* t_kls, char* source);
-char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
@@ -449,24 +444,6 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
  * @see KLS_STRDUP()
  */
 #define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
-
-/**
- * Macro to copy a C string from a source buffer to a destination buffer.
- * Unsafe, do not use.
- * Used in KLS_STRDUP() and KLS_STRDUP_T().
- * @see KLS_STRDUP()
- * @see KLS_STRDUP_T()
- */
-#define __KLS_STRCPY(dest, source) do {\
-    strcpy((dest), (source));\
-} while (0)
-
-/*
- * Macro to dupe a C string to a passed Koliseo, returns a pointer to the allocated string.
- * Unsafe, do not use.
- * @see kls_strdup()
- */
-#define KLS_STRDUP(kls, source) kls_strdup((kls), (source))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
@@ -497,18 +474,6 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), char, strlen((cstr)), (region_type), (name), (desc))
 
 /**
- * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
- */
-#define KLS_POP_ARR(kls, type, count) (type*)kls_pop_AR((kls), sizeof(type), _Alignof(type), (count))
-
-/**
- * Macro to "remove" the memory for a C string from a Koliseo. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo index.
- * It's up to you to copy your string somewhere else before calling any PUSH operation again, as that memory should be overwritten.
- */
-#define KLS_POP_STR(kls, cstr) KLS_POP_ARR((kls), char, strlen((cstr)))
-
-/**
  * Macro used to request memory from a Koliseo.
  */
 #define KLS_PUSH(kls, type) KLS_PUSH_ARR((kls), type, 1)
@@ -522,12 +487,6 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
  * Macro used to request memory from a Koliseo, and assign a a type, a name and a description to the region item.
  */
 #define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), type, 1, (region_type), (name), (desc))
-
-/**
- * Macro used to "remove" memory from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
- */
-#define KLS_POP(kls, type) KLS_POP_ARR((kls), type, 1)
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
@@ -569,9 +528,6 @@ void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc);
 #endif // KOLISEO_HAS_REGION
-void *kls_temp_pop(Koliseo_Temp * t_kls, ptrdiff_t size, ptrdiff_t align,
-                   ptrdiff_t count);
-void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void print_temp_kls_2file(FILE * fp, Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 
@@ -585,13 +541,6 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  * @see KLS_STRDUP_T()
  */
 #define KLS_PUSH_STR_T(kls_temp, cstr) KLS_PUSH_ARR_T((kls_temp), char, strlen((cstr))+1)
-
-/*
- * Macro to dupe a C string to a passed Koliseo_Temp, returns a pointer to the allocated string.
- * Unsafe, do not use.
- * @see kls_t_strdup()
- */
-#define KLS_STRDUP_T(t_kls, source) kls_t_strdup((t_kls), (source))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a name and a description to the region item.
@@ -622,18 +571,6 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 #define KLS_PUSH_STR_T_TYPED(kls_temp, cstr, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), char, strlen((cstr)), (region_type), (name), (desc))
 
 /**
- * Macro used to "remove" memory as an array from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
- */
-#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop_AR((kls_temp), sizeof(type), _Alignof(type), (count))
-
-/**
- * Macro to "remove" the memory for a C string from a Koliseo_Temp. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo_Temp index.
- * It's up to you to copy your string somewhere else before calling any PUSH operation again, as that memory should be overwritten.
- */
-#define KLS_POP_STR_T(kls_temp, cstr) KLS_POP_ARR_T((kls_temp), char, strlen((cstr)))
-
-/**
  * Macro used to request memory from a Koliseo_Temp.
  */
 #define KLS_PUSH_T(kls_temp, type) KLS_PUSH_ARR_T((kls_temp), type, 1)
@@ -647,12 +584,6 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  */
 #define KLS_PUSH_T_TYPED(kls_temp, type, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), type, 1, (region_type), (name), (desc))
 
-/**
- * Macro used to "remove" memory from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
- */
-#define KLS_POP_T(kls_temp, type) KLS_POP_ARR_T((kls_temp), type, 1)
-
 #ifdef KOLISEO_HAS_REGION
 
 KLS_Region_List kls_emptyList(void);
@@ -661,9 +592,13 @@ bool kls_empty(KLS_Region_List);
 KLS_list_element kls_head(KLS_Region_List);
 KLS_Region_List kls_tail(KLS_Region_List);
 KLS_Region_List kls_cons(Koliseo *, KLS_list_element, KLS_Region_List);
+#ifdef KOLISEO_HAS_EXPER
 KLS_region_list_item* kls_list_pop(Koliseo *kls);
+#endif // KOLISEO_HAS_EXPER
 KLS_Region_List kls_t_cons(Koliseo_Temp *, KLS_list_element, KLS_Region_List);
+#ifdef KOLISEO_HAS_EXPER
 KLS_region_list_item* kls_t_list_pop(Koliseo_Temp *t_kls);
+#endif // KOLISEO_HAS_EXPER
 
 void kls_freeList(KLS_Region_List);
 #define KLS_FREELIST(kls_list) kls_freeList(kls_list)
@@ -793,6 +728,83 @@ Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max
 #endif				//KOLISEO_GULP_H_
 
 #endif				//KOLISEO_HAS_GULP
+
+#ifdef KOLISEO_HAS_EXPER
+
+void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+
+/**
+ * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_ARR(kls, type, count) (type*)kls_pop_AR((kls), sizeof(type), _Alignof(type), (count))
+
+/**
+ * Macro to "remove" the memory for a C string from a Koliseo. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your string somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_STR(kls, cstr) KLS_POP_ARR((kls), char, strlen((cstr)))
+
+/**
+ * Macro used to "remove" memory from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP(kls, type) KLS_POP_ARR((kls), type, 1)
+
+void *kls_temp_pop(Koliseo_Temp * t_kls, ptrdiff_t size, ptrdiff_t align,
+                   ptrdiff_t count);
+void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+
+/**
+ * Macro used to "remove" memory as an array from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop_AR((kls_temp), sizeof(type), _Alignof(type), (count))
+
+/**
+ * Macro to "remove" the memory for a C string from a Koliseo_Temp. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your string somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_STR_T(kls_temp, cstr) KLS_POP_ARR_T((kls_temp), char, strlen((cstr)))
+
+/**
+ * Macro used to "remove" memory from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_T(kls_temp, type) KLS_POP_ARR_T((kls_temp), type, 1)
+
+char* kls_strdup(Koliseo* kls, char* source);
+char** kls_strdup_arr(Koliseo* kls, size_t count, char** source);
+
+/**
+ * Macro to copy a C string from a source buffer to a destination buffer.
+ * Unsafe, do not use.
+ * Used in KLS_STRDUP() and KLS_STRDUP_T().
+ * @see KLS_STRDUP()
+ * @see KLS_STRDUP_T()
+ */
+#define __KLS_STRCPY(dest, source) do {\
+    strcpy((dest), (source));\
+} while (0)
+
+/*
+ * Macro to dupe a C string to a passed Koliseo, returns a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see kls_strdup()
+ */
+#define KLS_STRDUP(kls, source) kls_strdup((kls), (source))
+
+char* kls_t_strdup(Koliseo_Temp* t_kls, char* source);
+char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
+
+/*
+ * Macro to dupe a C string to a passed Koliseo_Temp, returns a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see kls_t_strdup()
+ */
+#define KLS_STRDUP_T(t_kls, source) kls_t_strdup((t_kls), (source))
+#endif // KOLISEO_HAS_EXPER
 
 #else
 #error "This code requires C11 or later.\n    _Alignof() is not available"
