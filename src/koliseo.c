@@ -173,7 +173,7 @@ const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, char* log_filepath)
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, const char* log_filepath)
 {
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
