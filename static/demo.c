@@ -70,6 +70,18 @@ int main(int argc, char **argv)
 #endif
 #endif // KOLISEO_HAS_REGION
 
+    int* pex = KLS_PUSH_EX(kls, int, "foo");
+
+    *pex = 3;
+
+    printf("*pex is {%i}\n", *pex);
+
+    char* pt_ex = KLS_PUSH_TYPED_EX(kls, char, 42, "foo_2");
+
+    *pt_ex = 'w';
+
+    printf("*pt_ex is {%c}\n", *pt_ex);
+
     printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
 #ifndef WINDOWS_BUILD

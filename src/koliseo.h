@@ -49,6 +49,8 @@
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
+#define STRINGIFY(x) #x
+
 #ifdef KOLISEO_HAS_REGION
 /**
  * Defines allocation backend for KLS_Region_List items.
@@ -484,9 +486,21 @@ void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 #define KLS_PUSH_NAMED(kls, type, name, desc) KLS_PUSH_ARR_NAMED((kls), type, 1, (name), (desc))
 
 /**
+ * Macro used to request memory from a Koliseo, and assign a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
+ */
+#define KLS_PUSH_EX(kls, type, name) KLS_PUSH_NAMED((kls), type, (name), STRINGIFY(type))
+
+/**
  * Macro used to request memory from a Koliseo, and assign a a type, a name and a description to the region item.
  */
 #define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), type, 1, (region_type), (name), (desc))
+
+/**
+ * Macro used to request memory from a Koliseo, and assign a type and a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
+ */
+#define KLS_PUSH_TYPED_EX(kls, type, region_type, name) KLS_PUSH_TYPED((kls), type, (region_type), (name), STRINGIFY(type))
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
@@ -579,10 +593,23 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  * Macro used to request memory from a Koliseo_Temp, and assign a name and a description to the region item.
  */
 #define KLS_PUSH_T_NAMED(kls_temp, type, name, desc) KLS_PUSH_ARR_T_NAMED((kls_temp), type, 1, (name), (desc))
+
+/**
+ * Macro used to request memory from a Koliseo_Temp, and assign a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
+ */
+#define KLS_PUSH_T_EX(kls_temp, type, name) KLS_PUSH_T_NAMED((kls_temp), type, (name), STRINGIFY(type))
+
 /**
  * Macro used to request memory from a Koliseo_Temp, and assign a type, a name and a description to the region item.
  */
 #define KLS_PUSH_T_TYPED(kls_temp, type, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), type, 1, (region_type), (name), (desc))
+
+/**
+ * Macro used to request memory from a Koliseo_Temp, and assign a type and a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
+ */
+#define KLS_PUSH_T_TYPED_EX(kls_temp, type, region_type, name) KLS_PUSH_T_TYPED((kls_temp), type, (region_type), (name), STRINGIFY(type))
 
 #ifdef KOLISEO_HAS_REGION
 
@@ -804,6 +831,7 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
  * @see kls_t_strdup()
  */
 #define KLS_STRDUP_T(t_kls, source) kls_t_strdup((t_kls), (source))
+
 #endif // KOLISEO_HAS_EXPER
 
 #else
