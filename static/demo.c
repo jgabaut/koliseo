@@ -35,22 +35,16 @@ int main(int argc, char **argv)
     kls_print_title();
 #endif // KOLISEO_HAS_TITLE
 
+
     printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n",
 	   int_koliseo_version(), string_koliseo_version());
     printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
 
-    KLS_Conf kls_config = {
-#ifdef KOLISEO_HAS_REGION
-	.kls_autoset_regions = 1,
-	//.kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_LIBC,
-	.kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
-	.kls_reglist_kls_size = KLS_DEFAULT_SIZE,
-	.kls_autoset_temp_regions = 1,
-#endif //KOLISEO_HAS_REGION
-	.kls_collect_stats = 1,
-	.kls_log_filepath = "./static/debug_log.txt",
-	.kls_verbose_lvl = 1,
-    };
+#ifndef KOLISEO_HAS_REGION
+    int KLS_REGLIST_ALLOC_KLS_BASIC = -1;
+#endif
+
+    KLS_Conf kls_config = kls_conf_init(1, KLS_REGLIST_ALLOC_KLS_BASIC, KLS_DEFAULT_SIZE, 1, 1, 1, NULL, "./static/debug_log.txt");
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
