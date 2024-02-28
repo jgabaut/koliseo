@@ -53,7 +53,9 @@ KLS_Stats KLS_STATS_DEFAULT = {
 #ifdef KOLISEO_HAS_REGION
     .avg_region_size = 0,
 #endif
+#ifdef KLS_DEBUG_CORE
     .worst_pushcall_time = -1,
+#endif
 };
 
 #ifdef KOLISEO_HAS_REGION

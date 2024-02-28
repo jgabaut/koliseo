@@ -109,7 +109,9 @@ typedef struct KLS_Stats {
 #ifdef KOLISEO_HAS_REGION
     ptrdiff_t avg_region_size; /**< Average size for allocated KLS_Region.*/
 #endif
+#ifdef KLS_DEBUG_CORE
     double worst_pushcall_time;	/**< Longest time taken by a PUSH call.*/
+#endif
 } KLS_Stats;
 
 /**
@@ -156,14 +158,32 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Stats_Arg()
  */
 #ifdef KOLISEO_HAS_REGION
+
 #ifndef _WIN32
+
+#ifdef KLS_DEBUG_CORE
 #define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %li, tot_hiccups: %i, worst_push_time: %.9f }"
 #else
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %lli, tot_hiccups: %i, worst_push_time: %.7f }"
-#endif
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %li, tot_hiccups: %i }"
+#endif // KLS_DEBUG_CORE
+
 #else
 
+#ifdef KLS_DEBUG_CORE
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %lli, tot_hiccups: %i, worst_push_time: %.7f }"
+#else
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %lli, tot_hiccups: %i }"
+#endif // KLS_DEBUG_CORE
+#endif // _WIN32
+
+#else
+
+#ifdef KLS_DEBUG_CORE
 #define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %.7f }"
+#else
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i }"
+#endif // KLS_DEBUG_CORE
+
 #endif // KOLISEO_HAS_REGION
 
 /**
@@ -171,10 +191,17 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Stats_Fmt
  */
 #ifdef KOLISEO_HAS_REGION
+#ifdef KLS_DEBUG_CORE
 #define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.avg_region_size),(stats.tot_hiccups),(stats.worst_pushcall_time)
 #else
-
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.avg_region_size),(stats.tot_hiccups)
+#endif // KLS_DEBUG_CORE
+#else
+#ifdef KLS_DEBUG_CORE
 #define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups),(stats.worst_pushcall_time)
+#else
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups)
+#endif // KLS_DEBUG_CORE
 #endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_REGION
