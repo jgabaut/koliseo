@@ -170,6 +170,32 @@ const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
 #endif // KOLISEO_HAS_REGION
 
 /**
+ * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * @see KLS_Conf
+ */
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, char* log_filepath)
+{
+    KLS_Conf res = {0};
+#ifdef KOLISEO_HAS_REGION
+    res.kls_autoset_regions = autoset_regions;
+    res.kls_alloc_backend = alloc_backend;
+    res.kls_reglist_kls_size = reglist_kls_size;
+    res.kls_autoset_temp_regions = autoset_temp_regions;
+#else
+    (void) autoset_regions;
+    (void) alloc_backend;
+    (void) reglist_kls_size;
+    (void) autoset_temp_regions;
+#endif // KOLISEO_HAS_REGION
+    res.kls_collect_stats = collect_stats;
+    res.kls_verbose_lvl = verbose_lvl;
+    res.kls_log_fp = log_fp;
+    res.kls_log_filepath = log_filepath;
+
+    return res;
+}
+
+/**
  * Returns the current offset (position of pointer bumper) for the passed Koliseo.
  * @param kls The Koliseo at hand.
  * @return A ptrdiff_t value for current position.

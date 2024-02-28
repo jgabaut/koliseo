@@ -93,6 +93,8 @@ typedef struct KLS_Conf {
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
 } KLS_Conf;
 
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, char* log_filepath);
+
 /**
  * Defines a stat struct for Koliseo.
  * @see Koliseo
