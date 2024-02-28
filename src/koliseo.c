@@ -2877,6 +2877,64 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
 }
 
 /**
+ * Function to dupe a C string to a Koliseo, and return a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see KLS_PUSH_STR()
+ * @see __KLS_STRCPY()
+ */
+char* kls_strdup(Koliseo* kls, char* source)
+{
+    char* dest = KLS_PUSH_STR(kls, source);
+    __KLS_STRCPY(dest, source);
+    return dest;
+}
+
+/**
+ * Function to dupe a C string array to a Koliseo, and return a pointer to the allocated array.
+ * Unsafe, do not use.
+ * @see KLS_STRDUP()
+ * @see __KLS_STRCPY()
+ */
+char** kls_strdup_arr(Koliseo* kls, size_t count, char** source)
+{
+    char** strings = NULL;
+    strings = KLS_PUSH_ARR(kls, char*, count);
+    for (int i=0; i < count; i++) {
+        strings[i] = KLS_STRDUP(kls, source[i]);
+    }
+    return strings;
+}
+
+/**
+ * Function to dupe a C string to a Koliseo_Temp, and return a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see KLS_PUSH_STR_T()
+ * @see __KLS_STRCPY()
+ */
+char* kls_t_strdup(Koliseo_Temp* t_kls, char* source)
+{
+    char* dest = KLS_PUSH_STR_T(t_kls, source);
+    __KLS_STRCPY(dest, source);
+    return dest;
+}
+
+/**
+ * Function to dupe a C string array to a Koliseo_Temp, and return a pointer to the allocated array.
+ * Unsafe, do not use.
+ * @see KLS_STRDUP_T()
+ * @see __KLS_STRCPY()
+ */
+char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source)
+{
+    char** strings = NULL;
+    strings = KLS_PUSH_ARR_T(t_kls, char*, count);
+    for (int i=0; i < count; i++) {
+        strings[i] = KLS_STRDUP_T(t_kls, source[i]);
+    }
+    return strings;
+}
+
+/**
  * Prints enabled Koliseo features to stderr.
  */
 void kls_dbg_features(void)

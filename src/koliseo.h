@@ -405,6 +405,10 @@ void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void kls_dbg_features(void);
+char* kls_strdup(Koliseo* kls, char* source);
+char** kls_strdup_arr(Koliseo* kls, size_t count, char** source);
+char* kls_t_strdup(Koliseo_Temp* t_kls, char* source);
+char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
@@ -415,8 +419,7 @@ void kls_dbg_features(void);
  * Macro to request memory for a C string from a Koliseo.
  * @see KLS_STRDUP()
  */
-#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr)))
-
+#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
 
 /**
  * Macro to copy a C string from a source buffer to a destination buffer.
@@ -425,20 +428,16 @@ void kls_dbg_features(void);
  * @see KLS_STRDUP()
  * @see KLS_STRDUP_T()
  */
-#define __KLS_STRCPY(source, dest) do {\
+#define __KLS_STRCPY(dest, source) do {\
     strcpy((dest), (source));\
 } while (0)
 
-/**
- * Macro to dupe a C string to a Koliseo, and copy its contents to the passed destination buffer.
+/*
+ * Macro to dupe a C string to a passed Koliseo, returns a pointer to the allocated string.
  * Unsafe, do not use.
- * @see KLS_PUSH_STR()
- * @see __KLS_STRCYP()
+ * @see kls_strdup()
  */
-#define KLS_STRDUP(kls, cstr_source, dest) do {\
-    (dest) = KLS_PUSH_STR((kls), (cstr_source));\
-    __KLS_STRCPY((cstr_source), (dest));\
-} while (0)
+#define KLS_STRDUP(kls, source) kls_strdup((kls), (source))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
@@ -556,18 +555,14 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  * Macro to request memory for a C string from a Koliseo_Temp.
  * @see KLS_STRDUP_T()
  */
-#define KLS_PUSH_STR_T(kls_temp, cstr) KLS_PUSH_ARR_T((kls_temp), char, strlen((cstr)))
+#define KLS_PUSH_STR_T(kls_temp, cstr) KLS_PUSH_ARR_T((kls_temp), char, strlen((cstr))+1)
 
-/**
- * Macro to dupe a C string to a Koliseo_Temp, and copy its contents to the passed destination buffer.
+/*
+ * Macro to dupe a C string to a passed Koliseo_Temp, returns a pointer to the allocated string.
  * Unsafe, do not use.
- * @see KLS_PUSH_STR_T()
- * @see __KLS_STRCYP()
+ * @see kls_t_strdup()
  */
-#define KLS_STRDUP_T(kls_temp, cstr_source, dest) do {\
-    (dest) = KLS_PUSH_STR_T((kls_temp), (cstr_source));\
-    __KLS_STRCPY((cstr_source), (dest));\
-} while (0)
+#define KLS_STRDUP_T(t_kls, source) kls_t_strdup((t_kls), (source))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a name and a description to the region item.

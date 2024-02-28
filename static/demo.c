@@ -54,8 +54,7 @@ int main(int argc, char **argv)
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
-    char* demo_str = NULL;
-    KLS_STRDUP(kls, "\nKoliseo demo\n", demo_str);
+    char* demo_str = KLS_STRDUP(kls, "\nKoliseo demo\n");
 
     printf("%s\n", demo_str);
 
