@@ -49,7 +49,9 @@
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
-#define STRINGIFY(x) #x
+#define STRINGIFY_2(x) #x
+
+#define STRINGIFY(x) STRINGIFY_2(x)
 
 #ifdef KOLISEO_HAS_REGION
 /**
@@ -609,7 +611,7 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
  * Macro used to request memory from a Koliseo_Temp, and assign a type and a name to the region item.
  * The description field is automatically filled with the stringized passed type.
  */
-#define KLS_PUSH_T_TYPED_EX(kls_temp, type, region_type, name) KLS_PUSH_T_TYPED((kls_temp), type, (region_type), (name), STRINGIFY(type))
+#define KLS_PUSH_T_TYPED_EX(kls_temp, type, region_type, name) KLS_PUSH_T_TYPED((kls_temp), type, (region_type), (name), STRINFIGY(type))
 
 #ifdef KOLISEO_HAS_REGION
 
