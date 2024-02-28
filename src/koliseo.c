@@ -180,7 +180,7 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
     res.kls_autoset_regions = autoset_regions;
-    res.kls_alloc_backend = alloc_backend;
+    res.kls_reglist_alloc_backend = alloc_backend;
     res.kls_reglist_kls_size = reglist_kls_size;
     res.kls_autoset_temp_regions = autoset_temp_regions;
 #else
@@ -385,10 +385,10 @@ Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
             kls_header->padding = 0;
             kls_header->type = KLS_Header;
             strncpy(kls_header->name, "KLS_Header", KLS_REGION_MAX_NAME_SIZE);
-            kls_header->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+            kls_header->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
             strncpy(kls_header->desc, "Sizeof Koliseo header",
                     KLS_REGION_MAX_DESC_SIZE);
-            kls_header->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+            kls_header->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
             //KLS_Region_List reglist = kls_emptyList();
             //reglist = kls_cons(kls,kls_header,reglist);
             //kls->regs = reglist;
@@ -604,10 +604,10 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
             kls_header->type = KLS_Header;
             strncpy(kls_header->name, "KLS_Header",
                     KLS_REGION_MAX_NAME_SIZE);
-            kls_header->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+            kls_header->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
             strncpy(kls_header->desc, "Sizeof Koliseo header",
                     KLS_REGION_MAX_DESC_SIZE);
-            kls_header->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+            kls_header->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
             //KLS_Region_List reglist = kls_emptyList();
             //reglist = kls_cons(kls,kls_header,reglist);
             //kls->regs = reglist;
@@ -1215,10 +1215,10 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         reg->type = KLS_None;
         strncpy(reg->name, KOLISEO_DEFAULT_REGION_NAME,
                 KLS_REGION_MAX_NAME_SIZE);
-        reg->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+        reg->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
         strncpy(reg->desc, KOLISEO_DEFAULT_REGION_DESC,
                 KLS_REGION_MAX_DESC_SIZE);
-        reg->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+        reg->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //kls->regs = kls_append(kls,reglist, kls->regs);
@@ -1384,10 +1384,10 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
         reg->type = KLS_None;
         strncpy(reg->name, KOLISEO_DEFAULT_REGION_NAME,
                 KLS_REGION_MAX_NAME_SIZE);
-        reg->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+        reg->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
         strncpy(reg->desc, KOLISEO_DEFAULT_REGION_DESC,
                 KLS_REGION_MAX_DESC_SIZE);
-        reg->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+        reg->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
@@ -1547,9 +1547,9 @@ void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         reg->padding = padding;
         reg->type = KLS_None;
         strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
-        reg->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+        reg->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
         strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
-        reg->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+        reg->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //kls->regs = kls_append(kls,reglist, kls->regs);
@@ -1720,9 +1720,9 @@ void *kls_temp_push_zero_named(Koliseo_Temp *t_kls, ptrdiff_t size,
         reg->padding = padding;
         reg->type = KLS_None;
         strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
-        reg->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+        reg->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
         strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
-        reg->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+        reg->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
@@ -1878,9 +1878,9 @@ void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         reg->padding = padding;
         reg->type = type;
         strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
-        reg->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+        reg->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
         strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
-        reg->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+        reg->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //kls->regs = kls_append(kls,reglist, kls->regs);
@@ -2049,9 +2049,9 @@ void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
         reg->padding = padding;
         reg->type = type;
         strncpy(reg->name, name, KLS_REGION_MAX_NAME_SIZE);
-        reg->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+        reg->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
         strncpy(reg->desc, desc, KLS_REGION_MAX_DESC_SIZE);
-        reg->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+        reg->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
@@ -2802,10 +2802,10 @@ Koliseo_Temp *kls_temp_start(Koliseo *kls)
         temp_kls_header->type = Temp_KLS_Header;
         strncpy(temp_kls_header->name, "T_KLS_Header",
                 KLS_REGION_MAX_NAME_SIZE);
-        temp_kls_header->name[KLS_REGION_MAX_NAME_SIZE - 1] = '\0';
+        temp_kls_header->name[KLS_REGION_MAX_NAME_SIZE] = '\0';
         strncpy(temp_kls_header->desc, "Last Reg b4 KLS_T",
                 KLS_REGION_MAX_DESC_SIZE);
-        temp_kls_header->desc[KLS_REGION_MAX_DESC_SIZE - 1] = '\0';
+        temp_kls_header->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
         KLS_Region_List reglist = kls_emptyList();
         reglist = kls_t_cons(tmp, temp_kls_header, reglist);
         tmp->t_regs = reglist;
