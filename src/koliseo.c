@@ -676,6 +676,7 @@ void *kls_pop(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
+        kls_free(kls);
         exit(EXIT_FAILURE);
     }
     char *p = kls->data + kls->offset - padding - size * count;
@@ -712,6 +713,7 @@ void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
+        kls_free(kls);
         exit(EXIT_FAILURE);
     }
     char *p = kls->data + kls->offset - padding - size * count;
@@ -786,6 +788,7 @@ void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
         fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
+        kls_free(kls);
         exit(EXIT_FAILURE);
     }
     char *p = kls->data + kls->offset - padding - size * count;
@@ -830,6 +833,7 @@ void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrd
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
         fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
+        kls_free(kls);
         exit(EXIT_FAILURE);
     }
     char *p = kls->data + kls->offset - padding - size * count;
@@ -1124,7 +1128,7 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                     size * count, available - padding);
 #endif
         }
-        fprintf(stderr, "[KLS] Failed kls_push_zero() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
         //return 0;
