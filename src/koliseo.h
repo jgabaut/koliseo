@@ -262,7 +262,6 @@ const char *string_koliseo_version(void);
  */
 const int int_koliseo_version(void);
 
-
 #ifdef KOLISEO_HAS_TITLE
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
 extern char *kls_title[KLS_TITLEROWS + 1];
@@ -423,7 +422,7 @@ Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
 #define kls_new_dbg(size) kls_new_dbg_alloc((size), KLS_DEFAULT_ALLOCF)
 Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
-                               ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
+                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
 #define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);

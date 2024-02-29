@@ -534,7 +534,7 @@ Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
  * @see kls_new_conf_alloc()
  */
 Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
-                               ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func)
+                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -4014,7 +4014,8 @@ void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
     if (kls->conf.kls_autoset_regions == 1) {
         KLS_region_list_item *reg = NULL;
         switch (kls->conf.kls_reglist_alloc_backend) {
-            case KLS_REGLIST_ALLOC_LIBC: case KLS_REGLIST_ALLOC_KLS_BASIC: {
+        case KLS_REGLIST_ALLOC_LIBC:
+        case KLS_REGLIST_ALLOC_KLS_BASIC: {
             reg = kls_list_pop(kls);
         }
         break;
@@ -4134,7 +4135,8 @@ void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrd
     if (t_kls->conf.kls_autoset_regions == 1) {
         KLS_region_list_item *reg = NULL;
         switch (t_kls->conf.tkls_reglist_alloc_backend) {
-            case KLS_REGLIST_ALLOC_LIBC: case KLS_REGLIST_ALLOC_KLS_BASIC: {
+        case KLS_REGLIST_ALLOC_LIBC:
+        case KLS_REGLIST_ALLOC_KLS_BASIC: {
             reg = kls_t_list_pop(t_kls);
         }
         break;
