@@ -840,3 +840,149 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
 
 #endif //KOLISEO_H_
+
+
+#ifdef DARRAY_T
+// This code is from https://www.davidpriver.com/ctemplates.html.
+// Darray.h
+// Include this header multiple times to implement a
+// simplistic dynamic array.  Before inclusion define at
+// least DARRAY_T to the type the dynamic array can hold.
+// See DARRAY_NAME, DARRAY_PREFIX and DARRAY_LINKAGE for
+// other customization points.
+//
+// If you define DARRAY_DECLS_ONLY, only the declarations
+// of the type and its function will be declared.
+//
+
+#ifndef DARRAY_HEADER_H
+#define DARRAY_HEADER_H
+// Inline functions, #defines and includes that will be
+// needed for all instantiations can go up here.
+#include <stdlib.h> // realloc, size_t
+
+#define DARRAY_IMPL(word) DARRAY_COMB1(DARRAY_PREFIX,word)
+#define DARRAY_COMB1(pre, word) DARRAY_COMB2(pre, word)
+#define DARRAY_COMB2(pre, word) pre##word
+
+#endif // DARRAY_HEADER_H
+
+// NOTE: this section is *not* guarded as it is intended
+// to be included multiple times.
+
+#ifndef DARRAY_T
+#error "DARRAY_T must be defined"
+#endif
+
+// The name of the data type to be generated.
+// If not given, will expand to something like
+// `darray_int` for an `int`.
+#ifndef DARRAY_NAME
+#define DARRAY_NAME DARRAY_COMB1(DARRAY_COMB1(darray,_), DARRAY_T)
+#endif
+
+// Prefix for generated functions.
+#ifndef DARRAY_PREFIX
+#define DARRAY_PREFIX DARRAY_COMB1(DARRAY_NAME, _)
+#endif
+
+// Customize the linkage of the function.
+#ifndef DARRAY_LINKAGE
+#define DARRAY_LINKAGE static inline
+#endif
+
+typedef struct DARRAY_NAME DARRAY_NAME;
+struct DARRAY_NAME {
+    Koliseo* kls;
+    DARRAY_T* items;
+    size_t count;
+    size_t capacity;
+};
+
+#define DARRAY_push DARRAY_IMPL(push)
+#define DARRAY_init DARRAY_IMPL(init)
+#define DARRAY_free DARRAY_IMPL(free)
+
+#ifdef DARRAY_DECLS_ONLY
+
+DARRAY_LINKAGE
+void
+DARRAY_push(DARRAY_NAME* array, DARRAY_T item);
+
+DARRAY_LINKAGE
+DARRAY_NAME
+DARRAY_init(Koliseo* kls);
+
+DARRAY_LINKAGE
+void
+DARRAY_free(DARRAY_NAME* array);
+
+#else
+
+DARRAY_LINKAGE
+void
+DARRAY_push(DARRAY_NAME* array, DARRAY_T item){
+    if(array->count >= array->capacity){
+        //TODO: handle realloc
+        /*
+        size_t old_cap = array->capacity;
+        size_t new_cap = old_cap?old_cap*2:4;
+        size_t new_size = new_cap * sizeof(DARRAY_T);
+        array->items = realloc(array->items, new_size);
+        array->capacity = new_cap;
+        */
+        fprintf(stderr,"In %s, at %i: %s(): out of capacity.\n", __FILE__, __LINE__, __func__);
+        kls_free(array->kls);
+        exit(EXIT_FAILURE);
+    }
+    // The push call is needed to advance the underlying offset.
+    KLS_PUSH(array->kls, DARRAY_T);
+    array->items[array->count++] = item;
+}
+
+DARRAY_LINKAGE
+DARRAY_NAME*
+DARRAY_init(Koliseo* kls){
+    // This functions sets the passed Koliseo as the backing memory for the array, and returns a pointer to it.
+    if(kls == NULL) {
+        fprintf(stderr,"In %s, at %i: %s(): kls was NULL.\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
+    DARRAY_NAME* res = KLS_PUSH_EX(kls, DARRAY_NAME, "from DARRAY_new()");
+    if (res == NULL) {
+        fprintf(stderr,"In %s, at %i: %s(): res was NULL.\n", __FILE__, __LINE__, __func__);
+        kls_free(res->kls);
+        exit(EXIT_FAILURE);
+    }
+    res->kls = kls;
+    res->capacity = ((kls->size - kls->offset) / sizeof(DARRAY_T)) -1;
+    res->items = (DARRAY_T*) (kls->data + kls->offset);
+    return res;
+}
+
+DARRAY_LINKAGE
+void
+DARRAY_free(DARRAY_NAME* array){
+    if (array == NULL) {
+        fprintf(stderr,"In %s, at %i: %s(): array was NULL.\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
+    kls_free(array->kls);
+    return;
+}
+#endif
+
+// Cleanup
+// These need to be undef'ed so they can be redefined the
+// next time you need to instantiate this template.
+#undef DARRAY_T
+#undef DARRAY_PREFIX
+#undef DARRAY_NAME
+#undef DARRAY_LINKAGE
+#undef DARRAY_push
+#undef DARRAY_init
+#undef DARRAY_free
+#ifdef DARRAY_DECLS_ONLY
+#undef DARRAY_DECLS_ONLY
+#endif // DARRAY_HEADER_H
+#endif // DARRAY_T

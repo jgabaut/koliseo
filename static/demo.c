@@ -6,6 +6,12 @@
 #include "../src/koliseo.h"
 #include "amboso.h"
 
+#define DARRAY_T int
+#define DARRAY_PREFIX i
+#define DARRAY_NAME IntArray
+// Must be manually instantiated by #including the file
+#include "../src/koliseo.h"
+
 void usage(char *progname)
 {
     fprintf(stderr, "Usage:  %s [-a]\n\n", progname);
@@ -47,6 +53,36 @@ int main(int argc, char **argv)
     KLS_Conf kls_config = kls_conf_init(1, KLS_REGLIST_ALLOC_KLS_BASIC, KLS_DEFAULT_SIZE, 1, 1, 1, NULL, "./static/debug_log.txt");
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
+
+    if (kls == NULL) {
+        fprintf(stderr, "Failed kls_new_conf() call.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    IntArray* ints = iinit(kls);
+
+    if (ints == NULL) {
+        fprintf(stderr, "Failed iinit() call.\n");
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+    ipush(ints, 1);
+    ipush(ints, 2);
+    ipush(ints, 3);
+    ipush(ints, 4);
+    ipush(ints, 5);
+    ipush(ints, 6);
+    assert(ints->count == 6);
+    assert(ints->items[0] == 1);
+    assert(ints->items[1] == 2);
+    assert(ints->items[2] == 3);
+    assert(ints->items[3] == 4);
+    assert(ints->items[4] == 5);
+    assert(ints->items[5] == 6);
+    for(size_t i = 0; i < ints->count; i++){
+        printf("[%zu] = %d\n", i, ints->items[i]);
+    }
+    printf("IntArray capacity (if it was on its own Koliseo, NOT shared): {%zu}\n", ints->capacity);
 
 #ifdef KOLISEO_HAS_EXPER
     char* demo_str = KLS_STRDUP(kls, "\nKoliseo demo\n");
