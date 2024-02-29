@@ -217,10 +217,20 @@ void kls_dbg_features(void)
 #else
     fprintf(stderr, "[KLS] KLS_Region_List is not enabled\n");
 #endif
+#ifdef KOLISEO_HAS_TITLE
+    fprintf(stderr, "[KLS] Koliseo title banner is enabled\n");
+#else
+    fprintf(stderr, "[KLS] Koliseo title banner is not enabled\n");
+#endif
 #ifdef KLS_DEBUG_CORE
     fprintf(stderr, "[KLS] Koliseo core debugging is enabled\n");
 #else
     fprintf(stderr, "[KLS] Koliseo core debugging is not enabled\n");
+#endif
+#ifdef KOLISEO_HAS_EXPER
+    fprintf(stderr, "[KLS] Koliseo experimental is enabled\n");
+#else
+    fprintf(stderr, "[KLS] Koliseo experimental is not enabled\n");
 #endif
 }
 
