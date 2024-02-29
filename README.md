@@ -25,7 +25,7 @@
 ## What is this thing? <a name = "witt"></a>
 
   This is a C library for an arena allocator, whose arenas are named `Koliseo`.
-  It offers a basic API to perform initalisation, push/pop, reset and free of a `Koliseo`.
+  It offers a basic API to perform initalisation, push (request arena memory), reset and free of a `Koliseo`.
 
   If you compile it without defining any special macros, you will get the basic functionality.
 
