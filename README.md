@@ -6,6 +6,14 @@
 
 + [What is this thing?](#witt)
   + [Basic example](#basic_example)
+  + [Extra features](#extra_features)
+    + [Region](#extra_region)
+    + [Curses](#extra_curses)
+    + [Debug](#extra_debug)
+    + [Gulp](#extra_gulp)
+    + [Title banner](#extra_title)
+    + [Experimental](#extra_exper)
+    + [How to use extras](#extra_howto)
   + [Documentation](#docs)
   + [Prerequisites](#prerequisites)
   + [Configuration](#config)
@@ -16,15 +24,10 @@
 
 ## What is this thing? <a name = "witt"></a>
 
-  This is a C library for an arena allocator, whose arenas are named Koliseo.
-  It offers a basic API to perform initalisation, push/pop, reset and free of a Koliseo.
+  This is a C library for an arena allocator, whose arenas are named `Koliseo`.
+  It offers a basic API to perform initalisation, push (request arena memory), reset and free of a `Koliseo`.
 
-  It also has:
-  - A tagging system to type/name your references and have them in a list
-    - The list can be stored either in an inner Koliseo or using the global allocator)
-  - A couple utility functions to:
-    - Help you estimate relative memory usage by some particular type of object, may prove useful in some scenarios.
-    - Memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+  If you compile it without defining any special macros, you will get the basic functionality.
 
 ## Basic example <a name = "basic_example"></a>
 
@@ -61,6 +64,83 @@ int main(void)
 }
 ```
 
+  After including the `koliseo.h` header:
+
+  - To initialise a default arena:
+  ```c
+  Koliseo* kls_new(size_t)
+  ```
+  - To request memory for a specific type:
+  ```c
+  Type* KLS_PUSH(Koliseo* kls, Type)
+  ```
+  - For C strings, you can use:
+  ```c
+  char* KLS_PUSH_STR(Koliseo* kls, char* cstring)
+  ```
+  - Also, a couple unsafe utility macros (not recommended to use, for now):
+  ```c
+  char* KLS_STRDUP(Koliseo* kls, char* source, char* dest)
+  ```
+  - To free the arena:
+  ```c
+  void kls_free(Koliseo* kls)
+  ```
+
+  For more documentation on the available functions, see [this section.](#docs)
+
+## Extra features <a name = "extra_features"></a>
+
+  By default, extended functionalities are not included in the build, with each feature needing a preprocessor macro to be defined before including the library header.
+  You can find hints on configuration [here,](#config) or the list of macros [here.](#extras_howto)
+
+### Region <a name = "extra_region"></a>
+
+  A ready-to-go index for every allocation you make.
+  - It uses an intrusive linked list and (at the moment) has quite the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
+  - Offers extended API with tagging arguments, to type/name your references
+  - For now, two allocations backends can be chosen for the list, it can be stored:
+    - In an inner Koliseo (this puts an extra limit to the total number of single allocations)
+    - Using the global allocator (from malloc)
+  - Extra utility functions
+    - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
+
+### Curses <a name = "extra_curses"></a>
+
+  Utility functions that extend ncurses API to provide debug info.
+
+### Core debug <a name = "extra_debug"></a>
+
+  Extra debug for core calls, may be too verbose for some applications.
+
+### Gulp <a name = "extra_gulp"></a>
+
+  Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+  - Also includes a minimal string-view API, in case you want to work on the file contents differently.
+
+### Title banner <a name = "extra_title"></a>
+
+  Include an ASCII art string to be printed as a title banner.
+
+### Experimental <a name = "extra_exper"></a>
+
+  Include some experimental (NOT WELL TESTED. USE WITH CAUTION) functions.
+
+  In particular, enables the dreaded `pop` operation and its functions.
+
+### How to enable extra features<a name = "extra_howto"></a>
+
+  To aid in building with extra features, see [this section.](#config)
+
+  The preprocessor macros to enable them manually are:
+
+  - Region: `KOLISEO_HAS_REGION`
+  - Curses: `KOLISEO_HAS_CURSES`
+  - Debug: `KLS_DEBUG_CORE`
+  - Gulp: `KOLISEO_HAS_GULP`
+  - Title banner: `KOLISEO_HAS_TITLE`
+  - Experimental: `KOLISEO_HAS_EXPER`
+
 ## Documentation <a name = "docs"></a>
 
   HTML docs are available at [this Github Pages link](https://jgabaut.github.io/koliseo-docs/index.html).
@@ -79,7 +159,7 @@ int main(void)
 
   To bootstrap and use the `./anvil` tool to build all amboso-supported tags for `demo`, you also need either:
 
-  * `bash >4.x` if you want to use `amboso`
+  * `bash >4.x, gawk` if you want to use `amboso`
   * `rustc` if you want to use `invil`
 
 
@@ -91,17 +171,20 @@ int main(void)
   aclocal
   autoconf
   automake --add-missing
-  ./configure # Optionally, with --enable-debug=yes or --host
+  ./configure # Optionally, with --enable-debug or --host
   make
   ```
 
   You will get a `./configure` script, which you can use to enable debug mode or other features.
 
   - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
-  - Run `./configure --enable-debug=yes` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
+  - Run `./configure --enable-debug` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
     - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
-  - Run `./configure --enable-curses=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
-  - Run `./configure --enable-gulp=yes` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
+  - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag.
+  - Run `./configure --enable-curses` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
+  - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
+  - Run `./configure --enable-title` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_TITLE` flag.
+  - Run `./configure --enable-exper` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_EXPER` flag.
 
 
 ## Building <a name = "building"></a>
@@ -114,8 +197,9 @@ int main(void)
 
   ATM the code should build for:
   - `x86_64-Linux`
-  - `x86_64-w64-mingw32` to target `Windows`, but ATM there is no guarantee it works as intended there.
-    - This build does not have a `.dll` target yet.
+  - `darwin-arm64`
+  - `x86_64-w64-mingw32` to target `Windows`.
+    - This build, while mostly identical to `Linux`/`macOS`, is less tested.
 
 ## Credits <a name = "credits"></a>
 
@@ -128,3 +212,8 @@ int main(void)
 ## Todo <a name = "todo"></a>
 
   - Break up internal extensions to the core functionality
+    - Maybe move the guarded code into separate headers?
+  - Model `KLS_Temp_Conf` to still be included without `Region` feature
+  - At the moment, the arena can't grown its own underlying buffer.
+    - Add backwards-compatible logic to enable growable arenas.
+  - Clean up the `Windows` part of the includes, to have minimal definitions from `windows.h`.

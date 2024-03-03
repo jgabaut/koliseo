@@ -15,7 +15,7 @@ TARGET_INSTALL_DIR = /usr
 SOURCE_INSTALL_DIR = "."
 INSTALLER_LOG_FILE = "./installer.log"
 # Check local version
-PACK_NAME = $(TARGET)-$(VERSION)-$(OS)-$(MACHINE)
+PACK_NAME = $(SHARED_LIB)-$(VERSION)-$(OS)-$(MACHINE)
 
 # Source files
 demo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
@@ -46,6 +46,17 @@ if GULP_BUILD
 AM_CFLAGS += -DKOLISEO_HAS_GULP
 endif
 
+if REGION_BUILD
+AM_CFLAGS += -DKOLISEO_HAS_REGION
+endif
+
+if TITLE_BUILD
+AM_CFLAGS += -DKOLISEO_HAS_TITLE
+endif
+
+if EXPER_BUILD
+AM_CFLAGS += -DKOLISEO_HAS_EXPER
+endif
 
 ./anvil:
 	@echo -e "\033[1;35m[Makefile]\e[0m    Bootstrapping \"./anvil\":"

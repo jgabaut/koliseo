@@ -20,6 +20,8 @@ basic_example
 amboso_cfg.dot
 #Ignore invil log
 invil.log
+#Ignore anvil log
+anvil.log
 
 #Ignore installer log
 installer.log

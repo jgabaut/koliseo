@@ -1,7 +1,7 @@
 // jgabaut @ github.com/jgabaut
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-    Copyright (C) 2023  jgabaut
+    Copyright (C) 2023-2024  jgabaut
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,8 +45,15 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 0 /**< Represents current patch release.*/
+#define KLS_PATCH 1 /**< Represents current patch release.*/
 
+typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
+
+#define STRINGIFY_2(x) #x
+
+#define STRINGIFY(x) STRINGIFY_2(x)
+
+#ifdef KOLISEO_HAS_REGION
 /**
  * Defines allocation backend for KLS_Region_List items.
  * @see Koliseo
@@ -71,21 +78,28 @@ extern const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS];
  * @see kls_reglist_backend_strings
  */
 const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be);
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Defines flags for Koliseo.
  * @see Koliseo
  */
 typedef struct KLS_Conf {
+#ifdef KOLISEO_HAS_REGION
     int kls_autoset_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage.*/
     KLS_RegList_Alloc_Backend kls_reglist_alloc_backend; /**< Sets the backend for the KLS_Regions allocation.*/
     ptrdiff_t kls_reglist_kls_size; /**< Sets the size for reglist_kls when on KLS_REGLIST_ALLOC_KLS_BASIC.*/
     int kls_autoset_temp_regions; /**< If set to 1, make the Koliseo handle the KLS_Regions for its usage when operating on a Koliseo_Temp instance.*/
+#endif // KOLISEO_HAS_REGION
     int kls_collect_stats; /**< If set to 1, make the Koliseo collect performance stats.*/
     int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
     FILE *kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
 } KLS_Conf;
+
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, const char* log_filepath);
+
+void kls_dbg_features(void);
 
 /**
  * Defines a stat struct for Koliseo.
@@ -98,8 +112,12 @@ typedef struct KLS_Stats {
     int tot_temp_pops; /**< Total POP_T calls done.*/
     int tot_logcalls; /**< Total kls_log() calls done.*/
     int tot_hiccups; /**< Total hiccups encountered.*/
+#ifdef KOLISEO_HAS_REGION
     ptrdiff_t avg_region_size; /**< Average size for allocated KLS_Region.*/
+#endif
+#ifdef KLS_DEBUG_CORE
     double worst_pushcall_time;	/**< Longest time taken by a PUSH call.*/
+#endif
 } KLS_Stats;
 
 /**
@@ -120,34 +138,79 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format string for KLS_Conf.
  * @see KLS_Conf_Arg()
  */
+#ifdef KOLISEO_HAS_REGION
 #ifndef _WIN32
 #define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 #else
 #define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
 #endif
+#else
+
+#define KLS_Conf_Fmt "KLS_Conf { collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
+#ifdef KOLISEO_HAS_REGION
 #define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),kls_reglist_backend_string((conf.kls_reglist_alloc_backend)),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#else
+#define KLS_Conf_Arg(conf) (conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Defines a format string for KLS_Stats.
  * @see KLS_Stats_Arg()
  */
+#ifdef KOLISEO_HAS_REGION
+
 #ifndef _WIN32
+
+#ifdef KLS_DEBUG_CORE
 #define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %li, tot_hiccups: %i, worst_push_time: %.9f }"
 #else
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %li, tot_hiccups: %i }"
+#endif // KLS_DEBUG_CORE
+
+#else
+
+#ifdef KLS_DEBUG_CORE
 #define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %lli, tot_hiccups: %i, worst_push_time: %.7f }"
-#endif
+#else
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, avg_region_size: %lli, tot_hiccups: %i }"
+#endif // KLS_DEBUG_CORE
+#endif // _WIN32
+
+#else
+
+#ifdef KLS_DEBUG_CORE
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %.7f }"
+#else
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i }"
+#endif // KLS_DEBUG_CORE
+
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Defines a format macro for KLS_Stats args.
  * @see KLS_Stats_Fmt
  */
+#ifdef KOLISEO_HAS_REGION
+#ifdef KLS_DEBUG_CORE
 #define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.avg_region_size),(stats.tot_hiccups),(stats.worst_pushcall_time)
+#else
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.avg_region_size),(stats.tot_hiccups)
+#endif // KLS_DEBUG_CORE
+#else
+#ifdef KLS_DEBUG_CORE
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups),(stats.worst_pushcall_time)
+#else
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups)
+#endif // KLS_DEBUG_CORE
+#endif // KOLISEO_HAS_REGION
 
+#ifdef KOLISEO_HAS_REGION
 /**
  * Defines flags for Koliseo_Temp.
  * @see Koliseo_Temp
@@ -159,6 +222,7 @@ typedef struct KLS_Temp_Conf {
     KLS_RegList_Alloc_Backend tkls_reglist_alloc_backend; /**< Sets the backend for the KLS_Regions allocation.*/
     ptrdiff_t kls_reglist_kls_size; /**< Sets the size for reglist_kls when on KLS_REGLIST_ALLOC_KLS_BASIC.*/
 } KLS_Temp_Conf;
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Defines a format string for KLS_Temp_Conf.
@@ -186,7 +250,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.0"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -198,12 +262,14 @@ const char *string_koliseo_version(void);
  */
 const int int_koliseo_version(void);
 
+#ifdef KOLISEO_HAS_TITLE
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
 extern char *kls_title[KLS_TITLEROWS + 1];
 /**< Contains title banner.*/
 
 void kls_print_title_2file(FILE * fp);/**< Prints the title banner to the passed FILE.*/
 void kls_print_title(void);
+#endif // KOLISEO_HAS_TITLE
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 
@@ -238,6 +304,8 @@ typedef enum KLS_Region_Type {
  */
 #define KLS_REGION_MAX_DESC_SIZE 20
 
+#ifdef KOLISEO_HAS_REGION
+
 /**
  * Represents an allocated memory region in a Koliseo.
  * @see KLS_PUSH()
@@ -268,6 +336,7 @@ typedef struct KLS_list_region {
 } KLS_region_list_item;
 
 typedef KLS_region_list_item *KLS_Region_List;
+#endif // KOLISEO_HAS_REGION
 
 struct Koliseo_Temp;		//Forward declaration for Koliseo itself
 
@@ -284,13 +353,15 @@ typedef struct Koliseo {
     ptrdiff_t size;	/**< Size of data field.*/
     ptrdiff_t offset;	  /**< Current position of memory pointer.*/
     ptrdiff_t prev_offset;     /**< Previous position of memory pointer.*/
+#ifdef KOLISEO_HAS_REGION
     KLS_Region_List regs;     /**< List of allocated Regions*/
+    struct Koliseo *reglist_kls; /**< When conf.kls_reglist_alloc_backend is KLS_REGLIST_ALLOC_KLS_BASIC, points to the backing kls for regs list.*/
+    int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
+#endif
     int has_temp;     /**< When == 1, a Koliseo_Temp is currently active on this Koliseo.*/
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
     KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
     struct Koliseo_Temp *t_kls;	    /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
-    struct Koliseo *reglist_kls; /**< When conf.kls_reglist_alloc_backend is KLS_REGLIST_ALLOC_KLS_BASIC, points to the backing kls for regs list.*/
-    int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
 } Koliseo;
 
 /**
@@ -320,72 +391,117 @@ typedef struct Koliseo_Temp {
     Koliseo *kls;     /**< Reference to the actual Koliseo we're saving.*/
     ptrdiff_t offset;	  /**< Current position of memory pointer.*/
     ptrdiff_t prev_offset;     /**< Previous position of memory pointer.*/
+#ifdef KOLISEO_HAS_REGION
     KLS_Region_List t_regs;	/**< List of temporarily allocated Regions*/
-    KLS_Temp_Conf conf;	/**< Contains flags to change the Koliseo_Temp behaviour.*/
     Koliseo *reglist_kls; /**< Reference to the supporting Koliseo when conf.tkls_reglist_alloc_backend is KLS_BASIC.*/
     int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
+    KLS_Temp_Conf conf;	/**< Contains flags to change the Koliseo_Temp behaviour.*/
+#endif
 } Koliseo_Temp;
 
 void kls_log(Koliseo * kls, const char *tag, const char *format, ...);
 ptrdiff_t kls_get_pos(Koliseo * kls);
+
+#ifdef KOLISEO_HAS_REGION
 int kls_get_maxRegions_KLS_BASIC(Koliseo * kls);
 int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp * t_kls);
+#endif
 
-Koliseo *kls_new(ptrdiff_t size);
+Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
+
+#ifndef KLS_DEFAULT_ALLOCF
+#define KLS_DEFAULT_ALLOCF malloc /**< Defines the default allocation function.*/
+#endif
+
+#define kls_new(size) kls_new_alloc((size), KLS_DEFAULT_ALLOCF)
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
-Koliseo *kls_new_conf(ptrdiff_t size, KLS_Conf conf);
-Koliseo *kls_new_traced(ptrdiff_t size, const char *output_path);
-Koliseo *kls_new_dbg(ptrdiff_t size);
-Koliseo *kls_new_traced_AR_KLS(ptrdiff_t size, const char *output_path,
-                               ptrdiff_t reglist_kls_size);
+Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func);
+#define kls_new_conf(size, conf) kls_new_conf_alloc((size), (conf), KLS_DEFAULT_ALLOCF)
+Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func);
+#define kls_new_traced(size, output_path) kls_new_traced_alloc((size), (output_path), KLS_DEFAULT_ALLOCF)
+Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
+#define kls_new_dbg(size) kls_new_dbg_alloc((size), KLS_DEFAULT_ALLOCF)
+Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
+                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
+#define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void *kls_push_zero(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                     ptrdiff_t count);
 void *kls_push_zero_AR(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                        ptrdiff_t count);
+#ifdef KOLISEO_HAS_REGION
 void *kls_push_zero_named(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, char *name, char *desc);
 void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc);
-void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
-void kls_dbg_features(void);
+#endif // KOLISEO_HAS_REGION
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
  */
-#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_AR(kls, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_AR((kls), sizeof(type), _Alignof(type), (count))
+
+/**
+ * Macro to request memory for a C string from a Koliseo.
+ * @see KLS_STRDUP()
+ */
+#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
+
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named(kls, sizeof(type), _Alignof(type), count, name, desc)
+#ifdef KOLISEO_HAS_REGION
+#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named((kls), sizeof(type), _Alignof(type), (count), (name), (desc))
+#else
+#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) KLS_PUSH_ARR((kls),type,(count))
+#endif // KOLISEO_HAS_REGION
+
+/**
+ * Macro to request memory for a C string from a Koliseo, and assign a name and a description to the region item.
+ */
+#define KLS_PUSH_STR_NAMED(kls, cstr, name, desc) KLS_PUSH_ARR_NAMED((kls), char, strlen((cstr)), (name), (desc))
+
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed(kls, sizeof(type), _Alignof(type), count, region_type, name, desc)
+#ifdef KOLISEO_HAS_REGION
+#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed((kls), sizeof(type), _Alignof(type), (count), (region_type), (name), (desc))
+#else
+#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) KLS_PUSH_ARR((kls),type,(count))
+#endif // KOLISEO_HAS_REGION
+
 /**
- * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ * Macro to request memory for a C string from a Koliseo, and assign a type, a name and a description to the region item.
  */
-#define KLS_POP_ARR(kls, type, count) (type*)kls_pop(kls, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), char, strlen((cstr)), (region_type), (name), (desc))
 
 /**
  * Macro used to request memory from a Koliseo.
  */
-#define KLS_PUSH(kls, type) KLS_PUSH_ARR(kls, type, 1)
+#define KLS_PUSH(kls, type) KLS_PUSH_ARR((kls), type, 1)
+
 /**
  * Macro used to request memory from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_NAMED(kls, type, name, desc) KLS_PUSH_ARR_NAMED(kls, type, 1, name, desc)
+#define KLS_PUSH_NAMED(kls, type, name, desc) KLS_PUSH_ARR_NAMED((kls), type, 1, (name), (desc))
+
+/**
+ * Macro used to request memory from a Koliseo, and assign a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
+ */
+#define KLS_PUSH_EX(kls, type, name) KLS_PUSH_NAMED((kls), type, (name), STRINGIFY(type))
+
 /**
  * Macro used to request memory from a Koliseo, and assign a a type, a name and a description to the region item.
  */
-#define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED(kls, type, 1, region_type, name, desc)
+#define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), type, 1, (region_type), (name), (desc))
+
 /**
- * Macro used to "remove" memory from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ * Macro used to request memory from a Koliseo, and assign a type and a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
  */
-#define KLS_POP(kls, type) KLS_POP_ARR(kls, type, 1)
+#define KLS_PUSH_TYPED_EX(kls, type, region_type, name) KLS_PUSH_TYPED((kls), type, (region_type), (name), STRINGIFY(type))
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
@@ -405,9 +521,11 @@ void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
 #endif				//WINDOWS_BUILD
 
 void kls_show_toWin(Koliseo * kls, WINDOW * win);
-void kls_showList_toWin(Koliseo * kls, WINDOW * win);
 void kls_temp_show_toWin(Koliseo_Temp * t_kls, WINDOW * win);
+#ifdef KOLISEO_HAS_REGION
+void kls_showList_toWin(Koliseo * kls, WINDOW * win);
 void kls_temp_showList_toWin(Koliseo_Temp * t_kls, WINDOW * win);
+#endif // KOLISEO_HAS_REGION
 #endif				//KOLISEO_CURSES_H_
 
 #endif				//KOLISEO_HAS_CURSES
@@ -417,51 +535,84 @@ Koliseo_Temp *kls_temp_start(Koliseo * kls);
 void kls_temp_end(Koliseo_Temp * tmp_kls);
 void *kls_temp_push_zero_AR(Koliseo_Temp * t_kls, ptrdiff_t size,
                             ptrdiff_t align, ptrdiff_t count);
+#ifdef KOLISEO_HAS_REGION
 void *kls_temp_push_zero_named(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, char *name,
                                char *desc);
 void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc);
-void *kls_temp_pop(Koliseo_Temp * t_kls, ptrdiff_t size, ptrdiff_t align,
-                   ptrdiff_t count);
+#endif // KOLISEO_HAS_REGION
 void print_temp_kls_2file(FILE * fp, Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp.
  */
-#define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_AR(kls_temp, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_AR((kls_temp), sizeof(type), _Alignof(type), (count))
+
+/**
+ * Macro to request memory for a C string from a Koliseo_Temp.
+ * @see KLS_STRDUP_T()
+ */
+#define KLS_PUSH_STR_T(kls_temp, cstr) KLS_PUSH_ARR_T((kls_temp), char, strlen((cstr))+1)
+
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named(kls_temp, sizeof(type), _Alignof(type), count, name, desc)
+#ifdef KOLISEO_HAS_REGION
+#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named((kls_temp), sizeof(type), _Alignof(type), (count), (name), (desc))
+#else
+#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) KLS_PUSH_ARR_T((kls_temp),(type),(count))
+#endif // KOLISEO_HAS_REGION
+
+/**
+ * Macro to request memory for a C string from a Koliseo_Temp, and assign a name and a description to the region item.
+ */
+#define KLS_PUSH_STR_T_NAMED(kls_temp, cstr, name, desc) KLS_PUSH_ARR_T_NAMED((kls_temp), char, strlen((cstr)), (name), (desc))
+
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_ARR_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)kls_temp_push_zero_typed(kls_temp, sizeof(type), _Alignof(type), count, region_type, name, desc)
+#ifdef KOLISEO_HAS_REGION
+#define KLS_PUSH_ARR_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)kls_temp_push_zero_typed((kls_temp), sizeof(type), _Alignof(type), (count), (region_type), (name), (desc))
+#else
+#define KLS_PUSH_ARR_T_TYPED(kls_temp, type, count, region_type, name, desc) KLS_PUSH_ARR_T((kls_temp),type,(count))
+#endif // KOLISEO_HAS_REGION
+
 /**
- * Macro used to "remove" memory as an array from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ * Macro to request memory for a C string from a Koliseo_Temp, and assign a type, a name and a description to the region item.
  */
-#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop(kls_temp, sizeof(type), _Alignof(type), count)
+#define KLS_PUSH_STR_T_TYPED(kls_temp, cstr, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), char, strlen((cstr)), (region_type), (name), (desc))
+
 /**
  * Macro used to request memory from a Koliseo_Temp.
  */
-#define KLS_PUSH_T(kls_temp, type) KLS_PUSH_ARR_T(kls_temp, type, 1)
+#define KLS_PUSH_T(kls_temp, type) KLS_PUSH_ARR_T((kls_temp), type, 1)
+
 /**
  * Macro used to request memory from a Koliseo_Temp, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_T_NAMED(kls_temp, type, name, desc) KLS_PUSH_ARR_T_NAMED(kls_temp, type, 1, name, desc)
+#define KLS_PUSH_T_NAMED(kls_temp, type, name, desc) KLS_PUSH_ARR_T_NAMED((kls_temp), type, 1, (name), (desc))
+
+/**
+ * Macro used to request memory from a Koliseo_Temp, and assign a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
+ */
+#define KLS_PUSH_T_EX(kls_temp, type, name) KLS_PUSH_T_NAMED((kls_temp), type, (name), STRINGIFY(type))
+
 /**
  * Macro used to request memory from a Koliseo_Temp, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_T_TYPED(kls_temp, type, region_type, name, desc) KLS_PUSH_ARR_T_TYPED(kls_temp, type, 1, region_type, name, desc)
+#define KLS_PUSH_T_TYPED(kls_temp, type, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), type, 1, (region_type), (name), (desc))
+
 /**
- * Macro used to "remove" memory from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
- * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ * Macro used to request memory from a Koliseo_Temp, and assign a type and a name to the region item.
+ * The description field is automatically filled with the stringized passed type.
  */
-#define KLS_POP_T(kls_temp, type) KLS_POP_ARR_T(kls_temp, type), 1)
+#define KLS_PUSH_T_TYPED_EX(kls_temp, type, region_type, name) KLS_PUSH_T_TYPED((kls_temp), type, (region_type), (name), STRINFIGY(type))
+
+#ifdef KOLISEO_HAS_REGION
 
 KLS_Region_List kls_emptyList(void);
 #define KLS_GETLIST() kls_emptyList()
@@ -469,7 +620,13 @@ bool kls_empty(KLS_Region_List);
 KLS_list_element kls_head(KLS_Region_List);
 KLS_Region_List kls_tail(KLS_Region_List);
 KLS_Region_List kls_cons(Koliseo *, KLS_list_element, KLS_Region_List);
+#ifdef KOLISEO_HAS_EXPER
+KLS_region_list_item* kls_list_pop(Koliseo *kls);
+#endif // KOLISEO_HAS_EXPER
 KLS_Region_List kls_t_cons(Koliseo_Temp *, KLS_list_element, KLS_Region_List);
+#ifdef KOLISEO_HAS_EXPER
+KLS_region_list_item* kls_t_list_pop(Koliseo_Temp *t_kls);
+#endif // KOLISEO_HAS_EXPER
 
 void kls_freeList(KLS_Region_List);
 #define KLS_FREELIST(kls_list) kls_freeList(kls_list)
@@ -501,6 +658,8 @@ ptrdiff_t kls_avg_regionSize(Koliseo *);
 void kls_usageReport_toFile(Koliseo *, FILE *);
 void kls_usageReport(Koliseo *);
 ptrdiff_t kls_type_usage(int, Koliseo *);
+
+#endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_GULP /**< This definition controls the inclusion of gulp functions.*/
 
@@ -597,6 +756,84 @@ Kstr * try_kls_gulp_file_to_kstr(Koliseo* kls, const char * filepath, size_t max
 #endif				//KOLISEO_GULP_H_
 
 #endif				//KOLISEO_HAS_GULP
+
+#ifdef KOLISEO_HAS_EXPER
+
+void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+
+/**
+ * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_ARR(kls, type, count) (type*)kls_pop_AR((kls), sizeof(type), _Alignof(type), (count))
+
+/**
+ * Macro to "remove" the memory for a C string from a Koliseo. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your string somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_STR(kls, cstr) KLS_POP_ARR((kls), char, strlen((cstr)))
+
+/**
+ * Macro used to "remove" memory from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP(kls, type) KLS_POP_ARR((kls), type, 1)
+
+void *kls_temp_pop(Koliseo_Temp * t_kls, ptrdiff_t size, ptrdiff_t align,
+                   ptrdiff_t count);
+void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+
+/**
+ * Macro used to "remove" memory as an array from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop_AR((kls_temp), sizeof(type), _Alignof(type), (count))
+
+/**
+ * Macro to "remove" the memory for a C string from a Koliseo_Temp. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your string somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_STR_T(kls_temp, cstr) KLS_POP_ARR_T((kls_temp), char, strlen((cstr)))
+
+/**
+ * Macro used to "remove" memory from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
+ * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
+ */
+#define KLS_POP_T(kls_temp, type) KLS_POP_ARR_T((kls_temp), type, 1)
+
+char* kls_strdup(Koliseo* kls, char* source);
+char** kls_strdup_arr(Koliseo* kls, size_t count, char** source);
+
+/**
+ * Macro to copy a C string from a source buffer to a destination buffer.
+ * Unsafe, do not use.
+ * Used in KLS_STRDUP() and KLS_STRDUP_T().
+ * @see KLS_STRDUP()
+ * @see KLS_STRDUP_T()
+ */
+#define __KLS_STRCPY(dest, source) do {\
+    strcpy((dest), (source));\
+} while (0)
+
+/*
+ * Macro to dupe a C string to a passed Koliseo, returns a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see kls_strdup()
+ */
+#define KLS_STRDUP(kls, source) kls_strdup((kls), (source))
+
+char* kls_t_strdup(Koliseo_Temp* t_kls, char* source);
+char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
+
+/*
+ * Macro to dupe a C string to a passed Koliseo_Temp, returns a pointer to the allocated string.
+ * Unsafe, do not use.
+ * @see kls_t_strdup()
+ */
+#define KLS_STRDUP_T(t_kls, source) kls_t_strdup((t_kls), (source))
+
+#endif // KOLISEO_HAS_EXPER
 
 #else
 #error "This code requires C11 or later.\n    _Alignof() is not available"

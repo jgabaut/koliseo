@@ -1,5 +1,5 @@
 # Define the package name and version
-AC_INIT([koliseo], [0.4.0], [jgabaut@github.com])
+AC_INIT([koliseo], [0.4.1], [jgabaut@github.com])
 
 # Verify automake version and enable foreign option
 AM_INIT_AUTOMAKE([foreign -Wall])
@@ -23,9 +23,24 @@ AC_ARG_ENABLE([gulp],
   [AS_HELP_STRING([--enable-gulp], [Enable gulp header])],
   [enable_gulp=$enableval],
   [enable_gulp=no])
+AC_ARG_ENABLE([region],
+  [AS_HELP_STRING([--enable-region], [Enable region feature])],
+  [enable_region=$enableval],
+  [enable_region=no])
+AC_ARG_ENABLE([title],
+  [AS_HELP_STRING([--enable-title], [Enable title feature])],
+  [enable_title=$enableval],
+  [enable_title=no])
+AC_ARG_ENABLE([exper],
+  [AS_HELP_STRING([--enable-exper], [Enable experimental features])],
+  [enable_exper=$enableval],
+  [enable_exper=no])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
 AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
+AM_CONDITIONAL([REGION_BUILD], [test "$enable_region" = "yes"])
+AM_CONDITIONAL([TITLE_BUILD], [test "$enable_title" = "yes"])
+AM_CONDITIONAL([EXPER_BUILD], [test "$enable_exper" = "yes"])
 
 # Define the include and library paths based on the host system
 case "${host_os}" in
@@ -89,7 +104,7 @@ AM_CONDITIONAL([LINUX_BUILD], [test "$build_linux" = "yes"])
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
 if test -z "$VERSION"; then
-  VERSION="0.4.0"
+  VERSION="0.4.1"
 fi
 
 # Output variables to the config.h header

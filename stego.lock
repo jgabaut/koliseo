@@ -1,6 +1,6 @@
 [ anvil ]
 
-version = "2.0.3"
+version = "2.0.4"
 kern = "amboso-C"
 
 [ build ]
@@ -61,3 +61,4 @@ testsdir = "ok"
 "0.3.19" = "Add .a rule, bump invil"
 "0.3.20" = "Improve configure.ac, refactor MINGW32_BUILD, add SHARED_LIB define"
 "0.4.0" = "Refactor usage macros, add KLS_DEFAULT_CONF__"
+"0.4.1" = "Region is an optional feature, move pop ops under experimental features"
