@@ -1024,20 +1024,25 @@ LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
 
 LIST_LINKAGE
 LIST_NAME
-LIST_nullList(void) {
+LIST_nullList(void)
+{
     return NULL;
 }
 
 LIST_LINKAGE
 bool
-LIST_isEmpty(LIST_NAME list) {
-    if (list == NULL) { return true; };
+LIST_isEmpty(LIST_NAME list)
+{
+    if (list == NULL) {
+        return true;
+    };
     return false;
 }
 
 LIST_LINKAGE
 LIST_T*
-LIST_head(LIST_NAME list) {
+LIST_head(LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         fprintf(stderr, "%s at %i: %s(): List is empty.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1047,7 +1052,8 @@ LIST_head(LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_tail(LIST_NAME list) {
+LIST_tail(LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         fprintf(stderr, "%s at %i: %s(): List is empty.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1057,7 +1063,8 @@ LIST_tail(LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_cons_gl(LIST_T* element, LIST_NAME list) {
+LIST_cons_gl(LIST_T* element, LIST_NAME list)
+{
     LIST_NAME t;
     t = (LIST_NAME) malloc(sizeof(LIST_ITEM_NAME));
     t->value = element;
@@ -1067,7 +1074,8 @@ LIST_cons_gl(LIST_T* element, LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list) {
+LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
+{
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1085,7 +1093,8 @@ LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list) {
 
 LIST_LINKAGE
 void
-LIST_free_gl(LIST_NAME list) {
+LIST_free_gl(LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         return;
     } else {
@@ -1097,7 +1106,8 @@ LIST_free_gl(LIST_NAME list) {
 
 LIST_LINKAGE
 bool
-LIST_member(LIST_T* element, LIST_NAME list) {
+LIST_member(LIST_T* element, LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         return false;
     } else {
@@ -1111,7 +1121,8 @@ LIST_member(LIST_T* element, LIST_NAME list) {
 
 LIST_LINKAGE
 int
-LIST_length(LIST_NAME list) {
+LIST_length(LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         return 0;
     } else {
@@ -1121,7 +1132,8 @@ LIST_length(LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_append_gl(LIST_NAME l1, LIST_NAME l2) {
+LIST_append_gl(LIST_NAME l1, LIST_NAME l2)
+{
     if (LIST_isEmpty(l1)) {
         return l2;
     } else {
@@ -1131,7 +1143,8 @@ LIST_append_gl(LIST_NAME l1, LIST_NAME l2) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_append_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2) {
+LIST_append_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+{
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1145,7 +1158,8 @@ LIST_append_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_reverse_gl(LIST_NAME list) {
+LIST_reverse_gl(LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         return LIST_nullList();
     } else {
@@ -1155,7 +1169,8 @@ LIST_reverse_gl(LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_reverse_kls(Koliseo* kls, LIST_NAME list) {
+LIST_reverse_kls(Koliseo* kls, LIST_NAME list)
+{
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1169,7 +1184,8 @@ LIST_reverse_kls(Koliseo* kls, LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_copy_gl(LIST_NAME list) {
+LIST_copy_gl(LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         return list;
     } else {
@@ -1179,7 +1195,8 @@ LIST_copy_gl(LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_copy_kls(Koliseo* kls, LIST_NAME list) {
+LIST_copy_kls(Koliseo* kls, LIST_NAME list)
+{
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1194,7 +1211,8 @@ LIST_copy_kls(Koliseo* kls, LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_remove_gl(LIST_T* element, LIST_NAME list) {
+LIST_remove_gl(LIST_T* element, LIST_NAME list)
+{
     if (LIST_isEmpty(list)) {
         return LIST_nullList();
     } else {
@@ -1208,7 +1226,8 @@ LIST_remove_gl(LIST_T* element, LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list) {
+LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
+{
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1226,7 +1245,8 @@ LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2) {
+LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2)
+{
     if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
         return LIST_nullList();
     }
@@ -1239,7 +1259,8 @@ LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2) {
+LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+{
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;
@@ -1256,7 +1277,8 @@ LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_diff_gl(LIST_NAME l1, LIST_NAME l2) {
+LIST_diff_gl(LIST_NAME l1, LIST_NAME l2)
+{
     if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
         return l1;
     } else {
@@ -1270,7 +1292,8 @@ LIST_diff_gl(LIST_NAME l1, LIST_NAME l2) {
 
 LIST_LINKAGE
 LIST_NAME
-LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2) {
+LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+{
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;

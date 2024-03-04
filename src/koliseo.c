@@ -1167,7 +1167,7 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
                             "[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.",
                             __func__, t_kls->max_regions_kls_alloc_basic);
                     kls_rl_showList_toFile(t_kls->t_regs,
-                                        kls->conf.kls_log_fp);
+                                           kls->conf.kls_log_fp);
                     print_kls_2file(kls->conf.kls_log_fp,
                                     t_kls->reglist_kls);
                     print_kls_2file(kls->conf.kls_log_fp, kls);
@@ -1503,7 +1503,7 @@ void *kls_temp_push_zero_named(Koliseo_Temp *t_kls, ptrdiff_t size,
                             "[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.",
                             __func__, t_kls->max_regions_kls_alloc_basic);
                     kls_rl_showList_toFile(t_kls->t_regs,
-                                        kls->conf.kls_log_fp);
+                                           kls->conf.kls_log_fp);
                     print_kls_2file(kls->conf.kls_log_fp,
                                     t_kls->reglist_kls);
                     print_kls_2file(kls->conf.kls_log_fp, kls);
@@ -1833,7 +1833,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
                             "[%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.",
                             __func__, t_kls->max_regions_kls_alloc_basic);
                     kls_rl_showList_toFile(t_kls->t_regs,
-                                        kls->conf.kls_log_fp);
+                                           kls->conf.kls_log_fp);
                     print_kls_2file(kls->conf.kls_log_fp,
                                     t_kls->reglist_kls);
                     print_kls_2file(kls->conf.kls_log_fp, kls);
@@ -2854,7 +2854,7 @@ KLS_region_list_item* kls_list_pop(Koliseo *kls)
 #endif // KOLISEO_HAS_EXPER
 
 KLS_Region_List kls_rl_t_cons(Koliseo_Temp *t_kls, KLS_list_element e,
-                           KLS_Region_List l)
+                              KLS_Region_List l)
 {
     if (e == NULL) {
 #ifdef KLS_DEBUG_CORE
@@ -3057,7 +3057,7 @@ KLS_Region_List kls_rl_reverse(Koliseo *kls, KLS_Region_List l)
         return kls_rl_emptyList();
     } else {
         return kls_rl_append(kls, kls_rl_reverse(kls, kls_rl_tail(l)),
-                          kls_rl_cons(kls, kls_rl_head(l), kls_rl_emptyList()));
+                             kls_rl_cons(kls, kls_rl_head(l), kls_rl_emptyList()));
     }
 }
 
@@ -3110,7 +3110,7 @@ KLS_Region_List kls_rl_insord(Koliseo *kls, KLS_list_element el, KLS_Region_List
 }
 
 KLS_Region_List kls_rl_insord_p(Koliseo *kls, KLS_list_element el,
-                             KLS_Region_List l)
+                                KLS_Region_List l)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
@@ -3173,7 +3173,7 @@ KLS_Region_List kls_rl_insord_p(Koliseo *kls, KLS_list_element el,
 }
 
 KLS_Region_List kls_rl_mergeList(Koliseo *kls, KLS_Region_List l1,
-                              KLS_Region_List l2)
+                                 KLS_Region_List l2)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
@@ -3187,15 +3187,15 @@ KLS_Region_List kls_rl_mergeList(Koliseo *kls, KLS_Region_List l1,
         } else {
             if (kls_rl_isLess(kls_rl_head(l1), kls_rl_head(l2))) {
                 return kls_rl_cons(kls, kls_rl_head(l1),
-                                kls_rl_mergeList(kls, kls_rl_tail(l1), l2));
+                                   kls_rl_mergeList(kls, kls_rl_tail(l1), l2));
             } else {
                 if (kls_rl_isEqual(kls_rl_head(l1), kls_rl_head(l2))) {
                     return kls_rl_cons(kls, kls_rl_head(l1),
-                                    kls_rl_mergeList(kls, kls_rl_tail(l1),
-                                                  kls_rl_tail(l2)));
+                                       kls_rl_mergeList(kls, kls_rl_tail(l1),
+                                                        kls_rl_tail(l2)));
                 } else {
                     return kls_rl_cons(kls, kls_rl_head(l2),
-                                    kls_rl_mergeList(kls, l1, kls_rl_tail(l2)));
+                                       kls_rl_mergeList(kls, l1, kls_rl_tail(l2)));
                 }
             }
         }
@@ -3203,7 +3203,7 @@ KLS_Region_List kls_rl_mergeList(Koliseo *kls, KLS_Region_List l1,
 }
 
 KLS_Region_List kls_rl_intersect(Koliseo *kls, KLS_Region_List l1,
-                              KLS_Region_List l2)
+                                 KLS_Region_List l2)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
@@ -3215,7 +3215,7 @@ KLS_Region_List kls_rl_intersect(Koliseo *kls, KLS_Region_List l1,
 
     if (kls_rl_member(kls_rl_head(l1), l2) && !kls_rl_member(kls_rl_head(l1), kls_rl_tail(l1))) {
         return kls_rl_cons(kls, kls_rl_head(l1),
-                        kls_rl_intersect(kls, kls_rl_tail(l1), l2));
+                           kls_rl_intersect(kls, kls_rl_tail(l1), l2));
     }
 
     else {
