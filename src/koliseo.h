@@ -843,6 +843,7 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 
 #ifdef LIST_T //This ensures the library never causes any trouble if this macro was not defined.
 // list.h
+// This is a template for a linked list, inspired by the dynamic array example in https://www.davidpriver.com/ctemplates.html#template-headers.
 // Include this header multiple times to implement a
 // simplistic linked list.  Before inclusion define at
 // least DLIST_T to the type the linked list can hold.
@@ -851,6 +852,9 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 //
 // If you define DLIST_DECLS_ONLY, only the declarations
 // of the type and its function will be declared.
+//
+// Functions ending with _gl use malloc() for the nodes.
+// Functions ending with _kls expect a Koliseo arg to use for allocating nodes.
 //
 
 #ifndef LIST_HEADER_H
