@@ -100,7 +100,7 @@ int main(int argc, char **argv)
     printf("[Show Region list for Koliseo] [pos: %lli]\n", kls_get_pos(kls));
 #endif
 
-    KLS_ECHOLIST(kls->regs);
+    KLS_RL_ECHOLIST(kls->regs);
 #endif // KOLISEO_HAS_REGION
 
 
@@ -184,11 +184,11 @@ int main(int argc, char **argv)
     printf("[Show Region list for Koliseo] [pos: %lli]\n", kls_get_pos(kls));
 #endif
 
-    KLS_ECHOLIST(kls->regs);
-    printf("[%i] List size\n", kls_length(kls->regs));
+    KLS_RL_ECHOLIST(kls->regs);
+    printf("[%i] List size\n", kls_rl_length(kls->regs));
 
-    KLS_ECHOLIST(temp_kls->t_regs);
-    printf("[%i] Temp List size\n", kls_length(temp_kls->t_regs));
+    KLS_RL_ECHOLIST(temp_kls->t_regs);
+    printf("[%i] Temp List size\n", kls_rl_length(temp_kls->t_regs));
 
     printf("[Usage report for Koliseo]\n");
     kls_usageReport(kls);
@@ -259,12 +259,12 @@ int main(int argc, char **argv)
     print_dbg_kls(kls);
 #ifdef KOLISEO_HAS_REGION
     print_dbg_kls(kls->reglist_kls);
-    KLS_ECHOLIST(kls->regs);
+    KLS_RL_ECHOLIST(kls->regs);
     printf("[Koliseo_Temp Info]\n");
-    KLS_ECHOLIST(temp_kls->t_regs);
+    KLS_RL_ECHOLIST(temp_kls->t_regs);
     print_dbg_kls(temp_kls->reglist_kls);
-    printf("[%i] List size for Koliseo\n", kls_length(kls->regs));
-    printf("[%i] List size for Koliseo_Temp\n", kls_length(temp_kls->t_regs));
+    printf("[%i] List size for Koliseo\n", kls_rl_length(kls->regs));
+    printf("[%i] List size for Koliseo_Temp\n", kls_rl_length(temp_kls->t_regs));
 #endif // KOLISEO_HAS_REGION
     printf("[Clear Koliseo]\n");
     kls_clear(kls);
