@@ -1159,7 +1159,7 @@ LIST_reverse_kls(Koliseo* kls, LIST_NAME list) {
     if (LIST_isEmpty(list)) {
         return LIST_nullList();
     } else {
-        return LIST_append_kls(LIST_reverse_kls(LIST_tail(list)), LIST_cons_kls(LIST_head(list), LIST_nullList()));
+        return LIST_append_kls(kls, LIST_reverse_kls(kls, LIST_tail(list)), LIST_cons_kls(kls, LIST_head(list), LIST_nullList()));
     }
 }
 
