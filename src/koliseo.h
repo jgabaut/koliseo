@@ -631,7 +631,9 @@ KLS_region_list_item* kls_rl_t_list_pop(Koliseo_Temp *t_kls);
 void kls_rl_freeList(KLS_Region_List);
 #define KLS_RL_FREELIST(kls_list) kls_rl_freeList(kls_list)
 void kls_rl_showList(KLS_Region_List);
+#define kls_showList(list) kls_rl_showList((list))
 void kls_rl_showList_toFile(KLS_Region_List, FILE * fp);
+#define kls_showList_toFile(list, fp) kls_rl_showList_toFile((list), (fp))
 #define KLS_RL_ECHOLIST(kls_list) kls_rl_showList(kls_list)
 #define KLS_RL_PRINTLIST(kls_list,file) kls_rl_showList_toFile(kls_list,file)
 bool kls_rl_member(KLS_list_element, KLS_Region_List);
