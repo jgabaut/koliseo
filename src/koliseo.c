@@ -2115,7 +2115,7 @@ void kls_show_toWin(Koliseo *kls, WINDOW *win)
 #endif
 #ifdef KOLISEO_HAS_REGION
     mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
-              kls_length(kls->regs));
+              kls_rl_length(kls->regs));
 #endif
     mvwprintw(win, y++, x, "Current usage: { %.3f%% }",
               (kls->offset * 100.0) / kls->size);
@@ -2212,9 +2212,9 @@ void kls_temp_show_toWin(Koliseo_Temp *t_kls, WINDOW *win)
 #endif
 #ifdef KOLISEO_HAS_REGION
     mvwprintw(win, y++, x, "Refer KLS_Region_List len: { %i }",
-              kls_length(kls->regs));
+              kls_rl_length(kls->regs));
     mvwprintw(win, y++, x, "Temp KLS_Region_List len: { %i }",
-              kls_length(t_kls->t_regs));
+              kls_rl_length(t_kls->t_regs));
 #endif
     mvwprintw(win, y++, x, "Current inner usage: { %.3f%% }",
               (kls->offset * 100.0) / kls->size);
@@ -2276,10 +2276,10 @@ void kls_showList_toWin(Koliseo *kls, WINDOW *win)
     int quit = 0;
     mvwprintw(win, y++, x, "KLS_Region_List data:");
     KLS_Region_List rl = kls->regs;
-    while (!quit && !kls_empty(rl)) {
+    while (!quit && !kls_rl_empty(rl)) {
         wclear(win);
         y = 3;
-        KLS_list_element e = kls_head(rl);
+        KLS_list_element e = kls_rl_head(rl);
         mvwprintw(win, y++, x, "Name: { %s }", e->name);
         mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
 #ifndef WINDOWS_BUILD
@@ -2294,7 +2294,7 @@ void kls_showList_toWin(Koliseo *kls, WINDOW *win)
         mvwprintw(win, y++, x, "Padding: { %lli }", e->padding);
 #endif
         mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
-                  kls_length(kls->regs));
+                  kls_rl_length(kls->regs));
         mvwprintw(win, y++, x, "Current usage: { %.3f%% }",
                   kls_usageShare(e, kls));
         char h_size[200];
@@ -2318,7 +2318,7 @@ void kls_showList_toWin(Koliseo *kls, WINDOW *win)
             ch = wgetch(win);
             switch (ch) {
             case KEY_RIGHT: {
-                rl = kls_tail(rl);
+                rl = kls_rl_tail(rl);
                 picked = 1;
             }
             break;
@@ -2371,10 +2371,10 @@ void kls_temp_showList_toWin(Koliseo_Temp *t_kls, WINDOW *win)
     int quit = 0;
     mvwprintw(win, y++, x, "KLS_Region_List data:");
     KLS_Region_List rl = t_kls->t_regs;
-    while (!quit && !kls_empty(rl)) {
+    while (!quit && !kls_rl_empty(rl)) {
         wclear(win);
         y = 3;
-        KLS_list_element e = kls_head(rl);
+        KLS_list_element e = kls_rl_head(rl);
         mvwprintw(win, y++, x, "Name: { %s }", e->name);
         mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
 #ifndef WINDOWS_BUILD
@@ -2389,7 +2389,7 @@ void kls_temp_showList_toWin(Koliseo_Temp *t_kls, WINDOW *win)
         mvwprintw(win, y++, x, "Padding: { %lli }", e->padding);
 #endif
         mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
-                  kls_length(t_kls->t_regs));
+                  kls_rl_length(t_kls->t_regs));
         //mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
         char h_size[200];
         ptrdiff_t reg_size = e->end_offset - e->begin_offset;
@@ -2412,7 +2412,7 @@ void kls_temp_showList_toWin(Koliseo_Temp *t_kls, WINDOW *win)
             ch = wgetch(win);
             switch (ch) {
             case KEY_RIGHT: {
-                rl = kls_tail(rl);
+                rl = kls_rl_tail(rl);
                 picked = 1;
             }
             break;
