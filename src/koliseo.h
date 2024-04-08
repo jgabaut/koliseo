@@ -514,11 +514,11 @@ void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
 #ifndef KOLISEO_CURSES_H_
 #define KOLISEO_CURSES_H_
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
 #include "ncurses.h"
 #else
 #include <ncursesw/ncurses.h>
-#endif				//WINDOWS_BUILD
+#endif	//    _WIN32
 
 void kls_show_toWin(Koliseo * kls, WINDOW * win);
 void kls_temp_show_toWin(Koliseo_Temp * t_kls, WINDOW * win);
@@ -844,6 +844,23 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #endif //KOLISEO_H_
 
 #ifdef LIST_T //This ensures the library never causes any trouble if this macro was not defined.
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+    Copyright (C) 2023-2024  jgabaut
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 // list.h
 // This is a template for a linked list, inspired by the dynamic array example in https://www.davidpriver.com/ctemplates.html#template-headers.
 // Include this header multiple times to implement a

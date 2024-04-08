@@ -50,10 +50,10 @@ case "${host_os}" in
         if test "$enable_curses" = "yes"; then
             echo "Building with curses header"
             build_windows=yes
-            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DWINDOWS_BUILD -DNCURSES_STATIC"])
+            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DNCURSES_STATIC"])
             AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -lncursesw"])
         else
-            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DWINDOWS_BUILD"])
+            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector"])
             AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib"])
         fi
         AC_SUBST([CCOMP], ["/usr/bin/x86_64-w64-mingw32-gcc"])
