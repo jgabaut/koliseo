@@ -14,7 +14,7 @@ int main(void)
     Koliseo *kls = kls_new_traced(KLS_DEFAULT_SIZE, "./static/debug_log.txt");
 
     //Use the arena (see demo for Koliseo_Temp usage)
-    Example *e = KLS_PUSH(kls, Example, 1);
+    Example *e = KLS_PUSH(kls, Example);
     e->val = 42;
 
     //Show contents to stdout
