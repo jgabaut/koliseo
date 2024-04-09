@@ -774,7 +774,7 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
                     size * count, available - padding);
 #endif
         }
-        fprintf(stderr, "[KLS] Failed kls_push() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
     }
@@ -870,7 +870,7 @@ void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                     size * count, available - padding);
 #endif
         }
-        fprintf(stderr, "[KLS] Failed kls_push_zero() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
         //return 0;
@@ -1136,7 +1136,7 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
                     size * count, available - padding);
 #endif
         }
-        fprintf(stderr, "[KLS] Failed kls_push_zero() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
         //return 0;
@@ -1303,7 +1303,7 @@ void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                     size * count, available - padding);
 #endif
         }
-        fprintf(stderr, "[KLS] Failed kls_push_zero() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
         //return 0;
@@ -1634,7 +1634,7 @@ void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                     size * count, available - padding);
 #endif
         }
-        fprintf(stderr, "[KLS] Failed kls_push_zero() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
         //return 0;
@@ -1803,7 +1803,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
                     size * count, available - padding);
 #endif
         }
-        fprintf(stderr, "[KLS] Failed kls_push_zero() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
         //return 0;
@@ -4094,7 +4094,7 @@ void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
     ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
     }
@@ -4139,7 +4139,7 @@ void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrd
     ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed kls_temp_pop() call.\n");
+        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
         exit(EXIT_FAILURE);
     }
