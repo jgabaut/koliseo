@@ -1,5 +1,5 @@
 # Define the package name and version
-AC_INIT([koliseo], [0.4.1], [jgabaut@github.com])
+AC_INIT([koliseo], [0.4.2], [jgabaut@github.com])
 
 # Verify automake version and enable foreign option
 AM_INIT_AUTOMAKE([foreign -Wall])
@@ -50,10 +50,10 @@ case "${host_os}" in
         if test "$enable_curses" = "yes"; then
             echo "Building with curses header"
             build_windows=yes
-            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DWINDOWS_BUILD -DNCURSES_STATIC"])
+            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DNCURSES_STATIC"])
             AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib -lncursesw"])
         else
-            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector -DWINDOWS_BUILD"])
+            AC_SUBST([KOLISEO_CFLAGS], ["-I/usr/x86_64-w64-mingw32/include -static -fstack-protector"])
             AC_SUBST([KOLISEO_LDFLAGS], ["-L/usr/x86_64-w64-mingw32/lib"])
         fi
         AC_SUBST([CCOMP], ["/usr/bin/x86_64-w64-mingw32-gcc"])
@@ -104,7 +104,7 @@ AM_CONDITIONAL([LINUX_BUILD], [test "$build_linux" = "yes"])
 # Set a default version number if not specified externally
 AC_ARG_VAR([VERSION], [Version number])
 if test -z "$VERSION"; then
-  VERSION="0.4.1"
+  VERSION="0.4.2"
 fi
 
 # Output variables to the config.h header

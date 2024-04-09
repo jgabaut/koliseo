@@ -45,7 +45,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 1 /**< Represents current patch release.*/
+#define KLS_PATCH 2 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -250,7 +250,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -514,11 +514,11 @@ void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
 #ifndef KOLISEO_CURSES_H_
 #define KOLISEO_CURSES_H_
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
 #include "ncurses.h"
 #else
 #include <ncursesw/ncurses.h>
-#endif				//WINDOWS_BUILD
+#endif	//    _WIN32
 
 void kls_show_toWin(Koliseo * kls, WINDOW * win);
 void kls_temp_show_toWin(Koliseo_Temp * t_kls, WINDOW * win);
@@ -563,7 +563,7 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 #ifdef KOLISEO_HAS_REGION
 #define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named((kls_temp), sizeof(type), _Alignof(type), (count), (name), (desc))
 #else
-#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) KLS_PUSH_ARR_T((kls_temp),(type),(count))
+#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) KLS_PUSH_ARR_T((kls_temp),type,(count))
 #endif // KOLISEO_HAS_REGION
 
 /**
@@ -614,44 +614,46 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 
 #ifdef KOLISEO_HAS_REGION
 
-KLS_Region_List kls_emptyList(void);
-#define KLS_GETLIST() kls_emptyList()
-bool kls_empty(KLS_Region_List);
-KLS_list_element kls_head(KLS_Region_List);
-KLS_Region_List kls_tail(KLS_Region_List);
-KLS_Region_List kls_cons(Koliseo *, KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_rl_emptyList(void);
+#define KLS_RL_GETLIST() kls_rl_emptyList()
+bool kls_rl_empty(KLS_Region_List);
+KLS_list_element kls_rl_head(KLS_Region_List);
+KLS_Region_List kls_rl_tail(KLS_Region_List);
+KLS_Region_List kls_rl_cons(Koliseo *, KLS_list_element, KLS_Region_List);
 #ifdef KOLISEO_HAS_EXPER
-KLS_region_list_item* kls_list_pop(Koliseo *kls);
+KLS_region_list_item* kls_rl_list_pop(Koliseo *kls);
 #endif // KOLISEO_HAS_EXPER
-KLS_Region_List kls_t_cons(Koliseo_Temp *, KLS_list_element, KLS_Region_List);
+KLS_Region_List kls_rl_t_cons(Koliseo_Temp *, KLS_list_element, KLS_Region_List);
 #ifdef KOLISEO_HAS_EXPER
-KLS_region_list_item* kls_t_list_pop(Koliseo_Temp *t_kls);
+KLS_region_list_item* kls_rl_t_list_pop(Koliseo_Temp *t_kls);
 #endif // KOLISEO_HAS_EXPER
 
-void kls_freeList(KLS_Region_List);
-#define KLS_FREELIST(kls_list) kls_freeList(kls_list)
-void kls_showList(KLS_Region_List);
-void kls_showList_toFile(KLS_Region_List, FILE * fp);
-#define KLS_ECHOLIST(kls_list) kls_showList(kls_list)
-#define KLS_PRINTLIST(kls_list,file) kls_showList_toFile(kls_list,file)
-bool kls_member(KLS_list_element, KLS_Region_List);
-int kls_length(KLS_Region_List);
-KLS_Region_List kls_append(Koliseo *, KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_reverse(Koliseo *, KLS_Region_List);
-KLS_Region_List kls_copy(Koliseo *, KLS_Region_List);
-KLS_Region_List kls_delete(Koliseo *, KLS_list_element, KLS_Region_List);
+void kls_rl_freeList(KLS_Region_List);
+#define KLS_RL_FREELIST(kls_list) kls_rl_freeList(kls_list)
+void kls_rl_showList(KLS_Region_List);
+#define kls_showList(list) kls_rl_showList((list))
+void kls_rl_showList_toFile(KLS_Region_List, FILE * fp);
+#define kls_showList_toFile(list, fp) kls_rl_showList_toFile((list), (fp))
+#define KLS_RL_ECHOLIST(kls_list) kls_rl_showList(kls_list)
+#define KLS_RL_PRINTLIST(kls_list,file) kls_rl_showList_toFile(kls_list,file)
+bool kls_rl_member(KLS_list_element, KLS_Region_List);
+int kls_rl_length(KLS_Region_List);
+KLS_Region_List kls_rl_append(Koliseo *, KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_rl_reverse(Koliseo *, KLS_Region_List);
+KLS_Region_List kls_rl_copy(Koliseo *, KLS_Region_List);
+KLS_Region_List kls_rl_delete(Koliseo *, KLS_list_element, KLS_Region_List);
 
-KLS_Region_List kls_insord(Koliseo *, KLS_list_element, KLS_Region_List);
-#define KLS_PUSHLIST(kls,reg,kls_list) kls_insord(kls,reg,kls_list)
-KLS_Region_List kls_insord_p(Koliseo *, KLS_list_element, KLS_Region_List);
-#define KLS_PUSHLIST_P(kls,reg,kls_list) kls_insord_p(kls,reg,kls_list)
-KLS_Region_List kls_mergeList(Koliseo *, KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_intersect(Koliseo *, KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_diff(Koliseo *, KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_rl_insord(Koliseo *, KLS_list_element, KLS_Region_List);
+#define KLS_RL_PUSHLIST(kls,reg,kls_list) kls_rl_insord(kls,reg,kls_list)
+KLS_Region_List kls_rl_insord_p(Koliseo *, KLS_list_element, KLS_Region_List);
+#define KLS_RL_PUSHLIST_P(kls,reg,kls_list) kls_rl_insord_p(kls,reg,kls_list)
+KLS_Region_List kls_rl_mergeList(Koliseo *, KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_rl_intersect(Koliseo *, KLS_Region_List, KLS_Region_List);
+KLS_Region_List kls_rl_diff(Koliseo *, KLS_Region_List, KLS_Region_List);
 
-#define KLS_DIFF(kls,kls_list1,kls_list2) kls_diff(kls,kls_list1,kls_list2)
-bool kls_isLess(KLS_list_element, KLS_list_element);
-bool kls_isEqual(KLS_list_element, KLS_list_element);
+#define KLS_RL_DIFF(kls,kls_list1,kls_list2) kls_rl_diff(kls,kls_list1,kls_list2)
+bool kls_rl_isLess(KLS_list_element, KLS_list_element);
+bool kls_rl_isEqual(KLS_list_element, KLS_list_element);
 double kls_usageShare(KLS_list_element, Koliseo *);
 ptrdiff_t kls_regionSize(KLS_list_element);
 ptrdiff_t kls_avg_regionSize(Koliseo *);
@@ -840,3 +842,524 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
 
 #endif //KOLISEO_H_
+
+#ifdef LIST_T //This ensures the library never causes any trouble if this macro was not defined.
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+    Copyright (C) 2023-2024  jgabaut
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+// list.h
+// This is a template for a linked list, inspired by the dynamic array example in https://www.davidpriver.com/ctemplates.html#template-headers.
+// Include this header multiple times to implement a
+// simplistic linked list.  Before inclusion define at
+// least DLIST_T to the type the linked list can hold.
+// See DLIST_NAME, DLIST_PREFIX and DLIST_LINKAGE for
+// other customization points.
+//
+// If you define DLIST_DECLS_ONLY, only the declarations
+// of the type and its function will be declared.
+//
+// Functions ending with _gl use malloc() for the nodes.
+// Functions ending with _kls expect a Koliseo arg to use for allocating nodes.
+//
+
+#ifndef LIST_HEADER_H
+#define LIST_HEADER_H
+// Inline functions, #defines and includes that will be
+// needed for all instantiations can go up here.
+#include <stdbool.h> // bool
+#include <stdlib.h> // malloc, size_t
+
+#define LIST_IMPL(word) LIST_COMB1(LIST_PREFIX,word)
+#define LIST_COMB1(pre, word) LIST_COMB2(pre, word)
+#define LIST_COMB2(pre, word) pre##word
+
+#define LIST_HEADER_VERSION "0.1.0"
+
+#endif // LIST_HEADER_H
+
+// NOTE: this section is *not* guarded as it is intended
+// to be included multiple times.
+
+#ifndef LIST_T
+#error "LIST_T must be defined"
+#endif
+
+// The name of the data type to be generated.
+// If not given, will expand to something like
+// `list_int` for an `int`.
+#ifndef LIST_NAME
+#define LIST_NAME LIST_COMB1(LIST_COMB1(list,_), LIST_T)
+#endif
+
+// Prefix for generated functions.
+#ifndef LIST_PREFIX
+#define LIST_PREFIX LIST_COMB1(LIST_NAME, _)
+#endif
+
+// Customize the linkage of the function.
+#ifndef LIST_LINKAGE
+#define LIST_LINKAGE static inline
+#endif
+
+// Suffix for generated list item struct.
+#ifndef LIST_I_SUFFIX
+#define LIST_I_SUFFIX item
+#endif
+
+// The name of the item data type to be generated.
+#ifndef LIST_ITEM_NAME
+#define LIST_ITEM_NAME LIST_COMB1(LIST_COMB1(LIST_T,_), LIST_I_SUFFIX)
+#endif
+
+typedef struct LIST_ITEM_NAME LIST_ITEM_NAME;
+struct LIST_ITEM_NAME {
+    LIST_T* value;
+    struct LIST_ITEM_NAME* next;
+};
+typedef LIST_ITEM_NAME* LIST_NAME;
+
+#define LIST_nullList LIST_IMPL(nullList)
+#define LIST_isEmpty LIST_IMPL(isEmpty)
+#define LIST_head LIST_IMPL(head)
+#define LIST_tail LIST_IMPL(tail)
+#define LIST_cons_gl LIST_IMPL(cons_gl)
+#define LIST_cons_kls LIST_IMPL(cons_kls)
+#define LIST_free_gl LIST_IMPL(free_gl)
+#define LIST_member LIST_IMPL(member)
+#define LIST_length LIST_IMPL(length)
+#define LIST_append_gl LIST_IMPL(append_gl)
+#define LIST_append_kls LIST_IMPL(append_kls)
+#define LIST_reverse_gl LIST_IMPL(reverse_gl)
+#define LIST_reverse_kls LIST_IMPL(reverse_kls)
+#define LIST_copy_gl LIST_IMPL(copy_gl)
+#define LIST_copy_kls LIST_IMPL(copy_kls)
+#define LIST_remove_gl LIST_IMPL(remove_gl)
+#define LIST_remove_kls LIST_IMPL(remove_kls)
+#define LIST_intersect_gl LIST_IMPL(intersect_gl)
+#define LIST_intersect_kls LIST_IMPL(intersect_kls)
+#define LIST_diff_gl LIST_IMPL(diff_gl)
+#define LIST_diff_kls LIST_IMPL(diff_kls)
+
+#ifdef LIST_DECLS_ONLY
+
+LIST_LINKAGE
+LIST_NAME
+LIST_nullList(void);
+
+LIST_LINKAGE
+bool
+LIST_isEmpty(LIST_NAME list);
+
+LIST_LINKAGE
+LIST_T*
+LIST_head(LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_tail(LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_cons_gl(LIST_T* element, LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list);
+
+LIST_LINKAGE
+void
+LIST_free_gl(LIST_NAME list);
+
+LIST_LINKAGE
+bool
+LIST_member(LIST_T* element, LIST_NAME list);
+
+LIST_LINKAGE
+int
+LIST_length(LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_append_gl(LIST_NAME l1, LIST_NAME l2);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_append_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_reverse_gl(LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_reverse_kls(Koliseo* kls, LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_copy_gl(LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_copy_kls(Koliseo* kls, LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_remove_gl(LIST_T* element, LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_diff_gl(LIST_NAME l1, LIST_NAME l2);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
+#else
+
+LIST_LINKAGE
+LIST_NAME
+LIST_nullList(void)
+{
+    return NULL;
+}
+
+LIST_LINKAGE
+bool
+LIST_isEmpty(LIST_NAME list)
+{
+    if (list == NULL) {
+        return true;
+    };
+    return false;
+}
+
+LIST_LINKAGE
+LIST_T*
+LIST_head(LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        fprintf(stderr, "%s at %i: %s(): List is empty.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    return list->value;
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_tail(LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        fprintf(stderr, "%s at %i: %s(): List is empty.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    return list->next;
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_cons_gl(LIST_T* element, LIST_NAME list)
+{
+    LIST_NAME t;
+    t = (LIST_NAME) malloc(sizeof(LIST_ITEM_NAME));
+    t->value = element;
+    t->next = list;
+    return t;
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    LIST_NAME t;
+    t = (LIST_NAME) KLS_PUSH_EX(kls, LIST_ITEM_NAME, "List node");
+    if (t == NULL ) {
+        fprintf(stderr, "%s at %i: %s(): Failed KLS_PUSH_EX() call.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    t->value = element;
+    t->next = list;
+    return t;
+}
+
+LIST_LINKAGE
+void
+LIST_free_gl(LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        return;
+    } else {
+        LIST_free_gl(LIST_tail(list));
+        free(list);
+    }
+    return;
+}
+
+LIST_LINKAGE
+bool
+LIST_member(LIST_T* element, LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        return false;
+    } else {
+        if (element == LIST_head(list)) {
+            return true;
+        } else {
+            return LIST_member(element, LIST_tail(list));
+        }
+    }
+}
+
+LIST_LINKAGE
+int
+LIST_length(LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        return 0;
+    } else {
+        return 1 + LIST_length(LIST_tail(list));
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_append_gl(LIST_NAME l1, LIST_NAME l2)
+{
+    if (LIST_isEmpty(l1)) {
+        return l2;
+    } else {
+        return LIST_cons_gl(LIST_head(l1), LIST_append_gl(LIST_tail(l1), l2));
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_append_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    if (LIST_isEmpty(l1)) {
+        return l2;
+    } else {
+        return LIST_cons_kls(kls, LIST_head(l1), LIST_append_kls(kls, LIST_tail(l1), l2));
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_reverse_gl(LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        return LIST_nullList();
+    } else {
+        return LIST_append_gl(LIST_reverse_gl(LIST_tail(list)), LIST_cons_gl(LIST_head(list), LIST_nullList()));
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_reverse_kls(Koliseo* kls, LIST_NAME list)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    if (LIST_isEmpty(list)) {
+        return LIST_nullList();
+    } else {
+        return LIST_append_kls(kls, LIST_reverse_kls(kls, LIST_tail(list)), LIST_cons_kls(kls, LIST_head(list), LIST_nullList()));
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_copy_gl(LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        return list;
+    } else {
+        return LIST_cons_gl(LIST_head(list), LIST_copy_gl(LIST_tail(list)));
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_copy_kls(Koliseo* kls, LIST_NAME list)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    if (LIST_isEmpty(list)) {
+        return list;
+    } else {
+        return LIST_cons_kls(kls, LIST_head(list), LIST_copy_kls(kls, LIST_tail(list)));
+    }
+
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_remove_gl(LIST_T* element, LIST_NAME list)
+{
+    if (LIST_isEmpty(list)) {
+        return LIST_nullList();
+    } else {
+        if (element == LIST_head(list)) {
+            return LIST_tail(list);
+        } else {
+            return LIST_cons_gl(LIST_head(list), LIST_remove_gl(element, LIST_tail(list)));
+        }
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    if (LIST_isEmpty(list)) {
+        return LIST_nullList();
+    } else {
+        if (element == LIST_head(list)) {
+            return LIST_tail(list);
+        } else {
+            return LIST_cons_kls(kls, LIST_head(list), LIST_remove_kls(kls, element, LIST_tail(list)));
+        }
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2)
+{
+    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
+        return LIST_nullList();
+    }
+    if (LIST_member(LIST_head(l1), l2) && !(LIST_member(LIST_head(l1), LIST_tail(l2)))) {
+        return LIST_cons_gl(LIST_head(l1), LIST_intersect_gl(LIST_tail(l1), l2));
+    } else {
+        return LIST_intersect_gl(LIST_tail(l1), l2);
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
+        return LIST_nullList();
+    }
+    if (LIST_member(LIST_head(l1), l2) && !(LIST_member(LIST_head(l1), LIST_tail(l2)))) {
+        return LIST_cons_kls(kls, LIST_head(l1), LIST_intersect_kls(kls, LIST_tail(l1), l2));
+    } else {
+        return LIST_intersect_kls(kls, LIST_tail(l1), l2);
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_diff_gl(LIST_NAME l1, LIST_NAME l2)
+{
+    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
+        return l1;
+    } else {
+        if (!LIST_member(LIST_head(l1), l2) && !LIST_member(LIST_head(l1), LIST_tail(l1))) {
+            return LIST_cons_gl(LIST_head(l1), LIST_diff_gl(LIST_tail(l1), l2));
+        } else {
+            return LIST_diff_gl(LIST_tail(l1), l2);
+        }
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
+        return l1;
+    } else {
+        if (!LIST_member(LIST_head(l1), l2) && !LIST_member(LIST_head(l1), LIST_tail(l1))) {
+            return LIST_cons_kls(kls, LIST_head(l1), LIST_diff_kls(kls, LIST_tail(l1), l2));
+        } else {
+            return LIST_diff_kls(kls, LIST_tail(l1), l2);
+        }
+    }
+}
+#endif
+
+// Cleanup
+// These need to be undef'ed so they can be redefined the
+// next time you need to instantiate this template.
+#undef LIST_T
+#undef LIST_PREFIX
+#undef LIST_NAME
+#undef LIST_LINKAGE
+#undef LIST_I_SUFFIX
+#undef LIST_ITEM_NAME
+#undef LIST_nullList
+#undef LIST_isEmpty
+#undef LIST_head
+#undef LIST_tail
+#undef LIST_cons_gl
+#undef LIST_cons_kls
+#undef LIST_free_gl
+#undef LIST_member
+#undef LIST_length
+#undef LIST_append_gl
+#undef LIST_append_kls
+#undef LIST_reverse_gl
+#undef LIST_reverse_kls
+#undef LIST_copy_gl
+#undef LIST_copy_kls
+#undef LIST_remove_gl
+#undef LIST_remove_kls
+#undef LIST_intersect_gl
+#undef LIST_intersect_kls
+#undef LIST_diff_gl
+#undef LIST_diff_kls
+#ifdef LIST_DECLS_ONLY
+#undef LIST_DECLS_ONLY
+#endif // LIST_DECLS_ONLY
+#endif // LIST_T

@@ -11,6 +11,7 @@
     + [Curses](#extra_curses)
     + [Debug](#extra_debug)
     + [Gulp](#extra_gulp)
+    + [List template](#list_template)
     + [Title banner](#extra_title)
     + [Experimental](#extra_exper)
     + [How to use extras](#extra_howto)
@@ -118,6 +119,25 @@ int main(void)
   Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
   - Also includes a minimal string-view API, in case you want to work on the file contents differently.
 
+### List template <a name = "list_template"></a>
+
+  Any time `LIST_T` is defined before including `koliseo.h`, a basic linked-list implementation supporting `Koliseo` allocation will be declared for the passed type.
+  - It can be done also after building a static object for the library.
+
+  The `LIST_T` macro and the `koliseo.h` should be repeatable without issues, allowing definition of more than one list interface.
+
+  This is implemented using some code-generating macros, which could rended build time slower if overused.
+
+  Defining the `LIST_NAME`, `LIST_PREFIX` and `LIST_LINKAGE` can allow customisation for each list implementation:
+  - `LIST_NAME`: The name of the data type to be generated.
+    - If not given, will expand to something like `list_int` for an `int`.
+  - `LIST_PREFIX`: Prefix for generated functions.
+    - If not given, will expand to something `LIST_NAME` + `_`. (eg. `list_int_`)
+  - `LIST_LINKAGE`: Customize the linkage of the function.
+    - If not given, will expand to `static inline`.
+
+  This is inspired by the dynamic array example by [David Priver](#credits).
+
 ### Title banner <a name = "extra_title"></a>
 
   Include an ASCII art string to be printed as a title banner.
@@ -208,6 +228,8 @@ int main(void)
   Thanks to [Mako](https://www.instagram.com/mako_x_tattoo/) for the repo banner.
 
   Thanks to [Tsoding](https://github.com/tsoding) for its creative string view library ([repo](https://github.com/tsoding/sv)), which indeed does things so simply you mostly can't do anything different.
+
+  Thanks to [David Priver](https://www.davidpriver.com/ctemplates.html#template-headers.) for its dynamic array template example.
 
 ## Todo <a name = "todo"></a>
 

@@ -82,9 +82,24 @@ int main(int argc, char **argv)
 
     printf("*pt_ex is {%c}\n", *pt_ex);
 
+    char* pt_nm = KLS_PUSH_ARR_NAMED(kls, char, 10, "char array", "Named array");
+
+    pt_nm[0] = 'W';
+
+    printf("pt_nm[0] is {%c}\n", pt_nm[0]);
+
+    char* pt_tp = KLS_PUSH_ARR_TYPED(kls, char, 10, 42, "char array, typed \"42\"", "Typed chararray");
+
+    pt_tp[0] = 'W';
+    pt_tp[1] = 'W';
+    pt_tp[2] = '\0';
+
+    printf("pt_tp is {%s}\n", pt_tp);
+
+
     printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[Current position in Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else
     printf("[Current position in Koliseo] [pos: %lli]\n", kls_get_pos(kls));
@@ -94,20 +109,20 @@ int main(int argc, char **argv)
 
 
 #ifdef KOLISEO_HAS_REGION
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[Show Region list for Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else
     printf("[Show Region list for Koliseo] [pos: %lli]\n", kls_get_pos(kls));
 #endif
 
-    KLS_ECHOLIST(kls->regs);
+    KLS_RL_ECHOLIST(kls->regs);
 #endif // KOLISEO_HAS_REGION
 
 
     Koliseo_Temp *temp_kls = kls_temp_start(kls);
     //temp_kls->conf.kls_autoset_regions = 1; TODO why does this crash?
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[Started Koliseo_Temp] [pos: %li]\n", kls_get_pos(temp_kls->kls));
 #else
     printf("[Started Koliseo_Temp] [pos: %lli]\n", kls_get_pos(temp_kls->kls));
@@ -126,7 +141,7 @@ int main(int argc, char **argv)
     printf("\n*p2 is [%i] before KLS_PUSH_T\n", *p2);
     printf("\n*p3 is [%i] before KLS_PUSH_T\n", *p3);
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[KLS_PUSH for a int to Koliseo] [size: %li]\n", sizeof(int));
 #else
     printf("[KLS_PUSH for a int to Koliseo] [size: %lli]\n", sizeof(int));
@@ -137,7 +152,7 @@ int main(int argc, char **argv)
     p = (int *)KLS_PUSH(kls, int);
 
 #ifdef KOLISEO_HAS_REGION
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[KLS_PUSH_T_NAMED for a int to Koliseo_Temp] [size: %li]\n",
 	   sizeof(int));
 #else
@@ -147,7 +162,7 @@ int main(int argc, char **argv)
 
     p2 = (int *)KLS_PUSH_T_NAMED(temp_kls, int, "int", "Another int");
 #endif // KOLISEO_HAS_REGION
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[KLS_PUSH_T for a int to Koliseo_Temp] [size: %li]\n", sizeof(int));
 #else
     printf("[KLS_PUSH_T for a int to Koliseo_Temp] [size: %lli]\n",
@@ -155,13 +170,13 @@ int main(int argc, char **argv)
 #endif
     p3 = (int *)KLS_PUSH_T(temp_kls, int);
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[Current position in Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else
     printf("[Current position in Koliseo] [pos: %lli]\n", kls_get_pos(kls));
 #endif
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[Current position in Koliseo_Temp] [pos: %li]\n", temp_kls->offset);
 #else
     printf("[Current position in Koliseo_Temp] [pos: %lli]\n",
@@ -178,17 +193,17 @@ int main(int argc, char **argv)
     printf("\n*p3 is [%i] after KLS_PUSH\n", *p3);
 
 #ifdef KOLISEO_HAS_REGION
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[Show Region list for Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else
     printf("[Show Region list for Koliseo] [pos: %lli]\n", kls_get_pos(kls));
 #endif
 
-    KLS_ECHOLIST(kls->regs);
-    printf("[%i] List size\n", kls_length(kls->regs));
+    KLS_RL_ECHOLIST(kls->regs);
+    printf("[%i] List size\n", kls_rl_length(kls->regs));
 
-    KLS_ECHOLIST(temp_kls->t_regs);
-    printf("[%i] Temp List size\n", kls_length(temp_kls->t_regs));
+    KLS_RL_ECHOLIST(temp_kls->t_regs);
+    printf("[%i] Temp List size\n", kls_rl_length(temp_kls->t_regs));
 
     printf("[Usage report for Koliseo]\n");
     kls_usageReport(kls);
@@ -226,7 +241,7 @@ int main(int argc, char **argv)
     int *z = &minusone;
     printf("\n*z is [%i] before KLS_POP\n", *z);
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[KLS_POP a int from Koliseo] [size: %li]\n", sizeof(int));
 #else
     printf("[KLS_POP a int from Koliseo] [size: %lli]\n", sizeof(int));
@@ -237,7 +252,7 @@ int main(int argc, char **argv)
     printf("\n*z is [%i] after KLS_POP\n", *z);
 #endif // KOLISEO_HAS_EXPER
 
-#ifndef WINDOWS_BUILD
+#ifndef _WIN32
     printf("[Current position in Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else
     printf("[Current position in Koliseo] [pos: %lli]\n", kls_get_pos(kls));
@@ -259,12 +274,12 @@ int main(int argc, char **argv)
     print_dbg_kls(kls);
 #ifdef KOLISEO_HAS_REGION
     print_dbg_kls(kls->reglist_kls);
-    KLS_ECHOLIST(kls->regs);
+    KLS_RL_ECHOLIST(kls->regs);
     printf("[Koliseo_Temp Info]\n");
-    KLS_ECHOLIST(temp_kls->t_regs);
+    KLS_RL_ECHOLIST(temp_kls->t_regs);
     print_dbg_kls(temp_kls->reglist_kls);
-    printf("[%i] List size for Koliseo\n", kls_length(kls->regs));
-    printf("[%i] List size for Koliseo_Temp\n", kls_length(temp_kls->t_regs));
+    printf("[%i] List size for Koliseo\n", kls_rl_length(kls->regs));
+    printf("[%i] List size for Koliseo_Temp\n", kls_rl_length(temp_kls->t_regs));
 #endif // KOLISEO_HAS_REGION
     printf("[Clear Koliseo]\n");
     kls_clear(kls);
