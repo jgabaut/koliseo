@@ -82,6 +82,21 @@ int main(int argc, char **argv)
 
     printf("*pt_ex is {%c}\n", *pt_ex);
 
+    char* pt_nm = KLS_PUSH_ARR_NAMED(kls, char, 10, "char array", "Named array");
+
+    pt_nm[0] = 'W';
+
+    printf("pt_nm[0] is {%c}\n", pt_nm[0]);
+
+    char* pt_tp = KLS_PUSH_ARR_TYPED(kls, char, 10, 42, "char array, typed \"42\"", "Typed chararray");
+
+    pt_tp[0] = 'W';
+    pt_tp[1] = 'W';
+    pt_tp[2] = '\0';
+
+    printf("pt_tp is {%s}\n", pt_tp);
+
+
     printf(KLS_Conf_Fmt "\n", KLS_Conf_Arg(kls->conf));
 
 #ifndef _WIN32

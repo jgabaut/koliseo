@@ -563,7 +563,7 @@ void print_dbg_temp_kls(Koliseo_Temp * t_kls);
 #ifdef KOLISEO_HAS_REGION
 #define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named((kls_temp), sizeof(type), _Alignof(type), (count), (name), (desc))
 #else
-#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) KLS_PUSH_ARR_T((kls_temp),(type),(count))
+#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) KLS_PUSH_ARR_T((kls_temp),type,(count))
 #endif // KOLISEO_HAS_REGION
 
 /**
