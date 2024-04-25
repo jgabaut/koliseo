@@ -260,7 +260,7 @@ const char *string_koliseo_version(void);
 /**
  * Returns current koliseo version as an integer.
  */
-const int int_koliseo_version(void);
+int int_koliseo_version(void);
 
 #ifdef KOLISEO_HAS_TITLE
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
@@ -400,7 +400,7 @@ typedef struct Koliseo_Temp {
 } Koliseo_Temp;
 
 void kls_log(Koliseo * kls, const char *tag, const char *format, ...);
-ptrdiff_t kls_get_pos(Koliseo * kls);
+ptrdiff_t kls_get_pos(const Koliseo * kls);
 
 #ifdef KOLISEO_HAS_REGION
 int kls_get_maxRegions_KLS_BASIC(Koliseo * kls);
@@ -543,8 +543,8 @@ void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc);
 #endif // KOLISEO_HAS_REGION
-void print_temp_kls_2file(FILE * fp, Koliseo_Temp * t_kls);
-void print_dbg_temp_kls(Koliseo_Temp * t_kls);
+void print_temp_kls_2file(FILE * fp, const Koliseo_Temp * t_kls);
+void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp.
