@@ -70,25 +70,25 @@ int main(int argc, char **argv)
 #endif
 #endif // KOLISEO_HAS_REGION
 
-    int* pex = KLS_PUSH_EX(kls, int, "foo");
+    int* pex = KLS_PUSH_EX(kls, pex, int, "foo");
 
     *pex = 3;
 
     printf("*pex is {%i}\n", *pex);
 
-    char* pt_ex = KLS_PUSH_TYPED_EX(kls, char, 42, "foo_2");
+    char* pt_ex = KLS_PUSH_TYPED_EX(kls, pt_ex, char, 42, "foo_2");
 
     *pt_ex = 'w';
 
     printf("*pt_ex is {%c}\n", *pt_ex);
 
-    char* pt_nm = KLS_PUSH_ARR_NAMED(kls, char, 10, "char array", "Named array");
+    char* pt_nm = KLS_PUSH_ARR_NAMED(kls, pt_nm, 10, "char array", "Named array");
 
     pt_nm[0] = 'W';
 
     printf("pt_nm[0] is {%c}\n", pt_nm[0]);
 
-    char* pt_tp = KLS_PUSH_ARR_TYPED(kls, char, 10, 42, "char array, typed \"42\"", "Typed chararray");
+    char* pt_tp = KLS_PUSH_ARR_TYPED(kls, pt_tp, 10, 42, "char array, typed \"42\"", "Typed chararray");
 
     pt_tp[0] = 'W';
     pt_tp[1] = 'W';
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 
     printf
 	("[This handles the Koliseo directly while we have an open Koliseo_Temp.]\n");
-    p = (int *)KLS_PUSH(kls, int);
+    p = (int *)KLS_PUSH(kls, p);
 
 #ifdef KOLISEO_HAS_REGION
 #ifndef _WIN32

@@ -53,7 +53,7 @@ int main(void)
     Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
 
     //Use the arena (see demo for Koliseo_Temp usage)
-    Example* e = KLS_PUSH(kls, Example);
+    Example* e = KLS_PUSH(kls, e);
     e->val = 42;
 
     //Show contents to stdout
@@ -73,7 +73,7 @@ int main(void)
   ```
   - To request memory for a specific type:
   ```c
-  Type* KLS_PUSH(Koliseo* kls, Type)
+  Type* KLS_PUSH(Koliseo* kls, Type* item_ptr)
   ```
   - For C strings, you can use:
   ```c

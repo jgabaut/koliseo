@@ -17,7 +17,7 @@ int main(void) {
     assert(kstr_eq(kstr,cstr) && "kstr_eq() failed.\n");
     assert(kstr_eq_ignorecase(kstr,lstr) && "kstr_eq_ignorecase() failed.\n");
     assert(!kstr_eq(cstr,lstr) && "kstr_eq() failed.\n");
-    Kstr * kls_str = KLS_PUSH_NAMED(k,Kstr, "Kstr*", "Kstr* for test");
+    Kstr * kls_str = KLS_PUSH_NAMED(k, kls_str, "Kstr*", "Kstr* for test");
     const char* line = "  Hello, World  test !  \n42\n";
     *kls_str = kstr_from_c_lit(line);
     Kstr data = *kls_str;

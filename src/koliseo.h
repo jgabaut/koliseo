@@ -440,68 +440,68 @@ void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
  */
-#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_AR((kls), sizeof(type), _Alignof(type), (count))
+#define KLS_PUSH_ARR(kls, item_ptr, count) kls_push_zero_AR(kls, sizeof(*item_ptr), _Alignof(*item_ptr), count)
 
 /**
  * Macro to request memory for a C string from a Koliseo.
  * @see KLS_STRDUP()
  */
-#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
+#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR(kls, cstr, 1)
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
  */
 #ifdef KOLISEO_HAS_REGION
-#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named((kls), sizeof(type), _Alignof(type), (count), (name), (desc))
+#define KLS_PUSH_ARR_NAMED(kls, item_ptr, count, name, desc) kls_push_zero_named(kls, sizeof(*item_ptr), _Alignof(*item_ptr), count, name, desc)
 #else
-#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) KLS_PUSH_ARR((kls),type,(count))
+#define KLS_PUSH_ARR_NAMED(kls, item_ptr, count, name, desc) KLS_PUSH_ARR(kls, item_ptr, count)
 #endif // KOLISEO_HAS_REGION
 
 /**
  * Macro to request memory for a C string from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_STR_NAMED(kls, cstr, name, desc) KLS_PUSH_ARR_NAMED((kls), char, strlen((cstr)), (name), (desc))
+#define KLS_PUSH_STR_NAMED(kls, cstr, name, desc) KLS_PUSH_ARR_NAMED(kls, cstr, 1, name, desc)
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a type, a name and a description to the region item.
  */
 #ifdef KOLISEO_HAS_REGION
-#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed((kls), sizeof(type), _Alignof(type), (count), (region_type), (name), (desc))
+#define KLS_PUSH_ARR_TYPED(kls, item_ptr, count, region_type, name, desc) kls_push_zero_typed(kls, sizeof(*item_ptr), _Alignof(*item_ptr), count, region_type, name, desc)
 #else
-#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) KLS_PUSH_ARR((kls),type,(count))
+#define KLS_PUSH_ARR_TYPED(kls, item_ptr, count, region_type, name, desc) KLS_PUSH_ARR(kls, item_ptr, count)
 #endif // KOLISEO_HAS_REGION
 
 /**
  * Macro to request memory for a C string from a Koliseo, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), char, strlen((cstr)), (region_type), (name), (desc))
+#define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED(kls, cstr, 1, region_type, name, desc)
 
 /**
  * Macro used to request memory from a Koliseo.
  */
-#define KLS_PUSH(kls, type) KLS_PUSH_ARR((kls), type, 1)
+#define KLS_PUSH(kls, item_ptr) KLS_PUSH_ARR(kls, item_ptr, 1)
 
 /**
  * Macro used to request memory from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_NAMED(kls, type, name, desc) KLS_PUSH_ARR_NAMED((kls), type, 1, (name), (desc))
+#define KLS_PUSH_NAMED(kls, item_ptr, name, desc) KLS_PUSH_ARR_NAMED(kls, item_ptr, 1, name, desc)
 
 /**
  * Macro used to request memory from a Koliseo, and assign a name to the region item.
  * The description field is automatically filled with the stringized passed type.
  */
-#define KLS_PUSH_EX(kls, type, name) KLS_PUSH_NAMED((kls), type, (name), STRINGIFY(type))
+#define KLS_PUSH_EX(kls, item_ptr, type, name) KLS_PUSH_NAMED(kls, item_ptr, name, STRINGIFY(type))
 
 /**
  * Macro used to request memory from a Koliseo, and assign a a type, a name and a description to the region item.
  */
-#define KLS_PUSH_TYPED(kls, type, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), type, 1, (region_type), (name), (desc))
+#define KLS_PUSH_TYPED(kls, item_ptr, region_type, name, desc) KLS_PUSH_ARR_TYPED(kls, item_ptr, 1, region_type, name, desc)
 
 /**
  * Macro used to request memory from a Koliseo, and assign a type and a name to the region item.
  * The description field is automatically filled with the stringized passed type.
  */
-#define KLS_PUSH_TYPED_EX(kls, type, region_type, name) KLS_PUSH_TYPED((kls), type, (region_type), (name), STRINGIFY(type))
+#define KLS_PUSH_TYPED_EX(kls, item_ptr, type, region_type, name) KLS_PUSH_TYPED(kls, item_ptr, region_type, name, STRINGIFY(type))
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
@@ -1099,8 +1099,8 @@ LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
         return NULL;
     }
-    LIST_NAME t;
-    t = (LIST_NAME) KLS_PUSH_EX(kls, LIST_ITEM_NAME, "List node");
+
+    LIST_NAME t = (LIST_NAME) KLS_PUSH_EX(kls, t, LIST_ITEM_NAME, "List node");
     if (t == NULL ) {
         fprintf(stderr, "%s at %i: %s(): Failed KLS_PUSH_EX() call.\n", __FILE__, __LINE__, __func__);
         return NULL;

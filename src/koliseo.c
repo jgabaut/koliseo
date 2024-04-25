@@ -632,7 +632,7 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 #endif
             kls->regs = NULL;
             KLS_Region *kls_header =
-                (KLS_Region *) KLS_PUSH(kls->reglist_kls, KLS_Region);
+                (KLS_Region *) KLS_PUSH(kls->reglist_kls, kls_header);
             kls_header->begin_offset = 0;
             kls_header->end_offset = kls->offset;
             kls_header->size =
@@ -990,7 +990,7 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         break;
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
             if (kls_rl_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
-                reg = KLS_PUSH(kls->reglist_kls, KLS_Region);
+                reg = KLS_PUSH(kls->reglist_kls, reg);
             } else {
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n",
@@ -1157,7 +1157,7 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
             if (kls_rl_length(t_kls->t_regs) <
                 t_kls->max_regions_kls_alloc_basic) {
-                reg = KLS_PUSH(t_kls->reglist_kls, KLS_Region);
+                reg = KLS_PUSH(t_kls->reglist_kls, reg);
             } else {
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n",
@@ -1322,7 +1322,7 @@ void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         break;
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
             if (kls_rl_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
-                reg = KLS_PUSH(kls->reglist_kls, KLS_Region);
+                reg = KLS_PUSH(kls->reglist_kls, reg);
             } else {
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n",
@@ -1493,7 +1493,7 @@ void *kls_temp_push_zero_named(Koliseo_Temp *t_kls, ptrdiff_t size,
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
             if (kls_rl_length(t_kls->t_regs) <
                 t_kls->max_regions_kls_alloc_basic) {
-                reg = KLS_PUSH(t_kls->reglist_kls, KLS_Region);
+                reg = KLS_PUSH(t_kls->reglist_kls, reg);
             } else {
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n",
@@ -1653,7 +1653,7 @@ void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         break;
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
             if (kls_rl_length(kls->regs) < kls->max_regions_kls_alloc_basic) {
-                reg = KLS_PUSH(kls->reglist_kls, KLS_Region);
+                reg = KLS_PUSH(kls->reglist_kls, reg);
             } else {
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding kls->max_regions_kls_alloc_basic: {%i}.\n",
@@ -1823,7 +1823,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
             if (kls_rl_length(t_kls->t_regs) <
                 t_kls->max_regions_kls_alloc_basic) {
-                reg = KLS_PUSH(t_kls->reglist_kls, KLS_Region);
+                reg = KLS_PUSH(t_kls->reglist_kls, reg);
             } else {
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding t_kls->max_regions_kls_alloc_basic: {%i}.\n",
@@ -2536,7 +2536,7 @@ Koliseo_Temp *kls_temp_start(Koliseo *kls)
     ptrdiff_t prev = kls->prev_offset;
     ptrdiff_t off = kls->offset;
 
-    Koliseo_Temp *tmp = KLS_PUSH(kls, Koliseo_Temp);
+    Koliseo_Temp *tmp = KLS_PUSH(kls, tmp);
     tmp->kls = kls;
     tmp->prev_offset = prev;
     tmp->offset = off;
@@ -2591,7 +2591,7 @@ Koliseo_Temp *kls_temp_start(Koliseo *kls)
         }
         break;
         case KLS_REGLIST_ALLOC_KLS_BASIC: {
-            temp_kls_header = KLS_PUSH(tmp->reglist_kls, KLS_Region);
+            temp_kls_header = KLS_PUSH(tmp->reglist_kls, temp_kls_header);
         }
         break;
         default: {
@@ -2782,7 +2782,7 @@ KLS_Region_List kls_rl_cons(Koliseo *kls, KLS_list_element e, KLS_Region_List l)
             kls_free(kls);
             exit(EXIT_FAILURE);
         }
-        t = KLS_PUSH(kls->reglist_kls, KLS_region_list_item);
+        t = KLS_PUSH(kls->reglist_kls, t);
     }
     break;
     default: {
@@ -2873,7 +2873,7 @@ KLS_Region_List kls_rl_t_cons(Koliseo_Temp *t_kls, KLS_list_element e,
     }
     break;
     case KLS_REGLIST_ALLOC_KLS_BASIC: {
-        t = KLS_PUSH(t_kls->reglist_kls, KLS_region_list_item);
+        t = KLS_PUSH(t_kls->reglist_kls, t);
     }
     break;
     default: {
@@ -3145,7 +3145,7 @@ KLS_Region_List kls_rl_insord_p(Koliseo *kls, KLS_list_element el,
             kls_free(kls);
             exit(EXIT_FAILURE);
         }
-        paux = KLS_PUSH(kls->reglist_kls, KLS_region_list_item);
+        paux = KLS_PUSH(kls->reglist_kls, paux);
     }
     break;
     default: {
@@ -3722,10 +3722,10 @@ static char * kls_read_file(Koliseo* kls, const char * f_name, Gulp_Res * err, s
         }
         va_end(args);
 
-        buffer = KLS_PUSH_ARR_NAMED(kls,char,length + 1,"char*","Buffer for file gulp");
+        buffer = KLS_PUSH_ARR_NAMED(kls, buffer, 1, "char*", "Buffer for file gulp");
 
         if (buffer == NULL) {
-            assert(0 && "KLS_PUSH_NAMED() failed\n");
+            assert(0 && "KLS_PUSH_ARR_NAMED() failed\n");
         }
 
         if (length) {
@@ -3848,10 +3848,10 @@ static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res 
         allow_nullchar = allow_nulls;
         va_end(args);
 
-        buffer = KLS_PUSH_ARR_NAMED(kls,char,length + 1,"char*","Buffer for file gulp");
+        buffer = KLS_PUSH_ARR_NAMED(kls, buffer, 1, "char*", "Buffer for file gulp");
 
         if (buffer == NULL) {
-            assert(0 && "KLS_PUSH_NAMED() failed\n");
+            assert(0 && "KLS_PUSH_ARR_NAMED() failed\n");
         }
 
         if (length) {
@@ -3881,7 +3881,7 @@ static Kstr * kls_read_file_to_kstr(Koliseo* kls, const char * f_name, Gulp_Res 
             return NULL;
         }
     }
-    Kstr * res = KLS_PUSH_NAMED(kls,Kstr,"Kstr","Kstr for file gulp");
+    Kstr * res = KLS_PUSH_NAMED(kls, res, "Kstr", "Kstr for file gulp");
     if (res == NULL) {
         assert(0 && "KLS_PUSH_NAMED() failed\n");
     }
@@ -4209,8 +4209,7 @@ char* kls_strdup(Koliseo* kls, char* source)
  */
 char** kls_strdup_arr(Koliseo* kls, size_t count, char** source)
 {
-    char** strings = NULL;
-    strings = KLS_PUSH_ARR(kls, char*, count);
+    char** strings = KLS_PUSH_ARR(kls, source, count);
     for (int i=0; i < count; i++) {
         strings[i] = KLS_STRDUP(kls, source[i]);
     }
