@@ -505,8 +505,8 @@ void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
-void print_kls_2file(FILE * fp, Koliseo * kls);
-void print_dbg_kls(Koliseo * kls);
+void print_kls_2file(FILE * fp, const Koliseo * kls);
+void print_dbg_kls(const Koliseo * kls);
 void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
 
 #ifdef KOLISEO_HAS_CURSES /**< This definition controls the inclusion of ncurses functions.*/

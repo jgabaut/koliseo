@@ -1917,7 +1917,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
  * @param fp The FILE pointer to print to.
  * @param kls The Koliseo at hand.
  */
-void print_kls_2file(FILE *fp, Koliseo *kls)
+void print_kls_2file(FILE *fp, const Koliseo *kls)
 {
     if (fp == NULL) {
         fprintf(stderr, "print_kls_2file():  fp was NULL.\n");
@@ -1966,7 +1966,7 @@ void print_kls_2file(FILE *fp, Koliseo *kls)
  * Prints header fields from the passed Koliseo pointer, to stderr.
  * @param kls The Koliseo at hand.
  */
-void print_dbg_kls(Koliseo *kls)
+void print_dbg_kls(const Koliseo *kls)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
