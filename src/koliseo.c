@@ -367,15 +367,9 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
 Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 {
     if (size < (ptrdiff_t)sizeof(Koliseo)) {
-#ifndef _WIN32
         fprintf(stderr,
                 "[ERROR]    at %s():  invalid requested kls size (%td). Min accepted is: (%td).\n",
                 __func__, size, (ptrdiff_t)sizeof(Koliseo));
-#else
-        fprintf(stderr,
-                "[ERROR]    at %s():  invalid requested kls size (%td). Min accepted is: (%td).\n",
-                __func__, size, (ptrdiff_t)sizeof(Koliseo));
-#endif
         //TODO Is it better to abort the program?
         return NULL;
     }
@@ -764,15 +758,9 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
                     count, PTRDIFF_MAX / size);
 #endif
         } else {
-#ifndef _WIN32
             fprintf(stderr,
                     "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
                     size * count, available - padding);
-#else
-            fprintf(stderr,
-                    "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    size * count, available - padding);
-#endif
         }
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
@@ -860,15 +848,9 @@ void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                     count, PTRDIFF_MAX / size);
 #endif
         } else {
-#ifndef _WIN32
             fprintf(stderr,
                     "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
                     size * count, available - padding);
-#else
-            fprintf(stderr,
-                    "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    size * count, available - padding);
-#endif
         }
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
@@ -960,15 +942,9 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                     count, PTRDIFF_MAX / size);
 #endif
         } else {
-#ifndef _WIN32
             fprintf(stderr,
                     "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
                     size * count, available - padding);
-#else
-            fprintf(stderr,
-                    "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    size * count, available - padding);
-#endif
         }
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
@@ -1126,15 +1102,9 @@ void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
                     count, PTRDIFF_MAX / size);
 #endif
         } else {
-#ifndef _WIN32
             fprintf(stderr,
                     "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
                     size * count, available - padding);
-#else
-            fprintf(stderr,
-                    "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    size * count, available - padding);
-#endif
         }
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
         kls_free(kls);
@@ -1931,24 +1901,15 @@ void print_kls_2file(FILE *fp, const Koliseo *kls)
                 KLS_Conf_Arg(kls->conf));
         fprintf(fp, "\n[INFO] Stats: { " KLS_Stats_Fmt " }\n",
                 KLS_Stats_Arg(kls->stats));
-#ifndef _WIN32
         fprintf(fp, "\n[KLS] Size: { %td }\n", kls->size);
-#else
-        fprintf(fp, "\n[KLS] Size: { %td }\n", kls->size);
-#endif
         char human_size[200];
         char curr_size[200];
         kls_formatSize(kls->size, human_size, sizeof(human_size));
         fprintf(fp, "[KLS] Size (Human): { %s }\n", human_size);
         kls_formatSize(kls->offset, curr_size, sizeof(curr_size));
         fprintf(fp, "[KLS] Used (Human): { %s }\n", curr_size);
-#ifndef _WIN32
         fprintf(fp, "[KLS] Offset: { %td }\n", kls->offset);
         fprintf(fp, "[KLS] Prev_Offset: { %td }\n", kls->prev_offset);
-#else
-        fprintf(fp, "[KLS] Offset: { %td }\n", kls->offset);
-        fprintf(fp, "[KLS] Prev_Offset: { %td }\n", kls->prev_offset);
-#endif
 #ifdef KOLISEO_HAS_REGION
         if (kls->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
             fprintf(fp, "[KLS] Max Regions: { %i }\n\n",
@@ -1993,15 +1954,9 @@ void print_temp_kls_2file(FILE *fp, const Koliseo_Temp *t_kls)
     } else {
         const Koliseo *kls = t_kls->kls;
         fprintf(fp, "\n[KLS_T] API Level: { %i }\n", int_koliseo_version());
-#ifndef _WIN32
         fprintf(fp, "\n[KLS_T] Temp Size: { %td }\n",
                 kls->size - t_kls->offset);
         fprintf(fp, "\n[KLS_T] Refer Size: { %td }\n", kls->size);
-#else
-        fprintf(fp, "\n[KLS_T] Temp Size: { %td }\n",
-                kls->size - t_kls->offset);
-        fprintf(fp, "\n[KLS_T] Refer Size: { %td }\n", kls->size);
-#endif
         char human_size[200];
         char curr_size[200];
         kls_formatSize(kls->size - t_kls->offset, human_size,
@@ -2013,22 +1968,11 @@ void print_temp_kls_2file(FILE *fp, const Koliseo_Temp *t_kls)
         fprintf(fp, "[KLS_T] Inner Used (Human): { %s }\n", curr_size);
         kls_formatSize(t_kls->offset, curr_size, sizeof(curr_size));
         fprintf(fp, "[KLS_T] Temp Used (Human): { %s }\n", curr_size);
-#ifndef _WIN32
         fprintf(fp, "[KLS_T] Inner Offset: { %td }\n", kls->offset);
         fprintf(fp, "[KLS_T] Temp Offset: { %td }\n", t_kls->offset);
-#else
-        fprintf(fp, "[KLS_T] Inner Offset: { %td }\n", kls->offset);
-        fprintf(fp, "[KLS_T] Temp Offset: { %td }\n", t_kls->offset);
-#endif
-#ifndef _WIN32
         fprintf(fp, "[KLS_T] Inner Prev_Offset: { %td }\n", kls->prev_offset);
         fprintf(fp, "[KLS_T] Temp Prev_Offset: { %td }\n\n",
                 t_kls->prev_offset);
-#else
-        fprintf(fp, "[KLS_T] Inner Prev_Offset: { %td }\n", kls->prev_offset);
-        fprintf(fp, "[KLS_T] Temp Prev_Offset: { %td }\n\n",
-                t_kls->prev_offset);
-#endif
     }
 }
 
