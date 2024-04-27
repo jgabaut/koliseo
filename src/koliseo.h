@@ -45,7 +45,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 2 /**< Represents current patch release.*/
+#define KLS_PATCH 3 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -250,7 +250,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -260,7 +260,7 @@ const char *string_koliseo_version(void);
 /**
  * Returns current koliseo version as an integer.
  */
-const int int_koliseo_version(void);
+int int_koliseo_version(void);
 
 #ifdef KOLISEO_HAS_TITLE
 #define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
@@ -400,7 +400,7 @@ typedef struct Koliseo_Temp {
 } Koliseo_Temp;
 
 void kls_log(Koliseo * kls, const char *tag, const char *format, ...);
-ptrdiff_t kls_get_pos(Koliseo * kls);
+ptrdiff_t kls_get_pos(const Koliseo * kls);
 
 #ifdef KOLISEO_HAS_REGION
 int kls_get_maxRegions_KLS_BASIC(Koliseo * kls);
@@ -505,8 +505,8 @@ void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 
 void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
-void print_kls_2file(FILE * fp, Koliseo * kls);
-void print_dbg_kls(Koliseo * kls);
+void print_kls_2file(FILE * fp, const Koliseo * kls);
+void print_dbg_kls(const Koliseo * kls);
 void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
 
 #ifdef KOLISEO_HAS_CURSES /**< This definition controls the inclusion of ncurses functions.*/
@@ -543,8 +543,8 @@ void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc);
 #endif // KOLISEO_HAS_REGION
-void print_temp_kls_2file(FILE * fp, Koliseo_Temp * t_kls);
-void print_dbg_temp_kls(Koliseo_Temp * t_kls);
+void print_temp_kls_2file(FILE * fp, const Koliseo_Temp * t_kls);
+void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp.
