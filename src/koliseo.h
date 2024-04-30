@@ -1363,6 +1363,7 @@ LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
 #undef LIST_isEmpty
 #undef LIST_head
 #undef LIST_tail
+#undef LIST_allocator
 #undef LIST_cons_gl
 #undef LIST_cons_kls
 #undef LIST_free_gl
