@@ -887,7 +887,10 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #define LIST_COMB1(pre, word) LIST_COMB2(pre, word)
 #define LIST_COMB2(pre, word) pre##word
 
-#define LIST_HEADER_VERSION "0.1.0"
+// Customize memory allocator function for list generated header
+#define LIST_DEFAULT_ALLOCF malloc
+
+#define LIST_HEADER_VERSION "0.1.1"
 
 #endif // LIST_HEADER_H
 
@@ -936,6 +939,7 @@ typedef LIST_ITEM_NAME* LIST_NAME;
 #define LIST_isEmpty LIST_IMPL(isEmpty)
 #define LIST_head LIST_IMPL(head)
 #define LIST_tail LIST_IMPL(tail)
+#define LIST_allocator LIST_IMPL(allocator)
 #define LIST_cons_gl LIST_IMPL(cons_gl)
 #define LIST_cons_kls LIST_IMPL(cons_kls)
 #define LIST_free_gl LIST_IMPL(free_gl)
@@ -971,6 +975,10 @@ LIST_head(LIST_NAME list);
 LIST_LINKAGE
 LIST_NAME
 LIST_tail(LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_allocator(void);
 
 LIST_LINKAGE
 LIST_NAME
@@ -1082,10 +1090,23 @@ LIST_tail(LIST_NAME list)
 
 LIST_LINKAGE
 LIST_NAME
+LIST_allocator(void)
+{
+    return (LIST_NAME) LIST_DEFAULT_ALLOCF(sizeof(LIST_ITEM_NAME));
+}
+
+LIST_LINKAGE
+LIST_NAME
 LIST_cons_gl(LIST_T* element, LIST_NAME list)
 {
     LIST_NAME t;
-    t = (LIST_NAME) malloc(sizeof(LIST_ITEM_NAME));
+    t = LIST_allocator();
+    if (t == NULL)
+    {
+        fprintf(stderr, "%s at %i: %s(): LIST_allocator failed.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+
     t->value = element;
     t->next = list;
     return t;
