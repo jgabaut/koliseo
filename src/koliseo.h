@@ -45,7 +45,7 @@
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 3 /**< Represents current patch release.*/
+#define KLS_PATCH 4 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -250,7 +250,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.4-dev"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -327,15 +327,41 @@ static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents def
 typedef KLS_Region *KLS_list_element; /**< Redundant typedef to better denote the actual value field of a KLS_region_list_item.*/
 
 /**
- * Defines the node for a KLS_Region_List.
+ * Defines the node for a KLS_Region_SlList.
  * @see KLS_list_element
  */
-typedef struct KLS_list_region {
+typedef struct KLS_sllist_region {
     KLS_list_element value;	/**< The KLS_Region value.*/
-    struct KLS_list_region *next;     /**< Pointer to the next node int the list.*/
-} KLS_region_list_item;
+    struct KLS_sllist_region *next;     /**< Pointer to the next node in the list.*/
+} KLS_region_sllist_item;
 
-typedef KLS_region_list_item *KLS_Region_List;
+typedef KLS_region_sllist_item *KLS_Region_SlList;
+
+/**
+ * Defines the node for a KLS_Region_DlList.
+ * @see KLS_list_element
+ */
+typedef struct KLS_dllist_region {
+    KLS_list_element value; /**< The KLS_Region value.*/
+    struct KLS_dllist_region* prev; /**< Pointer to the prev node in the list.*/
+    struct KLS_dllist_region* next; /**< Pointer to the next node in the list.*/
+} KLS_region_dllist_item;
+
+typedef KLS_region_dllist_item KLS_Region_DlList_Node; /**< Redundant typedef to better denote the head and tail fields of a KLS_region_dllist.*/
+
+typedef struct KLS_region_dllist {
+    KLS_Region_DlList_Node *head;
+    KLS_Region_DlList_Node *tail;
+    size_t len;
+} KLS_region_dllist;
+
+typedef KLS_region_dllist *KLS_Region_DlList; /**< Redundant typedef to better denote the doubly linked list field in a Koliseo.*/
+
+typedef union KLS_Region_List {
+    KLS_Region_SlList list;     /**< List of allocated Regions*/
+    KLS_Region_DlList dllist; /**< Doubly linked list of allocated Regions*/
+} KLS_Region_List; /**< Defines the type of list a Koliseo is using.*/
+
 #endif // KOLISEO_HAS_REGION
 
 struct Koliseo_Temp;		//Forward declaration for Koliseo itself
@@ -354,7 +380,7 @@ typedef struct Koliseo {
     ptrdiff_t offset;	  /**< Current position of memory pointer.*/
     ptrdiff_t prev_offset;     /**< Previous position of memory pointer.*/
 #ifdef KOLISEO_HAS_REGION
-    KLS_Region_List regs;     /**< List of allocated Regions*/
+    KLS_Region_List regs; /**< List of allocated regions.*/
     struct Koliseo *reglist_kls; /**< When conf.kls_reglist_alloc_backend is KLS_REGLIST_ALLOC_KLS_BASIC, points to the backing kls for regs list.*/
     int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
 #endif
@@ -392,7 +418,7 @@ typedef struct Koliseo_Temp {
     ptrdiff_t offset;	  /**< Current position of memory pointer.*/
     ptrdiff_t prev_offset;     /**< Previous position of memory pointer.*/
 #ifdef KOLISEO_HAS_REGION
-    KLS_Region_List t_regs;	/**< List of temporarily allocated Regions*/
+    KLS_Region_List t_regs; /**< List of temporarily allocated regions.*/
     Koliseo *reglist_kls; /**< Reference to the supporting Koliseo when conf.tkls_reglist_alloc_backend is KLS_BASIC.*/
     int max_regions_kls_alloc_basic; /**< Contains maximum number of allocatable KLS_Region when using KLS_REGLIST_ALLOC_KLS_BASIC.*/
     KLS_Temp_Conf conf;	/**< Contains flags to change the Koliseo_Temp behaviour.*/
@@ -614,42 +640,42 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 
 #ifdef KOLISEO_HAS_REGION
 
-KLS_Region_List kls_rl_emptyList(void);
+KLS_Region_SlList kls_rl_emptyList(void);
 #define KLS_RL_GETLIST() kls_rl_emptyList()
-bool kls_rl_empty(KLS_Region_List);
-KLS_list_element kls_rl_head(KLS_Region_List);
-KLS_Region_List kls_rl_tail(KLS_Region_List);
-KLS_Region_List kls_rl_cons(Koliseo *, KLS_list_element, KLS_Region_List);
+bool kls_rl_empty(KLS_Region_SlList);
+KLS_list_element kls_rl_head(KLS_Region_SlList);
+KLS_Region_SlList kls_rl_tail(KLS_Region_SlList);
+KLS_Region_SlList kls_rl_cons(Koliseo *, KLS_list_element, KLS_Region_SlList);
 #ifdef KOLISEO_HAS_EXPER
-KLS_region_list_item* kls_rl_list_pop(Koliseo *kls);
+KLS_region_sllist_item* kls_rl_list_pop(Koliseo *kls);
 #endif // KOLISEO_HAS_EXPER
-KLS_Region_List kls_rl_t_cons(Koliseo_Temp *, KLS_list_element, KLS_Region_List);
+KLS_Region_SlList kls_rl_t_cons(Koliseo_Temp *, KLS_list_element, KLS_Region_SlList);
 #ifdef KOLISEO_HAS_EXPER
-KLS_region_list_item* kls_rl_t_list_pop(Koliseo_Temp *t_kls);
+KLS_region_sllist_item* kls_rl_t_list_pop(Koliseo_Temp *t_kls);
 #endif // KOLISEO_HAS_EXPER
 
-void kls_rl_freeList(KLS_Region_List);
+void kls_rl_freeList(KLS_Region_SlList);
 #define KLS_RL_FREELIST(kls_list) kls_rl_freeList(kls_list)
-void kls_rl_showList(KLS_Region_List);
+void kls_rl_showList(KLS_Region_SlList);
 #define kls_showList(list) kls_rl_showList((list))
-void kls_rl_showList_toFile(KLS_Region_List, FILE * fp);
+void kls_rl_showList_toFile(KLS_Region_SlList, FILE * fp);
 #define kls_showList_toFile(list, fp) kls_rl_showList_toFile((list), (fp))
 #define KLS_RL_ECHOLIST(kls_list) kls_rl_showList(kls_list)
 #define KLS_RL_PRINTLIST(kls_list,file) kls_rl_showList_toFile(kls_list,file)
-bool kls_rl_member(KLS_list_element, KLS_Region_List);
-int kls_rl_length(KLS_Region_List);
-KLS_Region_List kls_rl_append(Koliseo *, KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_rl_reverse(Koliseo *, KLS_Region_List);
-KLS_Region_List kls_rl_copy(Koliseo *, KLS_Region_List);
-KLS_Region_List kls_rl_delete(Koliseo *, KLS_list_element, KLS_Region_List);
+bool kls_rl_member(KLS_list_element, KLS_Region_SlList);
+int kls_rl_length(KLS_Region_SlList);
+KLS_Region_SlList kls_rl_append(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
+KLS_Region_SlList kls_rl_reverse(Koliseo *, KLS_Region_SlList);
+KLS_Region_SlList kls_rl_copy(Koliseo *, KLS_Region_SlList);
+KLS_Region_SlList kls_rl_delete(Koliseo *, KLS_list_element, KLS_Region_SlList);
 
-KLS_Region_List kls_rl_insord(Koliseo *, KLS_list_element, KLS_Region_List);
+KLS_Region_SlList kls_rl_insord(Koliseo *, KLS_list_element, KLS_Region_SlList);
 #define KLS_RL_PUSHLIST(kls,reg,kls_list) kls_rl_insord(kls,reg,kls_list)
-KLS_Region_List kls_rl_insord_p(Koliseo *, KLS_list_element, KLS_Region_List);
+KLS_Region_SlList kls_rl_insord_p(Koliseo *, KLS_list_element, KLS_Region_SlList);
 #define KLS_RL_PUSHLIST_P(kls,reg,kls_list) kls_rl_insord_p(kls,reg,kls_list)
-KLS_Region_List kls_rl_mergeList(Koliseo *, KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_rl_intersect(Koliseo *, KLS_Region_List, KLS_Region_List);
-KLS_Region_List kls_rl_diff(Koliseo *, KLS_Region_List, KLS_Region_List);
+KLS_Region_SlList kls_rl_mergeList(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
+KLS_Region_SlList kls_rl_intersect(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
+KLS_Region_SlList kls_rl_diff(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
 
 #define KLS_RL_DIFF(kls,kls_list1,kls_list2) kls_rl_diff(kls,kls_list1,kls_list2)
 bool kls_rl_isLess(KLS_list_element, KLS_list_element);
