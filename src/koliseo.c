@@ -2798,7 +2798,7 @@ KLS_region_sllist_item* kls_list_pop(Koliseo *kls)
 #endif // KOLISEO_HAS_EXPER
 
 KLS_Region_SlList kls_rl_t_cons(Koliseo_Temp *t_kls, KLS_list_element e,
-                              KLS_Region_SlList l)
+                                KLS_Region_SlList l)
 {
     if (e == NULL) {
 #ifdef KLS_DEBUG_CORE
@@ -3054,7 +3054,7 @@ KLS_Region_SlList kls_rl_insord(Koliseo *kls, KLS_list_element el, KLS_Region_Sl
 }
 
 KLS_Region_SlList kls_rl_insord_p(Koliseo *kls, KLS_list_element el,
-                                KLS_Region_SlList l)
+                                  KLS_Region_SlList l)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
@@ -3117,7 +3117,7 @@ KLS_Region_SlList kls_rl_insord_p(Koliseo *kls, KLS_list_element el,
 }
 
 KLS_Region_SlList kls_rl_mergeList(Koliseo *kls, KLS_Region_SlList l1,
-                                 KLS_Region_SlList l2)
+                                   KLS_Region_SlList l2)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
@@ -3147,7 +3147,7 @@ KLS_Region_SlList kls_rl_mergeList(Koliseo *kls, KLS_Region_SlList l1,
 }
 
 KLS_Region_SlList kls_rl_intersect(Koliseo *kls, KLS_Region_SlList l1,
-                                 KLS_Region_SlList l2)
+                                   KLS_Region_SlList l2)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR]  [%s()]: Koliseo was NULL.\n", __func__);
