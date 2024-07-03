@@ -3346,6 +3346,36 @@ ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 
     return res;
 }
+
+KLS_Region_DlList_Node* kls_rdll_node_new(Koliseo* kls, KLS_Region* region)
+{
+    assert(false && "TODO: implement this");
+}
+
+KLS_Region_DlList* kls_rdll_list_new(Koliseo* kls)
+{
+    assert(false && "TODO: implement this");
+}
+
+bool kls_rdll_rpush(Koliseo* kls, KLS_Region_DlList* list, KLS_Region_DlList_Node* node)
+{
+    assert(false && "TODO: implement this");
+}
+
+bool kls_rdll_lpush(Koliseo* kls, KLS_Region_DlList* list, KLS_Region_DlList_Node* node)
+{
+    assert(false && "TODO: implement this");
+}
+
+KLS_Region_DlList_Node* kls_rdll_rpop(Koliseo* kls, KLS_Region_DlList* list)
+{
+    assert(false && "TODO: implement this");
+}
+
+KLS_Region_DlList_Node* kls_rdll_lpop(Koliseo* kls, KLS_Region_DlList* list)
+{
+    assert(false && "TODO: implement this");
+}
 #endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_GULP

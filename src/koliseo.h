@@ -687,6 +687,14 @@ void kls_usageReport_toFile(Koliseo *, FILE *);
 void kls_usageReport(Koliseo *);
 ptrdiff_t kls_type_usage(int, Koliseo *);
 
+// Doubly linked list functions
+KLS_Region_DlList_Node* kls_rdll_node_new(Koliseo*, KLS_Region*);
+KLS_Region_DlList* kls_rdll_list_new(Koliseo*);
+bool kls_rdll_rpush(Koliseo*, KLS_Region_DlList*, KLS_Region_DlList_Node*);
+bool kls_rdll_lpush(Koliseo*, KLS_Region_DlList*, KLS_Region_DlList_Node*);
+KLS_Region_DlList_Node* kls_rdll_rpop(Koliseo*, KLS_Region_DlList*);
+KLS_Region_DlList_Node* kls_rdll_lpop(Koliseo*, KLS_Region_DlList*);
+
 #endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_GULP /**< This definition controls the inclusion of gulp functions.*/
