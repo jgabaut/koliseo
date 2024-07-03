@@ -655,13 +655,13 @@ KLS_region_sllist_item* kls_rl_t_list_pop(Koliseo_Temp *t_kls);
 #endif // KOLISEO_HAS_EXPER
 
 void kls_rl_freeList(KLS_Region_SlList);
-#define KLS_RL_FREELIST(kls_list) kls_rl_freeList(kls_list)
+#define KLS_RL_FREELIST(kls_list) kls_rl_freeList((kls_list).list)
 void kls_rl_showList(KLS_Region_SlList);
-#define kls_showList(list) kls_rl_showList((list))
+#define kls_showList(list) kls_rl_showList((list).list)
 void kls_rl_showList_toFile(KLS_Region_SlList, FILE * fp);
-#define kls_showList_toFile(list, fp) kls_rl_showList_toFile((list), (fp))
-#define KLS_RL_ECHOLIST(kls_list) kls_rl_showList(kls_list)
-#define KLS_RL_PRINTLIST(kls_list,file) kls_rl_showList_toFile(kls_list,file)
+#define kls_showList_toFile(list, fp) kls_rl_showList_toFile((list).list, (fp))
+#define KLS_RL_ECHOLIST(kls_list) kls_rl_showList((kls_list).list)
+#define KLS_RL_PRINTLIST(kls_list,file) kls_rl_showList_toFile((kls_list).list,file)
 bool kls_rl_member(KLS_list_element, KLS_Region_SlList);
 int kls_rl_length(KLS_Region_SlList);
 KLS_Region_SlList kls_rl_append(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
@@ -670,14 +670,14 @@ KLS_Region_SlList kls_rl_copy(Koliseo *, KLS_Region_SlList);
 KLS_Region_SlList kls_rl_delete(Koliseo *, KLS_list_element, KLS_Region_SlList);
 
 KLS_Region_SlList kls_rl_insord(Koliseo *, KLS_list_element, KLS_Region_SlList);
-#define KLS_RL_PUSHLIST(kls,reg,kls_list) kls_rl_insord(kls,reg,kls_list)
+#define KLS_RL_PUSHLIST(kls,reg,kls_list) kls_rl_insord(kls,reg,(kls_list).list)
 KLS_Region_SlList kls_rl_insord_p(Koliseo *, KLS_list_element, KLS_Region_SlList);
-#define KLS_RL_PUSHLIST_P(kls,reg,kls_list) kls_rl_insord_p(kls,reg,kls_list)
+#define KLS_RL_PUSHLIST_P(kls,reg,kls_list) kls_rl_insord_p(kls,reg,(kls_list).list)
 KLS_Region_SlList kls_rl_mergeList(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
 KLS_Region_SlList kls_rl_intersect(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
 KLS_Region_SlList kls_rl_diff(Koliseo *, KLS_Region_SlList, KLS_Region_SlList);
 
-#define KLS_RL_DIFF(kls,kls_list1,kls_list2) kls_rl_diff(kls,kls_list1,kls_list2)
+#define KLS_RL_DIFF(kls,kls_list1,kls_list2) kls_rl_diff(kls,(kls_list1).list,(kls_list2).list)
 bool kls_rl_isLess(KLS_list_element, KLS_list_element);
 bool kls_rl_isEqual(KLS_list_element, KLS_list_element);
 double kls_usageShare(KLS_list_element, Koliseo *);
