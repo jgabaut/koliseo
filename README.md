@@ -26,7 +26,7 @@
 ## What is this thing? <a name = "witt"></a>
 
   This is a C library for an arena allocator, whose arenas are named `Koliseo`.
-  It offers a basic API to perform initalisation, push (request arena memory), reset and free of a `Koliseo`.
+  It offers a basic API to perform initialisation, push (request arena memory), reset and free of a `Koliseo`.
 
   If you compile it without defining any special macros, you will get the basic functionality.
 
@@ -98,7 +98,7 @@ int main(void)
 ### Region <a name = "extra_region"></a>
 
   A ready-to-go index for every allocation you make.
-  - It uses an intrusive linked list and (at the moment) has quite the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
+  - It uses a linked list and has quite the memory overhead, due to hosting a couple static string buffers, so it may not be suited for all usecases.
   - Offers extended API with tagging arguments, to type/name your references
   - For now, two allocations backends can be chosen for the list, it can be stored:
     - In an inner Koliseo (this puts an extra limit to the total number of single allocations)
