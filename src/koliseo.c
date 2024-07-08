@@ -3349,12 +3349,70 @@ ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 
 KLS_Region_DlList_Node* kls_rdll_node_new(Koliseo* kls, KLS_Region* region)
 {
-    assert(false && "TODO: implement this");
+    assert(kls != NULL);
+    assert(region != NULL);
+
+    KLS_Region_DlList_Node* res = NULL;
+    switch (kls->conf.kls_reglist_alloc_backend) {
+    case KLS_REGLIST_ALLOC_LIBC: {
+        res = (KLS_Region_DlList_Node*) malloc(sizeof(KLS_Region_DlList_Node));
+    }
+    break;
+    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+        assert(kls->reglist_kls != NULL);
+        res = KLS_PUSH(kls->reglist_kls, KLS_Region_DlList_Node);
+        res->value = region;
+    }
+    break;
+    default: {
+        fprintf(stderr,
+                "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
+                __func__, kls->conf.kls_reglist_alloc_backend);
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "ERROR",
+                "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
+                __func__, kls->conf.kls_reglist_alloc_backend);
+#endif
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+    break;
+    }
+
+    return res;
 }
 
 KLS_Region_DlList* kls_rdll_list_new(Koliseo* kls)
 {
-    assert(false && "TODO: implement this");
+    assert(kls != NULL);
+
+    KLS_Region_DlList* res = NULL;
+    switch (kls->conf.kls_reglist_alloc_backend) {
+    case KLS_REGLIST_ALLOC_LIBC: {
+        res = (KLS_Region_DlList*) malloc(sizeof(KLS_Region_DlList));
+    }
+    break;
+    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+        assert(kls->reglist_kls != NULL);
+        res = KLS_PUSH(kls->reglist_kls, KLS_Region_DlList);
+    }
+    break;
+    default: {
+        fprintf(stderr,
+                "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
+                __func__, kls->conf.kls_reglist_alloc_backend);
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "ERROR",
+                "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
+                __func__, kls->conf.kls_reglist_alloc_backend);
+#endif
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+    break;
+    }
+
+    return res;
 }
 
 bool kls_rdll_rpush(Koliseo* kls, KLS_Region_DlList* list, KLS_Region_DlList_Node* node)
