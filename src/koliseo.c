@@ -3497,12 +3497,57 @@ bool kls_rdll_lpush(Koliseo* kls, KLS_Region_DlList* list, KLS_Region_DlList_Nod
 
 KLS_Region_DlList_Node* kls_rdll_rpop(Koliseo* kls, KLS_Region_DlList* list)
 {
-    assert(false && "TODO: implement this");
+    assert(kls != NULL);
+    assert(*list != NULL);
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]:    Koliseo was NULL.\n", __func__);
+        return NULL;
+    }
+    if (*list == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]:    KLS_Region_DlList was NULL.\n", __func__);
+        return NULL;
+    }
+
+    KLS_Region_DlList_Node* node = (*list)->tail;
+    if ((*list)->len > 1) {
+        (*list)->tail = node->prev;
+        (*list)->tail->next = NULL;
+    } else {
+        (*list)->tail = NULL;
+        (*list)->head = NULL;
+    }
+
+    node->next = NULL;
+    node->prev = NULL;
+    return node;
 }
 
 KLS_Region_DlList_Node* kls_rdll_lpop(Koliseo* kls, KLS_Region_DlList* list)
 {
     assert(false && "TODO: implement this");
+    assert(kls != NULL);
+    assert(*list != NULL);
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]:    Koliseo was NULL.\n", __func__);
+        return NULL;
+    }
+    if (*list == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]:    KLS_Region_DlList was NULL.\n", __func__);
+        return NULL;
+    }
+
+    KLS_Region_DlList_Node* node = (*list)->head;
+    if ((*list)->len > 1) {
+        (*list)->head = node->next;
+        (*list)->head->prev = NULL;
+    } else {
+        (*list)->head = NULL;
+        (*list)->tail = NULL;
+    }
+
+    node->next = NULL;
+    node->prev = NULL;
+    return node;
 }
 #endif // KOLISEO_HAS_REGION
 
