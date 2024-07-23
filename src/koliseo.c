@@ -3549,6 +3549,51 @@ KLS_Region_DlList_Node* kls_rdll_lpop(Koliseo* kls, KLS_Region_DlList* list)
     node->prev = NULL;
     return node;
 }
+
+void kls_rdll_remove(Koliseo* kls, KLS_Region_DlList* list, KLS_Region_DlList_Node* node)
+{
+    assert(kls != NULL);
+    assert(list != NULL);
+    assert(node != NULL);
+    if (node->prev == NULL) {
+        (*list)->head = node->next;
+    } else {
+        KLS_Region_DlList_Node* prev = node->prev;
+        prev->next = node->next;
+    }
+    if (node->next == NULL) {
+        (*list)->tail = node->prev;
+    } else {
+        KLS_Region_DlList_Node* next = node->next;
+        next->prev = node->prev;
+    }
+
+    switch (kls->conf.kls_reglist_alloc_backend) {
+        case KLS_REGLIST_ALLOC_KLS_BASIC: {
+        // Don't free the value since it's on the inner Koliseo
+        }
+        break;
+        case KLS_REGLIST_ALLOC_LIBC: {
+            free(node->value);
+            free(node);
+        }
+        break;
+        default: {
+            fprintf(stderr,
+                    "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
+                    __func__, kls->conf.kls_reglist_alloc_backend);
+#ifdef KLS_DEBUG_CORE
+            kls_log(kls, "ERROR",
+                    "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
+                    __func__, kls->conf.kls_reglist_alloc_backend);
+#endif
+            kls_free(kls);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    (*list)->len -= 1;
+}
 #endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_GULP

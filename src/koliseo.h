@@ -694,6 +694,7 @@ bool kls_rdll_rpush(Koliseo*, KLS_Region_DlList*, KLS_Region_DlList_Node*);
 bool kls_rdll_lpush(Koliseo*, KLS_Region_DlList*, KLS_Region_DlList_Node*);
 KLS_Region_DlList_Node* kls_rdll_rpop(Koliseo*, KLS_Region_DlList*);
 KLS_Region_DlList_Node* kls_rdll_lpop(Koliseo*, KLS_Region_DlList*);
+void kls_rdll_remove(Koliseo*, KLS_Region_DlList*, KLS_Region_DlList_Node*);
 
 #endif // KOLISEO_HAS_REGION
 
