@@ -25,9 +25,10 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_autoset_temp_regions = 0,
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
+    .kls_block_while_has_temp = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
-};
+}; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
 #endif
 
 KLS_Conf KLS_DEFAULT_CONF = {
@@ -37,11 +38,12 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_reglist_kls_size = 0,
     .kls_autoset_temp_regions = 0,
 #endif // KOLISEO_HAS_REGION
+    .kls_block_while_has_temp = 0,
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
-};
+}; /**< Config used by any new Koliseo by default.*/
 
 KLS_Stats KLS_STATS_DEFAULT = {
     .tot_pushes = 0,
@@ -175,7 +177,7 @@ const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, const char* log_filepath)
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath)
 {
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
@@ -191,6 +193,7 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
 #endif // KOLISEO_HAS_REGION
     res.kls_collect_stats = collect_stats;
     res.kls_verbose_lvl = verbose_lvl;
+    res.kls_block_while_has_temp = block_while_has_temp;
     res.kls_log_fp = log_fp;
     res.kls_log_filepath = log_filepath;
 
@@ -744,6 +747,10 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
     }
+    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+        return NULL;
+    }
     ptrdiff_t available = kls->size - kls->offset;
     ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
@@ -833,6 +840,10 @@ void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
+    }
+    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+        return NULL;
     }
     ptrdiff_t available = kls->size - kls->offset;
     ptrdiff_t padding = -kls->offset & (align - 1);
@@ -926,6 +937,10 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
+    }
+    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+        return NULL;
     }
 
     ptrdiff_t available = kls->size - kls->offset;
@@ -1248,6 +1263,10 @@ void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
+    }
+    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+        return NULL;
     }
     ptrdiff_t available = kls->size - kls->offset;
     ptrdiff_t padding = -kls->offset & (align - 1);
@@ -1579,6 +1598,10 @@ void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
+    }
+    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+        return NULL;
     }
     ptrdiff_t available = kls->size - kls->offset;
     ptrdiff_t padding = -kls->offset & (align - 1);

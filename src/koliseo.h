@@ -95,9 +95,10 @@ typedef struct KLS_Conf {
     int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
     FILE *kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
+    int kls_block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
 } KLS_Conf;
 
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, const char* log_filepath);
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath);
 
 void kls_dbg_features(void);
 
