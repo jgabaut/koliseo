@@ -815,7 +815,7 @@ char** kls_strdup_arr(Koliseo* kls, size_t count, char** source);
  * @see KLS_STRDUP()
  * @see KLS_STRDUP_T()
  */
-#define __KLS_STRCPY(dest, source) do {\
+#define KLS__STRCPY(dest, source) do {\
     strcpy((dest), (source));\
 } while (0)
 
