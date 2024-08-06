@@ -26,7 +26,7 @@
 ## What is this thing? <a name = "witt"></a>
 
   This is a C library for an arena allocator, whose arenas are named `Koliseo`.
-  It offers a basic API to perform initalisation, push (request arena memory), reset and free of a `Koliseo`.
+  It offers a basic API to perform initialisation, push (request arena memory), reset and free of a `Koliseo`.
 
   If you compile it without defining any special macros, you will get the basic functionality.
 
@@ -121,10 +121,10 @@ int main(void)
 
 ### List template <a name = "list_template"></a>
 
-  Any time `LIST_T` is defined before including `koliseo.h`, a basic linked-list implementation supporting `Koliseo` allocation will be declared for the passed type.
+  Any time `LIST_T` is defined before including `templates/list.h`, a basic linked-list implementation supporting `Koliseo` allocation will be declared for the passed type.
   - It can be done also after building a static object for the library.
 
-  The `LIST_T` macro and the `koliseo.h` should be repeatable without issues, allowing definition of more than one list interface.
+  The `LIST_T` macro and the `templates/list.h` should be repeatable without issues, allowing definition of more than one list interface.
 
   This is implemented using some code-generating macros, which could rended build time slower if overused.
 
