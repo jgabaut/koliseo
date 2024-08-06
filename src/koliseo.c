@@ -749,6 +749,9 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "ERROR", "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", __func__);
+#endif // KLS_DEBUG_CORE
         return NULL;
     }
     ptrdiff_t available = kls->size - kls->offset;
@@ -843,6 +846,9 @@ void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "ERROR", "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", __func__);
+#endif // KLS_DEBUG_CORE
         return NULL;
     }
     ptrdiff_t available = kls->size - kls->offset;
@@ -940,6 +946,9 @@ void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "ERROR", "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", __func__);
+#endif // KLS_DEBUG_CORE
         return NULL;
     }
 
@@ -1266,6 +1275,9 @@ void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "ERROR", "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", __func__);
+#endif // KLS_DEBUG_CORE
         return NULL;
     }
     ptrdiff_t available = kls->size - kls->offset;
@@ -1601,6 +1613,9 @@ void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "ERROR", "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", __func__);
+#endif // KLS_DEBUG_CORE
         return NULL;
     }
     ptrdiff_t available = kls->size - kls->offset;
