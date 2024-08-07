@@ -623,7 +623,7 @@ void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
 void *kls_temp_push_zero_typed_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc, Koliseo_Loc loc);
-#define kls_temp_push_zero_typed(t_kls, size, align, count, type, name, desc, KLS_HERE)
+#define kls_temp_push_zero_typed(t_kls, size, align, count, type, name, desc) kls_temp_push_zero_typed_dbg((t_kls), (size), (align), (count), (type), (name), (desc), KLS_HERE)
 #endif // KLS_LOC_CALLS
 #endif // KOLISEO_HAS_REGION
 void print_temp_kls_2file(FILE * fp, const Koliseo_Temp * t_kls);
