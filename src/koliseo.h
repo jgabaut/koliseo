@@ -38,14 +38,46 @@
 #ifdef KLS_DEBUG_CORE
 #include <time.h>
 
+/*
+#ifndef KOLISEO_HAS_LOCATE
+#define KOLISEO_HAS_LOCATE // Used for enabling caller location arguments for some APIs.
+#endif // KOLISEO_HAS_LOCATE
+*/
+
 #ifdef _WIN32
-#include <windows.h>		//Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
+#include <profileapi.h>		//Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
 #endif
-#endif				//KLS_DEBUG_CORE
+#endif //KLS_DEBUG_CORE
+
+#ifdef KOLISEO_HAS_LOCATE
+typedef struct Koliseo_Loc {
+    const char* file;
+    const int line;
+    const char* func;
+} Koliseo_Loc;
+
+#define KLS_HERE (Koliseo_Loc){ \
+    .file = __FILE__, \
+    .line = __LINE__, \
+    .func = __func__, \
+}
+
+/**
+ * Defines a format string for Koliseo_Loc.
+ * @see KLS_Loc_Arg()
+ */
+#define KLS_Loc_Fmt "[%s:%i at %s():]    "
+
+/**
+ * Defines a format macro for Koliseo_Loc args.
+ * @see KLS_Loc_Fmt
+ */
+#define KLS_Loc_Arg(loc) (loc.file), (loc.line), (loc.func)
+#endif // KOLISEO_HAS_LOCATE
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 3 /**< Represents current patch release.*/
+#define KLS_PATCH 4 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -95,9 +127,10 @@ typedef struct KLS_Conf {
     int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
     FILE *kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
+    int kls_block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
 } KLS_Conf;
 
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, FILE* log_fp, const char* log_filepath);
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath);
 
 void kls_dbg_features(void);
 
@@ -250,7 +283,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.4"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -407,7 +440,12 @@ int kls_get_maxRegions_KLS_BASIC(Koliseo * kls);
 int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp * t_kls);
 #endif
 
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
+#else
+Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc);
+#define kls_new_alloc(size, alloc_func) kls_new_alloc_dbg((size), (alloc_func), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
 
 #ifndef KLS_DEFAULT_ALLOCF
 #define KLS_DEFAULT_ALLOCF malloc /**< Defines the default allocation function.*/
@@ -426,15 +464,45 @@ Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
 #define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
+
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                     ptrdiff_t count);
+#else
+void *kls_push_zero_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
+                        ptrdiff_t count, Koliseo_Loc loc);
+
+#define kls_push_zero(kls, size, align, count) kls_push_zero_dbg((kls), (size), (align), (count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_AR(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                        ptrdiff_t count);
+#else
+void *kls_push_zero_AR_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
+                           ptrdiff_t count, Koliseo_Loc loc);
+#define kls_push_zero_AR(kls, size, align, count) kls_push_zero_AR_dbg((kls), (size), (align), (count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
 #ifdef KOLISEO_HAS_REGION
+
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_named(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, char *name, char *desc);
+#else
+void *kls_push_zero_named_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
+                              ptrdiff_t count, char *name, char *desc, Koliseo_Loc loc);
+#define kls_push_zero_named(kls, size, align, count, name, desc) kls_push_zero_named_dbg((kls), (size), (align), (count), (name), (desc), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc);
+#else
+void *kls_push_zero_typed_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
+                              ptrdiff_t count, int type, char *name, char *desc, Koliseo_Loc loc);
+#define kls_push_zero_typed(kls, size, align, count, type, name, desc) kls_push_zero_typed_dbg((kls), (size), (align), (count), (type), (name), (desc), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
 #endif // KOLISEO_HAS_REGION
 
 /**
@@ -530,18 +598,46 @@ void kls_temp_showList_toWin(Koliseo_Temp * t_kls, WINDOW * win);
 
 #endif				//KOLISEO_HAS_CURSES
 
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo_Temp *kls_temp_start(Koliseo * kls);
+#else
+Koliseo_Temp *kls_temp_start_dbg(Koliseo * kls, Koliseo_Loc loc);
+#define kls_temp_start(kls) kls_temp_start_dbg((kls), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
 //bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
 void kls_temp_end(Koliseo_Temp * tmp_kls);
+
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_AR(Koliseo_Temp * t_kls, ptrdiff_t size,
                             ptrdiff_t align, ptrdiff_t count);
+#else
+void *kls_temp_push_zero_AR_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
+                                ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc);
+#define kls_temp_push_zero_AR(t_kls, size, align, count) kls_temp_push_zero_AR_dbg((t_kls), (size), (align), (count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
 #ifdef KOLISEO_HAS_REGION
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_named(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, char *name,
                                char *desc);
+#else
+void *kls_temp_push_zero_named_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
+                                   ptrdiff_t align, ptrdiff_t count, char *name,
+                                   char *desc, Koliseo_Loc loc);
+#define kls_temp_push_zero_named(t_kls, size, align, count, name, desc) kls_temp_push_zero_named_dbg((t_kls), (size), (align), (count), (name), (desc), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc);
+#else
+void *kls_temp_push_zero_typed_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
+                                   ptrdiff_t align, ptrdiff_t count, int type,
+                                   char *name, char *desc, Koliseo_Loc loc);
+#define kls_temp_push_zero_typed(t_kls, size, align, count, type, name, desc) kls_temp_push_zero_typed_dbg((t_kls), (size), (align), (count), (type), (name), (desc), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
 #endif // KOLISEO_HAS_REGION
 void print_temp_kls_2file(FILE * fp, const Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
@@ -814,7 +910,7 @@ char** kls_strdup_arr(Koliseo* kls, size_t count, char** source);
  * @see KLS_STRDUP()
  * @see KLS_STRDUP_T()
  */
-#define __KLS_STRCPY(dest, source) do {\
+#define KLS__STRCPY(dest, source) do {\
     strcpy((dest), (source));\
 } while (0)
 
@@ -842,524 +938,3 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
 
 #endif //KOLISEO_H_
-
-#ifdef LIST_T //This ensures the library never causes any trouble if this macro was not defined.
-// jgabaut @ github.com/jgabaut
-// SPDX-License-Identifier: GPL-3.0-only
-/*
-    Copyright (C) 2023-2024  jgabaut
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-// list.h
-// This is a template for a linked list, inspired by the dynamic array example in https://www.davidpriver.com/ctemplates.html#template-headers.
-// Include this header multiple times to implement a
-// simplistic linked list.  Before inclusion define at
-// least DLIST_T to the type the linked list can hold.
-// See DLIST_NAME, DLIST_PREFIX and DLIST_LINKAGE for
-// other customization points.
-//
-// If you define DLIST_DECLS_ONLY, only the declarations
-// of the type and its function will be declared.
-//
-// Functions ending with _gl use malloc() for the nodes.
-// Functions ending with _kls expect a Koliseo arg to use for allocating nodes.
-//
-
-#ifndef LIST_HEADER_H
-#define LIST_HEADER_H
-// Inline functions, #defines and includes that will be
-// needed for all instantiations can go up here.
-#include <stdbool.h> // bool
-#include <stdlib.h> // malloc, size_t
-
-#define LIST_IMPL(word) LIST_COMB1(LIST_PREFIX,word)
-#define LIST_COMB1(pre, word) LIST_COMB2(pre, word)
-#define LIST_COMB2(pre, word) pre##word
-
-#define LIST_HEADER_VERSION "0.1.0"
-
-#endif // LIST_HEADER_H
-
-// NOTE: this section is *not* guarded as it is intended
-// to be included multiple times.
-
-#ifndef LIST_T
-#error "LIST_T must be defined"
-#endif
-
-// The name of the data type to be generated.
-// If not given, will expand to something like
-// `list_int` for an `int`.
-#ifndef LIST_NAME
-#define LIST_NAME LIST_COMB1(LIST_COMB1(list,_), LIST_T)
-#endif
-
-// Prefix for generated functions.
-#ifndef LIST_PREFIX
-#define LIST_PREFIX LIST_COMB1(LIST_NAME, _)
-#endif
-
-// Customize the linkage of the function.
-#ifndef LIST_LINKAGE
-#define LIST_LINKAGE static inline
-#endif
-
-// Suffix for generated list item struct.
-#ifndef LIST_I_SUFFIX
-#define LIST_I_SUFFIX item
-#endif
-
-// The name of the item data type to be generated.
-#ifndef LIST_ITEM_NAME
-#define LIST_ITEM_NAME LIST_COMB1(LIST_COMB1(LIST_T,_), LIST_I_SUFFIX)
-#endif
-
-typedef struct LIST_ITEM_NAME LIST_ITEM_NAME;
-struct LIST_ITEM_NAME {
-    LIST_T* value;
-    struct LIST_ITEM_NAME* next;
-};
-typedef LIST_ITEM_NAME* LIST_NAME;
-
-#define LIST_nullList LIST_IMPL(nullList)
-#define LIST_isEmpty LIST_IMPL(isEmpty)
-#define LIST_head LIST_IMPL(head)
-#define LIST_tail LIST_IMPL(tail)
-#define LIST_cons_gl LIST_IMPL(cons_gl)
-#define LIST_cons_kls LIST_IMPL(cons_kls)
-#define LIST_free_gl LIST_IMPL(free_gl)
-#define LIST_member LIST_IMPL(member)
-#define LIST_length LIST_IMPL(length)
-#define LIST_append_gl LIST_IMPL(append_gl)
-#define LIST_append_kls LIST_IMPL(append_kls)
-#define LIST_reverse_gl LIST_IMPL(reverse_gl)
-#define LIST_reverse_kls LIST_IMPL(reverse_kls)
-#define LIST_copy_gl LIST_IMPL(copy_gl)
-#define LIST_copy_kls LIST_IMPL(copy_kls)
-#define LIST_remove_gl LIST_IMPL(remove_gl)
-#define LIST_remove_kls LIST_IMPL(remove_kls)
-#define LIST_intersect_gl LIST_IMPL(intersect_gl)
-#define LIST_intersect_kls LIST_IMPL(intersect_kls)
-#define LIST_diff_gl LIST_IMPL(diff_gl)
-#define LIST_diff_kls LIST_IMPL(diff_kls)
-
-#ifdef LIST_DECLS_ONLY
-
-LIST_LINKAGE
-LIST_NAME
-LIST_nullList(void);
-
-LIST_LINKAGE
-bool
-LIST_isEmpty(LIST_NAME list);
-
-LIST_LINKAGE
-LIST_T*
-LIST_head(LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_tail(LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_cons_gl(LIST_T* element, LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list);
-
-LIST_LINKAGE
-void
-LIST_free_gl(LIST_NAME list);
-
-LIST_LINKAGE
-bool
-LIST_member(LIST_T* element, LIST_NAME list);
-
-LIST_LINKAGE
-int
-LIST_length(LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_append_gl(LIST_NAME l1, LIST_NAME l2);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_append_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_reverse_gl(LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_reverse_kls(Koliseo* kls, LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_copy_gl(LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_copy_kls(Koliseo* kls, LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_remove_gl(LIST_T* element, LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_diff_gl(LIST_NAME l1, LIST_NAME l2);
-
-LIST_LINKAGE
-LIST_NAME
-LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
-#else
-
-LIST_LINKAGE
-LIST_NAME
-LIST_nullList(void)
-{
-    return NULL;
-}
-
-LIST_LINKAGE
-bool
-LIST_isEmpty(LIST_NAME list)
-{
-    if (list == NULL) {
-        return true;
-    };
-    return false;
-}
-
-LIST_LINKAGE
-LIST_T*
-LIST_head(LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        fprintf(stderr, "%s at %i: %s(): List is empty.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    return list->value;
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_tail(LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        fprintf(stderr, "%s at %i: %s(): List is empty.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    return list->next;
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_cons_gl(LIST_T* element, LIST_NAME list)
-{
-    LIST_NAME t;
-    t = (LIST_NAME) malloc(sizeof(LIST_ITEM_NAME));
-    t->value = element;
-    t->next = list;
-    return t;
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    LIST_NAME t;
-    t = (LIST_NAME) KLS_PUSH_EX(kls, LIST_ITEM_NAME, "List node");
-    if (t == NULL ) {
-        fprintf(stderr, "%s at %i: %s(): Failed KLS_PUSH_EX() call.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    t->value = element;
-    t->next = list;
-    return t;
-}
-
-LIST_LINKAGE
-void
-LIST_free_gl(LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        return;
-    } else {
-        LIST_free_gl(LIST_tail(list));
-        free(list);
-    }
-    return;
-}
-
-LIST_LINKAGE
-bool
-LIST_member(LIST_T* element, LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        return false;
-    } else {
-        if (element == LIST_head(list)) {
-            return true;
-        } else {
-            return LIST_member(element, LIST_tail(list));
-        }
-    }
-}
-
-LIST_LINKAGE
-int
-LIST_length(LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        return 0;
-    } else {
-        return 1 + LIST_length(LIST_tail(list));
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_append_gl(LIST_NAME l1, LIST_NAME l2)
-{
-    if (LIST_isEmpty(l1)) {
-        return l2;
-    } else {
-        return LIST_cons_gl(LIST_head(l1), LIST_append_gl(LIST_tail(l1), l2));
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_append_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(l1)) {
-        return l2;
-    } else {
-        return LIST_cons_kls(kls, LIST_head(l1), LIST_append_kls(kls, LIST_tail(l1), l2));
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_reverse_gl(LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        return LIST_nullList();
-    } else {
-        return LIST_append_gl(LIST_reverse_gl(LIST_tail(list)), LIST_cons_gl(LIST_head(list), LIST_nullList()));
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_reverse_kls(Koliseo* kls, LIST_NAME list)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(list)) {
-        return LIST_nullList();
-    } else {
-        return LIST_append_kls(kls, LIST_reverse_kls(kls, LIST_tail(list)), LIST_cons_kls(kls, LIST_head(list), LIST_nullList()));
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_copy_gl(LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        return list;
-    } else {
-        return LIST_cons_gl(LIST_head(list), LIST_copy_gl(LIST_tail(list)));
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_copy_kls(Koliseo* kls, LIST_NAME list)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(list)) {
-        return list;
-    } else {
-        return LIST_cons_kls(kls, LIST_head(list), LIST_copy_kls(kls, LIST_tail(list)));
-    }
-
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_remove_gl(LIST_T* element, LIST_NAME list)
-{
-    if (LIST_isEmpty(list)) {
-        return LIST_nullList();
-    } else {
-        if (element == LIST_head(list)) {
-            return LIST_tail(list);
-        } else {
-            return LIST_cons_gl(LIST_head(list), LIST_remove_gl(element, LIST_tail(list)));
-        }
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(list)) {
-        return LIST_nullList();
-    } else {
-        if (element == LIST_head(list)) {
-            return LIST_tail(list);
-        } else {
-            return LIST_cons_kls(kls, LIST_head(list), LIST_remove_kls(kls, element, LIST_tail(list)));
-        }
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2)
-{
-    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
-        return LIST_nullList();
-    }
-    if (LIST_member(LIST_head(l1), l2) && !(LIST_member(LIST_head(l1), LIST_tail(l2)))) {
-        return LIST_cons_gl(LIST_head(l1), LIST_intersect_gl(LIST_tail(l1), l2));
-    } else {
-        return LIST_intersect_gl(LIST_tail(l1), l2);
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
-        return LIST_nullList();
-    }
-    if (LIST_member(LIST_head(l1), l2) && !(LIST_member(LIST_head(l1), LIST_tail(l2)))) {
-        return LIST_cons_kls(kls, LIST_head(l1), LIST_intersect_kls(kls, LIST_tail(l1), l2));
-    } else {
-        return LIST_intersect_kls(kls, LIST_tail(l1), l2);
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_diff_gl(LIST_NAME l1, LIST_NAME l2)
-{
-    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
-        return l1;
-    } else {
-        if (!LIST_member(LIST_head(l1), l2) && !LIST_member(LIST_head(l1), LIST_tail(l1))) {
-            return LIST_cons_gl(LIST_head(l1), LIST_diff_gl(LIST_tail(l1), l2));
-        } else {
-            return LIST_diff_gl(LIST_tail(l1), l2);
-        }
-    }
-}
-
-LIST_LINKAGE
-LIST_NAME
-LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
-        return l1;
-    } else {
-        if (!LIST_member(LIST_head(l1), l2) && !LIST_member(LIST_head(l1), LIST_tail(l1))) {
-            return LIST_cons_kls(kls, LIST_head(l1), LIST_diff_kls(kls, LIST_tail(l1), l2));
-        } else {
-            return LIST_diff_kls(kls, LIST_tail(l1), l2);
-        }
-    }
-}
-#endif
-
-// Cleanup
-// These need to be undef'ed so they can be redefined the
-// next time you need to instantiate this template.
-#undef LIST_T
-#undef LIST_PREFIX
-#undef LIST_NAME
-#undef LIST_LINKAGE
-#undef LIST_I_SUFFIX
-#undef LIST_ITEM_NAME
-#undef LIST_nullList
-#undef LIST_isEmpty
-#undef LIST_head
-#undef LIST_tail
-#undef LIST_cons_gl
-#undef LIST_cons_kls
-#undef LIST_free_gl
-#undef LIST_member
-#undef LIST_length
-#undef LIST_append_gl
-#undef LIST_append_kls
-#undef LIST_reverse_gl
-#undef LIST_reverse_kls
-#undef LIST_copy_gl
-#undef LIST_copy_kls
-#undef LIST_remove_gl
-#undef LIST_remove_kls
-#undef LIST_intersect_gl
-#undef LIST_intersect_kls
-#undef LIST_diff_gl
-#undef LIST_diff_kls
-#ifdef LIST_DECLS_ONLY
-#undef LIST_DECLS_ONLY
-#endif // LIST_DECLS_ONLY
-#endif // LIST_T

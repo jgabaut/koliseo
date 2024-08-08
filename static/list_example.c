@@ -1,6 +1,7 @@
+#include <koliseo.h>
 #define LIST_T int
 #define LIST_NAME IntList
-#include <koliseo.h>
+#include "../templates/list.h"
 
 int main(void) {
     printf("KLS API: v%s\n", string_koliseo_version());
