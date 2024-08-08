@@ -11,6 +11,10 @@ build_windows=no
 build_mac=no
 echo "Host os:  $host_os"
 
+AC_ARG_ENABLE([locate],
+  [AS_HELP_STRING([--enable-locate], [Enable location signatures])],
+  [enable_locate=$enableval],
+  [enable_locate=no])
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Enable debug build])],
   [enable_debug=$enableval],
@@ -35,6 +39,7 @@ AC_ARG_ENABLE([exper],
   [AS_HELP_STRING([--enable-exper], [Enable experimental features])],
   [enable_exper=$enableval],
   [enable_exper=no])
+AM_CONDITIONAL([LOCATE_BUILD], [test "$enable_locate" = "yes"])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 AM_CONDITIONAL([CURSES_BUILD], [test "$enable_curses" = "yes"])
 AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])

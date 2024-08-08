@@ -30,6 +30,10 @@ AM_LDFLAGS = -O2
 # Compiler flags
 AM_CFLAGS = $(KOLISEO_CFLAGS) -O2 -Werror -Wpedantic -Wall --std=c11
 
+if LOCATE_BUILD
+AM_CFLAGS += -DKLS_LOC_CALLS
+endif
+
 if DEBUG_BUILD
 AM_LDFLAGS += -ggdb -O0
 AM_CFLAGS += -DKLS_DEBUG_CORE -DKLS_SETCONF_DEBUG

@@ -746,18 +746,39 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
         if (count > PTRDIFF_MAX / size) {
 #ifndef _WIN32
+#ifndef KLS_LOC_CALLS
             fprintf(stderr,
                     "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
                     count, PTRDIFF_MAX / size);
 #else
             fprintf(stderr,
+                    "[KLS] [%s:%i at %s():]    count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                    loc.file, loc.line, loc.func,
+                    count, PTRDIFF_MAX / size);
+#endif // KLS_LOC_CALLS
+#else
+#ifndef KLS_LOC_CALLS
+            fprintf(stderr,
                     "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
                     count, PTRDIFF_MAX / size);
-#endif
+#else
+            fprintf(stderr,
+                    "[KLS] [%s:%i at %s():]    count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                    loc.file, loc.line, loc.func,
+                    count, PTRDIFF_MAX / size);
+#endif // KLS_LOC_CALLS
+#endif // _WIN32
         } else {
+#ifndef KLS_LOC_CALLS
             fprintf(stderr,
                     "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
                     size * count, available - padding);
+#else
+            fprintf(stderr,
+                    "[KLS] [%s:%i at %s():]    Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                    loc.file, loc.line, loc.func,
+                    size * count, available - padding);
+#endif // KLS_LOC_CALLS
         }
 #ifndef KLS_LOC_CALLS
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
