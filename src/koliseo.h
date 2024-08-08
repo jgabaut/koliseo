@@ -38,10 +38,11 @@
 #ifdef KLS_DEBUG_CORE
 #include <time.h>
 
+/*
 #ifndef KLS_LOC_CALLS
 #define KLS_LOC_CALLS // Used for enabling caller location arguments for some APIs.
 #endif // KLS_LOC_CALLS
-
+*/
 
 #ifdef _WIN32
 #include <windows.h>		//Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
