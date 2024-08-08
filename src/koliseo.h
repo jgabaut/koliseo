@@ -39,17 +39,17 @@
 #include <time.h>
 
 /*
-#ifndef KLS_LOC_CALLS
-#define KLS_LOC_CALLS // Used for enabling caller location arguments for some APIs.
-#endif // KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
+#define KOLISEO_HAS_LOCATE // Used for enabling caller location arguments for some APIs.
+#endif // KOLISEO_HAS_LOCATE
 */
 
 #ifdef _WIN32
-#include <windows.h>		//Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
+#include <profileapi.h>		//Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
 #endif
 #endif //KLS_DEBUG_CORE
 
-#ifdef KLS_LOC_CALLS
+#ifdef KOLISEO_HAS_LOCATE
 typedef struct Koliseo_Loc {
     const char* file;
     const int line;
@@ -61,7 +61,19 @@ typedef struct Koliseo_Loc {
     .line = __LINE__, \
     .func = __func__, \
 }
-#endif // KLS_LOC_CALLS
+
+/**
+ * Defines a format string for Koliseo_Loc.
+ * @see KLS_Loc_Arg()
+ */
+#define KLS_Loc_Fmt "[%s:%i at %s():]    "
+
+/**
+ * Defines a format macro for Koliseo_Loc args.
+ * @see KLS_Loc_Fmt
+ */
+#define KLS_Loc_Arg(loc) (loc.file), (loc.line), (loc.func)
+#endif // KOLISEO_HAS_LOCATE
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
@@ -428,12 +440,12 @@ int kls_get_maxRegions_KLS_BASIC(Koliseo * kls);
 int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp * t_kls);
 #endif
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
 #else
 Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc);
 #define kls_new_alloc(size, alloc_func) kls_new_alloc_dbg((size), (alloc_func), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 
 #ifndef KLS_DEFAULT_ALLOCF
 #define KLS_DEFAULT_ALLOCF malloc /**< Defines the default allocation function.*/
@@ -453,44 +465,44 @@ Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                     ptrdiff_t count);
 #else
 void *kls_push_zero_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-                    ptrdiff_t count, Koliseo_Loc loc);
+                        ptrdiff_t count, Koliseo_Loc loc);
 
 #define kls_push_zero(kls, size, align, count) kls_push_zero_dbg((kls), (size), (align), (count), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_AR(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                        ptrdiff_t count);
 #else
 void *kls_push_zero_AR_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-                       ptrdiff_t count, Koliseo_Loc loc);
+                           ptrdiff_t count, Koliseo_Loc loc);
 #define kls_push_zero_AR(kls, size, align, count) kls_push_zero_AR_dbg((kls), (size), (align), (count), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 
 #ifdef KOLISEO_HAS_REGION
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_named(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, char *name, char *desc);
 #else
 void *kls_push_zero_named_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-                          ptrdiff_t count, char *name, char *desc, Koliseo_Loc loc);
+                              ptrdiff_t count, char *name, char *desc, Koliseo_Loc loc);
 #define kls_push_zero_named(kls, size, align, count, name, desc) kls_push_zero_named_dbg((kls), (size), (align), (count), (name), (desc), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_typed(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc);
 #else
 void *kls_push_zero_typed_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-                          ptrdiff_t count, int type, char *name, char *desc, Koliseo_Loc loc);
+                              ptrdiff_t count, int type, char *name, char *desc, Koliseo_Loc loc);
 #define kls_push_zero_typed(kls, size, align, count, type, name, desc) kls_push_zero_typed_dbg((kls), (size), (align), (count), (type), (name), (desc), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 #endif // KOLISEO_HAS_REGION
 
 /**
@@ -586,46 +598,46 @@ void kls_temp_showList_toWin(Koliseo_Temp * t_kls, WINDOW * win);
 
 #endif				//KOLISEO_HAS_CURSES
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo_Temp *kls_temp_start(Koliseo * kls);
 #else
 Koliseo_Temp *kls_temp_start_dbg(Koliseo * kls, Koliseo_Loc loc);
 #define kls_temp_start(kls) kls_temp_start_dbg((kls), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 //bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
 void kls_temp_end(Koliseo_Temp * tmp_kls);
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_AR(Koliseo_Temp * t_kls, ptrdiff_t size,
                             ptrdiff_t align, ptrdiff_t count);
 #else
 void *kls_temp_push_zero_AR_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
-                            ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc);
+                                ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc);
 #define kls_temp_push_zero_AR(t_kls, size, align, count) kls_temp_push_zero_AR_dbg((t_kls), (size), (align), (count), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 
 #ifdef KOLISEO_HAS_REGION
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_named(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, char *name,
                                char *desc);
 #else
 void *kls_temp_push_zero_named_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
-                               ptrdiff_t align, ptrdiff_t count, char *name,
-                               char *desc, Koliseo_Loc loc);
+                                   ptrdiff_t align, ptrdiff_t count, char *name,
+                                   char *desc, Koliseo_Loc loc);
 #define kls_temp_push_zero_named(t_kls, size, align, count, name, desc) kls_temp_push_zero_named_dbg((t_kls), (size), (align), (count), (name), (desc), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_typed(Koliseo_Temp * t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc);
 #else
 void *kls_temp_push_zero_typed_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
-                               ptrdiff_t align, ptrdiff_t count, int type,
-                               char *name, char *desc, Koliseo_Loc loc);
+                                   ptrdiff_t align, ptrdiff_t count, int type,
+                                   char *name, char *desc, Koliseo_Loc loc);
 #define kls_temp_push_zero_typed(t_kls, size, align, count, type, name, desc) kls_temp_push_zero_typed_dbg((t_kls), (size), (align), (count), (type), (name), (desc), KLS_HERE)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 #endif // KOLISEO_HAS_REGION
 void print_temp_kls_2file(FILE * fp, const Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(const Koliseo_Temp * t_kls);

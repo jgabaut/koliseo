@@ -98,7 +98,7 @@ int main(void)
 ### Region <a name = "extra_region"></a>
 
   A ready-to-go index for every allocation you make.
-  - It uses an intrusive linked list and (at the moment) has quite the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
+  - It uses a linked list and has some the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
   - Offers extended API with tagging arguments, to type/name your references
   - For now, two allocations backends can be chosen for the list, it can be stored:
     - In an inner Koliseo (this puts an extra limit to the total number of single allocations)

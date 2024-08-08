@@ -205,6 +205,11 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
  */
 void kls_dbg_features(void)
 {
+#ifdef KOLISEO_HAS_LOCATE
+    fprintf(stderr, "[KLS] caller location APIs are enabled\n");
+#else
+    fprintf(stderr, "[KLS] caller location APIs are not enabled\n");
+#endif
 #ifdef KOLISEO_HAS_CURSES
     fprintf(stderr, "[KLS] ncurses.h integration is enabled\n");
 #else
@@ -367,22 +372,22 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
  * @see kls_temp_start()
  * @see kls_temp_end()
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 #else
 Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 {
     if (size < (ptrdiff_t)sizeof(Koliseo)) {
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
                 "[ERROR]    at %s():  invalid requested kls size (%td). Min accepted is: (%td).\n",
                 __func__, size, (ptrdiff_t)sizeof(Koliseo));
 #else
         fprintf(stderr,
-                "[ERROR] [%s:%i at %s():]    %s():  invalid requested kls size (%td). Min accepted is: (%td).\n",
-                loc.file, loc.line, loc.func, __func__, size, (ptrdiff_t)sizeof(Koliseo));
-#endif // KLS_LOC_CALLS
+                "[ERROR] " KLS_Loc_Fmt "%s():  invalid requested kls size (%td). Min accepted is: (%td).\n",
+                KLS_Loc_Arg(loc), __func__, size, (ptrdiff_t)sizeof(Koliseo));
+#endif // KOLISEO_HAS_LOCATE
         //TODO Is it better to abort the program?
         return NULL;
     }
@@ -448,11 +453,11 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
         }
 #endif // KOLISEO_HAS_REGION
     } else {
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
 #else
-        fprintf(stderr, "[KLS] [%s:%i at %s():]    Failed %s() call.\n", loc.file, loc.line, loc.func, __func__);
-#endif // KLS_LOC_CALLS
+        fprintf(stderr, "[KLS] " KLS_Loc_Fmt "Failed %s() call.\n", KLS_Loc_Arg(loc), __func__);
+#endif // KOLISEO_HAS_LOCATE
         exit(EXIT_FAILURE);
     }
 #ifdef KLS_DEBUG_CORE
@@ -734,11 +739,11 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     return true;
 }
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 static inline void kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 #else
 static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
     ptrdiff_t available = kls->size - kls->offset;
@@ -746,45 +751,45 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
         if (count > PTRDIFF_MAX / size) {
 #ifndef _WIN32
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
             fprintf(stderr,
                     "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
                     count, PTRDIFF_MAX / size);
 #else
             fprintf(stderr,
-                    "[KLS] [%s:%i at %s():]    count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                    loc.file, loc.line, loc.func,
+                    "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                    KLS_Loc_Arg(loc),
                     count, PTRDIFF_MAX / size);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 #else
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
             fprintf(stderr,
                     "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
                     count, PTRDIFF_MAX / size);
 #else
             fprintf(stderr,
-                    "[KLS] [%s:%i at %s():]    count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                    loc.file, loc.line, loc.func,
+                    "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                    KLS_Loc_Arg(loc),
                     count, PTRDIFF_MAX / size);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 #endif // _WIN32
         } else {
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
             fprintf(stderr,
                     "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
                     size * count, available - padding);
 #else
             fprintf(stderr,
-                    "[KLS] [%s:%i at %s():]    Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    loc.file, loc.line, loc.func,
+                    "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                    KLS_Loc_Arg(loc),
                     size * count, available - padding);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
         }
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
 #else
-        fprintf(stderr, "[KLS] [%s:%i at %s():]    Failed %s() call.\n", loc.file, loc.line, loc.func, __func__);
-#endif // KLS_LOC_CALLS
+        fprintf(stderr, "[KLS] " KLS_Loc_Fmt "Failed %s() call.\n", KLS_Loc_Arg(loc), __func__);
+#endif // KOLISEO_HAS_LOCATE
         kls_free(kls);
         exit(EXIT_FAILURE);
     }
@@ -825,11 +830,11 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 #endif // KLS_DEBUG_CORE
         return NULL;
     }
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, KLS_HERE);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
     ptrdiff_t padding = -kls->offset & (align - 1);
     char *p = kls->data + kls->offset + padding;
     kls->prev_offset = kls->offset;
@@ -880,13 +885,13 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                     ptrdiff_t count)
 #else
 void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
-                    ptrdiff_t count, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+                        ptrdiff_t count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
 {
 
 #ifdef KLS_DEBUG_CORE
@@ -905,16 +910,16 @@ void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         exit(EXIT_FAILURE);
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
 #else
-        fprintf(stderr, "[ERROR] [%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", loc.file, loc.line, loc.func, __func__);
-        kls_log(kls, "ERROR", "[%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.", loc.file, loc.line, loc.func, __func__);
+        fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), __func__);
+        kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), __func__);
         exit(EXIT_FAILURE);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, loc);
@@ -1120,13 +1125,13 @@ static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls,
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                        ptrdiff_t count)
 #else
 void *kls_push_zero_AR_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
-                       ptrdiff_t count, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+                           ptrdiff_t count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
 {
 
 #ifdef KLS_DEBUG_CORE
@@ -1145,17 +1150,17 @@ void *kls_push_zero_AR_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         exit(EXIT_FAILURE);
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
 #else
-        fprintf(stderr, "[ERROR] [%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", loc.file, loc.line, loc.func, __func__);
-        kls_log(kls, "ERROR", "[%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.", loc.file, loc.line, loc.func, __func__);
+        fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), __func__);
+        kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), __func__);
         exit(EXIT_FAILURE);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, loc);
@@ -1217,13 +1222,13 @@ void *kls_push_zero_AR_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_AR(Koliseo_Temp *t_kls, ptrdiff_t size,
                             ptrdiff_t align, ptrdiff_t count)
 #else
 void *kls_temp_push_zero_AR_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
-                            ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+                                ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
 {
 
 #ifdef KLS_DEBUG_CORE
@@ -1248,7 +1253,7 @@ void *kls_temp_push_zero_AR_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
                 __func__);
         exit(EXIT_FAILURE);
     }
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, loc);
@@ -1315,13 +1320,13 @@ void *kls_temp_push_zero_AR_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, char *name, char *desc)
 #else
 void *kls_push_zero_named_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
-                          ptrdiff_t count, char *name, char *desc, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+                              ptrdiff_t count, char *name, char *desc, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
 {
 
 #ifdef KLS_DEBUG_CORE
@@ -1340,16 +1345,16 @@ void *kls_push_zero_named_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         exit(EXIT_FAILURE);
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
 #else
-        fprintf(stderr, "[ERROR] [%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", loc.file, loc.line, loc.func, __func__);
-        kls_log(kls, "ERROR", "[%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.", loc.file, loc.line, loc.func, __func__);
+        fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), __func__);
+        kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), __func__);
         exit(EXIT_FAILURE);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, loc);
@@ -1413,15 +1418,15 @@ void *kls_push_zero_named_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_named(Koliseo_Temp *t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, char *name,
                                char *desc)
 #else
 void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
-                               ptrdiff_t align, ptrdiff_t count, char *name,
-                               char *desc, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+                                   ptrdiff_t align, ptrdiff_t count, char *name,
+                                   char *desc, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
 {
 
 #ifdef KLS_DEBUG_CORE
@@ -1448,7 +1453,7 @@ void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
         exit(EXIT_FAILURE);
     }
 
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, loc);
@@ -1512,13 +1517,13 @@ void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                           ptrdiff_t count, int type, char *name, char *desc)
 #else
 void *kls_push_zero_typed_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
-                          ptrdiff_t count, int type, char *name, char *desc, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+                              ptrdiff_t count, int type, char *name, char *desc, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
 {
 #ifdef KLS_DEBUG_CORE
 #ifndef _WIN32
@@ -1535,16 +1540,16 @@ void *kls_push_zero_typed_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         exit(EXIT_FAILURE);
     }
     if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
 #else
-        fprintf(stderr, "[ERROR] [%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", loc.file, loc.line, loc.func, __func__);
-        kls_log(kls, "ERROR", "[%s:%i at %s():]    [%s()]: Passed Koliseo has an open Koliseo_Temp session.", loc.file, loc.line, loc.func, __func__);
+        fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), __func__);
+        kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), __func__);
         exit(EXIT_FAILURE);
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, loc);
@@ -1609,15 +1614,15 @@ void *kls_push_zero_typed_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
                                ptrdiff_t align, ptrdiff_t count, int type,
                                char *name, char *desc)
 #else
 void *kls_temp_push_zero_typed_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
-                               ptrdiff_t align, ptrdiff_t count, int type,
-                               char *name, char *desc, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+                                   ptrdiff_t align, ptrdiff_t count, int type,
+                                   char *name, char *desc, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
 {
 #ifdef KLS_DEBUG_CORE
 #ifndef _WIN32
@@ -1641,7 +1646,7 @@ void *kls_temp_push_zero_typed_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
                 __func__);
         exit(EXIT_FAILURE);
     }
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
     kls__check_available(kls, size, align, count);
 #else
     kls__check_available_dbg(kls, size, align, count, loc);
@@ -2271,11 +2276,11 @@ void kls_free(Koliseo *kls)
  * @return A Koliseo_Temp struct.
  * @see Koliseo_Temp
  */
-#ifndef KLS_LOC_CALLS
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo_Temp *kls_temp_start(Koliseo *kls)
 #else
 Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
-#endif // KLS_LOC_CALLS
+#endif // KOLISEO_HAS_LOCATE
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
