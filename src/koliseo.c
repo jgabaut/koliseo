@@ -1166,6 +1166,7 @@ void *kls_push_zero_AR_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
+
 #ifdef KOLISEO_HAS_REGION
     kls__autoregion(__func__, kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None);
 #endif // KOLISEO_HAS_REGION
@@ -1258,6 +1259,7 @@ void *kls_temp_push_zero_AR_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
+
 #ifdef KOLISEO_HAS_REGION
     kls__temp_autoregion(__func__, t_kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None);
 #endif // KOLISEO_HAS_REGION
@@ -1358,9 +1360,8 @@ void *kls_push_zero_named_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
-    if (kls->conf.kls_autoset_regions == 1) {
-        kls__autoregion(__func__, kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None);
-    }
+
+    kls__autoregion(__func__, kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None);
 
     char h_size[200];
     kls_formatSize(size * count, h_size, sizeof(h_size));
@@ -1458,9 +1459,8 @@ void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
-    if (t_kls->conf.kls_autoset_regions == 1) {
-        kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None);
-    }
+
+    kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None);
 
     char h_size[200];
     kls_formatSize(size, h_size, sizeof(h_size));
@@ -1555,9 +1555,8 @@ void *kls_push_zero_typed_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
-    if (kls->conf.kls_autoset_regions == 1) {
-        kls__autoregion(__func__, kls, padding, name, strlen(name), desc, strlen(desc), type);
-    }
+
+    kls__autoregion(__func__, kls, padding, name, strlen(name), desc, strlen(desc), type);
 
     char h_size[200];
     kls_formatSize(size * count, h_size, sizeof(h_size));
@@ -1653,9 +1652,8 @@ void *kls_temp_push_zero_typed_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
-    if (t_kls->conf.kls_autoset_regions == 1) {
-        kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, type);
-    }
+
+    kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, type);
 
     char h_size[200];
     kls_formatSize(size * count, h_size, sizeof(h_size));
