@@ -25,7 +25,7 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_autoset_temp_regions = 0,
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
-    .kls_block_while_has_temp = 0,
+    .kls_block_while_has_temp = 1,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
 }; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
@@ -38,7 +38,7 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_reglist_kls_size = 0,
     .kls_autoset_temp_regions = 0,
 #endif // KOLISEO_HAS_REGION
-    .kls_block_while_has_temp = 0,
+    .kls_block_while_has_temp = 1,
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
@@ -206,40 +206,89 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
 void kls_dbg_features(void)
 {
 #ifdef KOLISEO_HAS_LOCATE
-    fprintf(stderr, "[KLS] caller location APIs are enabled\n");
+    bool kls_locate = true;
 #else
-    fprintf(stderr, "[KLS] caller location APIs are not enabled\n");
+    bool kls_locate = false;
 #endif
 #ifdef KOLISEO_HAS_CURSES
-    fprintf(stderr, "[KLS] ncurses.h integration is enabled\n");
+    bool kls_ncurses = true;
 #else
-    fprintf(stderr, "[KLS] ncurses.h integration is not enabled\n");
+    bool kls_ncurses = false;
 #endif
 #ifdef KOLISEO_HAS_GULP
-    fprintf(stderr, "[KLS] KLS_GULP is enabled\n");
+    bool kls_gulp = true;
 #else
-    fprintf(stderr, "[KLS] KLS_GULP is not enabled\n");
+    bool kls_gulp = false;
 #endif
 #ifdef KOLISEO_HAS_REGION
-    fprintf(stderr, "[KLS] KLS_Region_List is enabled\n");
+    bool kls_region = true;
 #else
-    fprintf(stderr, "[KLS] KLS_Region_List is not enabled\n");
+    bool kls_region = false;
 #endif
 #ifdef KOLISEO_HAS_TITLE
-    fprintf(stderr, "[KLS] Koliseo title banner is enabled\n");
+    bool kls_title = true;
 #else
-    fprintf(stderr, "[KLS] Koliseo title banner is not enabled\n");
+    bool kls_title = false;
 #endif
 #ifdef KLS_DEBUG_CORE
-    fprintf(stderr, "[KLS] Koliseo core debugging is enabled\n");
+    bool kls_debug = true;
 #else
-    fprintf(stderr, "[KLS] Koliseo core debugging is not enabled\n");
+    bool kls_debug = false;
 #endif
 #ifdef KOLISEO_HAS_EXPER
-    fprintf(stderr, "[KLS] Koliseo experimental is enabled\n");
+    bool kls_exper = true;
 #else
-    fprintf(stderr, "[KLS] Koliseo experimental is not enabled\n");
+    bool kls_exper = false;
 #endif
+    bool features[7] = {
+        [0] = kls_debug,
+        [1] = kls_locate,
+        [2] = kls_title,
+        [3] = kls_ncurses,
+        [4] = kls_region,
+        [5] = kls_gulp,
+        [6] = kls_exper,
+    };
+    int total_enabled = 0;
+    for (int i=0; i<7; i++) {
+        if (features[i]) {
+            total_enabled += 1;
+        }
+    }
+    fprintf(stderr, "[KLS]    Enabled features: {");
+    if (total_enabled == 0) {
+        fprintf(stderr, "none}\n");
+        return;
+    } else {
+        if (kls_debug) {
+            fprintf(stderr, "debug%s", (total_enabled > 1 ? ", " : ""));
+            total_enabled -= 1;
+        }
+        if (kls_locate) {
+            fprintf(stderr, "locate%s", (total_enabled > 1 ? ", " : ""));
+            total_enabled -= 1;
+        }
+        if (kls_title) {
+            fprintf(stderr, "title%s", (total_enabled > 1 ? ", " : ""));
+            total_enabled -= 1;
+        }
+        if (kls_ncurses) {
+            fprintf(stderr, "ncurses%s", (total_enabled > 1 ? ", " : ""));
+            total_enabled -= 1;
+        }
+        if (kls_region) {
+            fprintf(stderr, "region%s", (total_enabled > 1 ? ", " : ""));
+            total_enabled -= 1;
+        }
+        if (kls_gulp) {
+            fprintf(stderr, "gulp%s", (total_enabled > 1 ? ", " : ""));
+            total_enabled -= 1;
+        }
+        if (kls_exper) {
+            fprintf(stderr, "exper");
+        }
+        fprintf(stderr, "}\n");
+    }
 }
 
 /**
