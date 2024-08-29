@@ -8,11 +8,9 @@
   + [Basic example](#basic_example)
   + [Extra features](#extra_features)
     + [Region](#extra_region)
-    + [Curses](#extra_curses)
     + [Debug](#extra_debug)
     + [Gulp](#extra_gulp)
     + [List template](#list_template)
-    + [Title banner](#extra_title)
     + [Experimental](#extra_exper)
     + [How to use extras](#extra_howto)
   + [Documentation](#docs)
@@ -106,10 +104,6 @@ int main(void)
   - Extra utility functions
     - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
 
-### Curses <a name = "extra_curses"></a>
-
-  Utility functions that extend ncurses API to provide debug info.
-
 ### Core debug <a name = "extra_debug"></a>
 
   Extra debug for core calls, may be too verbose for some applications.
@@ -138,10 +132,6 @@ int main(void)
 
   This is inspired by the dynamic array example by [David Priver](#credits).
 
-### Title banner <a name = "extra_title"></a>
-
-  Include an ASCII art string to be printed as a title banner.
-
 ### Experimental <a name = "extra_exper"></a>
 
   Include some experimental (NOT WELL TESTED. USE WITH CAUTION) functions.
@@ -155,10 +145,8 @@ int main(void)
   The preprocessor macros to enable them manually are:
 
   - Region: `KOLISEO_HAS_REGION`
-  - Curses: `KOLISEO_HAS_CURSES`
   - Debug: `KLS_DEBUG_CORE`
   - Gulp: `KOLISEO_HAS_GULP`
-  - Title banner: `KOLISEO_HAS_TITLE`
   - Experimental: `KOLISEO_HAS_EXPER`
 
 ## Documentation <a name = "docs"></a>
@@ -201,9 +189,7 @@ int main(void)
   - Run `./configure --enable-debug` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
     - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
   - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag.
-  - Run `./configure --enable-curses` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_CURSES` flag.
   - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
-  - Run `./configure --enable-title` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_TITLE` flag.
   - Run `./configure --enable-exper` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_EXPER` flag.
 
 

@@ -77,7 +77,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 5 /**< Represents current patch release.*/
+#define KLS_PATCH 6 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -283,7 +283,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.5"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.6-dev"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -294,15 +294,6 @@ const char *string_koliseo_version(void);
  * Returns current koliseo version as an integer.
  */
 int int_koliseo_version(void);
-
-#ifdef KOLISEO_HAS_TITLE
-#define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
-extern char *kls_title[KLS_TITLEROWS + 1];
-/**< Contains title banner.*/
-
-void kls_print_title_2file(FILE * fp);/**< Prints the title banner to the passed FILE.*/
-void kls_print_title(void);
-#endif // KOLISEO_HAS_TITLE
 
 #define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
 
@@ -576,27 +567,6 @@ void kls_free(Koliseo * kls);
 void print_kls_2file(FILE * fp, const Koliseo * kls);
 void print_dbg_kls(const Koliseo * kls);
 void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
-
-#ifdef KOLISEO_HAS_CURSES /**< This definition controls the inclusion of ncurses functions.*/
-
-#ifndef KOLISEO_CURSES_H_
-#define KOLISEO_CURSES_H_
-
-#ifndef _WIN32
-#include "ncurses.h"
-#else
-#include <ncursesw/ncurses.h>
-#endif	//    _WIN32
-
-void kls_show_toWin(Koliseo * kls, WINDOW * win);
-void kls_temp_show_toWin(Koliseo_Temp * t_kls, WINDOW * win);
-#ifdef KOLISEO_HAS_REGION
-void kls_showList_toWin(Koliseo * kls, WINDOW * win);
-void kls_temp_showList_toWin(Koliseo_Temp * t_kls, WINDOW * win);
-#endif // KOLISEO_HAS_REGION
-#endif				//KOLISEO_CURSES_H_
-
-#endif				//KOLISEO_HAS_CURSES
 
 #ifndef KOLISEO_HAS_LOCATE
 Koliseo_Temp *kls_temp_start(Koliseo * kls);
