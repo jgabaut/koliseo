@@ -363,6 +363,19 @@ typedef KLS_region_list_item *KLS_Region_List;
 #endif // KOLISEO_HAS_REGION
 
 struct Koliseo_Temp;		//Forward declaration for Koliseo itself
+struct Koliseo;             //Forward declaration for KLS_OOM_Handler
+
+#ifndef KOLISEO_HAS_LOCATE
+typedef void(KLS_OOM_Handler)(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count); /**< Used to pass an error handler for Out-Of-Memory error.*/
+#else
+typedef void(KLS_OOM_Handler)(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used to pass an error handler for Out-Of-Memory error.*/
+#endif
+
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count); /**< Used by default when no handler is passed.*/
+#else
+void KLS_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
+#endif
 
 /**
  * Represents the initialised arena allocator struct.
@@ -386,6 +399,7 @@ typedef struct Koliseo {
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
     KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
     struct Koliseo_Temp *t_kls;	    /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
+    KLS_OOM_Handler* OOM_handler; /**< Points to error handler for Out-Of-Memory in push calls.*/
 } Koliseo;
 
 /**
@@ -432,6 +446,12 @@ int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp * t_kls);
 #endif
 
 #ifndef KOLISEO_HAS_LOCATE
+Koliseo *kls_new_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
+#else
+Koliseo *kls_new_alloc_handled_dbg(ptrdiff_t size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler, Koliseo_Loc loc);
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
 #else
 Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc);
@@ -443,16 +463,26 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
 #endif
 
 #define kls_new(size) kls_new_alloc((size), KLS_DEFAULT_ALLOCF)
+#define kls_new_handled(size, OOM_handler) kls_new_alloc_handled((size), KLS_DEFAULT_ALLOCF, (OOM_handler))
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
+Koliseo *kls_new_conf_alloc_handled(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func);
 #define kls_new_conf(size, conf) kls_new_conf_alloc((size), (conf), KLS_DEFAULT_ALLOCF)
+#define kls_new_conf_handled(size, conf, OOM_handler) kls_new_conf_alloc_handled((size), (conf), KLS_DEFAULT_ALLOCF, (OOM_handler))
+Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
 Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func);
 #define kls_new_traced(size, output_path) kls_new_traced_alloc((size), (output_path), KLS_DEFAULT_ALLOCF)
+#define kls_new_traced_handled(size, output_path, OOM_handler) kls_new_traced_alloc_handled((size), (output_path), KLS_DEFAULT_ALLOCF, (OOM_handler))
+Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
 #define kls_new_dbg(size) kls_new_dbg_alloc((size), KLS_DEFAULT_ALLOCF)
+#define kls_new_dbg_handled(size, OOM_handler) kls_new_dbg_alloc_handled((size), KLS_DEFAULT_ALLOCF,(OOM_handler))
+Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_path,
+                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
 Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
                                      ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
 #define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
+#define kls_new_traced_AR_KLS_handled(size, output_path, reglist_kls_size, OOM_handler) kls_new_traced_AR_KLS_alloc_handled((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF, (OOM_handler))
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
