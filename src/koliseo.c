@@ -120,7 +120,6 @@ void KLS_OOM_default_handler__(Koliseo* kls, ptrdiff_t available, ptrdiff_t padd
 void KLS_OOM_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
-    (void) kls;
 #ifndef KOLISEO_HAS_LOCATE
     fprintf(stderr,
         "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
@@ -131,6 +130,8 @@ fprintf(stderr,
         KLS_Loc_Arg(loc),
         size * count, available - padding);
 #endif // KOLISEO_HAS_LOCATE
+    kls_free(kls); // Is it even worth it to try?
+    exit(EXIT_FAILURE); // Better than nothing. May change to return NULL instead? Requiring refactor of handler signature
 }
 
 /**
