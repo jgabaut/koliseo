@@ -237,11 +237,11 @@ typedef struct KLS_Err_Handlers {
     KLS_PTRDIFF_MAX_Handler* PTRDIFF_MAX_handler; /**< Pointer to handler for count > (PTRDIFF_MAX / size) errors in push calls.*/
 } KLS_Err_Handlers;
 
-/**
- * Default KLS_Err_Handlers used by auto-handled APIs.
- * @see KLS_Err_Handlers
- */
-extern KLS_Err_Handlers KLS_DEFAULT_ERR_HANDLERS;
+#ifndef KOLISEO_HAS_LOCATE
+#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__, }
+#else
+#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler_dbg__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__, }
+#endif // KOLISEO_HAS_LOCATE
 
 /**
  * Defines flags for Koliseo.

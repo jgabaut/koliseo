@@ -17,16 +17,6 @@
 */
 #include "koliseo.h"
 
-KLS_Err_Handlers KLS_DEFAULT_ERR_HANDLERS = {
-#ifndef KOLISEO_HAS_LOCATE
-    .OOM_handler = &KLS_OOM_default_handler__,
-    .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
-#else
-    .OOM_handler = &KLS_OOM_default_handler_dbg__,
-    .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
-#endif // KOLISEO_HAS_LOCATE
-};
-
 #ifdef KOLISEO_HAS_REGION
 static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_autoset_regions = 0,
@@ -38,7 +28,15 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_block_while_has_temp = 1,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
-    .err_handlers = KLS_DEFAULT_ERR_HANDLERS,
+    .err_handlers = {
+#ifndef KOLISEO_HAS_LOCATE
+        .OOM_handler = &KLS_OOM_default_handler__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
+#else
+        .OOM_handler = &KLS_OOM_default_handler_dbg__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
+#endif // KOLISEO_HAS_LOCATE
+    },
 }; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
 #endif
 
@@ -609,11 +607,8 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
  */
 Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func)
 {
-#ifndef KOLISEO_HAS_LOCATE
-    return kls_new_traced_alloc_handled(size, output_path, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
-#else
-    return kls_new_traced_alloc_handled(size, output_path, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
-#endif
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_new_traced_alloc_handled(size, output_path, alloc_func, err_handlers);
 }
 
 /**
@@ -661,11 +656,8 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KL
  */
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 {
-#ifndef KOLISEO_HAS_LOCATE
-    return kls_new_dbg_alloc_handled(size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
-#else
-    return kls_new_dbg_alloc_handled(size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
-#endif // KOLISEO_HAS_LOCATE
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_new_dbg_alloc_handled(size, alloc_func, err_handlers);
 }
 
 /**
@@ -698,15 +690,16 @@ Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_
         .kls_reglist_kls_size = reglist_kls_size,
         .kls_autoset_regions = 1,
         .kls_autoset_temp_regions = 1,
+#endif // KOLISEO_HAS_REGION
         .err_handlers = (KLS_Err_Handlers) {
 #ifndef KOLISEO_HAS_LOCATE
             .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__);
+            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
             .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__);
+            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLISEO_HAS_LOCATE
-#endif // KOLISEO_HAS_REGION
+       },
     };
     return kls_new_conf_alloc(size, k, alloc_func);
 }
@@ -726,13 +719,9 @@ Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_
 Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
                                      ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func)
 {
-#ifndef KOLISEO_HAS_LOCATE
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
     return kls_new_traced_AR_KLS_alloc_handled(size, output_path,
-                                     reglist_kls_size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
-#else
-    return kls_new_traced_AR_KLS_alloc_handled(size, output_path,
-                                     reglist_kls_size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
-#endif
+                                     reglist_kls_size, alloc_func, err_handlers);
 }
 
 /**
