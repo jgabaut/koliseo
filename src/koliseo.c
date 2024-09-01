@@ -701,9 +701,7 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 #endif // KLS_DEBUG_CORE
     }
 
-    if (conf.OOM_handler != NULL) {
-        kls->OOM_handler = conf.OOM_handler;
-    } else {
+    if (conf.OOM_handler == NULL) {
         fprintf(stderr,
                 "[ERROR]    at %s():  passed OOM_handler is NULL. Using default.\n",
                 __func__);
@@ -715,9 +713,9 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 #endif
 #endif // KLS_DEBUG_CORE
 #ifndef KOLISEO_HAS_LOCATE
-        kls->OOM_handler = &KLS_OOM_default_handler__;
+        kls->conf.OOM_handler = &KLS_OOM_default_handler__;
 #else
-        kls->OOM_handler = &KLS_OOM_default_handler_dbg__;
+        kls->conf.OOM_handler = &KLS_OOM_default_handler_dbg__;
 #endif
     }
 
@@ -854,9 +852,9 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 }
 
 #ifndef KOLISEO_HAS_LOCATE
-static inline void kls__check_available_handled(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, KLS_OOM_Handler* OOM_handler)
+static inline void kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 #else
-static inline void kls__check_available_handled_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, KLS_OOM_Handler* OOM_handler, Koliseo_Loc loc)
+static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
@@ -888,11 +886,11 @@ static inline void kls__check_available_handled_dbg(Koliseo* kls, ptrdiff_t size
 #endif // KOLISEO_HAS_LOCATE
 #endif // _WIN32
         } else {
-            if (OOM_handler != NULL) {
+            if (kls->conf.OOM_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
-                OOM_handler(kls, available, padding, size, count);
+                kls->conf.OOM_handler(kls, available, padding, size, count);
 #else
-                OOM_handler(kls, available, padding, size, count, loc);
+                kls->conf.OOM_handler(kls, available, padding, size, count, loc);
 #endif // KOLISEO_HAS_LOCATE
             } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
 #ifndef KOLISEO_HAS_LOCATE
@@ -915,19 +913,6 @@ static inline void kls__check_available_handled_dbg(Koliseo* kls, ptrdiff_t size
         kls_free(kls);
         exit(EXIT_FAILURE);
     }
-}
-
-#ifndef KOLISEO_HAS_LOCATE
-static inline void kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
-#else
-static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
-#endif // KOLISEO_HAS_LOCATE
-{
-#ifndef KOLISEO_HAS_LOCATE
-    kls__check_available_handled(kls, size, align, count, &KLS_OOM_default_handler__);
-#else
-    kls__check_available_handled_dbg(kls, size, align, count, &KLS_OOM_default_handler_dbg__, loc);
-#endif
 }
 
 /**

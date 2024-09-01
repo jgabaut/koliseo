@@ -400,7 +400,6 @@ typedef struct Koliseo {
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
     KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
     struct Koliseo_Temp *t_kls;	    /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
-    KLS_OOM_Handler* OOM_handler; /**< Points to error handler for Out-Of-Memory in push calls.*/
 } Koliseo;
 
 /**
