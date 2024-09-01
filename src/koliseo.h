@@ -211,10 +211,37 @@ typedef void(KLS_OOM_Handler)(struct Koliseo* kls, ptrdiff_t available, ptrdiff_
 #endif
 
 #ifndef KOLISEO_HAS_LOCATE
+typedef void(KLS_PTRDIFF_MAX_Handler)(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count); /**< Used to pass an error handler for count > (PTRDIFF_MAX / size) error.*/
+#else
+typedef void(KLS_PTRDIFF_MAX_Handler)(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used to pass an error handler for count > (PTRDIFF_MAX / size) error.*/
+#endif
+
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count); /**< Used by default when no handler is passed.*/
 #else
 void KLS_OOM_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
 #endif
+
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_PTRDIFF_MAX_default_handler__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count); /**< Used by default when no handler is passed.*/
+#else
+void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
+#endif
+
+/**
+ * Defines the handlers used for errors in push calls.
+ * @see KLS_Conf
+ */
+typedef struct KLS_Err_Handlers {
+    KLS_OOM_Handler* OOM_handler; /**< Pointer to handler for Out-Of-Memory errors in push caalls.*/
+    KLS_PTRDIFF_MAX_Handler* PTRDIFF_MAX_handler; /**< Pointer to handler for count > (PTRDIFF_MAX / size) errors in push calls.*/
+} KLS_Err_Handlers;
+
+/**
+ * Default KLS_Err_Handlers used by auto-handled APIs.
+ * @see KLS_Err_Handlers
+ */
+extern KLS_Err_Handlers KLS_DEFAULT_ERR_HANDLERS;
 
 /**
  * Defines flags for Koliseo.
@@ -232,10 +259,10 @@ typedef struct KLS_Conf {
     FILE *kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
     int kls_block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
-    KLS_OOM_Handler* OOM_handler; /**< Pointer to handler for Out-Of-Memory errors in push caalls.*/
+    KLS_Err_Handlers err_handlers; /**< Used to pass custom error handlers for push calls.*/
 } KLS_Conf;
 
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_OOM_Handler* OOM_handler);
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
 
 void kls_dbg_features(void);
 
@@ -460,20 +487,20 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func);
 #define kls_new_conf(size, conf) kls_new_conf_alloc((size), (conf), KLS_DEFAULT_ALLOCF)
-Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
+Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers);
 Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func);
 #define kls_new_traced(size, output_path) kls_new_traced_alloc((size), (output_path), KLS_DEFAULT_ALLOCF)
-#define kls_new_traced_handled(size, output_path, OOM_handler) kls_new_traced_alloc_handled((size), (output_path), KLS_DEFAULT_ALLOCF, (OOM_handler))
-Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
+#define kls_new_traced_handled(size, output_path, err_handlers) kls_new_traced_alloc_handled((size), (output_path), KLS_DEFAULT_ALLOCF, (err_handlers))
+Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers);
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
 #define kls_new_dbg(size) kls_new_dbg_alloc((size), KLS_DEFAULT_ALLOCF)
-#define kls_new_dbg_handled(size, OOM_handler) kls_new_dbg_alloc_handled((size), KLS_DEFAULT_ALLOCF,(OOM_handler))
+#define kls_new_dbg_handled(size, err_handlers) kls_new_dbg_alloc_handled((size), KLS_DEFAULT_ALLOCF,(err_handlers))
 Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_path,
-                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler);
+                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers);
 Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
                                      ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
 #define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
-#define kls_new_traced_AR_KLS_handled(size, output_path, reglist_kls_size, OOM_handler) kls_new_traced_AR_KLS_alloc_handled((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF, (OOM_handler))
+#define kls_new_traced_AR_KLS_handled(size, output_path, reglist_kls_size, err_handlers) kls_new_traced_AR_KLS_alloc_handled((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF, (err_handlers))
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 

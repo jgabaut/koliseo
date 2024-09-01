@@ -17,6 +17,16 @@
 */
 #include "koliseo.h"
 
+KLS_Err_Handlers KLS_DEFAULT_ERR_HANDLERS = {
+#ifndef KOLISEO_HAS_LOCATE
+    .OOM_handler = &KLS_OOM_default_handler__,
+    .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
+#else
+    .OOM_handler = &KLS_OOM_default_handler_dbg__,
+    .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
+#endif // KOLISEO_HAS_LOCATE
+};
+
 #ifdef KOLISEO_HAS_REGION
 static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_autoset_regions = 0,
@@ -28,11 +38,7 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_block_while_has_temp = 1,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
-#ifndef KOLISEO_HAS_LOCATE
-    .OOM_handler = &KLS_OOM_default_handler__,
-#else
-    .OOM_handler = &KLS_OOM_default_handler_dbg__,
-#endif // KOLISEO_HAS_LOCATE
+    .err_handlers = KLS_DEFAULT_ERR_HANDLERS,
 }; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
 #endif
 
@@ -48,11 +54,15 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
+    .err_handlers = {
 #ifndef KOLISEO_HAS_LOCATE
-    .OOM_handler = &KLS_OOM_default_handler__,
+        .OOM_handler = &KLS_OOM_default_handler__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
 #else
-    .OOM_handler = &KLS_OOM_default_handler_dbg__,
+        .OOM_handler = &KLS_OOM_default_handler_dbg__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
 #endif // KOLISEO_HAS_LOCATE
+    },
 }; /**< Config used by any new Koliseo by default.*/
 
 KLS_Stats KLS_STATS_DEFAULT = {
@@ -144,11 +154,44 @@ fprintf(stderr,
     exit(EXIT_FAILURE); // Better than nothing. May change to return NULL instead? Requiring refactor of handler signature
 }
 
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_PTRDIFF_MAX_default_handler__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count)
+#else
+void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc)
+#endif
+{
+#ifndef _WIN32
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                count, PTRDIFF_MAX / size);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                KLS_Loc_Arg(loc),
+                count, PTRDIFF_MAX / size);
+#endif // KOLISEO_HAS_LOCATE
+#else
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                count, PTRDIFF_MAX / size);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                KLS_Loc_Arg(loc),
+                count, PTRDIFF_MAX / size);
+#endif // KOLISEO_HAS_LOCATE
+#endif // _WIN32
+       kls_free(kls);
+       exit(EXIT_FAILURE);
+}
+
 /**
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_OOM_Handler* OOM_handler)
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
 {
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
@@ -168,13 +211,23 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
     res.kls_log_fp = log_fp;
     res.kls_log_filepath = log_filepath;
 
-    if (OOM_handler != NULL) {
-        res.OOM_handler = OOM_handler;
+    if (err_handlers.OOM_handler != NULL) {
+        res.err_handlers.OOM_handler = err_handlers.OOM_handler;
     } else {
 #ifndef KOLISEO_HAS_LOCATE
-        res.OOM_handler = &KLS_OOM_default_handler__;
+        res.err_handlers.OOM_handler = &KLS_OOM_default_handler__;
 #else
-        res.OOM_handler = &KLS_OOM_default_handler_dbg__;
+        res.err_handlers.OOM_handler = &KLS_OOM_default_handler_dbg__;
+#endif // KOLISEO_HAS_LOCATE
+    }
+
+    if (err_handlers.PTRDIFF_MAX_handler != NULL) {
+        res.err_handlers.PTRDIFF_MAX_handler = err_handlers.PTRDIFF_MAX_handler;
+    } else {
+#ifndef KOLISEO_HAS_LOCATE
+        res.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__;
+#else
+        res.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__;
 #endif // KOLISEO_HAS_LOCATE
     }
 
@@ -514,13 +567,13 @@ Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_
  * @param size The size for Koliseo data field.
  * @param output_path The filepath for log output.
  * @param alloc_func The allocation function to use.
- * @param OOM_handler The error handler for Out-Of-Memory in push calls.
+ * @param err_handlers The error handlers struct for errors in push calls.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
  * @see kls_new_conf_alloc()
  */
-Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler)
+Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
 {
 
 #ifndef KLS_DEBUG_CORE
@@ -532,9 +585,11 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
         .kls_collect_stats = 1,.kls_verbose_lvl =
                                  1,.kls_log_filepath = output_path,
 #ifndef KOLISEO_HAS_LOCATE
-            .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler__),
+            .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-            .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler_dbg__),
+            .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLISEO_HAS_LOCATE
     };
     return kls_new_conf_alloc(size, k, alloc_func);
@@ -555,9 +610,9 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
 Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func)
 {
 #ifndef KOLISEO_HAS_LOCATE
-    return kls_new_traced_alloc_handled(size, output_path, alloc_func, &KLS_OOM_default_handler__);
+    return kls_new_traced_alloc_handled(size, output_path, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
 #else
-    return kls_new_traced_alloc_handled(size, output_path, alloc_func, &KLS_OOM_default_handler_dbg__);
+    return kls_new_traced_alloc_handled(size, output_path, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
 #endif
 }
 
@@ -566,13 +621,13 @@ Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc
  * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
  * @param size The size for Koliseo data field.
  * @param alloc_func The allocation function to use.
- * @param OOM_handler The error handler for Out-Of-Memory in push calls.
+ * @param err_handlers The error handlers for errors in push calls.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
  * @see kls_new_conf()
  */
-Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler)
+Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -582,9 +637,11 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KL
     KLS_Conf k = (KLS_Conf) {
         .kls_collect_stats = 1,.kls_verbose_lvl = 0,
 #ifndef KOLISEO_HAS_LOCATE
-            .OOM_handler = ( OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler__),
+            .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-            .OOM_handler = ( OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler_dbg__),
+            .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLIEO_HAS_LOCATE
     };
     Koliseo * kls = kls_new_conf_alloc(size, k, alloc_func);
@@ -605,9 +662,9 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KL
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 {
 #ifndef KOLISEO_HAS_LOCATE
-    return kls_new_dbg_alloc_handled(size, alloc_func, &KLS_OOM_default_handler__);
+    return kls_new_dbg_alloc_handled(size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
 #else
-    return kls_new_dbg_alloc_handled(size, alloc_func, &KLS_OOM_default_handler_dbg__);
+    return kls_new_dbg_alloc_handled(size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
 #endif // KOLISEO_HAS_LOCATE
 }
 
@@ -618,14 +675,14 @@ Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
  * @param output_path The filepath for log output.
  * @param reglist_kls_size The size to use for the inner reglist Koliseo.
  * @param alloc_func The allocation function to use.
- * @param OOM_handler The error handler for Out-Of-Memory in push calls.
+ * @param err_handlers The error handlers for errors in push calls.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
  * @see kls_new_conf_alloc()
  */
 Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_path,
-                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler)
+                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -641,10 +698,13 @@ Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_
         .kls_reglist_kls_size = reglist_kls_size,
         .kls_autoset_regions = 1,
         .kls_autoset_temp_regions = 1,
+        .err_handlers = (KLS_Err_Handlers) {
 #ifndef KOLISEO_HAS_LOCATE
-        .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler__),
+            .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__);
 #else
-        .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler_dbg__),
+            .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__);
 #endif // KOLISEO_HAS_LOCATE
 #endif // KOLISEO_HAS_REGION
     };
@@ -668,10 +728,10 @@ Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
 {
 #ifndef KOLISEO_HAS_LOCATE
     return kls_new_traced_AR_KLS_alloc_handled(size, output_path,
-                                     reglist_kls_size, alloc_func, &KLS_OOM_default_handler__);
+                                     reglist_kls_size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
 #else
     return kls_new_traced_AR_KLS_alloc_handled(size, output_path,
-                                     reglist_kls_size, alloc_func, &KLS_OOM_default_handler_dbg__);
+                                     reglist_kls_size, alloc_func, KLS_DEFAULT_ERR_HANDLERS);
 #endif
 }
 
@@ -701,7 +761,7 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 #endif // KLS_DEBUG_CORE
     }
 
-    if (conf.OOM_handler == NULL) {
+    if (conf.err_handlers.OOM_handler == NULL) {
         fprintf(stderr,
                 "[ERROR]    at %s():  passed OOM_handler is NULL. Using default.\n",
                 __func__);
@@ -713,9 +773,27 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 #endif
 #endif // KLS_DEBUG_CORE
 #ifndef KOLISEO_HAS_LOCATE
-        kls->conf.OOM_handler = &KLS_OOM_default_handler__;
+        kls->conf.err_handlers.OOM_handler = &KLS_OOM_default_handler__;
 #else
-        kls->conf.OOM_handler = &KLS_OOM_default_handler_dbg__;
+        kls->conf.err_handlers.OOM_handler = &KLS_OOM_default_handler_dbg__;
+#endif
+    }
+
+    if (conf.err_handlers.PTRDIFF_MAX_handler == NULL) {
+        fprintf(stderr,
+                "[ERROR]    at %s():  passed PTRDIFF_MAX_handler is NULL. Using default.\n",
+                __func__);
+#ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
+        kls_log(kls, "KLS",
+                "[%s()]:  Passed PTRDIFF_MAX_handler was NULL, using default.",
+                __func__);
+#endif
+#endif // KLS_DEBUG_CORE
+#ifndef KOLISEO_HAS_LOCATE
+        kls->conf.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__;
+#else
+        kls->conf.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__;
 #endif
     }
 
@@ -862,35 +940,43 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
     const ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
         if (count > PTRDIFF_MAX / size) {
+            if (kls->conf.err_handlers.PTRDIFF_MAX_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
+                kls->conf.err_handlers.PTRDIFF_MAX_handler(kls, size, count);
+#else
+                kls->conf.err_handlers.PTRDIFF_MAX_handler(kls, size, count, loc);
+#endif // KOLISEO_HAS_LOCATE
+            } else { // Let's keep this here for now? It's the original part before adding KLS_PTRDIFF_MAX_default_handler__()
 #ifndef _WIN32
 #ifndef KOLISEO_HAS_LOCATE
-            fprintf(stderr,
-                    "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        count, PTRDIFF_MAX / size);
 #else
-            fprintf(stderr,
-                    "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                    KLS_Loc_Arg(loc),
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        KLS_Loc_Arg(loc),
+                        count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #else
 #ifndef KOLISEO_HAS_LOCATE
-            fprintf(stderr,
-                    "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        count, PTRDIFF_MAX / size);
 #else
-            fprintf(stderr,
-                    "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                    KLS_Loc_Arg(loc),
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        KLS_Loc_Arg(loc),
+                        count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #endif // _WIN32
+            }
         } else {
-            if (kls->conf.OOM_handler != NULL) {
+            if (kls->conf.err_handlers.OOM_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
-                kls->conf.OOM_handler(kls, available, padding, size, count);
+                kls->conf.err_handlers.OOM_handler(kls, available, padding, size, count);
 #else
-                kls->conf.OOM_handler(kls, available, padding, size, count, loc);
+                kls->conf.err_handlers.OOM_handler(kls, available, padding, size, count, loc);
 #endif // KOLISEO_HAS_LOCATE
             } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
 #ifndef KOLISEO_HAS_LOCATE
