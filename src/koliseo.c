@@ -28,6 +28,11 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_block_while_has_temp = 1,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
+#ifndef KOLISEO_HAS_LOCATE
+    .OOM_handler = &KLS_OOM_default_handler__,
+#else
+    .OOM_handler = &KLS_OOM_default_handler_dbg__,
+#endif // KOLISEO_HAS_LOCATE
 }; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
 #endif
 
@@ -43,6 +48,11 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
+#ifndef KOLISEO_HAS_LOCATE
+    .OOM_handler = &KLS_OOM_default_handler__,
+#else
+    .OOM_handler = &KLS_OOM_default_handler_dbg__,
+#endif // KOLISEO_HAS_LOCATE
 }; /**< Config used by any new Koliseo by default.*/
 
 KLS_Stats KLS_STATS_DEFAULT = {
@@ -138,7 +148,7 @@ fprintf(stderr,
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath)
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_OOM_Handler* OOM_handler)
 {
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
@@ -157,6 +167,16 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
     res.kls_block_while_has_temp = block_while_has_temp;
     res.kls_log_fp = log_fp;
     res.kls_log_filepath = log_filepath;
+
+    if (OOM_handler != NULL) {
+        res.OOM_handler = OOM_handler;
+    } else {
+#ifndef KOLISEO_HAS_LOCATE
+        res.OOM_handler = &KLS_OOM_default_handler__;
+#else
+        res.OOM_handler = &KLS_OOM_default_handler_dbg__;
+#endif // KOLISEO_HAS_LOCATE
+    }
 
     return res;
 }
@@ -355,7 +375,6 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
  * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
  * @param size The size for Koliseo data field.
  * @param alloc_func The allocation function to use to init the Koliseo.
- * @param OOM_handler The handler to register for Out-Of-Memory for the Koliseo.
  * @return A pointer to the initialised Koliseo struct.
  * @see Koliseo
  * @see Koliseo_Temp
@@ -365,9 +384,9 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
  * @see kls_temp_end()
  */
 #ifndef KOLISEO_HAS_LOCATE
-Koliseo *kls_new_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler)
+Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 #else
-Koliseo *kls_new_alloc_handled_dbg(ptrdiff_t size, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler, Koliseo_Loc loc)
+Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     if (size < (ptrdiff_t)sizeof(Koliseo)) {
@@ -390,24 +409,6 @@ Koliseo *kls_new_alloc_handled_dbg(ptrdiff_t size, kls_alloc_func alloc_func, KL
         char h_size[200];
         kls_formatSize(size, h_size, sizeof(h_size));
         Koliseo *kls = p;
-        if (OOM_handler != NULL) {
-            kls->OOM_handler = OOM_handler;
-        } else {
-#ifndef KOLISEO_HAS_LOCATE
-            fprintf(stderr,
-                    "[ERROR]    at %s():  passed OOM_handler is NULL. Using default.\n",
-                    __func__);
-#else
-            fprintf(stderr,
-                    "[ERROR] " KLS_Loc_Fmt "%s():  passed OOM_handler is NULL. Using default.\n",
-                    KLS_Loc_Arg(loc), __func__);
-#endif // KOLISEO_HAS_LOCATE
-#ifndef KOLISEO_HAS_LOCATE
-            kls->OOM_handler = &KLS_OOM_default_handler__;
-#else
-            kls->OOM_handler = &KLS_OOM_default_handler_dbg__;
-#endif
-        }
         kls->data = p;
         kls->size = size;
         kls->offset = sizeof(*kls);
@@ -480,62 +481,6 @@ Koliseo *kls_new_alloc_handled_dbg(ptrdiff_t size, kls_alloc_func alloc_func, KL
 }
 
 /**
- * Takes a ptrdiff_t size and a function pointer to the allocation function.
- * Allocates the backing memory for a Koliseo.
- * Sets the KLS_Conf field to KLS_DEFAULT_CONF.
- * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
- * @param size The size for Koliseo data field.
- * @param alloc_func The allocation function to use to init the Koliseo.
- * @return A pointer to the initialised Koliseo struct.
- * @see Koliseo
- * @see Koliseo_Temp
- * @see KLS_DEFAULT_CONF
- * @see kls_new()
- * @see kls_temp_start()
- * @see kls_temp_end()
- */
-#ifndef KOLISEO_HAS_LOCATE
-Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
-#else
-Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc)
-#endif // KOLISEO_HAS_LOCATE
-{
-#ifndef KOLISEO_HAS_LOCATE
-    return kls_new_alloc_handled(size, alloc_func, &KLS_OOM_default_handler__);
-#else
-    return kls_new_alloc_handled_dbg(size, alloc_func, &KLS_OOM_default_handler_dbg__, loc);
-#endif // KOLISEO_HAS_LOCATE
-}
-
-/**
- * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, and an allocation function pointer.
- * Calls kls_new_alloc() to initialise the Koliseo, then calls kls_set_conf() to update the config.
- * Returns the new Koliseo.
- * @param size The size for Koliseo data field.
- * @param conf The KLS_Conf for the new Koliseo.
- * @param alloc_func The allocation function to use.
- * @param OOM_handler The error handler for Out-Of-Memory in push calls.
- * @return A pointer to the initialised Koliseo struct, with wanted config.
- * @see Koliseo
- * @see KLS_Conf
- * @see KLS_DEFAULT_CONF
- * @see kls_new_alloc()
- * @see kls_set_conf()
- */
-Koliseo *kls_new_conf_alloc_handled(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, KLS_OOM_Handler* OOM_handler)
-{
-    Koliseo *k = kls_new_alloc_handled(size, alloc_func, OOM_handler);
-    bool conf_res = kls_set_conf(k, conf);
-    if (!conf_res) {
-        fprintf(stderr,
-                "[ERROR] [%s()]: Failed to set config for new Koliseo.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    return k;
-}
-
-/**
  * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, and an allocation function pointer.
  * Calls kls_new_alloc() to initialise the Koliseo, then calls kls_set_conf() to update the config.
  * Returns the new Koliseo.
@@ -551,11 +496,15 @@ Koliseo *kls_new_conf_alloc_handled(ptrdiff_t size, KLS_Conf conf, kls_alloc_fun
  */
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func)
 {
-#ifndef KOLISEO_HAS_LOCATE
-    return kls_new_conf_alloc_handled(size, conf, alloc_func, &KLS_OOM_default_handler__);
-#else
-    return kls_new_conf_alloc_handled(size, conf, alloc_func, &KLS_OOM_default_handler_dbg__);
-#endif
+    Koliseo *k = kls_new_alloc(size, alloc_func);
+    bool conf_res = kls_set_conf(k, conf);
+    if (!conf_res) {
+        fprintf(stderr,
+                "[ERROR] [%s()]: Failed to set config for new Koliseo.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+    return k;
 }
 
 /**
@@ -581,9 +530,14 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
 #endif
     KLS_Conf k = (KLS_Conf) {
         .kls_collect_stats = 1,.kls_verbose_lvl =
-                                 1,.kls_log_filepath = output_path
+                                 1,.kls_log_filepath = output_path,
+#ifndef KOLISEO_HAS_LOCATE
+            .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler__),
+#else
+            .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler_dbg__),
+#endif // KOLISEO_HAS_LOCATE
     };
-    return kls_new_conf_alloc_handled(size, k, alloc_func, OOM_handler);
+    return kls_new_conf_alloc(size, k, alloc_func);
 }
 
 /**
@@ -626,7 +580,12 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KL
             __func__);
 #endif
     KLS_Conf k = (KLS_Conf) {
-        .kls_collect_stats = 1,.kls_verbose_lvl = 0
+        .kls_collect_stats = 1,.kls_verbose_lvl = 0,
+#ifndef KOLISEO_HAS_LOCATE
+            .OOM_handler = ( OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler__),
+#else
+            .OOM_handler = ( OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler_dbg__),
+#endif // KOLIEO_HAS_LOCATE
     };
     Koliseo * kls = kls_new_conf_alloc(size, k, alloc_func);
     kls->conf.kls_verbose_lvl = 1;
@@ -645,7 +604,11 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KL
  */
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 {
+#ifndef KOLISEO_HAS_LOCATE
     return kls_new_dbg_alloc_handled(size, alloc_func, &KLS_OOM_default_handler__);
+#else
+    return kls_new_dbg_alloc_handled(size, alloc_func, &KLS_OOM_default_handler_dbg__);
+#endif // KOLISEO_HAS_LOCATE
 }
 
 /**
@@ -678,9 +641,14 @@ Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_
         .kls_reglist_kls_size = reglist_kls_size,
         .kls_autoset_regions = 1,
         .kls_autoset_temp_regions = 1,
+#ifndef KOLISEO_HAS_LOCATE
+        .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler__),
+#else
+        .OOM_handler = (OOM_handler != NULL ? OOM_handler : &KLS_OOM_default_handler_dbg__),
+#endif // KOLISEO_HAS_LOCATE
 #endif // KOLISEO_HAS_REGION
     };
-    return kls_new_conf_alloc_handled(size, k, alloc_func, OOM_handler);
+    return kls_new_conf_alloc(size, k, alloc_func);
 }
 
 /**
@@ -730,6 +698,26 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
                 "[%s()]:  Preliminary set of conf.kls_log_fp to stderr.",
                 __func__);
 #endif
+#endif // KLS_DEBUG_CORE
+    }
+
+    if (conf.OOM_handler != NULL) {
+        kls->OOM_handler = conf.OOM_handler;
+    } else {
+        fprintf(stderr,
+                "[ERROR]    at %s():  passed OOM_handler is NULL. Using default.\n",
+                __func__);
+#ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
+        kls_log(kls, "KLS",
+                "[%s()]:  Passed OOM_handler was NULL, using default.",
+                __func__);
+#endif
+#endif // KLS_DEBUG_CORE
+#ifndef KOLISEO_HAS_LOCATE
+        kls->OOM_handler = &KLS_OOM_default_handler__;
+#else
+        kls->OOM_handler = &KLS_OOM_default_handler_dbg__;
 #endif
     }
 
