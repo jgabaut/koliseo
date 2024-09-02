@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 #endif
 
     int block_usage_with_open_temp = 0;
-    KLS_Conf kls_config = kls_conf_init(1, KLS_REGLIST_ALLOC_KLS_BASIC, KLS_DEFAULT_SIZE, 1, 1, 1, block_usage_with_open_temp, NULL, "./static/debug_log.txt", KLS_DEFAULT_ERR_HANDLERS);
+    KLS_Conf kls_config = kls_conf_init(1, KLS_REGLIST_ALLOC_KLS_BASIC, KLS_DEFAULT_SIZE, 1, 1, 1, block_usage_with_open_temp, NULL, "./static/debug_log.txt");
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 

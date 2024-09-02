@@ -187,9 +187,10 @@ void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, 
 
 /**
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * Passes custom error handlers for errors in push calls.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
+KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
 {
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
@@ -230,6 +231,16 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
     }
 
     return res;
+}
+
+/**
+ * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * @see KLS_Conf
+ */
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath)
+{
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_conf_init_handled(autoset_regions, alloc_backend, reglist_kls_size, autoset_temp_regions, collect_stats, verbose_lvl, block_while_has_temp, log_fp, log_filepath, err_handlers);
 }
 
 /**
