@@ -77,7 +77,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 5 /**< Represents current patch release.*/
+#define KLS_PATCH 6 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -113,6 +113,137 @@ const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be);
 #endif // KOLISEO_HAS_REGION
 
 /**
+ * Defines current API version number from KLS_MAJOR, KLS_MINOR and KLS_PATCH.
+ */
+static const int KOLISEO_API_VERSION_INT =
+    (KLS_MAJOR * 1000000 + KLS_MINOR * 10000 + KLS_PATCH * 100);
+/**< Represents current version with numeric format.*/
+
+/**
+ * Defines current API version string.
+ */
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+
+/**
+ * Returns current koliseo version as a string.
+ */
+const char *string_koliseo_version(void);
+
+/**
+ * Returns current koliseo version as an integer.
+ */
+int int_koliseo_version(void);
+
+#define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
+
+#ifndef KLS_DEFAULT_ALIGNMENT
+#define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
+#endif
+
+/**
+ * Represents a type index for Regions.
+ * @see KLS_PUSH_TYPED()
+ */
+typedef enum KLS_Region_Type {
+    KLS_None = 0,
+    Temp_KLS_Header = 1,
+    KLS_Header = 2,
+} KLS_Region_Type;
+
+/**
+ * Defines max index for Koliseo's own Region_Type values.
+ * @see Region_Type
+ */
+#define KLS_REGIONTYPE_MAX KLS_Header
+
+/**
+ * Defines max size for KLS_Region's name field.
+ * @see KLS_Region
+ */
+#define KLS_REGION_MAX_NAME_SIZE 15
+/**
+ * Defines max size for KLS_Region's desc field.
+ * @see KLS_Region
+ */
+#define KLS_REGION_MAX_DESC_SIZE 20
+
+#ifdef KOLISEO_HAS_REGION
+
+/**
+ * Represents an allocated memory region in a Koliseo.
+ * @see KLS_PUSH()
+ * @see KLS_PUSH_NAMED()
+ */
+typedef struct KLS_Region {
+    ptrdiff_t begin_offset;	/**< Starting offset of memory region.*/
+    ptrdiff_t end_offset;     /**< Ending offset of memory region.*/
+    ptrdiff_t size;	/**< Size of memory for the KLS_Region.*/
+    ptrdiff_t padding;	   /**< Size of padding for the KLS_Region.*/
+    char name[KLS_REGION_MAX_NAME_SIZE + 1];   /**< Name field for the KLS_Region.*/
+    char desc[KLS_REGION_MAX_DESC_SIZE + 1];   /**< Description field for the KLS_Region.*/
+    int type;	  /**< Used to identify which type the KLS_Region holds.*/
+} KLS_Region;
+
+static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
+static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
+
+typedef KLS_Region *KLS_list_element; /**< Redundant typedef to better denote the actual value field of a KLS_region_list_item.*/
+
+/**
+ * Defines the node for a KLS_Region_List.
+ * @see KLS_list_element
+ */
+typedef struct KLS_list_region {
+    KLS_list_element value;	/**< The KLS_Region value.*/
+    struct KLS_list_region *next;     /**< Pointer to the next node int the list.*/
+} KLS_region_list_item;
+
+typedef KLS_region_list_item *KLS_Region_List;
+#endif // KOLISEO_HAS_REGION
+
+struct Koliseo_Temp;		//Forward declaration for Koliseo itself
+struct Koliseo;             //Forward declaration for KLS_OOM_Handler
+
+#ifndef KOLISEO_HAS_LOCATE
+typedef void(KLS_OOM_Handler)(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count); /**< Used to pass an error handler for Out-Of-Memory error.*/
+#else
+typedef void(KLS_OOM_Handler)(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used to pass an error handler for Out-Of-Memory error.*/
+#endif
+
+#ifndef KOLISEO_HAS_LOCATE
+typedef void(KLS_PTRDIFF_MAX_Handler)(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count); /**< Used to pass an error handler for count > (PTRDIFF_MAX / size) error.*/
+#else
+typedef void(KLS_PTRDIFF_MAX_Handler)(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used to pass an error handler for count > (PTRDIFF_MAX / size) error.*/
+#endif
+
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count); /**< Used by default when no handler is passed.*/
+#else
+void KLS_OOM_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
+#endif
+
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_PTRDIFF_MAX_default_handler__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count); /**< Used by default when no handler is passed.*/
+#else
+void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
+#endif
+
+/**
+ * Defines the handlers used for errors in push calls.
+ * @see KLS_Conf
+ */
+typedef struct KLS_Err_Handlers {
+    KLS_OOM_Handler* OOM_handler; /**< Pointer to handler for Out-Of-Memory errors in push caalls.*/
+    KLS_PTRDIFF_MAX_Handler* PTRDIFF_MAX_handler; /**< Pointer to handler for count > (PTRDIFF_MAX / size) errors in push calls.*/
+} KLS_Err_Handlers;
+
+#ifndef KOLISEO_HAS_LOCATE
+#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__, }
+#else
+#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler_dbg__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__, }
+#endif // KOLISEO_HAS_LOCATE
+
+/**
  * Defines flags for Koliseo.
  * @see Koliseo
  */
@@ -128,7 +259,10 @@ typedef struct KLS_Conf {
     FILE *kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
     int kls_block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
+    KLS_Err_Handlers err_handlers; /**< Used to pass custom error handlers for push calls.*/
 } KLS_Conf;
+
+KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
 
 KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath);
 
@@ -274,106 +408,6 @@ typedef struct KLS_Temp_Conf {
 #define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.tkls_reglist_alloc_backend),(conf.kls_reglist_kls_size)
 
 /**
- * Defines current API version number from KLS_MAJOR, KLS_MINOR and KLS_PATCH.
- */
-static const int KOLISEO_API_VERSION_INT =
-    (KLS_MAJOR * 1000000 + KLS_MINOR * 10000 + KLS_PATCH * 100);
-/**< Represents current version with numeric format.*/
-
-/**
- * Defines current API version string.
- */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.5"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
-
-/**
- * Returns current koliseo version as a string.
- */
-const char *string_koliseo_version(void);
-
-/**
- * Returns current koliseo version as an integer.
- */
-int int_koliseo_version(void);
-
-#ifdef KOLISEO_HAS_TITLE
-#define KLS_TITLEROWS 33 /**< Defines how many rows the title banner has.*/
-extern char *kls_title[KLS_TITLEROWS + 1];
-/**< Contains title banner.*/
-
-void kls_print_title_2file(FILE * fp);/**< Prints the title banner to the passed FILE.*/
-void kls_print_title(void);
-#endif // KOLISEO_HAS_TITLE
-
-#define KLS_DEFAULT_SIZE (16*1024) /**< Represents a simple default size for demo purposes.*/
-
-#ifndef KLS_DEFAULT_ALIGNMENT
-#define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
-#endif
-
-/**
- * Represents a type index for Regions.
- * @see KLS_PUSH_TYPED()
- */
-typedef enum KLS_Region_Type {
-    KLS_None = 0,
-    Temp_KLS_Header = 1,
-    KLS_Header = 2,
-} KLS_Region_Type;
-
-/**
- * Defines max index for Koliseo's own Region_Type values.
- * @see Region_Type
- */
-#define KLS_REGIONTYPE_MAX KLS_Header
-
-/**
- * Defines max size for KLS_Region's name field.
- * @see KLS_Region
- */
-#define KLS_REGION_MAX_NAME_SIZE 15
-/**
- * Defines max size for KLS_Region's desc field.
- * @see KLS_Region
- */
-#define KLS_REGION_MAX_DESC_SIZE 20
-
-#ifdef KOLISEO_HAS_REGION
-
-/**
- * Represents an allocated memory region in a Koliseo.
- * @see KLS_PUSH()
- * @see KLS_PUSH_NAMED()
- */
-typedef struct KLS_Region {
-    ptrdiff_t begin_offset;	/**< Starting offset of memory region.*/
-    ptrdiff_t end_offset;     /**< Ending offset of memory region.*/
-    ptrdiff_t size;	/**< Size of memory for the KLS_Region.*/
-    ptrdiff_t padding;	   /**< Size of padding for the KLS_Region.*/
-    char name[KLS_REGION_MAX_NAME_SIZE + 1];   /**< Name field for the KLS_Region.*/
-    char desc[KLS_REGION_MAX_DESC_SIZE + 1];   /**< Description field for the KLS_Region.*/
-    int type;	  /**< Used to identify which type the KLS_Region holds.*/
-} KLS_Region;
-
-static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
-static const char KOLISEO_DEFAULT_REGION_DESC[] = "No Desc"; /**< Represents default Region desc, used for kls_push_zero().*/
-
-typedef KLS_Region *KLS_list_element; /**< Redundant typedef to better denote the actual value field of a KLS_region_list_item.*/
-
-/**
- * Defines the node for a KLS_Region_List.
- * @see KLS_list_element
- */
-typedef struct KLS_list_region {
-    KLS_list_element value;	/**< The KLS_Region value.*/
-    struct KLS_list_region *next;     /**< Pointer to the next node int the list.*/
-} KLS_region_list_item;
-
-typedef KLS_region_list_item *KLS_Region_List;
-#endif // KOLISEO_HAS_REGION
-
-struct Koliseo_Temp;		//Forward declaration for Koliseo itself
-
-/**
  * Represents the initialised arena allocator struct.
  * @see kls_new()
  * @see kls_clear()
@@ -455,13 +489,20 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func);
 #define kls_new_conf(size, conf) kls_new_conf_alloc((size), (conf), KLS_DEFAULT_ALLOCF)
+Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers);
 Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func);
 #define kls_new_traced(size, output_path) kls_new_traced_alloc((size), (output_path), KLS_DEFAULT_ALLOCF)
+#define kls_new_traced_handled(size, output_path, err_handlers) kls_new_traced_alloc_handled((size), (output_path), KLS_DEFAULT_ALLOCF, (err_handlers))
+Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers);
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
 #define kls_new_dbg(size) kls_new_dbg_alloc((size), KLS_DEFAULT_ALLOCF)
+#define kls_new_dbg_handled(size, err_handlers) kls_new_dbg_alloc_handled((size), KLS_DEFAULT_ALLOCF,(err_handlers))
+Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_path,
+        ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers);
 Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
                                      ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
 #define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
+#define kls_new_traced_AR_KLS_handled(size, output_path, reglist_kls_size, err_handlers) kls_new_traced_AR_KLS_alloc_handled((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF, (err_handlers))
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
@@ -576,27 +617,6 @@ void kls_free(Koliseo * kls);
 void print_kls_2file(FILE * fp, const Koliseo * kls);
 void print_dbg_kls(const Koliseo * kls);
 void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
-
-#ifdef KOLISEO_HAS_CURSES /**< This definition controls the inclusion of ncurses functions.*/
-
-#ifndef KOLISEO_CURSES_H_
-#define KOLISEO_CURSES_H_
-
-#ifndef _WIN32
-#include "ncurses.h"
-#else
-#include <ncursesw/ncurses.h>
-#endif	//    _WIN32
-
-void kls_show_toWin(Koliseo * kls, WINDOW * win);
-void kls_temp_show_toWin(Koliseo_Temp * t_kls, WINDOW * win);
-#ifdef KOLISEO_HAS_REGION
-void kls_showList_toWin(Koliseo * kls, WINDOW * win);
-void kls_temp_showList_toWin(Koliseo_Temp * t_kls, WINDOW * win);
-#endif // KOLISEO_HAS_REGION
-#endif				//KOLISEO_CURSES_H_
-
-#endif				//KOLISEO_HAS_CURSES
 
 #ifndef KOLISEO_HAS_LOCATE
 Koliseo_Temp *kls_temp_start(Koliseo * kls);

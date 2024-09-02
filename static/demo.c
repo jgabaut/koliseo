@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <locale.h>
 #include "../src/koliseo.h"
+#include "./kls_banner.h"
 #include "amboso.h"
 
 void usage(char *progname)
@@ -31,9 +32,7 @@ int main(int argc, char **argv)
 	}
     }
 
-#ifdef KOLISEO_HAS_TITLE
     kls_print_title();
-#endif // KOLISEO_HAS_TITLE
 
 
     printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n",
@@ -209,34 +208,6 @@ int main(int argc, char **argv)
     printf("[Usage report for Koliseo]\n");
     kls_usageReport(kls);
 #endif // KOLISEO_HAS_REGION
-
-#ifdef KOLISEO_HAS_CURSES
-    if (is_interactive == 1) {
-	WINDOW *win = NULL;
-	/* Initialize curses */
-	setlocale(LC_ALL, "");
-	initscr();
-	clear();
-	refresh();
-	start_color();
-	cbreak();
-	noecho();
-	keypad(stdscr, TRUE);
-	win = newwin(22, 60, 1, 2);
-	keypad(win, TRUE);
-	wclear(win);
-	wrefresh(win);
-	kls_show_toWin(kls, win);
-	kls_temp_show_toWin(temp_kls, win);
-	refresh();
-#ifdef KOLISEO_HAS_REGION
-	kls_showList_toWin(kls, win);
-	kls_temp_showList_toWin(temp_kls, win);
-#endif // KOLISEO_HAS_REGION
-	delwin(win);
-	endwin();
-    }
-#endif
 
 #ifdef KOLISEO_HAS_EXPER
     int *z = &minusone;

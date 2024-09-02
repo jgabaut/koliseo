@@ -18,7 +18,7 @@ INSTALLER_LOG_FILE = "./installer.log"
 PACK_NAME = $(SHARED_LIB)-$(VERSION)-$(OS)-$(MACHINE)
 
 # Source files
-demo_SOURCES = src/koliseo.c static/amboso.c static/demo.c
+demo_SOURCES = src/koliseo.c static/amboso.c static/demo.c static/kls_banner.c
 lib_SOURCES = src/koliseo.c
 
 # Linking rule
@@ -40,10 +40,6 @@ AM_CFLAGS += -DKLS_DEBUG_CORE -DKLS_SETCONF_DEBUG
 else
 # Linker flag to strip symbols
 AM_LDFLAGS += -s
-endif
-
-if CURSES_BUILD
-AM_CFLAGS += -DKOLISEO_HAS_CURSES
 endif
 
 if GULP_BUILD

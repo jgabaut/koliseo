@@ -28,6 +28,15 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_block_while_has_temp = 1,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
+    .err_handlers = {
+#ifndef KOLISEO_HAS_LOCATE
+        .OOM_handler = &KLS_OOM_default_handler__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
+#else
+        .OOM_handler = &KLS_OOM_default_handler_dbg__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
+#endif // KOLISEO_HAS_LOCATE
+    },
 }; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
 #endif
 
@@ -43,6 +52,15 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
+    .err_handlers = {
+#ifndef KOLISEO_HAS_LOCATE
+        .OOM_handler = &KLS_OOM_default_handler__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
+#else
+        .OOM_handler = &KLS_OOM_default_handler_dbg__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
+#endif // KOLISEO_HAS_LOCATE
+    },
 }; /**< Config used by any new Koliseo by default.*/
 
 KLS_Stats KLS_STATS_DEFAULT = {
@@ -68,74 +86,6 @@ const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
 #endif
 
 static bool kls_set_conf(Koliseo * kls, KLS_Conf conf);	//Declare function used internally by kls_new() and kls_new_conf()
-
-#ifdef KOLISEO_HAS_TITLE
-/**
- * Defines title banner.
- */
-char *kls_title[KLS_TITLEROWS + 1] = {
-    "                               .',,,.                                                               ",
-    "                        ...''',,;;:cl;.                                                             ",
-    "                  ..''''''....      .co,                                                            ",
-    "              .'',,,'..               'ol.                                                          ",
-    "          ..''''..                     .co.                                                         ",
-    "        ..'..                            cl.                                                        ",
-    "      ..'...               .          .  .:'...       .       .      ..      .....     ...          ",
-    "     ....      .      ..:c,'.   .oc .ll.  :dddxo.    ld.     'x:  .cxddx;   :kxodo,  .lddxx;        ",
-    "    .,..     .cl,..   .cxd:..   ;Ol;do.  :Ol. c0c   .kx.     lO;  ;0d..::  .xk'     .xx' 'kx.       ",
-    "    .,..     'dOl.     .''......lKOkc.  .kx.  ;0l   ;0l     .xk.  'xk;     'Ok;'.   l0;  .xk.       ",
-    "    ''.;,    .,;;............. .xKKO'   ;0c   c0:   lO;     'Od.   .lko.   :0koo:. .xk.  'Od.       ",
-    "   ',.'c;.  .......            'Oo:ko.  c0;  .xk.  .xx.     :0c  .   ;Od. .oO,     'Od.  c0:        ",
-    "   ,;  .......        .::.     :O; lO;  :0l..okc.  'Od...  .oO' .ld'.:Od. 'kk,...  .kk,.:kd.        ",
-    "   ;xc,...  .   'd:   .:d;     ;l. .l:  .:dool''c. 'ddolc. .cc.  'ldooc.  'dxoll:.  'odoo:.         ",
-    "  .lx;. .  ,d;  .ll.   .''.                     ;l:'                                                ",
-    "  :o.   ;,  cc    ..     .                       ,cc:::c,                                           ",
-    " .c;    ..  .'           ....',,;;;;;;;;;;,,,,,,,,,,;;;ox;........'cddoollcc:;,,'..                 ",
-    "  ,:         ...',:clodxkO0KKXXXXXXKKK000000KKKKXXXXKKKXXXKKKKKKKKKXNNNNNNNNNNNXXKOxoc;'.           ",
-    "  .:. ..';cldkOKXXXXK0Okxxdolc::;,''.','......';clc::cloONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNK0xl;.       ",
-    "  :xxxOKKK0kxoddl;,';od;.   'cl,    .ckko.    ,d00Ol.   .xXNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNKkl;.   ",
-    ".lKX0xoc,';;. .ll.   ;xO;   .oX0,    ,ONXl    ,0NNNK;    .lKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNX0o' ",
-    ".xk;.  .  .;.  .:,    .dc    'OK;    .dNNo.   ;0NNNXc      ;kXNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNk.",
-    " :c        ..   ..    .l,    .k0,    .xXXo    ;0XNNXc       .l0NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNO'",
-    " :;                   .'.    .;:.    .,cl;....,loddo;..       'dKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN0,",
-    ".c,        ....',;;:cclllooddddddddddodxxxxxxxdddddddolllccccc:cxXNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNK;",
-    ".l:',:cloxxkkkOkkxxdollcc::;,,'''.............................',cONNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXc",
-    ":00OOxdoc:;,'...                     ..        ..         .     .oNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXl",
-    ":o,..',. ..   ';.   .co'     ;d,    'oOk;    .o00kd;    .oOkd,   :KNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXl",
-    ":;   ,o'  ..  .l:    ;0o    .dXo.   'xNNk.   'ONNNNO'   :KNNNd.   cKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNXo",
-    "c;    ..  ..   ';    'ko.   'ONo.   .kNNO'   ,0NNNNK;   :KNNXd.    :0NNNNNNNNNNNNNNNNNNNNNNNNNNNNNXo",
-    "l,             ..    'ko    'OXl    ,0NNO'   'ONNNNK;   ;KNNXl.     ;ONNNNNNNNNNNNNNNNNNNNNNNNNNNNXl",
-    "cc.............';'...;do'...:k0c....:0XX0:...'xXXXX0c...:0XK0l.......c0NNNNNNNNNNNNNNNNNNNNXXXXXXKO,",
-    ".;:;;;;;;:::::::::cc:::::::::c:;;;;,;ccc:;,,,,:cccc:;;;;;ccc:;,,,,,;;;clloooooooooooooooooollcc:;,. "
-};
-
-/**
- * Prints the title banner to the passed FILE pointer.
- * @see kls_title
- * @param fp The FILE to print to.
- */
-void kls_print_title_2file(FILE *fp)
-{
-    if (fp == NULL) {
-        fprintf(stderr,
-                "[KLS] kls_print_title_2file():  Passed file pointer was NULL.\n");
-        exit(EXIT_FAILURE);
-    }
-    for (int i = 0; i < KLS_TITLEROWS; i++) {
-        fprintf(fp, "%s\n", kls_title[i]);
-    }
-}
-
-/**
- * Prints the title banner to stdout.
- * @see kls_title
- */
-void kls_print_title(void)
-{
-    kls_print_title_2file(stdout);
-}
-
-#endif // KOLISEO_HAS_TITLE
 
 /**
  * Returns the constant string representing current version for Koliseo.
@@ -174,10 +124,73 @@ const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
 #endif // KOLISEO_HAS_REGION
 
 /**
- * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * Used internally for handling Out-Of-Memory in push calls when no user handler is provided.
+ * @param kls The Koliseo used in the push call
+ * @param available The Koliseo's available memory
+ * @param padding The current push call's padding
+ * @param size The current push call's size
+ * @param count The current push call's count
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath)
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_OOM_default_handler__(Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count)
+#else
+void KLS_OOM_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+#ifndef KOLISEO_HAS_LOCATE
+    fprintf(stderr,
+            "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+            size * count, available - padding);
+#else
+    fprintf(stderr,
+            "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+            KLS_Loc_Arg(loc),
+            size * count, available - padding);
+#endif // KOLISEO_HAS_LOCATE
+    kls_free(kls); // Is it even worth it to try?
+    exit(EXIT_FAILURE); // Better than nothing. May change to return NULL instead? Requiring refactor of handler signature
+}
+
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_PTRDIFF_MAX_default_handler__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count)
+#else
+void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc)
+#endif
+{
+#ifndef _WIN32
+#ifndef KOLISEO_HAS_LOCATE
+    fprintf(stderr,
+            "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+            count, PTRDIFF_MAX / size);
+#else
+    fprintf(stderr,
+            "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+            KLS_Loc_Arg(loc),
+            count, PTRDIFF_MAX / size);
+#endif // KOLISEO_HAS_LOCATE
+#else
+#ifndef KOLISEO_HAS_LOCATE
+    fprintf(stderr,
+            "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+            count, PTRDIFF_MAX / size);
+#else
+    fprintf(stderr,
+            "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+            KLS_Loc_Arg(loc),
+            count, PTRDIFF_MAX / size);
+#endif // KOLISEO_HAS_LOCATE
+#endif // _WIN32
+    kls_free(kls);
+    exit(EXIT_FAILURE);
+}
+
+/**
+ * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * Passes custom error handlers for errors in push calls.
+ * @see KLS_Conf
+ */
+KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
 {
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
@@ -197,7 +210,37 @@ KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist
     res.kls_log_fp = log_fp;
     res.kls_log_filepath = log_filepath;
 
+    if (err_handlers.OOM_handler != NULL) {
+        res.err_handlers.OOM_handler = err_handlers.OOM_handler;
+    } else {
+#ifndef KOLISEO_HAS_LOCATE
+        res.err_handlers.OOM_handler = &KLS_OOM_default_handler__;
+#else
+        res.err_handlers.OOM_handler = &KLS_OOM_default_handler_dbg__;
+#endif // KOLISEO_HAS_LOCATE
+    }
+
+    if (err_handlers.PTRDIFF_MAX_handler != NULL) {
+        res.err_handlers.PTRDIFF_MAX_handler = err_handlers.PTRDIFF_MAX_handler;
+    } else {
+#ifndef KOLISEO_HAS_LOCATE
+        res.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__;
+#else
+        res.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__;
+#endif // KOLISEO_HAS_LOCATE
+    }
+
     return res;
+}
+
+/**
+ * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * @see KLS_Conf
+ */
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath)
+{
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_conf_init_handled(autoset_regions, alloc_backend, reglist_kls_size, autoset_temp_regions, collect_stats, verbose_lvl, block_while_has_temp, log_fp, log_filepath, err_handlers);
 }
 
 /**
@@ -210,11 +253,6 @@ void kls_dbg_features(void)
 #else
     bool kls_locate = false;
 #endif
-#ifdef KOLISEO_HAS_CURSES
-    bool kls_ncurses = true;
-#else
-    bool kls_ncurses = false;
-#endif
 #ifdef KOLISEO_HAS_GULP
     bool kls_gulp = true;
 #else
@@ -224,11 +262,6 @@ void kls_dbg_features(void)
     bool kls_region = true;
 #else
     bool kls_region = false;
-#endif
-#ifdef KOLISEO_HAS_TITLE
-    bool kls_title = true;
-#else
-    bool kls_title = false;
 #endif
 #ifdef KLS_DEBUG_CORE
     bool kls_debug = true;
@@ -240,17 +273,15 @@ void kls_dbg_features(void)
 #else
     bool kls_exper = false;
 #endif
-    bool features[7] = {
+    bool features[5] = {
         [0] = kls_debug,
         [1] = kls_locate,
-        [2] = kls_title,
-        [3] = kls_ncurses,
-        [4] = kls_region,
-        [5] = kls_gulp,
-        [6] = kls_exper,
+        [2] = kls_region,
+        [3] = kls_gulp,
+        [4] = kls_exper,
     };
     int total_enabled = 0;
-    for (int i=0; i<7; i++) {
+    for (int i=0; i<5; i++) {
         if (features[i]) {
             total_enabled += 1;
         }
@@ -266,14 +297,6 @@ void kls_dbg_features(void)
         }
         if (kls_locate) {
             fprintf(stderr, "locate%s", (total_enabled > 1 ? ", " : ""));
-            total_enabled -= 1;
-        }
-        if (kls_title) {
-            fprintf(stderr, "title%s", (total_enabled > 1 ? ", " : ""));
-            total_enabled -= 1;
-        }
-        if (kls_ncurses) {
-            fprintf(stderr, "ncurses%s", (total_enabled > 1 ? ", " : ""));
             total_enabled -= 1;
         }
         if (kls_region) {
@@ -413,6 +436,7 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
  * Sets the KLS_Conf field to KLS_DEFAULT_CONF.
  * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
  * @param size The size for Koliseo data field.
+ * @param alloc_func The allocation function to use to init the Koliseo.
  * @return A pointer to the initialised Koliseo struct.
  * @see Koliseo
  * @see Koliseo_Temp
@@ -552,13 +576,15 @@ Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_
  * @param size The size for Koliseo data field.
  * @param output_path The filepath for log output.
  * @param alloc_func The allocation function to use.
+ * @param err_handlers The error handlers struct for errors in push calls.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
  * @see kls_new_conf_alloc()
  */
-Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func)
+Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
 {
+
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
             "[WARN]    %s(): KLS_DEBUG_CORE is not defined. No tracing allowed.\n",
@@ -566,9 +592,67 @@ Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc
 #endif
     KLS_Conf k = (KLS_Conf) {
         .kls_collect_stats = 1,.kls_verbose_lvl =
-                                 1,.kls_log_filepath = output_path
+                                 1,.kls_log_filepath = output_path,
+#ifndef KOLISEO_HAS_LOCATE
+                                   .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+                                   .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+#else
+                                   .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+                                   .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+#endif // KOLISEO_HAS_LOCATE
     };
     return kls_new_conf_alloc(size, k, alloc_func);
+}
+
+/**
+ * Takes a ptrdiff_t size, a filepath for the trace output file, and an allocation function pointer.
+ * Returns a pointer to the prepared Koliseo.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * @param size The size for Koliseo data field.
+ * @param output_path The filepath for log output.
+ * @param alloc_func The allocation function to use.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf_alloc()
+ */
+Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func)
+{
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_new_traced_alloc_handled(size, output_path, alloc_func, err_handlers);
+}
+
+/**
+ * Takes a ptrdiff_t size and an allocation function pointer, and returns a pointer to the prepared Koliseo.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
+ * @param size The size for Koliseo data field.
+ * @param alloc_func The allocation function to use.
+ * @param err_handlers The error handlers for errors in push calls.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf()
+ */
+Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
+{
+#ifndef KLS_DEBUG_CORE
+    fprintf(stderr,
+            "[WARN]    %s(): KLS_DEBUG_CORE is not defined. No debugging support.\n",
+            __func__);
+#endif
+    KLS_Conf k = (KLS_Conf) {
+        .kls_collect_stats = 1,.kls_verbose_lvl = 0,
+#ifndef KOLISEO_HAS_LOCATE
+        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+#else
+        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+#endif // KOLIEO_HAS_LOCATE
+    };
+    Koliseo * kls = kls_new_conf_alloc(size, k, alloc_func);
+    kls->conf.kls_verbose_lvl = 1;
+    return kls;
 }
 
 /**
@@ -583,17 +667,52 @@ Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc
  */
 Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 {
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_new_dbg_alloc_handled(size, alloc_func, err_handlers);
+}
+
+/**
+ * Takes a ptrdiff_t size and a filepath for the trace output file, and the needed parameters for a successful init of the prepared Koliseo.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * @param size The size for Koliseo data field.
+ * @param output_path The filepath for log output.
+ * @param reglist_kls_size The size to use for the inner reglist Koliseo.
+ * @param alloc_func The allocation function to use.
+ * @param err_handlers The error handlers for errors in push calls.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf_alloc()
+ */
+Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_path,
+        ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
+{
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
-            "[WARN]    %s(): KLS_DEBUG_CORE is not defined. No debugging support.\n",
+            "[WARN]    %s(): KLS_DEBUG_CORE is not defined. No tracing allowed.\n",
             __func__);
 #endif
     KLS_Conf k = (KLS_Conf) {
-        .kls_collect_stats = 1,.kls_verbose_lvl = 0
+        .kls_collect_stats = 1,
+        .kls_verbose_lvl = 1,
+        .kls_log_filepath = output_path,
+#ifdef KOLISEO_HAS_REGION
+        .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
+        .kls_reglist_kls_size = reglist_kls_size,
+        .kls_autoset_regions = 1,
+        .kls_autoset_temp_regions = 1,
+#endif // KOLISEO_HAS_REGION
+        .err_handlers = (KLS_Err_Handlers) {
+#ifndef KOLISEO_HAS_LOCATE
+            .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+#else
+            .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+#endif // KOLISEO_HAS_LOCATE
+        },
     };
-    Koliseo * kls = kls_new_conf_alloc(size, k, alloc_func);
-    kls->conf.kls_verbose_lvl = 1;
-    return kls;
+    return kls_new_conf_alloc(size, k, alloc_func);
 }
 
 /**
@@ -611,23 +730,9 @@ Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
                                      ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func)
 {
-#ifndef KLS_DEBUG_CORE
-    fprintf(stderr,
-            "[WARN]    %s(): KLS_DEBUG_CORE is not defined. No tracing allowed.\n",
-            __func__);
-#endif
-    KLS_Conf k = (KLS_Conf) {
-        .kls_collect_stats = 1,
-        .kls_verbose_lvl = 1,
-        .kls_log_filepath = output_path,
-#ifdef KOLISEO_HAS_REGION
-        .kls_reglist_alloc_backend = KLS_REGLIST_ALLOC_KLS_BASIC,
-        .kls_reglist_kls_size = reglist_kls_size,
-        .kls_autoset_regions = 1,
-        .kls_autoset_temp_regions = 1,
-#endif // KOLISEO_HAS_REGION
-    };
-    return kls_new_conf_alloc(size, k, alloc_func);
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_new_traced_AR_KLS_alloc_handled(size, output_path,
+            reglist_kls_size, alloc_func, err_handlers);
 }
 
 /**
@@ -653,6 +758,42 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
                 "[%s()]:  Preliminary set of conf.kls_log_fp to stderr.",
                 __func__);
 #endif
+#endif // KLS_DEBUG_CORE
+    }
+
+    if (conf.err_handlers.OOM_handler == NULL) {
+        fprintf(stderr,
+                "[ERROR]    at %s():  passed OOM_handler is NULL. Using default.\n",
+                __func__);
+#ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
+        kls_log(kls, "KLS",
+                "[%s()]:  Passed OOM_handler was NULL, using default.",
+                __func__);
+#endif
+#endif // KLS_DEBUG_CORE
+#ifndef KOLISEO_HAS_LOCATE
+        kls->conf.err_handlers.OOM_handler = &KLS_OOM_default_handler__;
+#else
+        kls->conf.err_handlers.OOM_handler = &KLS_OOM_default_handler_dbg__;
+#endif
+    }
+
+    if (conf.err_handlers.PTRDIFF_MAX_handler == NULL) {
+        fprintf(stderr,
+                "[ERROR]    at %s():  passed PTRDIFF_MAX_handler is NULL. Using default.\n",
+                __func__);
+#ifdef KLS_DEBUG_CORE
+#ifdef KLS_SETCONF_DEBUG
+        kls_log(kls, "KLS",
+                "[%s()]:  Passed PTRDIFF_MAX_handler was NULL, using default.",
+                __func__);
+#endif
+#endif // KLS_DEBUG_CORE
+#ifndef KOLISEO_HAS_LOCATE
+        kls->conf.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__;
+#else
+        kls->conf.err_handlers.PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__;
 #endif
     }
 
@@ -795,44 +936,60 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
-    ptrdiff_t available = kls->size - kls->offset;
-    ptrdiff_t padding = -kls->offset & (align - 1);
+    const ptrdiff_t available = kls->size - kls->offset;
+    const ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
         if (count > PTRDIFF_MAX / size) {
+            if (kls->conf.err_handlers.PTRDIFF_MAX_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
+                kls->conf.err_handlers.PTRDIFF_MAX_handler(kls, size, count);
+#else
+                kls->conf.err_handlers.PTRDIFF_MAX_handler(kls, size, count, loc);
+#endif // KOLISEO_HAS_LOCATE
+            } else { // Let's keep this here for now? It's the original part before adding KLS_PTRDIFF_MAX_default_handler__()
 #ifndef _WIN32
 #ifndef KOLISEO_HAS_LOCATE
-            fprintf(stderr,
-                    "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        count, PTRDIFF_MAX / size);
 #else
-            fprintf(stderr,
-                    "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                    KLS_Loc_Arg(loc),
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        KLS_Loc_Arg(loc),
+                        count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #else
 #ifndef KOLISEO_HAS_LOCATE
-            fprintf(stderr,
-                    "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        count, PTRDIFF_MAX / size);
 #else
-            fprintf(stderr,
-                    "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                    KLS_Loc_Arg(loc),
-                    count, PTRDIFF_MAX / size);
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        KLS_Loc_Arg(loc),
+                        count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #endif // _WIN32
+            }
         } else {
+            if (kls->conf.err_handlers.OOM_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
-            fprintf(stderr,
-                    "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    size * count, available - padding);
+                kls->conf.err_handlers.OOM_handler(kls, available, padding, size, count);
 #else
-            fprintf(stderr,
-                    "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    KLS_Loc_Arg(loc),
-                    size * count, available - padding);
+                kls->conf.err_handlers.OOM_handler(kls, available, padding, size, count, loc);
 #endif // KOLISEO_HAS_LOCATE
+            } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
+#ifndef KOLISEO_HAS_LOCATE
+                fprintf(stderr,
+                        "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        size * count, available - padding);
+#else
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        KLS_Loc_Arg(loc),
+                        size * count, available - padding);
+#endif // KOLISEO_HAS_LOCATE
+            }
         }
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
@@ -1875,373 +2032,6 @@ void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize)
 
     snprintf(outputBuffer, bufferSize, "%.2f %s", sizeValue, units[unitIndex]);
 }
-
-#ifdef KOLISEO_HAS_CURSES
-/**
- * Prints fields and eventually KLS_Region_List from the passed Koliseo pointer, to the passed WINDOW pointer.
- * @param kls The Koliseo at hand.
- * @param win The Window at hand.
- */
-void kls_show_toWin(Koliseo *kls, WINDOW *win)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "kls_show_toWin(): passed Koliseo was null.");
-        exit(EXIT_FAILURE);
-    }
-    if (win == NULL) {
-#ifdef KLS_DEBUG_CORE
-        kls_log(kls, "ERROR", "kls_show_toWin():  passed WINDOW was null.");
-#else
-        fprintf(stderr, "kls_show_toWin(): passed WINDOW was null.");
-#endif
-        exit(EXIT_FAILURE);
-    }
-    wclear(win);
-    box(win, 0, 0);
-    wrefresh(win);
-    int y = 2;
-    int x = 2;
-    mvwprintw(win, y++, x, "Koliseo data:");
-    mvwprintw(win, y++, x, "API Level: { %i }", int_koliseo_version());
-#ifndef _WIN32
-    mvwprintw(win, y++, x, "Size: { %li }", kls->size);
-#else
-    mvwprintw(win, y++, x, "Size: { %lli }", kls->size);
-#endif
-    char h_size[200];
-    kls_formatSize(kls->size, h_size, sizeof(h_size));
-    mvwprintw(win, y++, x, "Human size: { %s }", h_size);
-    char curr_size[200];
-    kls_formatSize(kls->offset, curr_size, sizeof(curr_size));
-    mvwprintw(win, y++, x, "Used (Human): { %s }", curr_size);
-#ifndef _WIN32
-    mvwprintw(win, y++, x, "Offset: { %li }", kls->offset);
-#else
-    mvwprintw(win, y++, x, "Offset: { %lli }", kls->offset);
-#endif
-#ifndef _WIN32
-    mvwprintw(win, y++, x, "Prev_Offset: { %li }", kls->prev_offset);
-#else
-    mvwprintw(win, y++, x, "Prev_Offset: { %lli }", kls->prev_offset);
-#endif
-#ifdef KOLISEO_HAS_REGION
-    mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
-              kls_rl_length(kls->regs));
-#endif
-    mvwprintw(win, y++, x, "Current usage: { %.3f%% }",
-              (kls->offset * 100.0) / kls->size);
-    mvwprintw(win, y++, x, "%s", "");
-    mvwprintw(win, y++, x, "q or Enter to quit.");
-    /*
-       KLS_Region_List rl = kls_copy(kls->regs);
-       while (!kls_empty(rl)) {
-       mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
-       }
-     */
-    wrefresh(win);
-    int ch = '?';
-    int quit = -1;
-    do {
-        quit = 0;
-        ch = wgetch(win);
-        switch (ch) {
-        case 10:
-        case 'q': {
-            quit = 1;
-        }
-        break;
-        default: {
-            quit = 0;
-        }
-        break;
-        }
-    } while (!quit);
-}
-
-/**
- * Takes a Koliseo_Temp pointer and prints fields and eventually KLS_Region_List from the referred Koliseo pointer, to the passed WINDOW pointer.
- * @param t_kls The Koliseo_Temp at hand.
- * @param win The Window at hand.
- */
-void kls_temp_show_toWin(Koliseo_Temp *t_kls, WINDOW *win)
-{
-    if (t_kls == NULL) {
-        fprintf(stderr, "kls_temp_show_toWin(): passed Koliseo_Temp was null.");
-        exit(EXIT_FAILURE);
-    }
-    Koliseo *kls = t_kls->kls;
-    if (kls == NULL) {
-        fprintf(stderr, "kls_temp_show_toWin(): referred Koliseo was null.");
-        exit(EXIT_FAILURE);
-    }
-    if (win == NULL) {
-#ifdef KLS_DEBUG_CORE
-        kls_log(kls, "ERROR",
-                "kls_temp_show_toWin():  passed WINDOW was null.");
-#else
-        fprintf(stderr, "kls_temp_show_toWin(): passed WINDOW was null.");
-#endif
-        exit(EXIT_FAILURE);
-    }
-    wclear(win);
-    box(win, 0, 0);
-    wrefresh(win);
-    int y = 2;
-    int x = 2;
-    mvwprintw(win, y++, x, "Koliseo_Temp data:");
-    mvwprintw(win, y++, x, "API Level: { %i }", int_koliseo_version());
-#ifndef _WIN32
-    mvwprintw(win, y++, x, "Temp Size: { %li }", kls->size - t_kls->offset);
-    mvwprintw(win, y++, x, "Refer Size: { %li }", kls->size);
-#else
-    mvwprintw(win, y++, x, "Temp Size: { %lli }", kls->size - t_kls->offset);
-    mvwprintw(win, y++, x, "Refer Size: { %lli }", kls->size);
-#endif
-    char h_size[200];
-    char curr_size[200];
-    kls_formatSize(kls->size - t_kls->offset, h_size, sizeof(h_size));
-    mvwprintw(win, y++, x, "Temp Human size: { %s }", h_size);
-    kls_formatSize(kls->size, h_size, sizeof(h_size));
-    mvwprintw(win, y++, x, "Inner Human size: { %s }", h_size);
-    kls_formatSize(kls->offset, curr_size, sizeof(curr_size));
-    mvwprintw(win, y++, x, "Inner Used (Human): { %s }", curr_size);
-    kls_formatSize(t_kls->offset, curr_size, sizeof(curr_size));
-    mvwprintw(win, y++, x, "Temp Used (Human): { %s }", curr_size);
-#ifndef _WIN32
-    mvwprintw(win, y++, x, "Inner Offset: { %li }", kls->offset);
-    mvwprintw(win, y++, x, "Temp Offset: { %li }", t_kls->offset);
-#else
-    mvwprintw(win, y++, x, "Inner Offset: { %lli }", kls->offset);
-    mvwprintw(win, y++, x, "Temp Offset: { %lli }", t_kls->offset);
-#endif
-#ifndef _WIN32
-    mvwprintw(win, y++, x, "Inner Prev_Offset: { %li }", kls->prev_offset);
-    mvwprintw(win, y++, x, "Temp Prev_Offset: { %li }", t_kls->prev_offset);
-#else
-    mvwprintw(win, y++, x, "Inner Prev_Offset: { %lli }", kls->prev_offset);
-    mvwprintw(win, y++, x, "Temp Prev_Offset: { %lli }", t_kls->prev_offset);
-#endif
-#ifdef KOLISEO_HAS_REGION
-    mvwprintw(win, y++, x, "Refer KLS_Region_List len: { %i }",
-              kls_rl_length(kls->regs));
-    mvwprintw(win, y++, x, "Temp KLS_Region_List len: { %i }",
-              kls_rl_length(t_kls->t_regs));
-#endif
-    mvwprintw(win, y++, x, "Current inner usage: { %.3f%% }",
-              (kls->offset * 100.0) / kls->size);
-    mvwprintw(win, y++, x, "Current refer usage: { %.3f%% }",
-              (t_kls->offset * 100.0) / kls->size);
-    mvwprintw(win, y++, x, "%s", "");
-    mvwprintw(win, y++, x, "q or Enter to quit.");
-    /*
-       KLS_Region_List rl = kls_copy(kls->regs);
-       while (!kls_empty(rl)) {
-       mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
-       }
-     */
-    wrefresh(win);
-    int ch = '?';
-    int quit = -1;
-    do {
-        quit = 0;
-        ch = wgetch(win);
-        switch (ch) {
-        case 10:
-        case 'q': {
-            quit = 1;
-        }
-        break;
-        default: {
-            quit = 0;
-        }
-        break;
-        }
-    } while (!quit);
-}
-
-#ifdef KOLISEO_HAS_REGION
-/**
- * Displays a slideshow of KLS_Region_List from passed Koliseo, to the passed WINDOW pointer.
- * @param kls The Koliseo at hand.
- * @param win The Window at hand.
- */
-void kls_showList_toWin(Koliseo *kls, WINDOW *win)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "kls_showList_toWin(): passed Koliseo was null.");
-        exit(EXIT_FAILURE);
-    }
-    if (win == NULL) {
-#ifdef KLS_DEBUG_CORE
-        kls_log(kls, "ERROR", "kls_showList_toWin():  passed WINDOW was null.");
-#else
-        fprintf(stderr, "kls_showList_toWin(): passed WINDOW was null.");
-#endif
-        exit(EXIT_FAILURE);
-    }
-    wclear(win);
-    box(win, 0, 0);
-    wrefresh(win);
-    int y = 2;
-    int x = 2;
-    int quit = 0;
-    mvwprintw(win, y++, x, "KLS_Region_List data:");
-    KLS_Region_List rl = kls->regs;
-    while (!quit && !kls_rl_empty(rl)) {
-        wclear(win);
-        y = 3;
-        KLS_list_element e = kls_rl_head(rl);
-        mvwprintw(win, y++, x, "Name: { %s }", e->name);
-        mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
-#ifndef _WIN32
-        mvwprintw(win, y++, x, "Offsets: { %li } -> { %li }", e->begin_offset,
-                  e->end_offset);
-        mvwprintw(win, y++, x, "Size: { %li }", e->size);
-        mvwprintw(win, y++, x, "Padding: { %li }", e->padding);
-#else
-        mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset,
-                  e->end_offset);
-        mvwprintw(win, y++, x, "Size: { %lli }", e->size);
-        mvwprintw(win, y++, x, "Padding: { %lli }", e->padding);
-#endif
-        mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
-                  kls_rl_length(kls->regs));
-        mvwprintw(win, y++, x, "Current usage: { %.3f%% }",
-                  kls_usageShare(e, kls));
-        char h_size[200];
-        ptrdiff_t reg_size = e->end_offset - e->begin_offset;
-        kls_formatSize(reg_size, h_size, sizeof(h_size));
-        mvwprintw(win, y++, x, "Human size: { %s }", h_size);
-        mvwprintw(win, y++, x, "%s", "");
-        mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
-        /*
-           KLS_Region_List rl = kls_copy(kls->regs);
-           while (!kls_empty(rl)) {
-           mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
-           }
-         */
-        box(win, 0, 0);
-        wrefresh(win);
-        int ch = '?';
-        int picked = -1;
-        do {
-            picked = 0;
-            ch = wgetch(win);
-            switch (ch) {
-            case KEY_RIGHT: {
-                rl = kls_rl_tail(rl);
-                picked = 1;
-            }
-            break;
-            case 'q': {
-                quit = 1;
-                picked = 1;
-            }
-            break;
-            default: {
-                picked = 0;
-            }
-            break;
-            }
-        } while (!quit && !picked);
-    }
-}
-
-/**
- * Displays a slideshow of KLS_Region_List from passed Koliseo_Temp, to the passed WINDOW pointer.
- * @param t_kls The Koliseo_Temp at hand.
- * @param win The Window at hand.
- */
-void kls_temp_showList_toWin(Koliseo_Temp *t_kls, WINDOW *win)
-{
-    if (t_kls == NULL) {
-        fprintf(stderr,
-                "kls_temp_showList_toWin(): passed Koliseo_Temp was null.\n");
-        exit(EXIT_FAILURE);
-    }
-    Koliseo *kls_ref = t_kls->kls;
-    if (kls_ref == NULL) {
-        fprintf(stderr,
-                "kls_temp_showList_toWin(): referred Koliseo was null.\n");
-        exit(EXIT_FAILURE);
-    }
-    if (win == NULL) {
-#ifdef KLS_DEBUG_CORE
-        kls_log(kls_ref, "ERROR",
-                "kls_temp_showList_toWin():  passed WINDOW was null.");
-#else
-        fprintf(stderr, "kls_temp_showList_toWin(): passed WINDOW was null.\n");
-#endif
-        exit(EXIT_FAILURE);
-    }
-    wclear(win);
-    box(win, 0, 0);
-    wrefresh(win);
-    int y = 2;
-    int x = 2;
-    int quit = 0;
-    mvwprintw(win, y++, x, "KLS_Region_List data:");
-    KLS_Region_List rl = t_kls->t_regs;
-    while (!quit && !kls_rl_empty(rl)) {
-        wclear(win);
-        y = 3;
-        KLS_list_element e = kls_rl_head(rl);
-        mvwprintw(win, y++, x, "Name: { %s }", e->name);
-        mvwprintw(win, y++, x, "Desc: { %s }", e->desc);
-#ifndef _WIN32
-        mvwprintw(win, y++, x, "Offsets: { %li } -> { %li }", e->begin_offset,
-                  e->end_offset);
-        mvwprintw(win, y++, x, "Size: { %li }", e->size);
-        mvwprintw(win, y++, x, "Padding: { %li }", e->padding);
-#else
-        mvwprintw(win, y++, x, "Offsets: { %lli } -> { %lli }", e->begin_offset,
-                  e->end_offset);
-        mvwprintw(win, y++, x, "Size: { %lli }", e->size);
-        mvwprintw(win, y++, x, "Padding: { %lli }", e->padding);
-#endif
-        mvwprintw(win, y++, x, "KLS_Region_List len: { %i }",
-                  kls_rl_length(t_kls->t_regs));
-        //mvwprintw(win, y++, x, "Current usage: { %.3f%% }", kls_usageShare(e,kls));
-        char h_size[200];
-        ptrdiff_t reg_size = e->end_offset - e->begin_offset;
-        kls_formatSize(reg_size, h_size, sizeof(h_size));
-        mvwprintw(win, y++, x, "Human size: { %s }", h_size);
-        mvwprintw(win, y++, x, "%s", "");
-        mvwprintw(win, y++, x, "q to quit, Right arrow to go forward.");
-        /*
-           KLS_Region_List rl = kls_copy(kls->regs);
-           while (!kls_empty(rl)) {
-           mvwprintw(win, y, x, "Prev_Offset: [%i]",kls->prev_offset);
-           }
-         */
-        box(win, 0, 0);
-        wrefresh(win);
-        int ch = '?';
-        int picked = -1;
-        do {
-            picked = 0;
-            ch = wgetch(win);
-            switch (ch) {
-            case KEY_RIGHT: {
-                rl = kls_rl_tail(rl);
-                picked = 1;
-            }
-            break;
-            case 'q': {
-                quit = 1;
-                picked = 1;
-            }
-            break;
-            default: {
-                picked = 0;
-            }
-            break;
-            }
-        } while (!quit && !picked);
-    }
-}
-#endif // KOLISEO_HAS_REGION
-#endif //KOLISEO_HAS_CURSES
 
 /**
  * Resets the offset field for the passed Koliseo pointer.
