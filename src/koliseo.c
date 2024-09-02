@@ -140,13 +140,13 @@ void KLS_OOM_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrdiff_t 
 {
 #ifndef KOLISEO_HAS_LOCATE
     fprintf(stderr,
-        "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-        size * count, available - padding);
+            "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+            size * count, available - padding);
 #else
-fprintf(stderr,
-        "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-        KLS_Loc_Arg(loc),
-        size * count, available - padding);
+    fprintf(stderr,
+            "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+            KLS_Loc_Arg(loc),
+            size * count, available - padding);
 #endif // KOLISEO_HAS_LOCATE
     kls_free(kls); // Is it even worth it to try?
     exit(EXIT_FAILURE); // Better than nothing. May change to return NULL instead? Requiring refactor of handler signature
@@ -160,29 +160,29 @@ void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, 
 {
 #ifndef _WIN32
 #ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr,
-                "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                count, PTRDIFF_MAX / size);
+    fprintf(stderr,
+            "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+            count, PTRDIFF_MAX / size);
 #else
-        fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                KLS_Loc_Arg(loc),
-                count, PTRDIFF_MAX / size);
+    fprintf(stderr,
+            "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+            KLS_Loc_Arg(loc),
+            count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #else
 #ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr,
-                "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                count, PTRDIFF_MAX / size);
+    fprintf(stderr,
+            "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+            count, PTRDIFF_MAX / size);
 #else
-        fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                KLS_Loc_Arg(loc),
-                count, PTRDIFF_MAX / size);
+    fprintf(stderr,
+            "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+            KLS_Loc_Arg(loc),
+            count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #endif // _WIN32
-       kls_free(kls);
-       exit(EXIT_FAILURE);
+    kls_free(kls);
+    exit(EXIT_FAILURE);
 }
 
 /**
@@ -583,11 +583,11 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
         .kls_collect_stats = 1,.kls_verbose_lvl =
                                  1,.kls_log_filepath = output_path,
 #ifndef KOLISEO_HAS_LOCATE
-            .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+                                   .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+                                   .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-            .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+                                   .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+                                   .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLISEO_HAS_LOCATE
     };
     return kls_new_conf_alloc(size, k, alloc_func);
@@ -632,11 +632,11 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KL
     KLS_Conf k = (KLS_Conf) {
         .kls_collect_stats = 1,.kls_verbose_lvl = 0,
 #ifndef KOLISEO_HAS_LOCATE
-            .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-            .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-            .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLIEO_HAS_LOCATE
     };
     Koliseo * kls = kls_new_conf_alloc(size, k, alloc_func);
@@ -674,7 +674,7 @@ Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
  * @see kls_new_conf_alloc()
  */
 Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_path,
-                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
+        ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -699,7 +699,7 @@ Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_
             .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
             .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLISEO_HAS_LOCATE
-       },
+        },
     };
     return kls_new_conf_alloc(size, k, alloc_func);
 }
@@ -721,7 +721,7 @@ Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
 {
     KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
     return kls_new_traced_AR_KLS_alloc_handled(size, output_path,
-                                     reglist_kls_size, alloc_func, err_handlers);
+            reglist_kls_size, alloc_func, err_handlers);
 }
 
 /**
@@ -969,14 +969,14 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
 #endif // KOLISEO_HAS_LOCATE
             } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
 #ifndef KOLISEO_HAS_LOCATE
-            fprintf(stderr,
-                    "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    size * count, available - padding);
+                fprintf(stderr,
+                        "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        size * count, available - padding);
 #else
-            fprintf(stderr,
-                    "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                    KLS_Loc_Arg(loc),
-                    size * count, available - padding);
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        KLS_Loc_Arg(loc),
+                        size * count, available - padding);
 #endif // KOLISEO_HAS_LOCATE
             }
         }
