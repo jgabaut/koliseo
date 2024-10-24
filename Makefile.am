@@ -17,6 +17,8 @@ INSTALLER_LOG_FILE = "./installer.log"
 # Check local version
 PACK_NAME = $(SHARED_LIB)-$(VERSION)-$(OS)-$(MACHINE)
 
+TEMPLATES_DIR = "./templates"
+
 # Source files
 demo_SOURCES = src/koliseo.c static/amboso.c static/demo.c static/kls_banner.c
 lib_SOURCES = src/koliseo.c
@@ -48,6 +50,10 @@ endif
 
 if REGION_BUILD
 AM_CFLAGS += -DKOLISEO_HAS_REGION
+endif
+
+if PIT_BUILD
+AM_CFLAGS += -DKOLISEO_HAS_PIT -I$(TEMPLATES_DIR)
 endif
 
 if TITLE_BUILD

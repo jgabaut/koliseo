@@ -1,5 +1,7 @@
+#define KOLISEO_HAS_PIT
 #define KLS_PIT_IMPLEMENTATION
-#include "../templates/pit.h"
+#include "../src/koliseo.h"
+//#include "../templates/pit.h"
 
 int main(void) {
 
