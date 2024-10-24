@@ -159,6 +159,11 @@ bad_size.k:
 	$(CCOMP) tests/error/bad_size.c src/koliseo.c -o tests/error/bad_size.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
+bad_count.k:
+	@echo -en "Building bad_count.k test"
+	$(CCOMP) tests/error/bad_count.c src/koliseo.c -o tests/error/bad_count.k -DKLS_DEBUG_CORE
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
 many_regions.k:
 	@echo -en "Building many_regions.k test"
 	$(CCOMP) tests/error/many_regions.c src/koliseo.c -o tests/error/many_regions.k
@@ -214,7 +219,7 @@ kstr_test.k:
 	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_size.k basic_run.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
+anviltest: bad_size.k bad_count.k basic_run.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"
@@ -246,6 +251,16 @@ pack: rebuild
 	echo -e "\033[1;36m[UNZIP] Result:\n"
 	unzip -t ~/koliseo-local/share/$(PACK_NAME).zip | tail -n1
 	@echo -e "\033[1;32m[ZIP] Done.\e[0m"
+	@echo -e "\033[1;33mDone.\e[0m"
+
+install_syntax:
+	@echo -en "Uninstalling koliseo lib:  "
+	./scripts/install_.sh
+	@echo -e "\033[1;33mDone.\e[0m"
+
+uninstall_syntax:
+	@echo -en "Uninstalling koliseo lib:  "
+	./scripts/install_.sh
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)

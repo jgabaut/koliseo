@@ -936,6 +936,20 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
+    if (count < 1) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS]  count [%td] was < 1.\n",
+                count);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "count [%td] was < 1.\n",
+                KLS_Loc_Arg(loc),
+                count);
+#endif // KOLISEO_HAS_LOCATE
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
     const ptrdiff_t available = kls->size - kls->offset;
     const ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
