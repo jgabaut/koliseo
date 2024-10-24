@@ -276,6 +276,7 @@ LIST_free_gl(LIST_NAME list)
         return;
     } else {
         LIST_free_gl(LIST_tail(list));
+        free(list->value);
         free(list);
     }
     return;

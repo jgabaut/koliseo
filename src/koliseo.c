@@ -930,9 +930,9 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 }
 
 #ifndef KOLISEO_HAS_LOCATE
-static inline void kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
+static inline int kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 #else
-static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
+static inline int kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
@@ -952,14 +952,18 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
     }
     const ptrdiff_t available = kls->size - kls->offset;
     const ptrdiff_t padding = -kls->offset & (align - 1);
+    bool OOM_happened, OOM_handled;
+    bool PTRDIFF_MAX_happened, PTRDIFF_MAX_handled;
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
         if (count > PTRDIFF_MAX / size) {
+            PTRDIFF_MAX_happened = true;
             if (kls->conf.err_handlers.PTRDIFF_MAX_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
                 kls->conf.err_handlers.PTRDIFF_MAX_handler(kls, size, count);
 #else
                 kls->conf.err_handlers.PTRDIFF_MAX_handler(kls, size, count, loc);
 #endif // KOLISEO_HAS_LOCATE
+                PTRDIFF_MAX_handled = true;
             } else { // Let's keep this here for now? It's the original part before adding KLS_PTRDIFF_MAX_default_handler__()
 #ifndef _WIN32
 #ifndef KOLISEO_HAS_LOCATE
@@ -986,12 +990,14 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
 #endif // _WIN32
             }
         } else {
+            OOM_happened = true;
             if (kls->conf.err_handlers.OOM_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
                 kls->conf.err_handlers.OOM_handler(kls, available, padding, size, count);
 #else
                 kls->conf.err_handlers.OOM_handler(kls, available, padding, size, count, loc);
 #endif // KOLISEO_HAS_LOCATE
+                OOM_handled = true;
             } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
 #ifndef KOLISEO_HAS_LOCATE
                 fprintf(stderr,
@@ -1005,6 +1011,15 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
 #endif // KOLISEO_HAS_LOCATE
             }
         }
+        if (PTRDIFF_MAX_happened) {
+            if (kls->conf.err_handlers.PTRDIFF_MAX_handler && PTRDIFF_MAX_handled) {
+                return -1;
+            }
+        } else if (OOM_happened) {
+            if (kls->conf.err_handlers.PTRDIFF_MAX_handler && OOM_handled) {
+                return -1;
+            }
+        }
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
 #else
@@ -1013,6 +1028,7 @@ static inline void kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdif
         kls_free(kls);
         exit(EXIT_FAILURE);
     }
+    return 0;
 }
 
 /**
@@ -1139,11 +1155,16 @@ void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
+    int checkavail_res = -1;
 #ifndef KOLISEO_HAS_LOCATE
-    kls__check_available(kls, size, align, count);
+    checkavail_res = kls__check_available(kls, size, align, count);
 #else
-    kls__check_available_dbg(kls, size, align, count, loc);
+    checkavail_res = kls__check_available_dbg(kls, size, align, count, loc);
 #endif
+
+    // If we have a non-zero check, we return NULL.
+    if (checkavail_res != 0) return NULL;
+
     ptrdiff_t padding = -kls->offset & (align - 1);
     char *p = kls->data + kls->offset + padding;
     //Zero new area
