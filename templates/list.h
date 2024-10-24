@@ -29,6 +29,10 @@
 // Functions ending with _gl use malloc() for the nodes.
 // Functions ending with _kls expect a Koliseo arg to use for allocating nodes.
 //
+// CHANGELOG
+//
+// 0.1.1 - LIST_NAME_free_gl() now also frees all elements
+// 0.1.0 - First release
 
 #ifndef LIST_HEADER_H
 #define LIST_HEADER_H
@@ -41,7 +45,7 @@
 #define LIST_COMB1(pre, word) LIST_COMB2(pre, word)
 #define LIST_COMB2(pre, word) pre##word
 
-#define LIST_HEADER_VERSION "0.1.0"
+#define LIST_HEADER_VERSION "0.1.1"
 
 #endif // LIST_HEADER_H
 
