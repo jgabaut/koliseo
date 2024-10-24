@@ -66,15 +66,18 @@ void kls_pit_free(KLS_Pit* p);
 #ifdef KLS_PIT_IMPLEMENTATION
 
 #ifndef KOLISEO_HAS_LOCATE
-void KLS_PIT_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count) {
+void KLS_PIT_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count)
+{
 #else
-void KLS_PIT_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc) {
+void KLS_PIT_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc)
+{
 #endif
     //fprintf(stderr, "%s():    OOM!\n", __func__);
     (void)0;
 }
 
-KLS_Pit kls_new_pit(ptrdiff_t size) {
+KLS_Pit kls_new_pit(ptrdiff_t size)
+{
     if (size < sizeof(Koliseo)) {
         size = KLS_DEFAULT_SIZE;
     }
@@ -91,7 +94,8 @@ KLS_Pit kls_new_pit(ptrdiff_t size) {
     return res;
 }
 
-static inline bool kls_pit_grow(KLS_Pit* pit) {
+static inline bool kls_pit_grow(KLS_Pit* pit)
+{
     if (!pit) return false;
     Koliseo* new_kls = kls_new_conf(pit->kls_size, KLS_PIT_CONF);
     if (!new_kls) {
@@ -102,7 +106,8 @@ static inline bool kls_pit_grow(KLS_Pit* pit) {
     return true;
 }
 
-char* kls_pit_push_zero(KLS_Pit* pit, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count) {
+char* kls_pit_push_zero(KLS_Pit* pit, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
+{
     Koliseo* head = KlsList_head(pit->list);
     if (!head) {
         fprintf(stderr, "%s():    Failed push to empty KLS_Pit\n", __func__);
@@ -120,7 +125,8 @@ char* kls_pit_push_zero(KLS_Pit* pit, ptrdiff_t size, ptrdiff_t align, ptrdiff_t
     }
 }
 
-void kls_pit_free(KLS_Pit* p) {
+void kls_pit_free(KLS_Pit* p)
+{
     if (!p) return;
     KlsList_free_gl(p->list);
 }
