@@ -939,10 +939,13 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     return true;
 }
 
+/**
+ * Internal usage only. Return value should be checked to catch errors.
+ */
 #ifndef KOLISEO_HAS_LOCATE
-static inline int kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
+static inline int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 #else
-static inline int kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
+static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
@@ -1042,13 +1045,28 @@ static inline int kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff
 }
 
 /**
+ * Internal usage only.
+ */
+#ifndef KOLISEO_HAS_LOCATE
+#define kls__check_available(kls, size, align, count) do { \
+    int res = kls__check_available_failable((kls), (size), (align), (count)); \
+    if (res != 0) return NULL; \
+} while(0)
+#else
+#define kls__check_available_dbg(kls, size, align, count, loc) do { \
+    int res = kls__check_available_failable_dbg((kls), (size), (align), (count), (loc)); \
+    if (res != 0) return NULL; \
+} while(0)
+#endif // KOLISEO_HAS_LOCATE
+
+/**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it does NOT zero the memory region.
  * @param kls The Koliseo at hand.
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
- * @return A void pointer to the start of memory just pushed to the Koliseo.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
  */
 void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 {
@@ -1129,7 +1147,7 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
- * @return A void pointer to the start of memory just pushed to the Koliseo.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1165,15 +1183,11 @@ void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
-    int checkavail_res = -1;
 #ifndef KOLISEO_HAS_LOCATE
-    checkavail_res = kls__check_available(kls, size, align, count);
+    kls__check_available(kls, size, align, count);
 #else
-    checkavail_res = kls__check_available_dbg(kls, size, align, count, loc);
+    kls__check_available_dbg(kls, size, align, count, loc);
 #endif
-
-    // If we have a non-zero check, we return NULL.
-    if (checkavail_res != 0) return NULL;
 
     ptrdiff_t padding = -kls->offset & (align - 1);
     char *p = kls->data + kls->offset + padding;
@@ -1374,7 +1388,7 @@ static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls,
  * @param size The size for data to push.
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
- * @return A void pointer to the start of memory just pushed to the Koliseo.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1766,7 +1780,7 @@ void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
  * @param type The type index for pushed KLS_Region.
  * @param name The name to assign to the resulting KLS_Region.
  * @param desc The desc to assign to the resulting KLS_Region.
- * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ * @return A void pointer to the start of memory just pushed to the Koliseo.
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
