@@ -14,8 +14,8 @@ int main(void) {
     for (int i=0; i < iters; i++) {
         voider = KLS_PIT_PUSH(p, int);
         *voider = 42069;
+        printf("%d\n", *voider);
     }
-    printf("%d\n", *voider);
     kls_pit_free(p);
     return 0;
 }

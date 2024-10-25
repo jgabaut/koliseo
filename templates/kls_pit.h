@@ -44,17 +44,29 @@ void KLS_PIT_OOM_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t available,
 }
 #endif // KOLISEO_HAS_LOCATE
 
-#define KLS_PIT_CONF (KLS_Conf) { \
-    .err_handlers =  KLS_PIT_ERR_HANDLERS, \
-}
+typedef struct KLS_Pit_Conf {
+#ifdef KOLISEO_HAS_REGION
+    int kls_autoset_regions; /**< If set to 1, make the Koliseos handle the KLS_Regions for their usage.*/
+    int kls_autoset_temp_regions; /**< If set to 1, make the Koliseos handle the KLS_Regions for their usage when operating on Koliseo_Temp instances.*/
+#endif // KOLISEO_HAS_REGION
+    int kls_collect_stats; /**< If set to 1, make the Koliseos collect performance stats.*/
+    int kls_block_while_has_temp; /**< If set to 1, make thes Koliseo reject push calls while they have has an open Koliseo_Temp.*/
+#ifndef KOLISEO_HAS_LOCATE
+    void (*PTRDIFF_MAX_handler)(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count);
+#else
+    void (*PTRDIFF_MAX_handler)(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc);
+#endif // KOLISEO_HAS_LOCATE
+} KLS_Pit_Conf;
 
 typedef struct KLS_Pit {
     KlsList list;
     ptrdiff_t kls_size;
+    const KLS_Pit_Conf conf;
 } KLS_Pit;
 
 #define KLS_PIT_NULL (KLS_Pit){0}
 
+KLS_Pit kls_new_pit_conf(ptrdiff_t size, KLS_Pit_Conf pit_conf);
 KLS_Pit kls_new_pit(ptrdiff_t size);
 char* kls_pit_push_zero(KLS_Pit* pit, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 void kls_pit_free(KLS_Pit* p);
@@ -76,7 +88,22 @@ void KLS_PIT_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptr
     (void)0;
 }
 
-KLS_Pit kls_new_pit(ptrdiff_t size)
+static inline KLS_Conf kls_conf_from_pitconf(KLS_Pit_Conf pit_conf) {
+    KLS_Conf kls_conf = KLS_DEFAULT_CONF;
+#ifdef KOLISEO_HAS_REGION
+    kls_conf.kls_autoset_regions = pit_conf.kls_autoset_regions;
+    kls_conf.kls_autoset_temp_regions = pit_conf.kls_autoset_temp_regions;
+#endif // KOLISEO_HAS_REGION
+    kls_conf.kls_collect_stats = pit_conf.kls_collect_stats;
+    kls_conf.kls_block_while_has_temp = pit_conf.kls_block_while_has_temp;
+    kls_conf.err_handlers = KLS_PIT_ERR_HANDLERS;
+    if (pit_conf.PTRDIFF_MAX_handler != NULL) {
+        kls_conf.err_handlers.PTRDIFF_MAX_handler = pit_conf.PTRDIFF_MAX_handler;
+    }
+    return kls_conf;
+}
+
+KLS_Pit kls_new_pit_conf(ptrdiff_t size, KLS_Pit_Conf pit_conf)
 {
     if (size < sizeof(Koliseo)) {
         size = KLS_DEFAULT_SIZE;
@@ -85,7 +112,8 @@ KLS_Pit kls_new_pit(ptrdiff_t size)
         .list = KlsList_nullList(),
         .kls_size = size,
     };
-    Koliseo* head = kls_new_conf(res.kls_size, KLS_PIT_CONF);
+    KLS_Conf kls_conf = kls_conf_from_pitconf(pit_conf);
+    Koliseo* head = kls_new_conf(res.kls_size, kls_conf);
     if (!head) {
         fprintf(stderr, "%s():    Failed creation of head Koliseo\n", __func__);
         return KLS_PIT_NULL;
@@ -94,10 +122,15 @@ KLS_Pit kls_new_pit(ptrdiff_t size)
     return res;
 }
 
+KLS_Pit kls_new_pit(ptrdiff_t size) {
+    return kls_new_pit_conf(size, (KLS_Pit_Conf){0});
+}
+
 static inline bool kls_pit_grow(KLS_Pit* pit)
 {
     if (!pit) return false;
-    Koliseo* new_kls = kls_new_conf(pit->kls_size, KLS_PIT_CONF);
+    KLS_Conf kls_conf = kls_conf_from_pitconf(pit->conf);
+    Koliseo* new_kls = kls_new_conf(pit->kls_size, kls_conf);
     if (!new_kls) {
         fprintf(stderr, "%s():    Failed creation of new_kls\n", __func__);
         return false;
