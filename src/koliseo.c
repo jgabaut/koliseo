@@ -949,19 +949,61 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
-    if (count < 1) {
+    if (count < 0) {
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
-                "[KLS]  count [%td] was < 1.\n",
+                "[KLS]  count [%td] was < 0.\n",
                 count);
 #else
         fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "count [%td] was < 1.\n",
+                "[KLS] " KLS_Loc_Fmt "count [%td] was < 0.\n",
                 KLS_Loc_Arg(loc),
                 count);
 #endif // KOLISEO_HAS_LOCATE
-        kls_free(kls);
-        exit(EXIT_FAILURE);
+       kls_free(kls);
+       exit(EXIT_FAILURE);
+    }
+    if (size < 1) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS]  size [%td] was < 1.\n",
+                size);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "size [%td] was < 1.\n",
+                KLS_Loc_Arg(loc),
+                size);
+#endif // KOLISEO_HAS_LOCATE
+       kls_free(kls);
+       exit(EXIT_FAILURE);
+    }
+    if (align < 1) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS]  align [%td] was < 1.\n",
+                align);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "align [%td] was < 1.\n",
+                KLS_Loc_Arg(loc),
+                align);
+#endif // KOLISEO_HAS_LOCATE
+       kls_free(kls);
+       exit(EXIT_FAILURE);
+    }
+    if (! ((align & (align - 1)) == 0)) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS]  align [%td] was not a power of 2.\n",
+                align);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "align [%td] was not a power of 2.\n",
+                KLS_Loc_Arg(loc),
+                align);
+#endif // KOLISEO_HAS_LOCATE
+       kls_free(kls);
+       exit(EXIT_FAILURE);
     }
     const ptrdiff_t available = kls->size - kls->offset;
     const ptrdiff_t padding = -kls->offset & (align - 1);
