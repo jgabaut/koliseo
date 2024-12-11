@@ -86,7 +86,7 @@ libkoliseo.a: libkoliseo.o
 %.o: %.c
 	$(CCOMP) -c $(CFLAGS) $(AM_CFLAGS) $< -o $@
 
-install: $(SHARED_LIB) doc
+install: $(SHARED_LIB)
 	@echo -en "Installing koliseo lib $(VERSION):  "
 	./installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	ldconfig
