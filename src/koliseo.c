@@ -1049,14 +1049,18 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
     }
     const ptrdiff_t available = kls->size - kls->offset;
     const ptrdiff_t padding = -kls->offset & (align - 1);
+    bool ZEROCOUNT_happened = false;
+    bool ZEROCOUNT_handled = false;
     if (count == 0) {
         if (kls->conf.kls_allow_zerocount_push != 1) {
+            ZEROCOUNT_happened = true;
             if (kls->conf.err_handlers.ZEROCOUNT_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
                 kls->conf.err_handlers.ZEROCOUNT_handler(kls, available, padding, size);
 #else
                 kls->conf.err_handlers.ZEROCOUNT_handler(kls, available, padding, size, loc);
 #endif // KOLISEO_HAS_LOCATE
+                ZEROCOUNT_handled = true;
             } else {
 #ifndef KOLISEO_HAS_LOCATE
                 fprintf(stderr,
@@ -1067,7 +1071,8 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
                         "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
                         KLS_Loc_Arg(loc), size, padding, available);
 #endif // KOLISEO_HAS_LOCATE
-                return -1;
+                kls_free(kls);
+                exit(EXIT_FAILURE);
             }
         } else {
 #ifdef KLS_DEBUG_CORE
@@ -1075,8 +1080,28 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
 #endif // KLS_DEBUG_CORE
         }
     }
-    bool OOM_happened, OOM_handled;
-    bool PTRDIFF_MAX_happened, PTRDIFF_MAX_handled;
+
+    if (ZEROCOUNT_happened && ZEROCOUNT_handled) {
+#ifdef KLS_DEBUG_CORE
+        kls_log(kls, "DEBUG", "Requested a zero-count push while kls_allow_zerocount_push is not 1, but the error handler returned instead of exiting.");
+#endif // KLS_DEBUG_CORE
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS]  Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                size, padding, available);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                KLS_Loc_Arg(loc), size, padding, available);
+#endif // KOLISEO_HAS_LOCATE
+        kls_free(kls);
+        exit(EXIT_FAILURE);
+    }
+
+    bool OOM_happened = false;
+    bool OOM_handled = false;
+    bool PTRDIFF_MAX_happened = false;
+    bool PTRDIFF_MAX_handled = false;
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
         if (count > PTRDIFF_MAX / size) {
             PTRDIFF_MAX_happened = true;
