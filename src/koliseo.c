@@ -26,15 +26,18 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
     .kls_block_while_has_temp = 1,
+    .kls_allow_zerocount_push = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
     .err_handlers = {
 #ifndef KOLISEO_HAS_LOCATE
         .OOM_handler = &KLS_OOM_default_handler__,
         .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
+        .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler__,
 #else
         .OOM_handler = &KLS_OOM_default_handler_dbg__,
         .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
+        .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler_dbg__,
 #endif // KOLISEO_HAS_LOCATE
     },
 }; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
@@ -48,6 +51,7 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_autoset_temp_regions = 0,
 #endif // KOLISEO_HAS_REGION
     .kls_block_while_has_temp = 1,
+    .kls_allow_zerocount_push = 0,
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
     .kls_log_fp = NULL,
@@ -56,9 +60,11 @@ KLS_Conf KLS_DEFAULT_CONF = {
 #ifndef KOLISEO_HAS_LOCATE
         .OOM_handler = &KLS_OOM_default_handler__,
         .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
+        .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler__,
 #else
         .OOM_handler = &KLS_OOM_default_handler_dbg__,
         .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
+        .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler_dbg__,
 #endif // KOLISEO_HAS_LOCATE
     },
 }; /**< Config used by any new Koliseo by default.*/
@@ -186,11 +192,40 @@ void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, 
 }
 
 /**
+ * Used internally for handling zero-count in push calls when no user handler is provided.
+ * By default, it returns immediately.
+ * @param kls The Koliseo used in the push call
+ * @param available The Koliseo's available memory
+ * @param padding The current push call's padding
+ * @param size The current push call's size
+ * @see KLS_Conf
+ */
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_ZEROCOUNT_default_handler__(Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size)
+#else
+void KLS_ZEROCOUNT_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+#ifndef KOLISEO_HAS_LOCATE
+    fprintf(stderr,
+            "[KLS]  Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+            size, padding, available);
+#else
+    fprintf(stderr,
+            "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+            KLS_Loc_Arg(loc),
+            size, padding, available);
+#endif // KOLISEO_HAS_LOCATE
+    kls_free(kls);
+    exit(EXIT_FAILURE);
+}
+
+/**
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
  * Passes custom error handlers for errors in push calls.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
+KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
 {
     KLS_Conf res = {0};
 #ifdef KOLISEO_HAS_REGION
@@ -207,6 +242,7 @@ KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t
     res.kls_collect_stats = collect_stats;
     res.kls_verbose_lvl = verbose_lvl;
     res.kls_block_while_has_temp = block_while_has_temp;
+    res.kls_allow_zerocount_push = allow_zerocount_push;
     res.kls_log_fp = log_fp;
     res.kls_log_filepath = log_filepath;
 
@@ -230,6 +266,16 @@ KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t
 #endif // KOLISEO_HAS_LOCATE
     }
 
+    if (err_handlers.ZEROCOUNT_handler != NULL) {
+        res.err_handlers.ZEROCOUNT_handler = err_handlers.ZEROCOUNT_handler;
+    } else {
+#ifndef KOLISEO_HAS_LOCATE
+        res.err_handlers.ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler__;
+#else
+        res.err_handlers.ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler_dbg__;
+#endif // KOLISEO_HAS_LOCATE
+    }
+
     return res;
 }
 
@@ -237,10 +283,10 @@ KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath)
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath)
 {
     KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
-    return kls_conf_init_handled(autoset_regions, alloc_backend, reglist_kls_size, autoset_temp_regions, collect_stats, verbose_lvl, block_while_has_temp, log_fp, log_filepath, err_handlers);
+    return kls_conf_init_handled(autoset_regions, alloc_backend, reglist_kls_size, autoset_temp_regions, collect_stats, verbose_lvl, block_while_has_temp, allow_zerocount_push, log_fp, log_filepath, err_handlers);
 }
 
 /**
@@ -1003,6 +1049,32 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
     }
     const ptrdiff_t available = kls->size - kls->offset;
     const ptrdiff_t padding = -kls->offset & (align - 1);
+    if (count == 0) {
+        if (kls->conf.kls_allow_zerocount_push != 1) {
+            if (kls->conf.err_handlers.ZEROCOUNT_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
+                kls->conf.err_handlers.ZEROCOUNT_handler(kls, available, padding, size);
+#else
+                kls->conf.err_handlers.ZEROCOUNT_handler(kls, available, padding, size, loc);
+#endif // KOLISEO_HAS_LOCATE
+            } else {
+#ifndef KOLISEO_HAS_LOCATE
+                    fprintf(stderr,
+                            "[KLS]  Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                            size, padding, available);
+#else
+                    fprintf(stderr,
+                            "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                            KLS_Loc_Arg(loc), size, padding, available);
+#endif // KOLISEO_HAS_LOCATE
+                    return -1;
+            }
+        } else {
+#ifdef KLS_DEBUG_CORE
+            kls_log(kls, "DEBUG", "Accepting zero-count push: conf.kls_allow_zerocount_push was 1");
+#endif // KLS_DEBUG_CORE
+        }
+    }
     bool OOM_happened, OOM_handled;
     bool PTRDIFF_MAX_happened, PTRDIFF_MAX_handled;
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
