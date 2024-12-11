@@ -960,8 +960,7 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
                 KLS_Loc_Arg(loc),
                 count);
 #endif // KOLISEO_HAS_LOCATE
-       kls_free(kls);
-       exit(EXIT_FAILURE);
+        return -1;
     }
     if (size < 1) {
 #ifndef KOLISEO_HAS_LOCATE
@@ -974,8 +973,7 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
                 KLS_Loc_Arg(loc),
                 size);
 #endif // KOLISEO_HAS_LOCATE
-       kls_free(kls);
-       exit(EXIT_FAILURE);
+        return -1;
     }
     if (align < 1) {
 #ifndef KOLISEO_HAS_LOCATE
@@ -988,8 +986,7 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
                 KLS_Loc_Arg(loc),
                 align);
 #endif // KOLISEO_HAS_LOCATE
-       kls_free(kls);
-       exit(EXIT_FAILURE);
+        return -1;
     }
     if (! ((align & (align - 1)) == 0)) {
 #ifndef KOLISEO_HAS_LOCATE
@@ -1002,8 +999,7 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
                 KLS_Loc_Arg(loc),
                 align);
 #endif // KOLISEO_HAS_LOCATE
-       kls_free(kls);
-       exit(EXIT_FAILURE);
+        return -1;
     }
     const ptrdiff_t available = kls->size - kls->offset;
     const ptrdiff_t padding = -kls->offset & (align - 1);
