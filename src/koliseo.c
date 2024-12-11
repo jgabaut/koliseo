@@ -50,10 +50,10 @@ KLS_Conf KLS_DEFAULT_CONF = {
     .kls_reglist_kls_size = 0,
     .kls_autoset_temp_regions = 0,
 #endif // KOLISEO_HAS_REGION
-    .kls_block_while_has_temp = 1,
-    .kls_allow_zerocount_push = 0,
     .kls_collect_stats = 0,
     .kls_verbose_lvl = 0,
+    .kls_block_while_has_temp = 1,
+    .kls_allow_zerocount_push = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
     .err_handlers = {
@@ -1059,15 +1059,15 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
 #endif // KOLISEO_HAS_LOCATE
             } else {
 #ifndef KOLISEO_HAS_LOCATE
-                    fprintf(stderr,
-                            "[KLS]  Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                            size, padding, available);
+                fprintf(stderr,
+                        "[KLS]  Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                        size, padding, available);
 #else
-                    fprintf(stderr,
-                            "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                            KLS_Loc_Arg(loc), size, padding, available);
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                        KLS_Loc_Arg(loc), size, padding, available);
 #endif // KOLISEO_HAS_LOCATE
-                    return -1;
+                return -1;
             }
         } else {
 #ifdef KLS_DEBUG_CORE

@@ -128,7 +128,8 @@ void KLS_PIT_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptr
     (void)0;
 }
 
-static inline KLS_Conf kls_conf_from_pitconf(KLS_Pit_Conf pit_conf) {
+static inline KLS_Conf kls_conf_from_pitconf(KLS_Pit_Conf pit_conf)
+{
     KLS_Conf kls_conf = KLS_DEFAULT_CONF;
 #ifdef KOLISEO_HAS_REGION
     kls_conf.kls_autoset_regions = pit_conf.kls_autoset_regions;
@@ -162,8 +163,11 @@ KLS_Pit kls_new_pit_conf(ptrdiff_t size, KLS_Pit_Conf pit_conf)
     return res;
 }
 
-KLS_Pit kls_new_pit(ptrdiff_t size) {
-    return kls_new_pit_conf(size, (KLS_Pit_Conf){0});
+KLS_Pit kls_new_pit(ptrdiff_t size)
+{
+    return kls_new_pit_conf(size, (KLS_Pit_Conf) {
+        0
+    });
 }
 
 static inline bool kls_pit_grow(KLS_Pit* pit)
