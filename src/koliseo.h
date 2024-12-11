@@ -972,7 +972,3 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
 
 #endif //KOLISEO_H_
-
-#ifdef KOLISEO_HAS_PIT
-#include "kls_pit.h"
-#endif // KOLISEO_HAS_PIT

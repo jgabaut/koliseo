@@ -309,11 +309,6 @@ void kls_dbg_features(void)
 #else
     bool kls_region = false;
 #endif
-#ifdef KOLISEO_HAS_PIT
-    bool kls_pit = true;
-#else
-    bool kls_pit = false;
-#endif
 #ifdef KLS_DEBUG_CORE
     bool kls_debug = true;
 #else
@@ -324,16 +319,15 @@ void kls_dbg_features(void)
 #else
     bool kls_exper = false;
 #endif
-    bool features[6] = {
+    bool features[5] = {
         [0] = kls_debug,
         [1] = kls_locate,
         [2] = kls_region,
         [3] = kls_gulp,
-        [4] = kls_pit,
-        [5] = kls_exper,
+        [4] = kls_exper,
     };
     int total_enabled = 0;
-    for (int i=0; i<6; i++) {
+    for (int i=0; i<5; i++) {
         if (features[i]) {
             total_enabled += 1;
         }
@@ -353,10 +347,6 @@ void kls_dbg_features(void)
         }
         if (kls_region) {
             fprintf(stderr, "region%s", (total_enabled > 1 ? ", " : ""));
-            total_enabled -= 1;
-        }
-        if (kls_pit) {
-            fprintf(stderr, "pit%s", (total_enabled > 1 ? ", " : ""));
             total_enabled -= 1;
         }
         if (kls_gulp) {

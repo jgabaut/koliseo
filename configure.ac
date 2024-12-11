@@ -27,10 +27,6 @@ AC_ARG_ENABLE([region],
   [AS_HELP_STRING([--enable-region], [Enable region feature])],
   [enable_region=$enableval],
   [enable_region=no])
-AC_ARG_ENABLE([pit],
-  [AS_HELP_STRING([--enable-pit], [Enable pit features])],
-  [enable_pit=$enableval],
-  [enable_pit=no])
 AC_ARG_ENABLE([title],
   [AS_HELP_STRING([--enable-title], [Enable title feature])],
   [enable_title=$enableval],
@@ -43,7 +39,6 @@ AM_CONDITIONAL([LOCATE_BUILD], [test "$enable_locate" = "yes"])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
 AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
 AM_CONDITIONAL([REGION_BUILD], [test "$enable_region" = "yes"])
-AM_CONDITIONAL([PIT_BUILD], [test "$enable_pit" = "yes"])
 AM_CONDITIONAL([TITLE_BUILD], [test "$enable_title" = "yes"])
 AM_CONDITIONAL([EXPER_BUILD], [test "$enable_exper" = "yes"])
 
