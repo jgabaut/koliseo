@@ -276,12 +276,12 @@ pack: rebuild
 
 install_syntax:
 	@echo -en "Uninstalling koliseo lib:  "
-	./scripts/install_.sh
+	./scripts/install_vim_syntax.sh
 	@echo -e "\033[1;33mDone.\e[0m"
 
 uninstall_syntax:
 	@echo -en "Uninstalling koliseo lib:  "
-	./scripts/install_.sh
+	./scripts/uninstall_vim_syntax.sh
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Default target (builds everything)
