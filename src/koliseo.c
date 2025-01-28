@@ -689,11 +689,11 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, KL
     KLS_Conf k = (KLS_Conf) {
         .kls_collect_stats = 1,.kls_verbose_lvl = 0,
 #ifndef KOLISEO_HAS_LOCATE
-        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+                               .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+                               .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+                               .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+                               .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLIEO_HAS_LOCATE
     };
     Koliseo * kls = kls_new_conf_alloc(size, k, alloc_func);
