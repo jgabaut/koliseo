@@ -77,7 +77,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 6 /**< Represents current patch release.*/
+#define KLS_PATCH 7 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -122,7 +122,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.7"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -217,6 +217,12 @@ typedef void(KLS_PTRDIFF_MAX_Handler)(struct Koliseo* kls, ptrdiff_t size, ptrdi
 #endif
 
 #ifndef KOLISEO_HAS_LOCATE
+typedef void(KLS_ZEROCOUNT_Handler)(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size); /**< Used to pass an error handler for zero-count push call error.*/
+#else
+typedef void(KLS_ZEROCOUNT_Handler)(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, Koliseo_Loc loc); /**< Used to pass an error handler for zero-count push call error.*/
+#endif
+
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count); /**< Used by default when no handler is passed.*/
 #else
 void KLS_OOM_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
@@ -228,19 +234,26 @@ void KLS_PTRDIFF_MAX_default_handler__(struct Koliseo* kls, ptrdiff_t size, ptrd
 void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, ptrdiff_t count, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
 #endif
 
+#ifndef KOLISEO_HAS_LOCATE
+void KLS_ZEROCOUNT_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size); /**< Used by default when no handler is passed.*/
+#else
+void KLS_ZEROCOUNT_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, Koliseo_Loc loc); /**< Used by default when no handler is passed.*/
+#endif
+
 /**
  * Defines the handlers used for errors in push calls.
  * @see KLS_Conf
  */
 typedef struct KLS_Err_Handlers {
-    KLS_OOM_Handler* OOM_handler; /**< Pointer to handler for Out-Of-Memory errors in push caalls.*/
+    KLS_OOM_Handler* OOM_handler; /**< Pointer to handler for Out-Of-Memory errors in push calls.*/
     KLS_PTRDIFF_MAX_Handler* PTRDIFF_MAX_handler; /**< Pointer to handler for count > (PTRDIFF_MAX / size) errors in push calls.*/
+    KLS_ZEROCOUNT_Handler* ZEROCOUNT_handler; /**< Pointer to handler for zero-count errors in push calls.*/
 } KLS_Err_Handlers;
 
 #ifndef KOLISEO_HAS_LOCATE
-#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__, }
+#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__, .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler__, }
 #else
-#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler_dbg__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__, }
+#define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler_dbg__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__, .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler_dbg__, }
 #endif // KOLISEO_HAS_LOCATE
 
 /**
@@ -259,12 +272,13 @@ typedef struct KLS_Conf {
     FILE *kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
     int kls_block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
+    int kls_allow_zerocount_push; /**< If set to 1, make the Koliseo accept push calls with a count of 0.*/
     KLS_Err_Handlers err_handlers; /**< Used to pass custom error handlers for push calls.*/
 } KLS_Conf;
 
-KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
+KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
 
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, FILE* log_fp, const char* log_filepath);
+KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath);
 
 void kls_dbg_features(void);
 
@@ -307,13 +321,13 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  */
 #ifdef KOLISEO_HAS_REGION
 #ifndef _WIN32
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %li, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p, block_while_has_temp: %i, allow_zerocount_push: %i }"
 #else
-#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { autoset_regions: %i, reglist_backend: %s, reglist_kls_size: %lli, autoset_temp_regions: %i, collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p, block_while_has_temp: %i, allow_zerocount_push: %i }"
 #endif
 #else
 
-#define KLS_Conf_Fmt "KLS_Conf { collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p }"
+#define KLS_Conf_Fmt "KLS_Conf { collect_stats: %i, verbose_lvl: %i, log_filepath: \"%s\", log_fp: %p, block_while_has_temp: %i, allow_zerocount_push: %i }"
 #endif // KOLISEO_HAS_REGION
 
 /**
@@ -321,9 +335,9 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Conf_Fmt
  */
 #ifdef KOLISEO_HAS_REGION
-#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),kls_reglist_backend_string((conf.kls_reglist_alloc_backend)),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#define KLS_Conf_Arg(conf) (conf.kls_autoset_regions),kls_reglist_backend_string((conf.kls_reglist_alloc_backend)),(conf.kls_reglist_kls_size),(conf.kls_autoset_temp_regions),(conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp),(conf.kls_block_while_has_temp),(conf.kls_allow_zerocount_push)
 #else
-#define KLS_Conf_Arg(conf) (conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp)
+#define KLS_Conf_Arg(conf) (conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp),(conf.kls_block_while_has_temp),(conf.kls_allow_zerocount_push)
 #endif // KOLISEO_HAS_REGION
 
 /**
@@ -776,6 +790,7 @@ ptrdiff_t kls_avg_regionSize(Koliseo *);
 void kls_usageReport_toFile(Koliseo *, FILE *);
 void kls_usageReport(Koliseo *);
 ptrdiff_t kls_type_usage(int, Koliseo *);
+ptrdiff_t kls_total_padding(Koliseo *);
 
 #endif // KOLISEO_HAS_REGION
 

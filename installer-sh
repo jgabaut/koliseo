@@ -45,13 +45,12 @@ if [[ $# -ne 5 ]] ; then {
 }
 fi
 
-INSTALLER_VERSION="0.1.0"
+INSTALLER_VERSION="0.1.1"
 VERSION="$2"
 TARGET_INSTALL_DIR="$3"
 SOURCE_INSTALL_DIR="$4"
 TARGET_INCLUDE_DIR="$TARGET_INSTALL_DIR/include"
 TARGET_LIB_DIR="$TARGET_INSTALL_DIR/lib"
-TARGET_DOC_DIR="$TARGET_INSTALL_DIR/share/doc"
 LOG_FILE="$5"
 
 truncate_log() {
@@ -67,7 +66,6 @@ echo -e "      args:  ["$@"]"
 echo -e "      will install koliseo version [$VERSION] to [$TARGET_INSTALL_DIR]"
 echo -e "          install header to [$TARGET_INCLUDE_DIR]"
 echo -e "          install lib .so [$VERSION] to [$TARGET_LIB_DIR]"
-echo -e "          install doc [$VERSION] to [$TARGET_DOC_DIR]"
 
 # Function for each installation step
 verscheck() {
@@ -106,37 +104,15 @@ installlib() {
     log_msg "\n  Installed lib [libkoliseo.so] to [$TARGET_LIB_DIR]."
 }
 
-installdoc() {
-    log_msg "\n  Installing doc to [$TARGET_DOC_DIR]"
-
-    if [[ -d "$TARGET_DOC_DIR" ]] ; then {
-        :
-    } elif [[ ! -e "$TARGET_DOC_DIR" ]] ; then {
-        mkdir "$TARGET_DOC_DIR"
-    }
-    fi
-    if [[ -d "$TARGET_DOC_DIR/koliseo" ]] ; then {
-        :
-    } elif [[ ! -e "$TARGET_DOC_DIR" ]] ; then {
-        mkdir "$TARGET_DOC_DIR/koliseo"
-    }
-    fi
-
-    install $SOURCE_INSTALL_DIR/README.md "$TARGET_DOC_DIR/koliseo"
-    install $SOURCE_INSTALL_DIR/docs/docs.pdf "$TARGET_DOC_DIR/koliseo"
-    log_msg "\n  Installed docs to [$TARGET_DOC_DIR]."
-}
-
 uninstallKoliseo() {
     log_msg "\n  Uninstalling koliseo lib"
-    yes | rm -rd "$TARGET_DOC_DIR/koliseo"
     yes | rm "$TARGET_LIB_DIR/libkoliseo.so"
     yes | rm "$TARGET_INCLUDE_DIR/koliseo.h"
     log_msg "\n  Done."
 }
 
 # Array of installation steps
-installSteps=("verscheck" "installincludes" "installlib" "installdoc")
+installSteps=("verscheck" "installincludes" "installlib")
 totalTasks=${#installSteps[@]}  # Total number of installation tasks
 currentTask=0  # Current task being executed
 PROGRESS_BAR_WIDTH=40  # Width of the progress bar
