@@ -11,7 +11,7 @@ SHELL := /bin/bash
 .ONESHELL:
 # Check system info
 MACHINE := $$(uname -m)
-TARGET_INSTALL_DIR = /usr
+TARGET_INSTALL_DIR = /usr/local
 SOURCE_INSTALL_DIR = "."
 INSTALLER_LOG_FILE = "./installer.log"
 # Check local version
@@ -90,7 +90,7 @@ install: $(SHARED_LIB)
 
 uninstall:
 	@echo -en "Uninstalling koliseo lib:  "
-	./installer.sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	./installer-sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Build rule for the demo binary
