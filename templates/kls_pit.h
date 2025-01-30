@@ -28,7 +28,7 @@
 
 /**
  * Out custom handler for when an underlying Koliseo fails a push operation with "OOM".
- * The only important thing it does is acually return instead of calling exit() inside (as the default handlers would do).
+ * The only important thing it does is actually return instead of calling exit() inside (as the default handlers would do).
  */
 #ifndef KOLISEO_HAS_LOCATE
 void KLS_PIT_OOM_default_handler__(struct Koliseo* kls, ptrdiff_t available, ptrdiff_t padding, ptrdiff_t size, ptrdiff_t count);
