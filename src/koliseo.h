@@ -583,7 +583,7 @@ void *kls_push_zero_typed_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 /**
  * Macro to request memory for a C string from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_STR_NAMED(kls, cstr, name, desc) KLS_PUSH_ARR_NAMED((kls), char, strlen((cstr)), (name), (desc))
+#define KLS_PUSH_STR_NAMED(kls, cstr, name, desc) KLS_PUSH_ARR_NAMED((kls), char, strlen((cstr))+1, (name), (desc))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a type, a name and a description to the region item.
@@ -597,7 +597,7 @@ void *kls_push_zero_typed_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 /**
  * Macro to request memory for a C string from a Koliseo, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), char, strlen((cstr)), (region_type), (name), (desc))
+#define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), char, strlen((cstr))+1, (region_type), (name), (desc))
 
 /**
  * Macro used to request memory from a Koliseo.
@@ -699,7 +699,7 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 /**
  * Macro to request memory for a C string from a Koliseo_Temp, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_STR_T_NAMED(kls_temp, cstr, name, desc) KLS_PUSH_ARR_T_NAMED((kls_temp), char, strlen((cstr)), (name), (desc))
+#define KLS_PUSH_STR_T_NAMED(kls_temp, cstr, name, desc) KLS_PUSH_ARR_T_NAMED((kls_temp), char, strlen((cstr))+1, (name), (desc))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a type, a name and a description to the region item.
@@ -713,7 +713,7 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 /**
  * Macro to request memory for a C string from a Koliseo_Temp, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_STR_T_TYPED(kls_temp, cstr, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), char, strlen((cstr)), (region_type), (name), (desc))
+#define KLS_PUSH_STR_T_TYPED(kls_temp, cstr, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), char, strlen((cstr))+1, (region_type), (name), (desc))
 
 /**
  * Macro used to request memory from a Koliseo_Temp.
