@@ -3191,6 +3191,29 @@ ptrdiff_t kls_type_usage(int type, Koliseo *kls)
 
     return res;
 }
+
+/**
+ * Calc memory used as padding for the passed Koliseo.
+ * @see KLS_Region_List
+ * @param kls The Koliseo to check total padding for.
+ * @return The total padding size as ptrdiff_t.
+ */
+ptrdiff_t kls_total_padding(Koliseo * kls)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
+        exit(EXIT_FAILURE);
+    }
+    KLS_Region_List rl = kls->regs;
+
+    ptrdiff_t res = 0;
+
+    while (!kls_rl_empty(rl)) {
+        res += kls_rl_head(rl)->padding;
+        rl = kls_rl_tail(rl);
+    }
+    return res;
+}
 #endif // KOLISEO_HAS_REGION
 
 #ifdef KOLISEO_HAS_GULP

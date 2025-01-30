@@ -11,14 +11,18 @@ build_windows=no
 build_mac=no
 echo "Host os:  $host_os"
 
-AC_ARG_ENABLE([locate],
-  [AS_HELP_STRING([--enable-locate], [Enable location signatures])],
-  [enable_locate=$enableval],
-  [enable_locate=no])
+AC_ARG_ENABLE([all],
+  [AS_HELP_STRING([--enable-all], [Enable almost all features, (no debug and exper)])],
+  [enable_all=$enableval],
+  [enable_all=no])
 AC_ARG_ENABLE([debug],
   [AS_HELP_STRING([--enable-debug], [Enable debug build])],
   [enable_debug=$enableval],
   [enable_debug=no])
+AC_ARG_ENABLE([locate],
+  [AS_HELP_STRING([--enable-locate], [Enable location signatures])],
+  [enable_locate=$enableval],
+  [enable_locate=no])
 AC_ARG_ENABLE([gulp],
   [AS_HELP_STRING([--enable-gulp], [Enable gulp header])],
   [enable_gulp=$enableval],
@@ -27,19 +31,14 @@ AC_ARG_ENABLE([region],
   [AS_HELP_STRING([--enable-region], [Enable region feature])],
   [enable_region=$enableval],
   [enable_region=no])
-AC_ARG_ENABLE([title],
-  [AS_HELP_STRING([--enable-title], [Enable title feature])],
-  [enable_title=$enableval],
-  [enable_title=no])
 AC_ARG_ENABLE([exper],
   [AS_HELP_STRING([--enable-exper], [Enable experimental features])],
   [enable_exper=$enableval],
   [enable_exper=no])
-AM_CONDITIONAL([LOCATE_BUILD], [test "$enable_locate" = "yes"])
 AM_CONDITIONAL([DEBUG_BUILD], [test "$enable_debug" = "yes"])
-AM_CONDITIONAL([GULP_BUILD], [test "$enable_gulp" = "yes"])
-AM_CONDITIONAL([REGION_BUILD], [test "$enable_region" = "yes"])
-AM_CONDITIONAL([TITLE_BUILD], [test "$enable_title" = "yes"])
+AM_CONDITIONAL([LOCATE_BUILD], [(test "$enable_locate" = "yes") || (test "$enable_all" = "yes")])
+AM_CONDITIONAL([GULP_BUILD], [(test "$enable_gulp" = "yes") || (test "$enable_all" = "yes")])
+AM_CONDITIONAL([REGION_BUILD], [(test "$enable_region" = "yes") || (test "$enable_all" = "yes")])
 AM_CONDITIONAL([EXPER_BUILD], [test "$enable_exper" = "yes"])
 
 # Define the include and library paths based on the host system

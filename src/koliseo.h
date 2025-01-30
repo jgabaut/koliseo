@@ -790,6 +790,7 @@ ptrdiff_t kls_avg_regionSize(Koliseo *);
 void kls_usageReport_toFile(Koliseo *, FILE *);
 void kls_usageReport(Koliseo *);
 ptrdiff_t kls_type_usage(int, Koliseo *);
+ptrdiff_t kls_total_padding(Koliseo *);
 
 #endif // KOLISEO_HAS_REGION
 
