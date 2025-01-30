@@ -10,7 +10,7 @@ fi
 SRC_DIR="src"
 TEMPLATES_DIR="templates"
 
-kls_SOURCES=("$SRC_DIR"/*.c "$SRC_DIR"/*.h "$TEMPLATES_DIR"/*.c "$TEMPLATES_DIR"/*.h)
+kls_SOURCES=("$SRC_DIR"/*.c "$SRC_DIR"/*.h "$TEMPLATES_DIR"/*.h)
 CONFIG_FILE=".astylerc"
 
 printf "Running \033[1;34mastyle -s4 --style=linux\e[0m for all source files.\n"
