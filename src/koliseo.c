@@ -1172,10 +1172,32 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
         }
         if (PTRDIFF_MAX_happened) {
             if (kls->conf.err_handlers.PTRDIFF_MAX_handler && PTRDIFF_MAX_handled) {
+#ifndef KOLISEO_HAS_LOCATE
+                fprintf(stderr, "[KLS] %s(): PTRDIFF_MAX fault happened and was handled.\n", caller_name);
+#ifdef KLS_DEBUG_CORE
+                kls_log(kls, "DEBUG", "%s(): PTRDIFF_MAX fault happened and was handled.", caller_name);
+#endif // KLS_DEBUG_CORE
+#else
+                fprintf(stderr, "[KLS] " KLS_Loc_Fmt "%s(): PTRDIFF_MAX fault happened and was handled.\n", KLS_Loc_Arg(loc), caller_name);
+#ifdef KLS_DEBUG_CORE
+                kls_log(kls, "DEBUG", KLS_Loc_Fmt "%s(): PTRDIFF_MAX fault happened and was handled.", KLS_Loc_Arg(loc), caller_name);
+#endif // KLS_DEBUG_CORE
+#endif // KOLISEO_HAS_LOCATE
                 return -1;
             }
         } else if (OOM_happened) {
             if (kls->conf.err_handlers.PTRDIFF_MAX_handler && OOM_handled) {
+#ifndef KOLISEO_HAS_LOCATE
+                fprintf(stderr, "[KLS] %s(): OOM fault happened and was handled.\n", caller_name);
+#ifdef KLS_DEBUG_CORE
+                kls_log(kls, "DEBUG", "%s(): OOM fault happened and was handled.", caller_name);
+#endif // KLS_DEBUG_CORE
+#else
+                fprintf(stderr, "[KLS] " KLS_Loc_Fmt "%s(): OOM fault happened and was handled.\n", KLS_Loc_Arg(loc), caller_name);
+#ifdef KLS_DEBUG_CORE
+                kls_log(kls, "DEBUG", KLS_Loc_Fmt "%s(): OOM fault happened and was handled.", KLS_Loc_Arg(loc), caller_name);
+#endif // KLS_DEBUG_CORE
+#endif // KOLISEO_HAS_LOCATE
                 return -1;
             }
         }
