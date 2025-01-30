@@ -193,7 +193,7 @@ void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, 
 
 /**
  * Used internally for handling zero-count in push calls when no user handler is provided.
- * By default, it returns immediately.
+ * By default, it goes to exit().
  * @param kls The Koliseo used in the push call
  * @param available The Koliseo's available memory
  * @param padding The current push call's padding
@@ -979,21 +979,24 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
  * Internal usage only. Return value should be checked to catch errors.
  */
 #ifndef KOLISEO_HAS_LOCATE
-static inline int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
+static inline int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
 #else
-static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
+static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
+    assert(caller_name != NULL);
     if (count < 0) {
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
-                "[KLS]  count [%td] was < 0.\n",
+                "[KLS] %s(): count [%td] was < 0.\n",
+                caller_name,
                 count);
 #else
         fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "count [%td] was < 0.\n",
+                "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was < 0.\n",
                 KLS_Loc_Arg(loc),
+                caller_name,
                 count);
 #endif // KOLISEO_HAS_LOCATE
         return -1;
@@ -1001,12 +1004,14 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
     if (size < 1) {
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
-                "[KLS]  size [%td] was < 1.\n",
+                "[KLS] %s(): size [%td] was < 1.\n",
+                caller_name,
                 size);
 #else
         fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "size [%td] was < 1.\n",
+                "[KLS] " KLS_Loc_Fmt "%s(): size [%td] was < 1.\n",
                 KLS_Loc_Arg(loc),
+                caller_name,
                 size);
 #endif // KOLISEO_HAS_LOCATE
         return -1;
@@ -1014,12 +1019,14 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
     if (align < 1) {
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
-                "[KLS]  align [%td] was < 1.\n",
+                "[KLS] %s(): align [%td] was < 1.\n",
+                caller_name,
                 align);
 #else
         fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "align [%td] was < 1.\n",
+                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was < 1.\n",
                 KLS_Loc_Arg(loc),
+                caller_name,
                 align);
 #endif // KOLISEO_HAS_LOCATE
         return -1;
@@ -1027,12 +1034,14 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
     if (! ((align & (align - 1)) == 0)) {
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
-                "[KLS]  align [%td] was not a power of 2.\n",
+                "[KLS] %s(): align [%td] was not a power of 2.\n",
+                caller_name,
                 align);
 #else
         fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "align [%td] was not a power of 2.\n",
+                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was not a power of 2.\n",
                 KLS_Loc_Arg(loc),
+                caller_name,
                 align);
 #endif // KOLISEO_HAS_LOCATE
         return -1;
@@ -1054,12 +1063,15 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
             } else {
 #ifndef KOLISEO_HAS_LOCATE
                 fprintf(stderr,
-                        "[KLS]  Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                        "[KLS] %s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                        caller_name,
                         size, padding, available);
 #else
                 fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                        KLS_Loc_Arg(loc), size, padding, available);
+                        "[KLS] " KLS_Loc_Fmt "%s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                        KLS_Loc_Arg(loc),
+                        caller_name,
+                        size, padding, available);
 #endif // KOLISEO_HAS_LOCATE
                 kls_free(kls);
                 exit(EXIT_FAILURE);
@@ -1077,12 +1089,15 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
 #endif // KLS_DEBUG_CORE
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
-                "[KLS]  Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                "[KLS] %s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                caller_name,
                 size, padding, available);
 #else
         fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                KLS_Loc_Arg(loc), size, padding, available);
+                "[KLS] " KLS_Loc_Fmt "%s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                KLS_Loc_Arg(loc),
+                caller_name,
+                size, padding, available);
 #endif // KOLISEO_HAS_LOCATE
         kls_free(kls);
         exit(EXIT_FAILURE);
@@ -1106,23 +1121,27 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
 #ifndef _WIN32
 #ifndef KOLISEO_HAS_LOCATE
                 fprintf(stderr,
-                        "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        "[KLS] %s(): count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        caller_name,
                         count, PTRDIFF_MAX / size);
 #else
                 fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
                         KLS_Loc_Arg(loc),
+                        caller_name,
                         count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #else
 #ifndef KOLISEO_HAS_LOCATE
                 fprintf(stderr,
-                        "[KLS]  count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        "[KLS] %s(): count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        caller_name,
                         count, PTRDIFF_MAX / size);
 #else
                 fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
                         KLS_Loc_Arg(loc),
+                        caller_name,
                         count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #endif // _WIN32
@@ -1139,12 +1158,14 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
             } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
 #ifndef KOLISEO_HAS_LOCATE
                 fprintf(stderr,
-                        "[KLS]  Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        "[KLS] %s(): Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        caller_name,
                         size * count, available - padding);
 #else
                 fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        "[KLS] " KLS_Loc_Fmt "%s(): Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
                         KLS_Loc_Arg(loc),
+                        caller_name,
                         size * count, available - padding);
 #endif // KOLISEO_HAS_LOCATE
             }
@@ -1159,9 +1180,9 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
             }
         }
 #ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
+        fprintf(stderr, "[KLS] Failed %s() call.\n", caller_name);
 #else
-        fprintf(stderr, "[KLS] " KLS_Loc_Fmt "Failed %s() call.\n", KLS_Loc_Arg(loc), __func__);
+        fprintf(stderr, "[KLS] " KLS_Loc_Fmt "Failed %s() call.\n", KLS_Loc_Arg(loc), caller_name);
 #endif // KOLISEO_HAS_LOCATE
         kls_free(kls);
         exit(EXIT_FAILURE);
@@ -1174,12 +1195,12 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
  */
 #ifndef KOLISEO_HAS_LOCATE
 #define kls__check_available(kls, size, align, count) do { \
-    int res = kls__check_available_failable((kls), (size), (align), (count)); \
+    int res = kls__check_available_failable((kls), (size), (align), (count), __func__); \
     if (res != 0) return NULL; \
 } while(0)
 #else
 #define kls__check_available_dbg(kls, size, align, count, loc) do { \
-    int res = kls__check_available_failable_dbg((kls), (size), (align), (count), (loc)); \
+    int res = kls__check_available_failable_dbg((kls), (size), (align), (count), __func__, (loc)); \
     if (res != 0) return NULL; \
 } while(0)
 #endif // KOLISEO_HAS_LOCATE
