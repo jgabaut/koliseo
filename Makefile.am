@@ -219,17 +219,17 @@ basic_run.k:
 
 basic_gulp.k:
 	@echo -en "Building basic_gulp.k test"
-	$(CCOMP) tests/ok/basic_gulp.c src/koliseo.c -o tests/ok/basic_gulp.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
+	$(CCOMP) tests/ok/basic_gulp.c src/koliseo.c -o tests/ok/basic_gulp.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 kstr_gulp.k:
 	@echo -en "Building kstr_gulp.k test"
-	$(CCOMP) tests/ok/kstr_gulp.c src/koliseo.c -o tests/ok/kstr_gulp.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
+	$(CCOMP) tests/ok/kstr_gulp.c src/koliseo.c -o tests/ok/kstr_gulp.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 kstr_test.k:
 	@echo -en "Building kstr_test.k test"
-	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE -DKOLISEO_HAS_GULP
+	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 anviltest: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil

@@ -796,6 +796,9 @@ ptrdiff_t kls_total_padding(Koliseo *);
 
 #ifdef KOLISEO_HAS_GULP /**< This definition controls the inclusion of gulp functions.*/
 
+/**
+ * KOLISEO_HAS_GULP is deprecated. The feature will be moved to a separate header in an upcoming release.
+ */
 #ifndef KOLISEO_GULP_H_
 #define KOLISEO_GULP_H_
 
