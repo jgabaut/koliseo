@@ -20,6 +20,8 @@
 // Include this header multiple times to implement a
 // simplistic linked list.  Before inclusion define at
 // least LIST_T to the type the linked list can hold.
+// If you define LIST_CMP_DEFAULT_FN, it will be used as default comparator for
+// functions not accepting one and as a fallback on NULL argument for the ones who do.
 // See LIST_NAME, LIST_PREFIX and LIST_LINKAGE for
 // other customization points.
 //
@@ -31,6 +33,7 @@
 //
 // CHANGELOG
 //
+// 0.1.2 - LIST_CMP_DEFAULT_FN customization, LIST_CMP_FN, typedef bool(LIST_cmp)(LIST_T*, LIST_T*). New API with _fn suffix taking a comparator, LIST_CMP_DEFAULT_FN
 // 0.1.1 - LIST_NAME_free_gl() now also frees all elements
 // 0.1.0 - First release
 
@@ -45,7 +48,7 @@
 #define LIST_COMB1(pre, word) LIST_COMB2(pre, word)
 #define LIST_COMB2(pre, word) pre##word
 
-#define LIST_HEADER_VERSION "0.1.1"
+#define LIST_HEADER_VERSION "0.1.2"
 
 #endif // LIST_HEADER_H
 
@@ -101,6 +104,9 @@ typedef LIST_ITEM_NAME* LIST_NAME;
 #define LIST_cons_gl LIST_IMPL(cons_gl)
 #define LIST_cons_kls LIST_IMPL(cons_kls)
 #define LIST_free_gl LIST_IMPL(free_gl)
+#define LIST_cmp LIST_IMPL(cmp)
+#define LIST_dumb_cmp LIST_IMPL(dumb_cmp)
+#define LIST_member_fn LIST_IMPL(member_fn)
 #define LIST_member LIST_IMPL(member)
 #define LIST_length LIST_IMPL(length)
 #define LIST_append_gl LIST_IMPL(append_gl)
@@ -109,11 +115,17 @@ typedef LIST_ITEM_NAME* LIST_NAME;
 #define LIST_reverse_kls LIST_IMPL(reverse_kls)
 #define LIST_copy_gl LIST_IMPL(copy_gl)
 #define LIST_copy_kls LIST_IMPL(copy_kls)
+#define LIST_remove_gl_fn LIST_IMPL(remove_gl_fn)
 #define LIST_remove_gl LIST_IMPL(remove_gl)
+#define LIST_remove_kls_fn LIST_IMPL(remove_kls_fn)
 #define LIST_remove_kls LIST_IMPL(remove_kls)
+#define LIST_intersect_gl_fn LIST_IMPL(intersect_gl_fn)
 #define LIST_intersect_gl LIST_IMPL(intersect_gl)
+#define LIST_intersect_kls_fn LIST_IMPL(intersect_kls_fn)
 #define LIST_intersect_kls LIST_IMPL(intersect_kls)
+#define LIST_diff_gl_fn LIST_IMPL(diff_gl_fn)
 #define LIST_diff_gl LIST_IMPL(diff_gl)
+#define LIST_diff_kls_fn LIST_IMPL(diff_kls_fn)
 #define LIST_diff_kls LIST_IMPL(diff_kls)
 
 #ifdef LIST_DECLS_ONLY
@@ -145,6 +157,21 @@ LIST_cons_kls(Koliseo* kls, LIST_T* element, LIST_NAME list);
 LIST_LINKAGE
 void
 LIST_free_gl(LIST_NAME list);
+
+#define LIST_CMP_FN bool(LIST_cmp)(const LIST_T*, const LIST_T*)
+typedef LIST_CMP_FN;
+
+LIST_LINKAGE
+bool
+LIST_dumb_cmp(const LIST_T* a, const LIST_T* b);
+
+#ifndef LIST_CMP_DEFAULT_FN
+#define LIST_CMP_DEFAULT_FN &LIST_dumb_cmp
+#endif // LIST_CMP_DEFAULT_FN
+
+LIST_LINKAGE
+bool
+LIST_member_fn(LIST_T* element, LIST_NAME list, LIST_cmp* comparator );
 
 LIST_LINKAGE
 bool
@@ -180,7 +207,15 @@ LIST_copy_kls(Koliseo* kls, LIST_NAME list);
 
 LIST_LINKAGE
 LIST_NAME
+LIST_remove_gl_fn(LIST_T* element, LIST_NAME list, LIST_cmp* comparator);
+
+LIST_LINKAGE
+LIST_NAME
 LIST_remove_gl(LIST_T* element, LIST_NAME list);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_remove_kls_fn(Koliseo* kls, LIST_T* element, LIST_NAME list, LIST_cmp* comparator);
 
 LIST_LINKAGE
 LIST_NAME
@@ -188,7 +223,15 @@ LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list);
 
 LIST_LINKAGE
 LIST_NAME
+LIST_intersect_gl_fn(LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator);
+
+LIST_LINKAGE
+LIST_NAME
 LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2);
+
+LIST_LINKAGE
+LIST_NAME
+LIST_intersect_kls_fn(Koliseo* kls, LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator);
 
 LIST_LINKAGE
 LIST_NAME
@@ -196,11 +239,20 @@ LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
 
 LIST_LINKAGE
 LIST_NAME
+LIST_diff_gl_fn(LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator);
+
+LIST_LINKAGE
+LIST_NAME
 LIST_diff_gl(LIST_NAME l1, LIST_NAME l2);
 
 LIST_LINKAGE
 LIST_NAME
+LIST_diff_kls_fn(Koliseo* kls, LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator);
+
+LIST_LINKAGE
+LIST_NAME
 LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2);
+
 #else
 
 LIST_LINKAGE
@@ -286,19 +338,49 @@ LIST_free_gl(LIST_NAME list)
     return;
 }
 
+#define LIST_CMP_FN bool(LIST_cmp)(const LIST_T*, const LIST_T*)
+typedef LIST_CMP_FN;
+
 LIST_LINKAGE
 bool
-LIST_member(LIST_T* element, LIST_NAME list)
+LIST_dumb_cmp(const LIST_T* a, const LIST_T* b)
+{
+    // ! Pointer comparison ! Avoid resorting to this.
+    fprintf(stderr, "%s at %i: %s(): Doing pointer comparison.\n", __FILE__, __LINE__, __func__);
+    fprintf(stderr, "%s at %i: %s(): Try defining LIST_CMP_DEFAULT_FN before importing the list.\n", __FILE__, __LINE__, __func__);
+    return a == b;
+}
+
+LIST_LINKAGE
+bool
+LIST_member_fn(LIST_T* element, LIST_NAME list, LIST_cmp* comparator)
 {
     if (LIST_isEmpty(list)) {
         return false;
     } else {
-        if (element == LIST_head(list)) {
-            return true;
+        if (comparator) {
+            if (comparator(element, LIST_head(list))) {
+                return true;
+            } else {
+                return LIST_member_fn(element, LIST_tail(list), comparator);
+            }
         } else {
-            return LIST_member(element, LIST_tail(list));
+            // Fallback to default comparator
+            LIST_cmp* cmp = LIST_CMP_DEFAULT_FN;
+            if (cmp(element, LIST_head(list))) {
+                return true;
+            } else {
+                return LIST_member_fn(element, LIST_tail(list), cmp);
+            }
         }
     }
+}
+
+LIST_LINKAGE
+bool
+LIST_member(LIST_T* element, LIST_NAME list)
+{
+    return LIST_member_fn(element, list, LIST_CMP_DEFAULT_FN);
 }
 
 LIST_LINKAGE
@@ -393,15 +475,61 @@ LIST_copy_kls(Koliseo* kls, LIST_NAME list)
 
 LIST_LINKAGE
 LIST_NAME
-LIST_remove_gl(LIST_T* element, LIST_NAME list)
+LIST_remove_gl_fn(LIST_T* element, LIST_NAME list, LIST_cmp* comparator)
 {
     if (LIST_isEmpty(list)) {
         return LIST_nullList();
     } else {
-        if (element == LIST_head(list)) {
-            return LIST_tail(list);
+        if (comparator) {
+            if (comparator(element, LIST_head(list))) {
+                return LIST_tail(list);
+            } else {
+                return LIST_cons_gl(LIST_head(list), LIST_remove_gl_fn(element, LIST_tail(list), comparator));
+            }
         } else {
-            return LIST_cons_gl(LIST_head(list), LIST_remove_gl(element, LIST_tail(list)));
+            // Fallback to default comparator
+            LIST_cmp* cmp = LIST_CMP_DEFAULT_FN;
+            if (cmp(element, LIST_head(list))) {
+                return LIST_tail(list);
+            } else {
+                return LIST_cons_gl(LIST_head(list), LIST_remove_gl_fn(element, LIST_tail(list), cmp));
+            }
+        }
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_remove_gl(LIST_T* element, LIST_NAME list)
+{
+    return LIST_remove_gl_fn(element, list, LIST_CMP_DEFAULT_FN);
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_remove_kls_fn(Koliseo* kls, LIST_T* element, LIST_NAME list, LIST_cmp* comparator)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
+    if (LIST_isEmpty(list)) {
+        return LIST_nullList();
+    } else {
+        if (comparator) {
+            if (comparator(element, LIST_head(list))) {
+                return LIST_tail(list);
+            } else {
+                return LIST_cons_kls(kls, LIST_head(list), LIST_remove_kls_fn(kls, element, LIST_tail(list), comparator));
+            }
+        } else {
+            // Fallback to default comparator
+            LIST_cmp* cmp = LIST_CMP_DEFAULT_FN;
+            if (cmp(element, LIST_head(list))) {
+                return LIST_tail(list);
+            } else {
+                return LIST_cons_kls(kls, LIST_head(list), LIST_remove_kls_fn(kls, element, LIST_tail(list), cmp));
+            }
         }
     }
 }
@@ -410,18 +538,20 @@ LIST_LINKAGE
 LIST_NAME
 LIST_remove_kls(Koliseo* kls, LIST_T* element, LIST_NAME list)
 {
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(list)) {
+    return LIST_remove_kls_fn(kls, element, list, LIST_CMP_DEFAULT_FN);
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_intersect_gl_fn(LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator)
+{
+    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
         return LIST_nullList();
+    }
+    if (LIST_member_fn(LIST_head(l1), l2, comparator) && !(LIST_member_fn(LIST_head(l1), LIST_tail(l2), comparator))) {
+        return LIST_cons_gl(LIST_head(l1), LIST_intersect_gl_fn(LIST_tail(l1), l2, comparator));
     } else {
-        if (element == LIST_head(list)) {
-            return LIST_tail(list);
-        } else {
-            return LIST_cons_kls(kls, LIST_head(list), LIST_remove_kls(kls, element, LIST_tail(list)));
-        }
+        return LIST_intersect_gl_fn(LIST_tail(l1), l2, comparator);
     }
 }
 
@@ -429,19 +559,12 @@ LIST_LINKAGE
 LIST_NAME
 LIST_intersect_gl(LIST_NAME l1, LIST_NAME l2)
 {
-    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
-        return LIST_nullList();
-    }
-    if (LIST_member(LIST_head(l1), l2) && !(LIST_member(LIST_head(l1), LIST_tail(l2)))) {
-        return LIST_cons_gl(LIST_head(l1), LIST_intersect_gl(LIST_tail(l1), l2));
-    } else {
-        return LIST_intersect_gl(LIST_tail(l1), l2);
-    }
+    return LIST_intersect_gl_fn(l1, l2, LIST_CMP_DEFAULT_FN);
 }
 
 LIST_LINKAGE
 LIST_NAME
-LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+LIST_intersect_kls_fn(Koliseo* kls, LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator)
 {
     if (kls == NULL) {
         fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
@@ -450,10 +573,32 @@ LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
     if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
         return LIST_nullList();
     }
-    if (LIST_member(LIST_head(l1), l2) && !(LIST_member(LIST_head(l1), LIST_tail(l2)))) {
-        return LIST_cons_kls(kls, LIST_head(l1), LIST_intersect_kls(kls, LIST_tail(l1), l2));
+    if (LIST_member_fn(LIST_head(l1), l2, comparator) && !(LIST_member_fn(LIST_head(l1), LIST_tail(l2), comparator))) {
+        return LIST_cons_kls(kls, LIST_head(l1), LIST_intersect_kls_fn(kls, LIST_tail(l1), l2, comparator));
     } else {
-        return LIST_intersect_kls(kls, LIST_tail(l1), l2);
+        return LIST_intersect_kls_fn(kls, LIST_tail(l1), l2, comparator);
+    }
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_intersect_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
+{
+    return LIST_intersect_kls_fn(kls, l1, l2, LIST_CMP_DEFAULT_FN);
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_diff_gl_fn(LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator)
+{
+    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
+        return l1;
+    } else {
+        if (!LIST_member_fn(LIST_head(l1), l2, comparator) && !LIST_member_fn(LIST_head(l1), LIST_tail(l1), comparator)) {
+            return LIST_cons_gl(LIST_head(l1), LIST_diff_gl_fn(LIST_tail(l1), l2, comparator));
+        } else {
+            return LIST_diff_gl_fn(LIST_tail(l1), l2, comparator);
+        }
     }
 }
 
@@ -461,13 +606,24 @@ LIST_LINKAGE
 LIST_NAME
 LIST_diff_gl(LIST_NAME l1, LIST_NAME l2)
 {
+    return LIST_diff_gl_fn(l1, l2, LIST_CMP_DEFAULT_FN);
+}
+
+LIST_LINKAGE
+LIST_NAME
+LIST_diff_kls_fn(Koliseo* kls, LIST_NAME l1, LIST_NAME l2, LIST_cmp* comparator)
+{
+    if (kls == NULL) {
+        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
+        return NULL;
+    }
     if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
         return l1;
     } else {
-        if (!LIST_member(LIST_head(l1), l2) && !LIST_member(LIST_head(l1), LIST_tail(l1))) {
-            return LIST_cons_gl(LIST_head(l1), LIST_diff_gl(LIST_tail(l1), l2));
+        if (!LIST_member_fn(LIST_head(l1), l2, comparator) && !LIST_member_fn(LIST_head(l1), LIST_tail(l1), comparator)) {
+            return LIST_cons_kls(kls, LIST_head(l1), LIST_diff_kls_fn(kls, LIST_tail(l1), l2, comparator));
         } else {
-            return LIST_diff_gl(LIST_tail(l1), l2);
+            return LIST_diff_kls_fn(kls, LIST_tail(l1), l2, comparator);
         }
     }
 }
@@ -476,19 +632,8 @@ LIST_LINKAGE
 LIST_NAME
 LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
 {
-    if (kls == NULL) {
-        fprintf(stderr, "%s at %i: %s(): Koliseo is NULL.\n", __FILE__, __LINE__, __func__);
-        return NULL;
-    }
-    if (LIST_isEmpty(l1) || LIST_isEmpty(l2)) {
-        return l1;
-    } else {
-        if (!LIST_member(LIST_head(l1), l2) && !LIST_member(LIST_head(l1), LIST_tail(l1))) {
-            return LIST_cons_kls(kls, LIST_head(l1), LIST_diff_kls(kls, LIST_tail(l1), l2));
-        } else {
-            return LIST_diff_kls(kls, LIST_tail(l1), l2);
-        }
-    }
+    //TODO: add macro to define default comparator
+    return LIST_diff_kls_fn(kls, l1, l2, NULL);
 }
 #endif // LIST_DECLS_ONLY
 
@@ -501,6 +646,7 @@ LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
 #undef LIST_LINKAGE
 #undef LIST_I_SUFFIX
 #undef LIST_ITEM_NAME
+#undef LIST_CMP_DEFAULT_FN
 #undef LIST_nullList
 #undef LIST_isEmpty
 #undef LIST_head
@@ -508,6 +654,9 @@ LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
 #undef LIST_cons_gl
 #undef LIST_cons_kls
 #undef LIST_free_gl
+#undef LIST_cmp
+#undef LIST_CMP_FN
+#undef LIST_member_fn
 #undef LIST_member
 #undef LIST_length
 #undef LIST_append_gl
@@ -516,11 +665,17 @@ LIST_diff_kls(Koliseo* kls, LIST_NAME l1, LIST_NAME l2)
 #undef LIST_reverse_kls
 #undef LIST_copy_gl
 #undef LIST_copy_kls
+#undef LIST_remove_gl_fn
 #undef LIST_remove_gl
+#undef LIST_remove_kls_fn
 #undef LIST_remove_kls
+#undef LIST_intersect_gl_fn
 #undef LIST_intersect_gl
+#undef LIST_intersect_kls_fn
 #undef LIST_intersect_kls
+#undef LIST_diff_gl_fn
 #undef LIST_diff_gl
+#undef LIST_diff_kls_fn
 #undef LIST_diff_kls
 #ifdef LIST_DECLS_ONLY
 #undef LIST_DECLS_ONLY
