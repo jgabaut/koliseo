@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.8] - 2025-04-01
+
+## Added
+
+- Add `src/kls_gulp.h`
+  - Related tests don't need `KOLISEO_HAS_GULP` anymore
+
+## Changed
+
+- Change default install dir to `/usr/local`
+- Fix uninstall target in `Makefile.am`
+  - Closes #83
+- Fix decorated string push macros not reserving space for NULL pointer
+  - Closes #82
+- Update `templates/list.h`
+  - New `LIST_CMP_FN` to specify comparators
+  - New `_p` functions for explicit pointer comparison
+- Bump `amboso` to `2.0.10`
+- Bump `invil` to `0.2.21`
+
 ## [0.4.7] - 2025-01-30
 ## [0.4.6] - 2024-09-02
 ## [0.4.5] - 2024-08-09
