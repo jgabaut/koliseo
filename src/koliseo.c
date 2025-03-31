@@ -478,6 +478,7 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
 
 /**
  * Takes a ptrdiff_t size and a function pointer to the allocation function.
+ * Additional arguments are for extensions.
  * Allocates the backing memory for a Koliseo.
  * Sets the KLS_Conf field to KLS_DEFAULT_CONF.
  * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
@@ -487,14 +488,15 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
  * @see Koliseo
  * @see Koliseo_Temp
  * @see KLS_DEFAULT_CONF
+ * @see KLS_Hooks
  * @see kls_new()
  * @see kls_temp_start()
  * @see kls_temp_end()
  */
 #ifndef KOLISEO_HAS_LOCATE
-Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
+Koliseo *kls_new_alloc_ext(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Hooks ext_handlers, void* user)
 #else
-Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc)
+Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Hooks ext_handlers, void* user, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     if (size < (ptrdiff_t)sizeof(Koliseo)) {
@@ -531,6 +533,8 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
         kls_set_conf(kls, KLS_DEFAULT_CONF);
         kls->stats = KLS_STATS_DEFAULT;
         kls->conf.kls_log_fp = stderr;
+        kls->hooks = ext_handlers;
+        kls->extension_data = user;
 #ifdef KLS_DEBUG_CORE
         kls_log(kls, "KLS", "API Level { %i } ->  Allocated (%s) for new KLS.",
                 int_koliseo_version(), h_size);
@@ -539,6 +543,10 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
                 kls + kls->offset);
 #endif
 
+        if (kls->hooks.on_new_handler != NULL) {
+            // Call on_new extension
+            kls->hooks.on_new_handler(kls);
+        }
 #ifdef KOLISEO_HAS_REGION
         if (kls->conf.kls_autoset_regions == 1) {
 #ifdef KLS_DEBUG_CORE
@@ -589,7 +597,64 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
 }
 
 /**
+ * Takes a ptrdiff_t size and a function pointer to the allocation function.
+ * Allocates the backing memory for a Koliseo.
+ * Sets the KLS_Conf field to KLS_DEFAULT_CONF.
+ * Sets the fields with appropriate values if memory allocation was successful, goes to exit() otherwise.
+ * @param size The size for Koliseo data field.
+ * @param alloc_func The allocation function to use to init the Koliseo.
+ * @return A pointer to the initialised Koliseo struct.
+ * @see Koliseo
+ * @see Koliseo_Temp
+ * @see KLS_DEFAULT_CONF
+ * @see kls_new()
+ * @see kls_temp_start()
+ * @see kls_temp_end()
+ */
+#ifndef KOLISEO_HAS_LOCATE
+Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
+#else
+Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+#ifndef KOLISEO_HAS_LOCATE
+    return kls_new_alloc_ext(size, alloc_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
+#else
+    return kls_new_alloc_ext_dbg(size, alloc_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, loc);
+#endif // KOLISEO_HAS_LOCATE
+}
+
+/**
  * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, and an allocation function pointer.
+ * Additional arguments are for extensions.
+ * Calls kls_new_alloc() to initialise the Koliseo, then calls kls_set_conf() to update the config.
+ * Returns the new Koliseo.
+ * @param size The size for Koliseo data field.
+ * @param conf The KLS_Conf for the new Koliseo.
+ * @param alloc_func The allocation function to use.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see KLS_DEFAULT_CONF
+ * @see kls_new_alloc_ext()
+ * @see kls_set_conf()
+ */
+Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, KLS_Hooks ext_handlers, void* user)
+{
+    Koliseo *k = kls_new_alloc_ext(size, alloc_func, ext_handlers, user);
+    bool conf_res = kls_set_conf(k, conf);
+    if (!conf_res) {
+        fprintf(stderr,
+                "[ERROR] [%s()]: Failed to set config for new Koliseo.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+    return k;
+}
+
+/**
+ * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, and an allocation function pointer.
+ * Additional arguments are for extensions.
  * Calls kls_new_alloc() to initialise the Koliseo, then calls kls_set_conf() to update the config.
  * Returns the new Koliseo.
  * @param size The size for Koliseo data field.
@@ -604,15 +669,7 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
  */
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func)
 {
-    Koliseo *k = kls_new_alloc(size, alloc_func);
-    bool conf_res = kls_set_conf(k, conf);
-    if (!conf_res) {
-        fprintf(stderr,
-                "[ERROR] [%s()]: Failed to set config for new Koliseo.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    return k;
+    return kls_new_conf_alloc_ext(size, conf, alloc_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
 }
 
 /**
@@ -1605,6 +1662,27 @@ void *kls_push_zero_AR_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
 
+    if (kls->hooks.on_push_handler != NULL) {
+        /*
+        struct KLS_EXTENSION_AR_DEFAULT_ARGS {
+            const char* region_name;
+            size_t region_name_len;
+            const char* region_desc;
+            size_t region_desc_len;
+            int region_type;
+        };
+        struct KLS_EXTENSION_AR_DEFAULT_ARGS ar_args = {
+            .region_name = KOLISEO_DEFAULT_REGION_NAME,
+            .region_name_len = strlen(KOLISEO_DEFAULT_REGION_NAME),
+            .region_desc = KOLISEO_DEFAULT_REGION_DESC,
+            .region_desc_len = strlen(KOLISEO_DEFAULT_REGION_DESC),
+            .region_type = KLS_None
+        };
+        kls->hooks.on_push_handler(kls, padding, (void*)&ar_args);
+        */
+        kls->hooks.on_push_handler(kls, padding, __func__, NULL);
+    }
+
 #ifdef KOLISEO_HAS_REGION
     kls__autoregion(__func__, kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None);
 #endif // KOLISEO_HAS_REGION
@@ -1697,6 +1775,11 @@ void *kls_temp_push_zero_AR_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     memset(p, 0, size * count);
     kls->prev_offset = kls->offset;
     kls->offset += padding + size * count;
+
+    if (kls->hooks.on_temp_push_handler != NULL) {
+        // Call on_temp_push extension with empty user arg
+        kls->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL);
+    }
 
 #ifdef KOLISEO_HAS_REGION
     kls__temp_autoregion(__func__, t_kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None);
@@ -2291,6 +2374,10 @@ void kls_free(Koliseo *kls)
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
     }
+    if (kls->hooks.on_free_handler != NULL) {
+        // Call on_free() extension
+        kls->hooks.on_free_handler(kls);
+    }
     if (kls->has_temp == 1) {
 #ifdef KLS_DEBUG_CORE
         kls_log(kls, "KLS",
@@ -2376,6 +2463,7 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
     kls_log(kls, "INFO", "Passed kls conf: " KLS_Conf_Fmt "\n",
             KLS_Conf_Arg(kls->conf));
 #endif
+
 #ifdef KOLISEO_HAS_REGION
     switch (kls->conf.kls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
@@ -2411,6 +2499,10 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_REGION
     kls->has_temp = 1;
     kls->t_kls = tmp;
+    if (kls->hooks.on_temp_start_handler != NULL) {
+        // Call on_temp_start extension
+        kls->hooks.on_temp_start_handler(tmp);
+    }
 #ifdef KOLISEO_HAS_REGION
     if (kls->conf.kls_autoset_temp_regions == 1) {
 #ifdef KLS_DEBUG_CORE
@@ -2503,6 +2595,18 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         exit(EXIT_FAILURE);
     }
 
+    Koliseo *kls_ref = tmp_kls->kls;
+    if (kls_ref == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+
+    if (kls_ref->hooks.on_temp_free_handler != NULL) {
+        // Call on_temp_free() extension
+        kls_ref->hooks.on_temp_free_handler(tmp_kls);
+    }
+
 #ifdef KOLISEO_HAS_REGION
     if (tmp_kls->conf.kls_autoset_regions == 1) {
         switch (tmp_kls->conf.tkls_reglist_alloc_backend) {
@@ -2530,13 +2634,7 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         }
     }
 #endif // KOLISEO_HAS_REGION
-    Koliseo *kls_ref = tmp_kls->kls;
 #ifdef KLS_DEBUG_CORE
-    if (kls_ref == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
     kls_log(kls_ref, "KLS", "Ended Temp KLS.");
 #endif
     tmp_kls->kls->has_temp = 0;
