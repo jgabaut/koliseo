@@ -1,3 +1,5 @@
+// jgabaut @ github.com/jgabaut
+// SPDX-License-Identifier: GPL-3.0-only
 #include "../src/koliseo.h"
 #define KLS_PIT_IMPLEMENTATION
 #include "../templates/kls_pit.h"

@@ -1,7 +1,7 @@
 // jgabaut @ github.com/jgabaut
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-    Copyright (C) 2023-2024  jgabaut
+    Copyright (C) 2023-2025  jgabaut
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 7 /**< Represents current patch release.*/
+#define KLS_PATCH 8 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -122,7 +122,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.7"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.8"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -583,7 +583,7 @@ void *kls_push_zero_typed_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 /**
  * Macro to request memory for a C string from a Koliseo, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_STR_NAMED(kls, cstr, name, desc) KLS_PUSH_ARR_NAMED((kls), char, strlen((cstr)), (name), (desc))
+#define KLS_PUSH_STR_NAMED(kls, cstr, name, desc) KLS_PUSH_ARR_NAMED((kls), char, strlen((cstr))+1, (name), (desc))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a type, a name and a description to the region item.
@@ -597,7 +597,7 @@ void *kls_push_zero_typed_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 /**
  * Macro to request memory for a C string from a Koliseo, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), char, strlen((cstr)), (region_type), (name), (desc))
+#define KLS_PUSH_STR_TYPED(kls, cstr, region_type, name, desc) KLS_PUSH_ARR_TYPED((kls), char, strlen((cstr))+1, (region_type), (name), (desc))
 
 /**
  * Macro used to request memory from a Koliseo.
@@ -699,7 +699,7 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 /**
  * Macro to request memory for a C string from a Koliseo_Temp, and assign a name and a description to the region item.
  */
-#define KLS_PUSH_STR_T_NAMED(kls_temp, cstr, name, desc) KLS_PUSH_ARR_T_NAMED((kls_temp), char, strlen((cstr)), (name), (desc))
+#define KLS_PUSH_STR_T_NAMED(kls_temp, cstr, name, desc) KLS_PUSH_ARR_T_NAMED((kls_temp), char, strlen((cstr))+1, (name), (desc))
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp, and assign a type, a name and a description to the region item.
@@ -713,7 +713,7 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 /**
  * Macro to request memory for a C string from a Koliseo_Temp, and assign a type, a name and a description to the region item.
  */
-#define KLS_PUSH_STR_T_TYPED(kls_temp, cstr, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), char, strlen((cstr)), (region_type), (name), (desc))
+#define KLS_PUSH_STR_T_TYPED(kls_temp, cstr, region_type, name, desc) KLS_PUSH_ARR_T_TYPED((kls_temp), char, strlen((cstr))+1, (region_type), (name), (desc))
 
 /**
  * Macro used to request memory from a Koliseo_Temp.
@@ -796,6 +796,9 @@ ptrdiff_t kls_total_padding(Koliseo *);
 
 #ifdef KOLISEO_HAS_GULP /**< This definition controls the inclusion of gulp functions.*/
 
+/**
+ * KOLISEO_HAS_GULP is deprecated. The feature will be moved to a separate header in an upcoming release.
+ */
 #ifndef KOLISEO_GULP_H_
 #define KOLISEO_GULP_H_
 
