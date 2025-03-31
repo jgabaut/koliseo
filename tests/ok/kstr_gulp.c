@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 #include "../../src/koliseo.h"
 #define KLS_GULP_IMPLEMENTATION
-#include "../../src/gulp.h"
+#include "../../src/kls_gulp.h"
 
 int main(void) {
     const char* filepath = "./LICENSE";
