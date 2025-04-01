@@ -558,6 +558,28 @@ Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
 #define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
 #define kls_new_traced_AR_KLS_handled(size, output_path, reglist_kls_size, err_handlers) kls_new_traced_AR_KLS_alloc_handled((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF, (err_handlers))
 
+#ifndef KOLISEO_HAS_LOCATE
+int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name);
+#else
+int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc);
+#endif // KOLISEO_HAS_LOCATE
+
+/**
+ * Macro to return NULL on errors from kls__check_available_failable.
+ * @see kls__check_available_failable
+ */
+#ifndef KOLISEO_HAS_LOCATE
+#define kls__check_available(kls, size, align, count) do { \
+    int res = kls__check_available_failable((kls), (size), (align), (count), __func__); \
+    if (res != 0) return NULL; \
+} while(0)
+#else
+#define kls__check_available_dbg(kls, size, align, count, loc) do { \
+    int res = kls__check_available_failable_dbg((kls), (size), (align), (count), __func__, (loc)); \
+    if (res != 0) return NULL; \
+} while(0)
+#endif // KOLISEO_HAS_LOCATE
+
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 
 #ifndef KOLISEO_HAS_LOCATE

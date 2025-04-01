@@ -1033,12 +1033,21 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 }
 
 /**
- * Internal usage only. Return value should be checked to catch errors.
+ * Takes a Koliseo, a ptrdiff_t size, align and count, and a caller name.
+ * Checks if the passed Koliseo can fit the requested allocation.
+ * In case of errors, tries calling the appropriate handler.
+ * @param kls The Koliseo to check space for.
+ * @param size The size of the type to allocate.
+ * @param align The alignment of the type to allocate.
+ * @param count The count of allocations.
+ * @param caller_name Name for caller. Used for error reporting.
+ * @return 0 for success, other values for errors. May exit of some errors without a custom handler.
+ * @see Koliseo
  */
 #ifndef KOLISEO_HAS_LOCATE
-static inline int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
+int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
 #else
-static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
+int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
@@ -1268,21 +1277,6 @@ static inline int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size
     }
     return 0;
 }
-
-/**
- * Internal usage only.
- */
-#ifndef KOLISEO_HAS_LOCATE
-#define kls__check_available(kls, size, align, count) do { \
-    int res = kls__check_available_failable((kls), (size), (align), (count), __func__); \
-    if (res != 0) return NULL; \
-} while(0)
-#else
-#define kls__check_available_dbg(kls, size, align, count, loc) do { \
-    int res = kls__check_available_failable_dbg((kls), (size), (align), (count), __func__, (loc)); \
-    if (res != 0) return NULL; \
-} while(0)
-#endif // KOLISEO_HAS_LOCATE
 
 /**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
