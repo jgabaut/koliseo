@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.9] - Unreleased
+## [0.4.9] - 2025-06-06
 
 ## Added
 - Add `src/kls_region.h`
