@@ -15,6 +15,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#ifndef _WIN32
+#define _POSIX_C_SOURCE 200809L
+#endif
+#include <time.h>
 #include <stddef.h>
 #include <assert.h>
 
