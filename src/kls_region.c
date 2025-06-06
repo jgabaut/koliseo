@@ -1370,7 +1370,7 @@ void KLS_autoregion_on_new(struct Koliseo* kls)
 #ifdef KLS_DEBUG_CORE
             kls_log(kls, "ERROR",
                     "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
-                    __func__, data_ot->conf.tkls_reglist_alloc_backend);
+                    __func__, data_pt->conf.tkls_reglist_alloc_backend);
 #endif
             kls_free(kls);
             exit(EXIT_FAILURE);
