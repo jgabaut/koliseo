@@ -169,32 +169,32 @@ bad_size.k:
 
 many_regions.k:
 	@echo -en "Building many_regions.k test"
-	$(CCOMP) tests/error/many_regions.c src/koliseo.c -o tests/error/many_regions.k -DKOLISEO_HAS_REGION
+	$(CCOMP) tests/error/many_regions.c src/kls_region.c -o tests/error/many_regions.k
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 many_temp_regions.k:
 	@echo -en "Building many_temp_regions.k test"
-	$(CCOMP) tests/error/many_temp_regions.c src/koliseo.c -o tests/error/many_temp_regions.k -DKOLISEO_HAS_REGION
+	$(CCOMP) tests/error/many_temp_regions.c src/kls_region.c -o tests/error/many_temp_regions.k
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 many_regions_named.k:
 	@echo -en "Building many_regions_named.k test"
-	$(CCOMP) tests/error/many_regions_named.c src/koliseo.c -o tests/error/many_regions_named.k -DKOLISEO_HAS_REGION
+	$(CCOMP) tests/error/many_regions_named.c src/kls_region.c -o tests/error/many_regions_named.k
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 many_temp_regions_named.k:
 	@echo -en "Building many_temp_regions_named.k test"
-	$(CCOMP) tests/error/many_temp_regions_named.c src/koliseo.c -o tests/error/many_temp_regions_named.k -DKOLISEO_HAS_REGION
+	$(CCOMP) tests/error/many_temp_regions_named.c src/kls_region.c -o tests/error/many_temp_regions_named.k
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 many_regions_typed.k:
 	@echo -en "Building many_regions_typed.k test"
-	$(CCOMP) tests/error/many_regions_typed.c src/koliseo.c -o tests/error/many_regions_typed.k -DKOLISEO_HAS_REGION
+	$(CCOMP) tests/error/many_regions_typed.c src/kls_region.c -o tests/error/many_regions_typed.k
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 many_temp_regions_typed.k:
 	@echo -en "Building many_temp_regions_typed.k test"
-	$(CCOMP) tests/error/many_temp_regions_typed.c src/koliseo.c -o tests/error/many_temp_regions_typed.k -DKOLISEO_HAS_REGION
+	$(CCOMP) tests/error/many_temp_regions_typed.c src/kls_region.c -o tests/error/many_temp_regions_typed.k
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 zero_count_err.k:

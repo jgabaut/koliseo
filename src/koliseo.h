@@ -77,7 +77,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 4 /**< Represents current minor release.*/
-#define KLS_PATCH 8 /**< Represents current patch release.*/
+#define KLS_PATCH 9 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -122,7 +122,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.4.8"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.4.9"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -140,6 +140,7 @@ int int_koliseo_version(void);
 #define KLS_DEFAULT_ALIGNMENT (2*sizeof(void *)) /**< Represents a default alignment value. Not used.*/
 #endif
 
+#ifdef KOLISEO_HAS_REGION
 /**
  * Represents a type index for Regions.
  * @see KLS_PUSH_TYPED()
@@ -166,8 +167,6 @@ typedef enum KLS_Region_Type {
  * @see KLS_Region
  */
 #define KLS_REGION_MAX_DESC_SIZE 20
-
-#ifdef KOLISEO_HAS_REGION
 
 /**
  * Represents an allocated memory region in a Koliseo.
@@ -255,6 +254,35 @@ typedef struct KLS_Err_Handlers {
 #else
 #define KLS_DEFAULT_ERR_HANDLERS (KLS_Err_Handlers) { .OOM_handler = &KLS_OOM_default_handler_dbg__, .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__, .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler_dbg__, }
 #endif // KOLISEO_HAS_LOCATE
+
+typedef void(KLS_hook_on_new)(struct Koliseo* kls); /**< Used to pass an extension handler for kls_new_alloc().*/
+
+typedef void(KLS_hook_on_free)(struct Koliseo* kls); /**< Used to pass an extension handler for kls_free().*/
+
+typedef void(KLS_hook_on_push)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_push().*/
+
+typedef void(KLS_hook_on_temp_start)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_start().*/
+
+typedef void(KLS_hook_on_temp_free)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_end().*/
+
+typedef void(KLS_hook_on_temp_push)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_temp_push().*/
+
+typedef struct KLS_Hooks {
+    KLS_hook_on_new* on_new_handler; /**< Used to pass custom new handler for kls_new_alloc calls.*/
+    KLS_hook_on_free* on_free_handler; /**< Used to pass custom free handler for kls_free calls.*/
+    KLS_hook_on_push* on_push_handler; /**< Used to pass custom push handler for kls_push calls.*/
+    KLS_hook_on_temp_start* on_temp_start_handler; /**< Used to pass custom start handler for kls_temp_start calls.*/
+    KLS_hook_on_temp_free* on_temp_free_handler; /**< Used to pass custom free handler for kls_temp_end calls.*/
+    KLS_hook_on_temp_push* on_temp_push_handler; /**< Used to pass custom push handler for kls_temp_push calls.*/
+} KLS_Hooks;
+
+#ifndef KLS_DEFAULT_HOOKS
+#define KLS_DEFAULT_HOOKS (KLS_Hooks){0}
+#endif // KLS_DEFAULT_HOOKS
+
+#ifndef KLS_DEFAULT_EXTENSION_DATA
+#define KLS_DEFAULT_EXTENSION_DATA NULL
+#endif // KLS_DEFAULT_EXTENSION_DATA
 
 /**
  * Defines flags for Koliseo.
@@ -443,6 +471,8 @@ typedef struct Koliseo {
     KLS_Conf conf; /**< Contains flags to change the Koliseo behaviour.*/
     KLS_Stats stats; /**< Contains stats for Koliseo performance analysis.*/
     struct Koliseo_Temp *t_kls;	    /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
+    KLS_Hooks hooks;  /**< Contains handlers for extensions.*/
+    void* extension_data; /**< Points to data for extensions.*/
 } Koliseo;
 
 /**
@@ -489,6 +519,13 @@ int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp * t_kls);
 #endif
 
 #ifndef KOLISEO_HAS_LOCATE
+Koliseo *kls_new_alloc_ext(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Hooks ext_handlers, void* user);
+#else
+Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, KLS_Hooks ext_handlers, void* user, Koliseo_Loc loc);
+#define kls_new_alloc_ext(size, alloc_func, ext_handlers, user) kls_new_alloc_ext_dbg((size), (alloc_func), (ext_handlers), (user), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 Koliseo *kls_new_alloc(ptrdiff_t size, kls_alloc_func alloc_func);
 #else
 Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Loc loc);
@@ -501,8 +538,11 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, Koliseo_Lo
 
 #define kls_new(size) kls_new_alloc((size), KLS_DEFAULT_ALLOCF)
 //bool kls_set_conf(Koliseo* kls, KLS_Conf conf);
+Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, KLS_Hooks ext_handlers, void* user);
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func);
+#define kls_new_conf_ext(size, conf, ext_handlers, user) kls_new_conf_alloc_ext((size), (conf), KLS_DEFAULT_ALLOCF, (ext_handlers), (user))
 #define kls_new_conf(size, conf) kls_new_conf_alloc((size), (conf), KLS_DEFAULT_ALLOCF)
+
 Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers);
 Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func);
 #define kls_new_traced(size, output_path) kls_new_traced_alloc((size), (output_path), KLS_DEFAULT_ALLOCF)
@@ -517,6 +557,28 @@ Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
                                      ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func);
 #define kls_new_traced_AR_KLS(size, output_path, reglist_kls_size) kls_new_traced_AR_KLS_alloc((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF)
 #define kls_new_traced_AR_KLS_handled(size, output_path, reglist_kls_size, err_handlers) kls_new_traced_AR_KLS_alloc_handled((size), (output_path), (reglist_kls_size), KLS_DEFAULT_ALLOCF, (err_handlers))
+
+#ifndef KOLISEO_HAS_LOCATE
+int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name);
+#else
+int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc);
+#endif // KOLISEO_HAS_LOCATE
+
+/**
+ * Macro to return NULL on errors from kls__check_available_failable.
+ * @see kls__check_available_failable
+ */
+#ifndef KOLISEO_HAS_LOCATE
+#define kls__check_available(kls, size, align, count) do { \
+    int res = kls__check_available_failable((kls), (size), (align), (count), __func__); \
+    if (res != 0) return NULL; \
+} while(0)
+#else
+#define kls__check_available_dbg(kls, size, align, count, loc) do { \
+    int res = kls__check_available_failable_dbg((kls), (size), (align), (count), __func__, (loc)); \
+    if (res != 0) return NULL; \
+} while(0)
+#endif // KOLISEO_HAS_LOCATE
 
 //void* kls_push(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
 

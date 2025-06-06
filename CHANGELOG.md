@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.9] - 2025-06-06
+
+## Added
+- Add `src/kls_region.h`
+  - Related tests don't need `KOLISEO_HAS_REGION` anymore
+- Add `KLS_Hooks` to support user callbacks
+- Add `kls_new_alloc_ext()`, `kls_new_conf_ext()`
+- `static/region_example.c` shows how to use the `kls_region` extension
+  - Build with `gcc -I./src static/region_example.c src/kls_region.c -o static/region_example`
+
 ## [0.4.8] - 2025-04-01
 
 ## Added

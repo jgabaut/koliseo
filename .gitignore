@@ -19,6 +19,8 @@ basic_example
 pit_example
 # ignore list_example binary
 list_example
+# ignore region_example binary
+region_example
 
 #We also want to ignore the dotfile dump if we ever use anvil with -c flag
 amboso_cfg.dot
