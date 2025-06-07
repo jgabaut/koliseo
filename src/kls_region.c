@@ -30,7 +30,17 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_allow_zerocount_push = 0,
     .kls_log_fp = NULL,
     .kls_log_filepath = "",
-    .err_handlers = KLS_DEFAULT_ERR_HANDLERS,
+    .err_handlers = {
+#ifndef KOLISEO_HAS_LOCATE
+        .OOM_handler = &KLS_OOM_default_handler__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler__,
+        .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler__,
+#else
+        .OOM_handler = &KLS_OOM_default_handler_dbg__,
+        .PTRDIFF_MAX_handler = &KLS_PTRDIFF_MAX_default_handler_dbg__,
+        .ZEROCOUNT_handler = &KLS_ZEROCOUNT_default_handler_dbg__,
+#endif // KOLISEO_HAS_LOCATE
+    },
 }; /**< Inner config used for any Koliseo used to host the regions for another Koliseo in the KLS_BASIC config.*/
 
 const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
@@ -1370,7 +1380,7 @@ void KLS_autoregion_on_new(struct Koliseo* kls)
 #ifdef KLS_DEBUG_CORE
             kls_log(kls, "ERROR",
                     "%s():  Invalid KLS_RegList_Alloc_Backend value: {%i}.",
-                    __func__, data_ot->conf.tkls_reglist_alloc_backend);
+                    __func__, data_pt->conf.tkls_reglist_alloc_backend);
 #endif
             kls_free(kls);
             exit(EXIT_FAILURE);
