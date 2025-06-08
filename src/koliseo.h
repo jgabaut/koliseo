@@ -417,23 +417,18 @@ void *kls_push_zero_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KOLISEO_HAS_LOCATE
-void *kls_push_zero_AR(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-                       ptrdiff_t count);
 void *kls_push_zero_ext(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                        ptrdiff_t count);
 #else
-void *kls_push_zero_AR_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
-                           ptrdiff_t count, Koliseo_Loc loc);
 void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
                            ptrdiff_t count, Koliseo_Loc loc);
-#define kls_push_zero_AR(kls, size, align, count) kls_push_zero_AR_dbg((kls), (size), (align), (count), KLS_HERE)
 #define kls_push_zero_ext(kls, size, align, count) kls_push_zero_ext_dbg((kls), (size), (align), (count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
  */
-#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_AR((kls), sizeof(type), _Alignof(type), (count))
+#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_ext((kls), sizeof(type), _Alignof(type), (count))
 
 /**
  * Macro to request memory for a C string from a Koliseo.
@@ -504,16 +499,11 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo * kls, Koliseo_Loc loc);
 void kls_temp_end(Koliseo_Temp * tmp_kls);
 
 #ifndef KOLISEO_HAS_LOCATE
-void *kls_temp_push_zero_AR(Koliseo_Temp * t_kls, ptrdiff_t size,
-                            ptrdiff_t align, ptrdiff_t count);
 void *kls_temp_push_zero_ext(Koliseo_Temp * t_kls, ptrdiff_t size,
                             ptrdiff_t align, ptrdiff_t count);
 #else
-void *kls_temp_push_zero_AR_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
-                                ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc);
 void *kls_temp_push_zero_ext_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
                                 ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc);
-#define kls_temp_push_zero_AR(t_kls, size, align, count) kls_temp_push_zero_AR_dbg((t_kls), (size), (align), (count), KLS_HERE)
 #define kls_temp_push_zero_ext(t_kls, size, align, count) kls_temp_push_zero_ext_dbg((t_kls), (size), (align), (count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
@@ -523,7 +513,7 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp.
  */
-#define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_AR((kls_temp), sizeof(type), _Alignof(type), (count))
+#define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_ext((kls_temp), sizeof(type), _Alignof(type), (count))
 
 /**
  * Macro to request memory for a C string from a Koliseo_Temp.
