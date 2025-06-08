@@ -1211,6 +1211,31 @@ void *kls_push_zero_AR_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 }
 
 /**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
+ * Notably, it zeroes the memory region.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ */
+#ifndef KOLISEO_HAS_LOCATE
+void *kls_push_zero_ext(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
+                       ptrdiff_t count)
+#else
+void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
+                           ptrdiff_t count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+
+#ifndef KOLISEO_HAS_LOCATE
+    return kls_push_zero_AR(kls, size, align, count);
+#else
+    return kls_push_zero_AR_dbg(kls, size, align, count, loc);
+#endif // KOLISEO_HAS_LOCATE
+}
+
+/**
  * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * @param t_kls The Koliseo_Temp at hand.
@@ -1300,6 +1325,30 @@ void *kls_temp_push_zero_AR_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
         kls->stats.tot_temp_pushes += 1;
     }
     return p;
+}
+
+/**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
+ * Notably, it zeroes the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ */
+#ifndef KOLISEO_HAS_LOCATE
+void *kls_temp_push_zero_ext(Koliseo_Temp *t_kls, ptrdiff_t size,
+                            ptrdiff_t align, ptrdiff_t count)
+#else
+void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
+                                ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+#ifndef KOLISEO_HAS_LOCATE
+    return kls_temp_push_zero_AR(t_kls, size, align, count);
+#else
+    return kls_temp_push_zero_AR_dbg(t_kls, size, align, count, loc);
+#endif // KOLISEO_HAS_LOCATE
 }
 
 /**
