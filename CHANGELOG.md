@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0] - 2025-06-08
+
+### Changed
+
+- Dropped `KOLISEO_HAS_REGION` guards and code
+  - Still available as an extension in `src/kls_region.c`
+- Dropped `KOLISEO_HAS_GULP` guards and code
+  - Still available as an additional header in `src/kls_gulp.h`
+- Avoid using `KLS_DEFAULT_ERR_HANDLERS` in `kls_region.c`
+- Include `time.h` in `kls_region.h`
+- Update CHANGELOG
+
 ## [0.4.9] - 2025-06-06
 
 ## Added
