@@ -93,7 +93,12 @@ int main(void)
   By default, extended functionalities are not included in the build, with each feature needing a preprocessor macro to be defined before including the library header.
   You can find hints on configuration [here,](#config) or the list of macros [here.](#extras_howto)
 
+### :construction: Disclaimer: after version 0.5, the Region and Gulp features are no longer bundled in the main koliseo.c file, after being moved to their own files. Read below for more info. :construction:
+
 ### Region <a name = "extra_region"></a>
+
+
+  :construction: Disclaimer: after version 0.5, the Region feature is no longer present inside the main koliseo.c file. It has been reimplemented as an extension, in kls_region.c file. :construction:
 
   A ready-to-go index for every allocation you make.
   - It uses a linked list and has some the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
@@ -109,6 +114,8 @@ int main(void)
   Extra debug for core calls, may be too verbose for some applications.
 
 ### Gulp <a name = "extra_gulp"></a>
+
+  :construction: Disclaimer: after version 0.5, the Gulp feature is no longer present inside the main koliseo.c file. It has been reimplemented as an extension, in kls_gulp.h file. :construction:
 
   Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
   - Also includes a minimal string-view API, in case you want to work on the file contents differently.
@@ -144,9 +151,9 @@ int main(void)
 
   The preprocessor macros to enable them manually are:
 
-  - Region: `KOLISEO_HAS_REGION`
+  - Region: `KOLISEO_HAS_REGION` :construction: (After 0.5, this macro is no longer used) :construction:
   - Debug: `KLS_DEBUG_CORE`
-  - Gulp: `KOLISEO_HAS_GULP`
+  - Gulp: `KOLISEO_HAS_GULP` :construction: (After 0.5, this macro is no longer used) :construction:
   - Experimental: `KOLISEO_HAS_EXPER`
 
 ## Documentation <a name = "docs"></a>
@@ -188,8 +195,8 @@ int main(void)
   - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
   - Run `./configure --enable-debug` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
     - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
-  - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag.
-  - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag.
+  - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag. :construction: (After 0.5, this is no longer relevant) :construction:
+  - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag. :construction: (After 0.5, this is no longer relevant) :construction:
   - Run `./configure --enable-exper` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_EXPER` flag.
 
 
