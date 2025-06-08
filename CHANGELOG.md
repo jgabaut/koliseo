@@ -8,8 +8,12 @@
   - Still available as an extension in `src/kls_region.c`
 - Dropped `KOLISEO_HAS_GULP` guards and code
   - Still available as an additional header in `src/kls_gulp.h`
+- Dropped `kls_new_traced_AR_KLS()` and relatives
+- Renamed `kls_push_zero_AR` to `kls_push_zero_ext()`
+- Renamed `kls_temp_push_zero_AR` to `kls_temp_push_zero_ext()`
 - Avoid using `KLS_DEFAULT_ERR_HANDLERS` in `kls_region.c`
 - Include `time.h` in `kls_region.h`
+- Fixed typo in `kls_region.c`
 - Update CHANGELOG
 
 ## [0.4.9] - 2025-06-06
