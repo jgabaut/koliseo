@@ -5,7 +5,6 @@
 #include <locale.h>
 #include "../src/koliseo.h"
 #include "./kls_banner.h"
-#include "amboso.h"
 
 void usage(char *progname)
 {
@@ -37,7 +36,6 @@ int main(int argc, char **argv)
 
     printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n",
 	   int_koliseo_version(), string_koliseo_version());
-    printf("Supporting Amboso API version %s\n\n", getAmbosoVersion());
 
 #ifndef KOLISEO_HAS_REGION
     int KLS_REGLIST_ALLOC_KLS_BASIC = -1;

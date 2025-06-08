@@ -20,7 +20,7 @@ PACK_NAME = $(SHARED_LIB)-$(VERSION)-$(OS)-$(MACHINE)
 TEMPLATES_DIR = "./templates"
 
 # Source files
-demo_SOURCES = src/koliseo.c static/amboso.c static/demo.c static/kls_banner.c
+demo_SOURCES = src/koliseo.c static/demo.c static/kls_banner.c
 lib_SOURCES = src/koliseo.c
 
 # Linking rule
