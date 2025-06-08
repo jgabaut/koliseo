@@ -579,64 +579,6 @@ Koliseo *kls_new_dbg_alloc(ptrdiff_t size, kls_alloc_func alloc_func)
 }
 
 /**
- * Takes a ptrdiff_t size and a filepath for the trace output file, and the needed parameters for a successful init of the prepared Koliseo.
- * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
- * @param size The size for Koliseo data field.
- * @param output_path The filepath for log output.
- * @param reglist_kls_size The size to use for the inner reglist Koliseo.
- * @param alloc_func The allocation function to use.
- * @param err_handlers The error handlers for errors in push calls.
- * @return A pointer to the initialised Koliseo struct, with wanted config.
- * @see Koliseo
- * @see KLS_Conf
- * @see kls_new_conf_alloc()
- */
-Koliseo *kls_new_traced_AR_KLS_alloc_handled(ptrdiff_t size, const char *output_path,
-        ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func, KLS_Err_Handlers err_handlers)
-{
-#ifndef KLS_DEBUG_CORE
-    fprintf(stderr,
-            "[WARN]    %s(): KLS_DEBUG_CORE is not defined. No tracing allowed.\n",
-            __func__);
-#endif
-    KLS_Conf k = (KLS_Conf) {
-        .kls_collect_stats = 1,
-        .kls_verbose_lvl = 1,
-        .kls_log_filepath = output_path,
-        .err_handlers = (KLS_Err_Handlers) {
-#ifndef KOLISEO_HAS_LOCATE
-            .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
-#else
-            .OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-            .PTRDIFF_MAX_handler = (err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
-#endif // KOLISEO_HAS_LOCATE
-        },
-    };
-    return kls_new_conf_alloc(size, k, alloc_func);
-}
-
-/**
- * Takes a ptrdiff_t size and a filepath for the trace output file, and the needed parameters for a successful init of the prepared Koliseo.
- * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
- * @param size The size for Koliseo data field.
- * @param output_path The filepath for log output.
- * @param reglist_kls_size The size to use for the inner reglist Koliseo.
- * @param alloc_func The allocation function to use.
- * @return A pointer to the initialised Koliseo struct, with wanted config.
- * @see Koliseo
- * @see KLS_Conf
- * @see kls_new_conf_alloc()
- */
-Koliseo *kls_new_traced_AR_KLS_alloc(ptrdiff_t size, const char *output_path,
-                                     ptrdiff_t reglist_kls_size, kls_alloc_func alloc_func)
-{
-    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
-    return kls_new_traced_AR_KLS_alloc_handled(size, output_path,
-            reglist_kls_size, alloc_func, err_handlers);
-}
-
-/**
  * Updates the KLS_Conf for the passed Koliseo pointer. Internal usage.
  * @param kls The Koliseo pointer to update.
  * @param conf The KLS_Conf to set.
