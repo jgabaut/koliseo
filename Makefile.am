@@ -20,7 +20,7 @@ PACK_NAME = $(SHARED_LIB)-$(VERSION)-$(OS)-$(MACHINE)
 TEMPLATES_DIR = "./templates"
 
 # Source files
-demo_SOURCES = src/koliseo.c static/demo.c static/kls_banner.c
+demo_SOURCES = static/demo.c static/kls_banner.c
 lib_SOURCES = src/koliseo.c
 
 # Linking rule
@@ -39,9 +39,11 @@ endif
 if DEBUG_BUILD
 AM_LDFLAGS += -ggdb -O0
 AM_CFLAGS += -DKLS_DEBUG_CORE -DKLS_SETCONF_DEBUG
+demo_SOURCES += src/kls_region.c
 else
 # Linker flag to strip symbols
 AM_LDFLAGS += -s
+demo_SOURCES += src/koliseo.c
 endif
 
 if EXPER_BUILD

@@ -77,7 +77,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 5 /**< Represents current minor release.*/
-#define KLS_PATCH 0 /**< Represents current patch release.*/
+#define KLS_PATCH 1 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 
@@ -95,7 +95,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.5.0"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.5.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -211,9 +211,9 @@ typedef struct KLS_Conf {
     KLS_Err_Handlers err_handlers; /**< Used to pass custom error handlers for push calls.*/
 } KLS_Conf;
 
-KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
+KLS_Conf kls_conf_init_handled(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
 
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath);
+KLS_Conf kls_conf_init(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath);
 
 void kls_dbg_features(void);
 

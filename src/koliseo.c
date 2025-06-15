@@ -165,13 +165,9 @@ void KLS_ZEROCOUNT_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrd
  * Passes custom error handlers for errors in push calls.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
+KLS_Conf kls_conf_init_handled(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
 {
     KLS_Conf res = {0};
-    (void) autoset_regions;
-    (void) alloc_backend;
-    (void) reglist_kls_size;
-    (void) autoset_temp_regions;
     res.kls_collect_stats = collect_stats;
     res.kls_verbose_lvl = verbose_lvl;
     res.kls_block_while_has_temp = block_while_has_temp;
@@ -216,10 +212,10 @@ KLS_Conf kls_conf_init_handled(int autoset_regions, int alloc_backend, ptrdiff_t
  * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
  * @see KLS_Conf
  */
-KLS_Conf kls_conf_init(int autoset_regions, int alloc_backend, ptrdiff_t reglist_kls_size, int autoset_temp_regions, int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath)
+KLS_Conf kls_conf_init(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath)
 {
     KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
-    return kls_conf_init_handled(autoset_regions, alloc_backend, reglist_kls_size, autoset_temp_regions, collect_stats, verbose_lvl, block_while_has_temp, allow_zerocount_push, log_fp, log_filepath, err_handlers);
+    return kls_conf_init_handled(collect_stats, verbose_lvl, block_while_has_temp, allow_zerocount_push, log_fp, log_filepath, err_handlers);
 }
 
 /**
