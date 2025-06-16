@@ -1107,10 +1107,10 @@ void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_ext(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
-                       ptrdiff_t count)
+                        ptrdiff_t count)
 #else
 void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
-                           ptrdiff_t count, Koliseo_Loc loc)
+                            ptrdiff_t count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
 
@@ -1219,10 +1219,10 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_ext(Koliseo_Temp *t_kls, ptrdiff_t size,
-                            ptrdiff_t align, ptrdiff_t count)
+                             ptrdiff_t align, ptrdiff_t count)
 #else
 void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
-                                ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
+                                 ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
 
