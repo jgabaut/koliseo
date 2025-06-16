@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.1] - Unreleased
+
+### Added
+
+- Add `KLS_DEFAULT_FREEF` to pair up with `KLS_DEFAULT_ALLOCF` in order to allow custom malloc/free pairs
+
+### Changed
+
+- Dropped unused parameters from `kls_conf_init()`
+- Demo uses `kls_region.c` in debug builds
+
 ## [0.5.0] - 2025-06-08
 
 ### Changed
