@@ -426,13 +426,14 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_f
 }
 
 /**
- * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, and an allocation function pointer.
+ * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, an allocation function pointer and a free function pointer.
  * Additional arguments are for extensions.
  * Calls kls_new_alloc() to initialise the Koliseo, then calls kls_set_conf() to update the config.
  * Returns the new Koliseo.
  * @param size The size for Koliseo data field.
  * @param conf The KLS_Conf for the new Koliseo.
  * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
@@ -454,13 +455,14 @@ Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func al
 }
 
 /**
- * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, and an allocation function pointer.
+ * Takes a ptrdiff_t size, a KLS_Conf to configure the new Koliseo, an allocation function pointer and a free function pointer.
  * Additional arguments are for extensions.
  * Calls kls_new_alloc() to initialise the Koliseo, then calls kls_set_conf() to update the config.
  * Returns the new Koliseo.
  * @param size The size for Koliseo data field.
  * @param conf The KLS_Conf for the new Koliseo.
  * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
@@ -473,6 +475,21 @@ Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_
     return kls_new_conf_alloc_ext(size, conf, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
 }
 
+/**
+ * Takes a ptrdiff_t size, a filepath for the trace output file, an allocation function pointer and a free function pointer.
+ * Additional arguments are for extensions.
+ * Returns a pointer to the prepared Koliseo.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * @param size The size for Koliseo data field.
+ * @param output_path The filepath for log output.
+ * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
+ * @param err_handlers The error handlers struct for errors in push calls.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf_alloc_ext()
+ */
 Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers, KLS_Hooks ext_handlers, void* user)
 {
 
@@ -496,12 +513,13 @@ Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_pat
 }
 
 /**
- * Takes a ptrdiff_t size, a filepath for the trace output file, and an allocation function pointer.
+ * Takes a ptrdiff_t size, a filepath for the trace output file, an allocation function pointer and a free function pointer.
  * Returns a pointer to the prepared Koliseo.
  * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
  * @param size The size for Koliseo data field.
  * @param output_path The filepath for log output.
  * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
  * @param err_handlers The error handlers struct for errors in push calls.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
@@ -514,12 +532,13 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
 }
 
 /**
- * Takes a ptrdiff_t size, a filepath for the trace output file, and an allocation function pointer.
+ * Takes a ptrdiff_t size, a filepath for the trace output file, an allocation function pointer and a free function pointer.
  * Returns a pointer to the prepared Koliseo.
  * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
  * @param size The size for Koliseo data field.
  * @param output_path The filepath for log output.
  * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
@@ -531,6 +550,19 @@ Koliseo *kls_new_traced_alloc(ptrdiff_t size, const char *output_path, kls_alloc
     return kls_new_traced_alloc_handled(size, output_path, alloc_func, free_func, err_handlers);
 }
 
+/**
+ * Takes a ptrdiff_t size, an allocation function pointer and a free function pointer, and returns a pointer to the prepared Koliseo.
+ * Additional arguments are for extensions.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
+ * @param size The size for Koliseo data field.
+ * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
+ * @param err_handlers The error handlers for errors in push calls.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf_alloc_ext()
+ */
 Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers, KLS_Hooks ext_handlers, void* user)
 {
 #ifndef KLS_DEBUG_CORE
@@ -554,10 +586,11 @@ Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func
 }
 
 /**
- * Takes a ptrdiff_t size and an allocation function pointer, and returns a pointer to the prepared Koliseo.
+ * Takes a ptrdiff_t size, an allocation function pointer and a free function pointer, and returns a pointer to the prepared Koliseo.
  * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
  * @param size The size for Koliseo data field.
  * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
  * @param err_handlers The error handlers for errors in push calls.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
@@ -570,10 +603,11 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, kl
 }
 
 /**
- * Takes a ptrdiff_t size and an allocation function pointer, and returns a pointer to the prepared Koliseo.
+ * Takes a ptrdiff_t size, an allocation function pointer and a free function pointer, and returns a pointer to the prepared Koliseo.
  * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
  * @param size The size for Koliseo data field.
  * @param alloc_func The allocation function to use.
+ * @param free_func The free function to use.
  * @return A pointer to the initialised Koliseo struct, with wanted config.
  * @see Koliseo
  * @see KLS_Conf
