@@ -532,6 +532,24 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
 }
 
 /**
+ * Takes a ptrdiff_t size and a filepath for the trace output file.
+ * Additional arguments are for extensions.
+ * Returns a pointer to the prepared Koliseo.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
+ * @param size The size for Koliseo data field.
+ * @param output_path The filepath for log output.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf_alloc()
+ */
+Koliseo *kls_new_traced_ext(ptrdiff_t size, const char *output_path, KLS_Hooks ext_handlers, void* user)
+{
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_new_traced_alloc_handled_ext(size, output_path, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, err_handlers, ext_handlers, user);
+}
+
+/**
  * Takes a ptrdiff_t size, a filepath for the trace output file, an allocation function pointer and a free function pointer.
  * Returns a pointer to the prepared Koliseo.
  * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a traced Koliseo, logging to the passed filepath.
@@ -600,6 +618,22 @@ Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func
 Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers)
 {
     return kls_new_dbg_alloc_handled_ext(size, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
+}
+
+/**
+ * Takes a ptrdiff_t size.
+ * Additional arguments are for extensions.
+ * Calls kls_new_conf_alloc() to initialise the Koliseo with the proper config for a debug Koliseo (printing to stderr).
+ * @param size The size for Koliseo data field.
+ * @return A pointer to the initialised Koliseo struct, with wanted config.
+ * @see Koliseo
+ * @see KLS_Conf
+ * @see kls_new_conf()
+ */
+Koliseo *kls_new_dbg_ext(ptrdiff_t size, KLS_Hooks ext_handlers, void* user)
+{
+    KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
+    return kls_new_dbg_alloc_handled_ext(size, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, err_handlers, ext_handlers, user);
 }
 
 /**
