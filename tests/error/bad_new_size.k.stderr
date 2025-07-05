@@ -1,2 +1,2 @@
-[ERROR]    at kls_new_alloc_ext():  invalid requested kls size (-1). Min accepted is: (192).
-[ERROR] [kls_push_zero_AR()]: Passed Koliseo was NULL.
+[ERROR]    at kls_new_alloc_ext():  invalid requested kls size (-1). Min accepted is: (200).
+[ERROR] [kls_push_zero_ext()]: Passed Koliseo was NULL.

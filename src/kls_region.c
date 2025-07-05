@@ -1426,9 +1426,8 @@ void KLS_autoregion_on_free(struct Koliseo* kls)
     } else {
         kls_rl_freeList(data_pt->regs);
     }
-    if (KLS_DEFAULT_ALLOCF == malloc) {
-        free(kls->extension_data);
-    }
+
+    KLS_DEFAULT_FREEF(kls->extension_data);
 }
 
 void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)

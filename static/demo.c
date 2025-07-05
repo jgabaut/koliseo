@@ -3,7 +3,11 @@
 
 #include <stdio.h>
 #include <locale.h>
+#ifndef DEBUG_BUILD
 #include "../src/koliseo.h"
+#else
+#include "../src/kls_region.h"
+#endif // DEBUG_BUILD
 #include "./kls_banner.h"
 
 void usage(char *progname)
@@ -37,13 +41,9 @@ int main(int argc, char **argv)
     printf("\n\nDemo for Koliseo, using API lvl [%i], version %s \n",
 	   int_koliseo_version(), string_koliseo_version());
 
-#ifndef KOLISEO_HAS_REGION
-    int KLS_REGLIST_ALLOC_KLS_BASIC = -1;
-#endif
-
     int block_usage_with_open_temp = 0;
     int allow_zerocount_push = 0;
-    KLS_Conf kls_config = kls_conf_init(1, KLS_REGLIST_ALLOC_KLS_BASIC, KLS_DEFAULT_SIZE, 1, 1, 1, block_usage_with_open_temp, allow_zerocount_push, NULL, "./static/debug_log.txt");
+    KLS_Conf kls_config = kls_conf_init(1, 1, block_usage_with_open_temp, allow_zerocount_push, NULL, "./static/debug_log.txt");
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 

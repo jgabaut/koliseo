@@ -1,3 +1,3 @@
-[WARN]    kls_new_traced_AR_KLS_alloc_handled(): KLS_DEBUG_CORE is not defined. No tracing allowed.
+[WARN]    kls_new_traced_alloc_handled_ext(): KLS_DEBUG_CORE is not defined. No tracing allowed.
 [WARN]    [kls_set_conf()]: KLS_DEBUG_CORE is not defined. Stats may not be collected in full.
-[ERROR]    [kls_push_zero_AR()]:  Exceeding max_regions_kls_alloc_basic: {168}.
+[ERROR]    [kls_push_zero_ext()]:  Exceeding max_regions_kls_alloc_basic: {168}.
