@@ -1705,7 +1705,10 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
 
     // Free any Koliseo chained after the current one
     Koliseo* to_free = tmp_kls->kls->next;
-    if (to_free != NULL) kls_free(to_free);
+    if (to_free != NULL) {
+        kls_free(to_free);
+        tmp_kls->kls->next = NULL;
+    }
 
     tmp_kls = NULL; // statement with no effect TODO: Clear tmp_kls from caller
     if (kls_ref->conf.kls_collect_stats == 1) {
