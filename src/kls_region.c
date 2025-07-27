@@ -29,6 +29,7 @@ static const KLS_Conf KLS_DEFAULT_CONF__ = {
     .kls_block_while_has_temp = 1,
     .kls_allow_zerocount_push = 0,
     .kls_log_fp = NULL,
+    .kls_growable = 0,
     .kls_log_filepath = "",
     .err_handlers = {
 #ifndef KOLISEO_HAS_LOCATE
