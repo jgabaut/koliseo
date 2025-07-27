@@ -1020,7 +1020,7 @@ int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t al
 
 bool kls__try_grow(Koliseo* kls, ptrdiff_t needed) {
     ptrdiff_t new_size = KLS_MAX(kls->size * 2, needed);
-    Koliseo* new_kls = kls_new(new_size);
+    Koliseo* new_kls = kls_new_conf(new_size, kls->conf);
     kls_log(kls, "DEBUG", "%s(): growing Koliseo, new size: {%td}", __func__, new_size);
     if (!new_kls) return false;
     kls->next = new_kls;
