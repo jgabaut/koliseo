@@ -213,12 +213,12 @@ basic_run.k:
 
 growable.k:
 	@echo -en "Building growable.k test"
-	$(CCOMP) tests/ok/growable.c src/koliseo.c -o tests/ok/growable.k -DKLS_DEBUG_CORE
+	$(CCOMP) tests/ok/growable.c src/koliseo.c -o tests/ok/growable.k -DKLS_DEBUG_CORE -fsanitize=address,undefined
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 growable_temp.k:
 	@echo -en "Building growable_temp.k test"
-	$(CCOMP) tests/ok/growable_temp.c src/koliseo.c -o tests/ok/growable_temp.k -DKLS_DEBUG_CORE
+	$(CCOMP) tests/ok/growable_temp.c src/koliseo.c -o tests/ok/growable_temp.k -DKLS_DEBUG_CORE -fsanitize=address,undefined
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 basic_gulp.k:

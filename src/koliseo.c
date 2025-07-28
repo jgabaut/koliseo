@@ -370,6 +370,7 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
         kls->hooks = ext_handlers;
         kls->extension_data = user;
         kls->free_func = free_func;
+        kls->next = NULL;
 #ifdef KLS_DEBUG_CORE
         kls_log(kls, "KLS", "API Level { %i } ->  Allocated (%s) for new KLS.",
                 int_koliseo_version(), h_size);
