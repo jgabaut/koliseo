@@ -23,6 +23,10 @@ int main(void)
 
     kls_temp_end(kls_t);
 
+    for(int i = 0; i < 500; i++) {
+        e = KLS_PUSH(kls,Example);
+    }
+
     //Free the arena
     kls_free(kls);
     printf("Done test {\"%s\"}.\n",__FILE__);
