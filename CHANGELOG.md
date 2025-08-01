@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.3] - Unreleased
+
+- Add `KLS_MAX_EXTENSIONS` and permit more than one extension
+
 ## [0.5.2] - 2025-08-01
 
 ### Added

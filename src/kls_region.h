@@ -159,7 +159,7 @@ void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls);
 void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
 
 #undef KLS_DEFAULT_HOOKS
-#define KLS_DEFAULT_HOOKS (KLS_Hooks) { \
+#define KLS_DEFAULT_HOOKS &(KLS_Hooks) { \
         .on_new_handler = &KLS_autoregion_on_new, \
         .on_free_handler = &KLS_autoregion_on_free, \
         .on_push_handler =  &KLS_autoregion_on_push, \

@@ -10,7 +10,7 @@ typedef struct Example {
 int main(void)
 {
     //Init the arena
-    Koliseo* kls = kls_new(500);
+    Koliseo* kls = kls_new(1000);
     Koliseo_Temp* kls_t = kls_temp_start(kls);
 
     //Use the arena (see demo for Koliseo_Temp usage)
