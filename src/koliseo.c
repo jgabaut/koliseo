@@ -993,7 +993,7 @@ int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t al
                 return -1;
             }
         } else if (OOM_happened) {
-            if (current->conf.err_handlers.PTRDIFF_MAX_handler && OOM_handled) {
+            if (current->conf.err_handlers.OOM_handler && OOM_handled) {
 #ifndef KOLISEO_HAS_LOCATE
                 fprintf(stderr, "[KLS] %s(): OOM fault happened and was handled.\n", caller_name);
 #ifdef KLS_DEBUG_CORE
