@@ -99,12 +99,14 @@ int main(void)
 
 
   :construction: Disclaimer: after version 0.5, the Region feature is no longer present inside the main koliseo.c file. It has been reimplemented as an extension, in kls_region.c file. :construction:
+  :contruction: See the [Extension section](#extensions). :construction:
 
   A ready-to-go index for every allocation you make.
   - It uses a linked list and has some the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
   - Offers extended API with tagging arguments, to type/name your references
   - For now, two allocations backends can be chosen for the list, it can be stored:
     - In an inner Koliseo (this puts an extra limit to the total number of single allocations)
+    - :construction: Since 0.5.2, a new backend is available which leverages growable Koliseo to avoid the extra limit on total number of single allocations. :construction:
     - Using the global allocator (from malloc)
   - Extra utility functions
     - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
@@ -155,6 +157,22 @@ int main(void)
   - Debug: `KLS_DEBUG_CORE`
   - Gulp: `KOLISEO_HAS_GULP` :construction: (After 0.5, this macro is no longer used) :construction:
   - Experimental: `KOLISEO_HAS_EXPER`
+
+## Extensions <a name = "extensions"></a>
+
+  You can define your own extensions to the allocator, which gives several hook points in its usage:
+
+```c
+typedef struct KLS_Hooks {
+    KLS_hook_on_new* on_new_handler; /**< Used to pass custom new handler for kls_new_alloc calls.*/
+    KLS_hook_on_free* on_free_handler; /**< Used to pass custom free handler for kls_free calls.*/
+    KLS_hook_on_push* on_push_handler; /**< Used to pass custom push handler for kls_push calls.*/
+    KLS_hook_on_temp_start* on_temp_start_handler; /**< Used to pass custom start handler for kls_temp_start calls.*/
+    KLS_hook_on_temp_free* on_temp_free_handler; /**< Used to pass custom free handler for kls_temp_end calls.*/
+    KLS_hook_on_temp_push* on_temp_push_handler; /**< Used to pass custom push handler for kls_temp_push calls.*/
+} KLS_Hooks;
+```
+  You can have multiple extensions. For example, `src/kls_region.h` shows how to implement support for keeping track of all allocated memory regions. See the [Region section](#extra_region).
 
 ## Documentation <a name = "docs"></a>
 
