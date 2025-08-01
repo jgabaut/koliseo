@@ -77,7 +77,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 5 /**< Represents current minor release.*/
-#define KLS_PATCH 1 /**< Represents current patch release.*/
+#define KLS_PATCH 2 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -85,6 +85,8 @@ typedef void(kls_free_func)(void*); /**< Used to select a free function for the 
 #define STRINGIFY_2(x) #x
 
 #define STRINGIFY(x) STRINGIFY_2(x)
+
+#define KLS_MAX(a, b) ((a) > (b) ? (a) : (b))
 
 /**
  * Defines current API version number from KLS_MAJOR, KLS_MINOR and KLS_PATCH.
@@ -96,7 +98,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.5.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.5.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -209,12 +211,13 @@ typedef struct KLS_Conf {
     const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
     int kls_block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
     int kls_allow_zerocount_push; /**< If set to 1, make the Koliseo accept push calls with a count of 0.*/
+    int kls_growable; /**< If set to 1, make the Koliseo grow when a out of memory for a push call.*/
     KLS_Err_Handlers err_handlers; /**< Used to pass custom error handlers for push calls.*/
 } KLS_Conf;
 
-KLS_Conf kls_conf_init_handled(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
+KLS_Conf kls_conf_init_handled(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, int growable, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers);
 
-KLS_Conf kls_conf_init(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, FILE* log_fp, const char* log_filepath);
+KLS_Conf kls_conf_init(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, int growable, FILE* log_fp, const char* log_filepath);
 
 void kls_dbg_features(void);
 
@@ -316,6 +319,7 @@ typedef struct Koliseo {
     KLS_Hooks hooks;  /**< Contains handlers for extensions.*/
     void* extension_data; /**< Points to data for extensions.*/
     kls_free_func* free_func; /**< Points to the free function for the arena's backing memory.*/
+    struct Koliseo* next; /**< Points to the next Koliseo when conf.kls_growable == 1.*/
 } Koliseo;
 
 /**

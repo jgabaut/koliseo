@@ -54,6 +54,7 @@
 typedef enum KLS_RegList_Alloc_Backend {
     KLS_REGLIST_ALLOC_LIBC = 0,
     KLS_REGLIST_ALLOC_KLS_BASIC,
+    KLS_REGLIST_ALLOC_KLS,
     KLS_REGLIST_TOTAL_BACKENDS
 } KLS_RegList_Alloc_Backend;
 

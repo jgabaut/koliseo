@@ -43,7 +43,8 @@ int main(int argc, char **argv)
 
     int block_usage_with_open_temp = 0;
     int allow_zerocount_push = 0;
-    KLS_Conf kls_config = kls_conf_init(1, 1, block_usage_with_open_temp, allow_zerocount_push, NULL, "./static/debug_log.txt");
+    int growable = 0;
+    KLS_Conf kls_config = kls_conf_init(1, 1, block_usage_with_open_temp, allow_zerocount_push, growable, NULL, "./static/debug_log.txt");
     printf("[Init Koliseo] [size: %i]\n", KLS_DEFAULT_SIZE);
     Koliseo *kls = kls_new_conf(KLS_DEFAULT_SIZE, kls_config);
 
