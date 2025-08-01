@@ -2419,7 +2419,8 @@ PREDEFINED             = KOLISEO_HAS_CURSES \
                          KOLISEO_HAS_REGION \
                          KOLISEO_HAS_TITLE \
                          KOLISEO_HAS_EXPER \
-                         KLS_DEBUG_CORE
+                         KLS_DEBUG_CORE \
+                         __STDC_VERSION__=201112L
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
