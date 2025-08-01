@@ -1,6 +1,19 @@
 # Changelog
 
-## [0.5.1] - Unreleased
+## [0.5.2] - 2025-08-01
+
+### Added
+
+- Add `kls_growable` to `KLS_Conf`
+- Add `next` field to `Koliseo`
+- New tests for `kls_growable`
+- Add new backend for `kls_region` using the growable feature
+
+### Changed
+
+- Update all core calls to support growable `Koliseo`
+
+## [0.5.1] - 2025-07-05
 
 ### Added
 

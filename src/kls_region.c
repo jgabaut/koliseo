@@ -21,6 +21,7 @@
 const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
     [KLS_REGLIST_ALLOC_LIBC] = "LIBC",
     [KLS_REGLIST_ALLOC_KLS_BASIC] = "KLS_BASIC",
+    [KLS_REGLIST_ALLOC_KLS] = "KLS",
 };
 
 static const KLS_Conf KLS_DEFAULT_CONF__ = {
@@ -48,7 +49,8 @@ const char* kls_reglist_backend_string(KLS_RegList_Alloc_Backend kls_be)
 {
     switch(kls_be) {
     case KLS_REGLIST_ALLOC_LIBC:
-    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+    case KLS_REGLIST_ALLOC_KLS_BASIC:
+    case KLS_REGLIST_ALLOC_KLS: {
         return kls_reglist_backend_strings[kls_be];
     }
     break;
@@ -111,7 +113,8 @@ KLS_Region_List kls_rl_cons(Koliseo *kls, KLS_list_element e, KLS_Region_List l)
         t = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
     }
     break;
-    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+    case KLS_REGLIST_ALLOC_KLS_BASIC:
+    case KLS_REGLIST_ALLOC_KLS: {
         if (data_pt->reglist_kls == NULL) {
             fprintf(stderr,
                     "[ERROR]   at %s(): Koliseo->reglist_kls was NULL.\n",
@@ -158,7 +161,8 @@ KLS_region_list_item* kls_list_pop(Koliseo *kls)
         l = kls->regs;
     }
     break;
-    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+    case KLS_REGLIST_ALLOC_KLS_BASIC:
+    case KLS_REGLIST_ALLOC_KLS: {
         if (kls->reglist_kls == NULL) {
             fprintf(stderr,
                     "[ERROR]   at %s(): Koliseo->reglist_kls was NULL.\n",
@@ -214,7 +218,8 @@ KLS_Region_List kls_rl_t_cons(Koliseo_Temp *t_kls, KLS_list_element e,
         t = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
     }
     break;
-    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+    case KLS_REGLIST_ALLOC_KLS_BASIC:
+    case KLS_REGLIST_ALLOC_KLS: {
         t = KLS_PUSH(data_pt->t_reglist_kls, KLS_region_list_item);
     }
     break;
@@ -427,7 +432,8 @@ KLS_Region_List kls_rl_insord_p(Koliseo *kls, KLS_list_element el,
         paux = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
     }
     break;
-    case KLS_REGLIST_ALLOC_KLS_BASIC: {
+    case KLS_REGLIST_ALLOC_KLS_BASIC:
+    case KLS_REGLIST_ALLOC_KLS: {
         if (data_pt->reglist_kls == NULL) {
             fprintf(stderr,
                     "[ERROR]   at %s(): reglist_kls was NULL.\n",
@@ -836,6 +842,10 @@ static inline void kls__autoregion(const char* caller, Koliseo* kls, ptrdiff_t p
             }
         }
         break;
+        case KLS_REGLIST_ALLOC_KLS: {
+            reg = KLS_PUSH(data_pt->reglist_kls, KLS_Region);
+        }
+        break;
         default: {
             fprintf(stderr,
                     "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
@@ -911,6 +921,10 @@ static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls,
                 kls_free(kls);
                 exit(EXIT_FAILURE);
             }
+        }
+        break;
+        case KLS_REGLIST_ALLOC_KLS: {
+            reg = KLS_PUSH(data_pt->t_reglist_kls, KLS_Region);
         }
         break;
         default: {
@@ -1374,6 +1388,15 @@ void KLS_autoregion_on_new(struct Koliseo* kls)
             kls_header = (KLS_Region *) KLS_PUSH(data_pt->reglist_kls, KLS_Region);
         }
         break;
+        case KLS_REGLIST_ALLOC_KLS: {
+            Koliseo *reglist_kls = NULL;
+            KLS_Hooks ext = {0};
+            reglist_kls = kls_new_conf_ext(data_pt->conf.kls_reglist_kls_size, KLS_DEFAULT_CONF__, ext, NULL);
+            reglist_kls->conf.kls_growable = 1;
+            data_pt->reglist_kls = reglist_kls;
+            kls_header = (KLS_Region *) KLS_PUSH(data_pt->reglist_kls, KLS_Region);
+        }
+        break;
         default: {
             fprintf(stderr,
                     "[ERROR] [%s()]:  Unexpected KLS_RegList_Alloc_Backend value: {%i}.\n",
@@ -1421,7 +1444,7 @@ void KLS_autoregion_on_free(struct Koliseo* kls)
         return;
     }
     KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data;
-    if (data_pt->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC) {
+    if (data_pt->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC || data_pt->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS) {
         kls_free(data_pt->reglist_kls);
         //free(kls->reglist_kls);
     } else {
@@ -1478,6 +1501,15 @@ void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls)
             temp_kls_header = (KLS_Region *) KLS_PUSH(data_pt->t_reglist_kls, KLS_Region);
         }
         break;
+        case KLS_REGLIST_ALLOC_KLS: {
+            Koliseo *t_reglist_kls = NULL;
+            KLS_Hooks ext = {0};
+            t_reglist_kls = kls_new_conf_ext(data_pt->conf.kls_reglist_kls_size, KLS_DEFAULT_CONF__, ext, NULL);
+            t_reglist_kls->conf.kls_growable = 1;
+            data_pt->t_reglist_kls = t_reglist_kls;
+            temp_kls_header = (KLS_Region *) KLS_PUSH(data_pt->t_reglist_kls, KLS_Region);
+        }
+        break;
         default: {
             fprintf(stderr,
                     "[ERROR]    %s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n",
@@ -1529,7 +1561,8 @@ void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls)
             kls_rl_freeList(data_pt->t_regs);
         }
         break;
-        case KLS_REGLIST_ALLOC_KLS_BASIC: {
+        case KLS_REGLIST_ALLOC_KLS_BASIC:
+        case KLS_REGLIST_ALLOC_KLS: {
             kls_free(data_pt->t_reglist_kls);
         }
         break;
