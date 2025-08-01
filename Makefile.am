@@ -221,6 +221,16 @@ growable_temp.k:
 	$(CCOMP) tests/ok/growable_temp.c src/koliseo.c -o tests/ok/growable_temp.k -DKLS_DEBUG_CORE -fsanitize=address,undefined
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
+oom.k:
+	@echo -en "Building oom.k test"
+	$(CCOMP) tests/error/oom.c src/koliseo.c -o tests/error/oom.k -DKLS_DEBUG_CORE
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+oom_temp.k:
+	@echo -en "Building oom_temp.k test"
+	$(CCOMP) tests/error/oom_temp.c src/koliseo.c -o tests/error/oom_temp.k -DKLS_DEBUG_CORE
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
 basic_gulp.k:
 	@echo -en "Building basic_gulp.k test"
 	$(CCOMP) tests/ok/basic_gulp.c src/koliseo.c -o tests/ok/basic_gulp.k -DKLS_DEBUG_CORE
@@ -236,7 +246,7 @@ kstr_test.k:
 	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k growable.k growable_temp.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
+anviltest: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k growable.k growable_temp.k oom.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"
