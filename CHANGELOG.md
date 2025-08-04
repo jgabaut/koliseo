@@ -2,7 +2,16 @@
 
 ## [0.5.3] - Unreleased
 
+### Added
+
 - Add `KLS_MAX_EXTENSIONS` and permit more than one extension
+- Add `KLS_DEFAULT_EXTENSIONS_LEN` to permit silent upgrade of `kls_new()` variants not ending in `_ext`
+
+### Changed
+
+- Fix experimental `kls_list_pop()` in `kls_region.c`
+- Made all `kls_new()` variants into proper functions
+- Fix demo in region mode
 
 ## [0.5.2] - 2025-08-01
 
