@@ -14,6 +14,8 @@
 - Fix experimental `kls_list_pop()` in `kls_region.c`
 - Made all `kls_new()` variants into proper functions
 - Fix demo in region mode
+- Bump `invil` to `0.2.26`
+- Bump `amboso` to `2.0.12`
 
 ## [0.5.2] - 2025-08-01
 
