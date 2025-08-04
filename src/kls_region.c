@@ -156,14 +156,15 @@ KLS_region_list_item* kls_list_pop(Koliseo *kls)
         exit(EXIT_FAILURE);
     }
     KLS_Region_List l;
-    switch (kls->conf.kls_reglist_alloc_backend) {
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    switch (data_pt->conf.kls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
-        l = kls->regs;
+        l = data_pt->regs;
     }
     break;
     case KLS_REGLIST_ALLOC_KLS_BASIC:
     case KLS_REGLIST_ALLOC_KLS: {
-        if (kls->reglist_kls == NULL) {
+        if (data_pt->reglist_kls == NULL) {
             fprintf(stderr,
                     "[ERROR]   at %s(): Koliseo->reglist_kls was NULL.\n",
                     __func__);
@@ -174,17 +175,17 @@ KLS_region_list_item* kls_list_pop(Koliseo *kls)
             kls_free(kls);
             exit(EXIT_FAILURE);
         }
-        l = kls->regs;
+        l = data_pt->regs;
     }
     break;
     default: {
         fprintf(stderr,
                 "[ERROR]    %s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n",
-                __func__, kls->conf.kls_reglist_alloc_backend);
+                __func__, data_pt->conf.kls_reglist_alloc_backend);
 #ifdef KLS_DEBUG_CORE
         kls_log(kls, "ERROR",
                 "%s():  Invalid conf.kls_reglist_alloc_backend value: {%i}.\n",
-                __func__, kls->conf.kls_reglist_alloc_backend);
+                __func__, data_pt->conf.kls_reglist_alloc_backend);
 #endif
         kls_free(kls);
         exit(EXIT_FAILURE);
@@ -192,8 +193,8 @@ KLS_region_list_item* kls_list_pop(Koliseo *kls)
     break;
     }
     //TODO: is this enough to correctly pop the list?
-    l = kls_tail(l);
-    KLS_region_list_item* popped_node = KLS_POP(kls->reglist_kls, KLS_region_list_item);
+    l = kls_rl_tail(l);
+    KLS_region_list_item* popped_node = KLS_POP(data_pt->reglist_kls, KLS_region_list_item);
     return popped_node;
 }
 #endif // KOLISEO_HAS_EXPER
