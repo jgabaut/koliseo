@@ -6,9 +6,11 @@
 
 - Add `KLS_MAX_EXTENSIONS` and permit more than one extension
 - Add `KLS_DEFAULT_EXTENSIONS_LEN` to permit silent upgrade of `kls_new()` variants not ending in `_ext`
+- Add `oom`, `oom_temp` tests
 
 ### Changed
 
+- Fix: check for non-NULL `OOM_handler `when `OOM_happened`
 - Fix experimental `kls_list_pop()` in `kls_region.c`
 - Made all `kls_new()` variants into proper functions
 - Fix demo in region mode
