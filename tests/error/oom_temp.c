@@ -11,7 +11,6 @@ int main(void)
 {
     //Init the arena
     Koliseo* kls = kls_new(1000);
-    kls->conf.kls_growable = 1;
     Koliseo_Temp* kls_t = kls_temp_start(kls);
 
     //Use the arena (see demo for Koliseo_Temp usage)
