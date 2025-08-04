@@ -283,24 +283,12 @@ extern KLS_Stats KLS_STATS_DEFAULT;
 #define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups)
 #endif // KLS_DEBUG_CORE
 
-/**
- * Defines a format string for KLS_Temp_Conf.
- * @see KLS_Temp_Conf_Arg()
- */
-#ifndef _WIN32
-#define KLS_Temp_Conf_Fmt "KLS_Temp_Conf {autoset_regions: %i, tkls_reglist_alloc_backend: %i, kls_reglist_kls_size: %li}"
-#else
-#define KLS_Temp_Conf_Fmt "KLS_Temp_Conf {autoset_regions: %i, tkls_reglist_alloc_backend: %i, kls_reglist_kls_size: %lli}"
-#endif
-
-/**
- * Defines a format macro for KLS_Conf args.
- * @see KLS_Temp_Conf_Fmt
- */
-#define KLS_Temp_Conf_Arg(conf) (conf.kls_autoset_regions),(conf.tkls_reglist_alloc_backend),(conf.kls_reglist_kls_size)
-
 #ifndef KLS_MAX_EXTENSIONS
 #define KLS_MAX_EXTENSIONS 1
+#endif // KLS_MAX_EXTENSIONS
+
+#ifndef KLS_DEFAULT_EXTENSIONS_LEN
+#define KLS_DEFAULT_EXTENSIONS_LEN 0
 #endif // KLS_MAX_EXTENSIONS
 
 /**

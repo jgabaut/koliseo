@@ -38,7 +38,7 @@ endif
 
 if DEBUG_BUILD
 AM_LDFLAGS += -ggdb -O0
-AM_CFLAGS += -DKLS_DEBUG_CORE -DKLS_SETCONF_DEBUG
+AM_CFLAGS += -DKLS_DEBUG_CORE -DKLS_SETCONF_DEBUG -DKOLISEO_HAS_REGION
 demo_SOURCES += src/kls_region.c
 else
 # Linker flag to strip symbols

@@ -168,6 +168,9 @@ void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, 
         .on_temp_push_handler = &KLS_autoregion_on_temp_push, \
     }
 
+#undef KLS_DEFAULT_EXTENSIONS_LEN
+#define KLS_DEFAULT_EXTENSIONS_LEN 1
+
 #include "koliseo.h"
 
 #ifndef KOLISEO_HAS_LOCATE
@@ -263,3 +266,4 @@ void kls_usageReport_toFile(Koliseo *, FILE *);
 void kls_usageReport(Koliseo *);
 ptrdiff_t kls_type_usage(int, Koliseo *);
 ptrdiff_t kls_total_padding(Koliseo *);
+int kls_get_maxRegions_KLS_BASIC(Koliseo *kls);

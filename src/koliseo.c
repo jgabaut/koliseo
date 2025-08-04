@@ -434,9 +434,9 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_f
 #endif // KOLISEO_HAS_LOCATE
 {
 #ifndef KOLISEO_HAS_LOCATE
-    return kls_new_alloc_ext(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, 0);
+    return kls_new_alloc_ext(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
 #else
-    return kls_new_alloc_ext_dbg(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, 0, loc);
+    return kls_new_alloc_ext_dbg(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN, loc);
 #endif // KOLISEO_HAS_LOCATE
 }
 
@@ -504,7 +504,7 @@ Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func al
  */
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, kls_free_func free_func)
 {
-    return kls_new_conf_alloc_ext(size, conf, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, 0);
+    return kls_new_conf_alloc_ext(size, conf, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
 }
 
 /**
@@ -593,7 +593,7 @@ Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_pat
  */
 Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers)
 {
-    return kls_new_traced_alloc_handled_ext(size, output_path, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, 0);
+    return kls_new_traced_alloc_handled_ext(size, output_path, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
 }
 
 /**
@@ -715,7 +715,7 @@ Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func
  */
 Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers)
 {
-    return kls_new_dbg_alloc_handled_ext(size, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, 0);
+    return kls_new_dbg_alloc_handled_ext(size, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
 }
 
 /**
