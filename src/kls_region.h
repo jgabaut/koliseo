@@ -168,8 +168,9 @@ void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, 
         .on_temp_push_handler = &KLS_autoregion_on_temp_push, \
     }
 
-#undef KLS_DEFAULT_EXTENSIONS_LEN
+#ifndef KLS_DEFAULT_EXTENSIONS_LEN
 #define KLS_DEFAULT_EXTENSIONS_LEN 1
+#endif // KLS_DEFAULT_EXTENSIONS_LEN
 
 #include "koliseo.h"
 
