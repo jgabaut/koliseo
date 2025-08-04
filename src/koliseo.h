@@ -192,10 +192,23 @@ typedef struct KLS_Hooks {
     KLS_hook_on_temp_push* on_temp_push_handler; /**< Used to pass custom push handler for kls_temp_push calls.*/
 } KLS_Hooks;
 
+/**
+ * Defines default hooks that are loaded on kls_new() variants lacking explicit set of KLS_Hooks.
+ * Useful to be redefined by an extension file, together with KLS_DEFAULT_EXTENSION_DATA.
+ * @see KLS_DEFAULT_EXTENSION_DATA
+ * @see KLS_DEFAULT_EXTENSIONS_LEN
+ * @see KLS_Hooks
+ */
 #ifndef KLS_DEFAULT_HOOKS
 #define KLS_DEFAULT_HOOKS &(KLS_Hooks){0}
 #endif // KLS_DEFAULT_HOOKS
 
+/**
+ * Defines default hooks that are loaded on kls_new() variants lacking explicit set of KLS_Hooks.
+ * Useful to be redefined by an extension file, together with KLS_DEFAULT_HOOKS.
+ * @see KLS_DEFAULT_HOOKS
+ * @see KLS_DEFAULT_EXTENSIONS_LEN
+ */
 #ifndef KLS_DEFAULT_EXTENSION_DATA
 #define KLS_DEFAULT_EXTENSION_DATA NULL
 #endif // KLS_DEFAULT_EXTENSION_DATA
@@ -283,10 +296,22 @@ extern KLS_Stats KLS_STATS_DEFAULT;
 #define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups)
 #endif // KLS_DEBUG_CORE
 
+/**
+ * Defines how many extensions can be handled at once.
+ * @see KLS_Hooks
+ * @see Koliseo
+ */
 #ifndef KLS_MAX_EXTENSIONS
 #define KLS_MAX_EXTENSIONS 1
 #endif // KLS_MAX_EXTENSIONS
 
+/**
+ * Defines how many extensions are loaded on kls_new() variants lacking explicit set of KLS_Hooks.
+ * Useful to be redefined by an extension file, together with KLS_DEFAULT_HOOKS.
+ * @see KLS_DEFAULT_HOOKS
+ * @see KLS_Hooks
+ * @see Koliseo
+ */
 #ifndef KLS_DEFAULT_EXTENSIONS_LEN
 #define KLS_DEFAULT_EXTENSIONS_LEN 0
 #endif // KLS_MAX_EXTENSIONS
