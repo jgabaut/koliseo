@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.5.3] - Unreleased
+## [0.5.4] - 2025-08-04
+
+### Changed
+
+- Fix `kls_new_alloc_ext_dbg()`
+
+## [0.5.3] - 2025-08-04
 
 ### Added
 

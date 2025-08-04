@@ -335,7 +335,7 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
 #ifndef KOLISEO_HAS_LOCATE
 Koliseo *kls_new_alloc_ext(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
 #else
-Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks ext_handlers, void** user, size_t ext_len, Koliseo_Loc loc)
+Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks* ext_handlers, void** user, size_t ext_len, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     if (size < (ptrdiff_t)sizeof(Koliseo)) {
