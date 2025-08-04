@@ -107,7 +107,7 @@ KLS_Region_List kls_rl_cons(Koliseo *kls, KLS_list_element e, KLS_Region_List l)
         exit(EXIT_FAILURE);
     }
     KLS_Region_List t;
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     switch (data_pt->conf.kls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
         t = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
@@ -156,7 +156,7 @@ KLS_region_list_item* kls_list_pop(Koliseo *kls)
         exit(EXIT_FAILURE);
     }
     KLS_Region_List l;
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     switch (data_pt->conf.kls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
         l = data_pt->regs;
@@ -213,7 +213,7 @@ KLS_Region_List kls_rl_t_cons(Koliseo_Temp *t_kls, KLS_list_element e,
         exit(EXIT_FAILURE);
     }
     KLS_Region_List t;
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) t_kls->kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) t_kls->kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     switch (data_pt->conf.tkls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
         t = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
@@ -427,7 +427,7 @@ KLS_Region_List kls_rl_insord_p(Koliseo *kls, KLS_list_element el,
             patt = patt->next;
         }
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     switch (data_pt->conf.kls_reglist_alloc_backend) {
     case KLS_REGLIST_ALLOC_LIBC: {
         paux = (KLS_Region_List) malloc(sizeof(KLS_region_list_item));
@@ -614,7 +614,7 @@ ptrdiff_t kls_avg_regionSize(Koliseo *kls)
         fprintf(stderr, "[KLS]    %s():  passed Koliseo was NULL.\n", __func__);
         return -1;
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     KLS_Region_List rl = data_pt->regs;
     ptrdiff_t res = 0;
     int tot_regs = kls_rl_length(rl);
@@ -657,7 +657,7 @@ void kls_usageReport_toFile(Koliseo *kls, FILE *fp)
 #endif
         return;
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     KLS_Region_List rl = data_pt->regs;
     int i = 0;
     while (!kls_rl_empty(rl)) {
@@ -691,7 +691,7 @@ ptrdiff_t kls_type_usage(int type, Koliseo *kls)
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     KLS_Region_List rl = data_pt->regs;
 
     ptrdiff_t res = 0;
@@ -719,7 +719,7 @@ ptrdiff_t kls_total_padding(Koliseo * kls)
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
         exit(EXIT_FAILURE);
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     KLS_Region_List rl = data_pt->regs;
 
     ptrdiff_t res = 0;
@@ -744,7 +744,7 @@ int kls_get_maxRegions_KLS_BASIC(Koliseo *kls)
 #endif
         return -1;
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.kls_reglist_alloc_backend != KLS_REGLIST_ALLOC_KLS_BASIC) {
 #ifdef KLS_DEBUG_CORE
         fprintf(stderr,
@@ -780,7 +780,7 @@ int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp *t_kls)
 #endif
         return -1;
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) t_kls->kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) t_kls->kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.tkls_reglist_alloc_backend != KLS_REGLIST_ALLOC_KLS_BASIC) {
 #ifdef KLS_DEBUG_CORE
         fprintf(stderr,
@@ -815,7 +815,7 @@ static inline void kls__autoregion(const char* caller, Koliseo* kls, ptrdiff_t p
     assert(region_desc_len > 0);
     size_t desc_len = (region_desc_len <= KLS_REGION_MAX_DESC_SIZE ? region_desc_len : KLS_REGION_MAX_DESC_SIZE);
     //assert(region_desc_len <= KLS_REGION_MAX_DESC_SIZE);
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.kls_autoset_regions == 1) {
         KLS_Region *reg = NULL;
         switch (data_pt->conf.kls_reglist_alloc_backend) {
@@ -894,7 +894,7 @@ static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls,
     size_t desc_len = (region_desc_len <= KLS_REGION_MAX_DESC_SIZE ? region_desc_len : KLS_REGION_MAX_DESC_SIZE);
     //assert(region_desc_len <= KLS_REGION_MAX_DESC_SIZE);
     KLS_Region *reg = NULL;
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.kls_autoset_regions == 1) {
         switch (data_pt->conf.tkls_reglist_alloc_backend) {
         case KLS_REGLIST_ALLOC_LIBC: {
@@ -1353,9 +1353,9 @@ void *kls_temp_push_zero_typed_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 void KLS_autoregion_on_new(struct Koliseo* kls)
 {
     assert(kls != NULL);
-    if (kls->extension_data[0] == NULL) { // Need to init kls extension data
-        kls->extension_data[0] = KLS_DEFAULT_ALLOCF(sizeof(KLS_Autoregion_Extension_Data));
-        KLS_Autoregion_Extension_Data* data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    if (kls->extension_data[KLS_AUTOREGION_EXT_SLOT] == NULL) { // Need to init kls extension data
+        kls->extension_data[KLS_AUTOREGION_EXT_SLOT] = KLS_DEFAULT_ALLOCF(sizeof(KLS_Autoregion_Extension_Data));
+        KLS_Autoregion_Extension_Data* data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
         (*data_pt) = (KLS_Autoregion_Extension_Data) {
             .conf = (KLS_Autoregion_Extension_Conf) {
                 .kls_autoset_regions = KLS_AUTOREGION_AUTOSET_DEFAULT,
@@ -1368,7 +1368,7 @@ void KLS_autoregion_on_new(struct Koliseo* kls)
         };
     }
 
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.kls_autoset_regions == 1) {
 #ifdef KLS_DEBUG_CORE
         kls_log(kls, "KLS", "Init of KLS_Region_List for kls.");
@@ -1441,10 +1441,10 @@ void KLS_autoregion_on_new(struct Koliseo* kls)
 void KLS_autoregion_on_free(struct Koliseo* kls)
 {
     assert(kls != NULL);
-    if (kls->extension_data[0] == NULL) { // No need to free kls extension data
+    if (kls->extension_data[KLS_AUTOREGION_EXT_SLOT] == NULL) { // No need to free kls extension data
         return;
     }
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC || data_pt->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS) {
         kls_free(data_pt->reglist_kls);
         //free(kls->reglist_kls);
@@ -1452,13 +1452,13 @@ void KLS_autoregion_on_free(struct Koliseo* kls)
         kls_rl_freeList(data_pt->regs);
     }
 
-    KLS_DEFAULT_FREEF(kls->extension_data[0]);
+    KLS_DEFAULT_FREEF(kls->extension_data[KLS_AUTOREGION_EXT_SLOT]);
 }
 
 void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)
 {
     assert(kls != NULL);
-    if (kls->extension_data[0] == NULL) {
+    if (kls->extension_data[KLS_AUTOREGION_EXT_SLOT] == NULL) {
         return;
     }
     struct KLS_EXTENSION_AR_DEFAULT_ARGS {
@@ -1481,7 +1481,7 @@ void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls)
     assert(t_kls != NULL);
     Koliseo* kls = t_kls->kls;
     assert(kls != NULL);
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.kls_autoset_temp_regions == 1) {
 #ifdef KLS_DEBUG_CORE
         kls_log(kls, "KLS", "Init of KLS_Region_List for temp kls.");
@@ -1555,7 +1555,7 @@ void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls)
     assert(t_kls != NULL);
     Koliseo* kls = t_kls->kls;
     assert(kls != NULL);
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[KLS_AUTOREGION_EXT_SLOT];
     if (data_pt->conf.kls_autoset_regions == 1) {
         switch (data_pt->conf.tkls_reglist_alloc_backend) {
         case KLS_REGLIST_ALLOC_LIBC: {

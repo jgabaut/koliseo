@@ -173,6 +173,10 @@ void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, 
 #define KLS_DEFAULT_EXTENSIONS_LEN 1
 #endif // KLS_DEFAULT_EXTENSIONS_LEN
 
+#ifndef KLS_AUTOREGION_EXT_SLOT
+#define KLS_AUTOREGION_EXT_SLOT 0
+#endif // KLS_AUTOREGION_EXT_SLOT
+
 #include "koliseo.h"
 
 #ifndef KOLISEO_HAS_LOCATE
