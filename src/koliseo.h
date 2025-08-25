@@ -28,6 +28,10 @@
 
 #define KOLISEO_H_
 
+#if defined(__cplusplus)
+    extern "C" {
+#endif // __cplusplus
+
 #ifndef _WIN32
 #define _POSIX_C_SOURCE 200809L
 #endif
@@ -685,4 +689,9 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #define KLS_STRDUP_T(t_kls, source) kls_t_strdup((t_kls), (source))
 
 #endif // KOLISEO_HAS_EXPER
+
+#if defined(__cplusplus)
+    }
+#endif // __cplusplus
 #endif //KOLISEO_H_
+
