@@ -19,6 +19,8 @@ basic_example
 pit_example
 # ignore list_example binary
 list_example
+# ignore list_example binary
+dllist_example
 # ignore region_example binary
 region_example
 
