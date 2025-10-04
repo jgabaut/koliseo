@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.5] - Unreleased
+
+### Added
+
+- Add `KLS_REPUSH()` to have realloc-like semantics
+- Add `templates/dllist.h`
+- Add `static/dllist_example.c`
+- Add `KLS_ALIGNOF()` for C++ interop
+- Add `extern C` header declaration for C++ interop
+
 ## [0.5.4] - 2025-08-04
 
 ### Changed

@@ -469,10 +469,24 @@ void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 #define kls_push_zero_ext(kls, size, align, count) kls_push_zero_ext_dbg((kls), (size), (align), (count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
+#ifndef KOLISEO_HAS_LOCATE
+void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
+                        ptrdiff_t old_count, ptrdiff_t new_count);
+#else
+void *kls_repush_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
+                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
+#define kls_repush(kls, size, align, old_count, new_count) kls_repush_dbg((kls), (size), (align), (old_count), (new_count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
  */
 #define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_ext((kls), sizeof(type), KLS_ALIGNOF(type), (count))
+
+/**
+ * Macro used to repush memory for dinamic arrays from a Koliseo.
+ */
+#define KLS_REPUSH(kls, old, type, old_count, new_count) (type*)kls_repush((kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
 
 /**
  * Macro to request memory for a C string from a Koliseo.
