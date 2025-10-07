@@ -23,6 +23,8 @@ list_example
 dllist_example
 # ignore region_example binary
 region_example
+# ignore darray_example binary
+darray_example
 
 #We also want to ignore the dotfile dump if we ever use anvil with -c flag
 amboso_cfg.dot

@@ -6,6 +6,7 @@
 
 - Add `KLS_REPUSH()` to have realloc-like semantics
 - Add `templates/dllist.h`
+- Add `templates/darray.h`
 - Add `static/dllist_example.c`
 - Add `KLS_ALIGNOF()` for C++ interop
 - Add `extern C` header declaration for C++ interop
