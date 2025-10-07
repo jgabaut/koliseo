@@ -88,7 +88,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 5 /**< Represents current minor release.*/
-#define KLS_PATCH 5 /**< Represents current patch release.*/
+#define KLS_PATCH 6 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -109,7 +109,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.5.5"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.5.6"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -473,9 +473,9 @@ void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                         ptrdiff_t old_count, ptrdiff_t new_count);
 #else
-void *kls_repush_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
+void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                             ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
-#define kls_repush(kls, size, align, old_count, new_count) kls_repush_dbg((kls), (size), (align), (old_count), (new_count), KLS_HERE)
+#define kls_repush(kls, old, size, align, old_count, new_count) kls_repush_dbg((kls), (old), (size), (align), (old_count), (new_count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
 /**
