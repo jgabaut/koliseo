@@ -1547,7 +1547,7 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                         ptrdiff_t old_count, ptrdiff_t new_count)
 #else
-void *kls_repush_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
+void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                             ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {

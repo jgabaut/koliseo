@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.5.5] - Unreleased
+## [0.5.6] - 2025-10-07
+
+### Changed
+
+- Fix `kls_repush_dbg()`
+
+## [0.5.5] - 2025-10-07
 
 ### Added
 
