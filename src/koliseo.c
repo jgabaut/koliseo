@@ -1543,6 +1543,115 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     return p;
 }
 
+#ifndef KOLISEO_HAS_LOCATE
+void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
+                        ptrdiff_t old_count, ptrdiff_t new_count)
+#else
+void *kls_repush_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
+                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+    if (!old) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): old was NULL.\n",
+                __func__);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): old was NULL.\n",
+                KLS_Loc_Arg(loc),
+                __func__);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (old_count < 0) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): old_count [%td] was < 0.\n",
+                __func__,
+                old_count);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): old_count [%td] was < 0.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                old_count);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (new_count < 0) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): new_count [%td] was < 0.\n",
+                __func__,
+                new_count);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): new_count [%td] was < 0.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                new_count);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (size < 1) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): size [%td] was < 1.\n",
+                __func__,
+                size);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): size [%td] was < 1.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                size);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (align < 1) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): align [%td] was < 1.\n",
+                __func__,
+                align);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was < 1.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                align);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (! ((align & (align - 1)) == 0)) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): align [%td] was not a power of 2.\n",
+                __func__,
+                align);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was not a power of 2.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                align);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (kls->has_temp == 1 && kls->conf.kls_block_while_has_temp == 1) {
+        fprintf(stderr, "%s(): kls has an active temp\n", __func__);
+        return NULL;
+    }
+    size_t old_size = old_count * size;
+    size_t new_size = new_count * size;
+    void *new_ptr = kls_push_zero_ext(kls, size, align, new_count);
+    if (new_ptr && old_size > 0) {
+        memcpy(new_ptr, old, old_size < new_size ? old_size : new_size);
+    }
+    return new_ptr;
+}
+
 /**
  * Prints header fields from the passed Koliseo pointer, to the passed FILE pointer.
  * @param fp The FILE pointer to print to.

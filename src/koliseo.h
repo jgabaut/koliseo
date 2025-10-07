@@ -19,7 +19,18 @@
 #ifndef KOLISEO_H_
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) //We need C11
+    #define KLS_ALIGNOF _Alignof
+#elif defined(__cplusplus)
+    #define KLS_ALIGNOF alignof
+#else
+#error "This code requires C11 or later.\n    _Alignof() is not available"
+#endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
+
 #define KOLISEO_H_
+
+#if defined(__cplusplus)
+    extern "C" {
+#endif // __cplusplus
 
 #ifndef _WIN32
 #define _POSIX_C_SOURCE 200809L
@@ -77,7 +88,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 5 /**< Represents current minor release.*/
-#define KLS_PATCH 4 /**< Represents current patch release.*/
+#define KLS_PATCH 5 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -98,7 +109,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.5.4"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.5.5"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -458,10 +469,24 @@ void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 #define kls_push_zero_ext(kls, size, align, count) kls_push_zero_ext_dbg((kls), (size), (align), (count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
+#ifndef KOLISEO_HAS_LOCATE
+void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
+                        ptrdiff_t old_count, ptrdiff_t new_count);
+#else
+void *kls_repush_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
+                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
+#define kls_repush(kls, size, align, old_count, new_count) kls_repush_dbg((kls), (size), (align), (old_count), (new_count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
  */
-#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_ext((kls), sizeof(type), _Alignof(type), (count))
+#define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_ext((kls), sizeof(type), KLS_ALIGNOF(type), (count))
+
+/**
+ * Macro used to repush memory for dinamic arrays from a Koliseo.
+ */
+#define KLS_REPUSH(kls, old, type, old_count, new_count) (type*)kls_repush((kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
 
 /**
  * Macro to request memory for a C string from a Koliseo.
@@ -546,7 +571,7 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 /**
  * Macro used to request memory for an array of type values from a Koliseo_Temp.
  */
-#define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_ext((kls_temp), sizeof(type), _Alignof(type), (count))
+#define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_ext((kls_temp), sizeof(type), KLS_ALIGNOF(type), (count))
 
 /**
  * Macro to request memory for a C string from a Koliseo_Temp.
@@ -610,7 +635,7 @@ void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
  * Macro used to "remove" memory as an array from a Koliseo. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo index.
  * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
  */
-#define KLS_POP_ARR(kls, type, count) (type*)kls_pop_AR((kls), sizeof(type), _Alignof(type), (count))
+#define KLS_POP_ARR(kls, type, count) (type*)kls_pop_AR((kls), sizeof(type), KLS_ALIGNOF(type), (count))
 
 /**
  * Macro to "remove" the memory for a C string from a Koliseo. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo index.
@@ -632,7 +657,7 @@ void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrd
  * Macro used to "remove" memory as an array from a Koliseo_Temp. Rewinds the pointer by the requested type and returns a pointer to that memory before updating the Koliseo_Temp index.
  * It's up to you to copy your item somewhere else before calling any PUSH operation again, as that memory should be overwritten.
  */
-#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop_AR((kls_temp), sizeof(type), _Alignof(type), (count))
+#define KLS_POP_ARR_T(kls_temp, type, count) (type*)kls_temp_pop_AR((kls_temp), sizeof(type), KLS_ALIGNOF(type), (count))
 
 /**
  * Macro to "remove" the memory for a C string from a Koliseo_Temp. Rewinds the pointer by the string's memory and returns a pointer to that memory before updating the Koliseo_Temp index.
@@ -679,8 +704,8 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 
 #endif // KOLISEO_HAS_EXPER
 
-#else
-#error "This code requires C11 or later.\n    _Alignof() is not available"
-#endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
-
+#if defined(__cplusplus)
+    }
+#endif // __cplusplus
 #endif //KOLISEO_H_
+
