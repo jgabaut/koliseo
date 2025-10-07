@@ -100,7 +100,7 @@ DARRAY_push(DARRAY_NAME* array, DARRAY_T item){
     if(array->count >= array->capacity){
         size_t old_cap = array->capacity;
         size_t new_cap = old_cap?old_cap*2:4;
-        size_t new_size = new_cap * sizeof(DARRAY_T);
+        // size_t new_size = new_cap * sizeof(DARRAY_T);
         array->items = KLS_REPUSH(array->kls, array->items, DARRAY_T, old_cap, new_cap);
         if (!array->items) {
             fprintf(stderr, "In %s, at %i: %s(): failed KLS_REPUSH()\n", __FILE__, __LINE__, __func__);

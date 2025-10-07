@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.7] - Unreleased
+
+### Changed
+
+- Drop unused var in darray template
+
 ## [0.5.6] - 2025-10-07
 
 ### Changed
