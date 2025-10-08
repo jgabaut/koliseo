@@ -2,6 +2,11 @@
 
 ## [0.5.7] - Unreleased
 
+### Added
+
+- Add `KLS_REPUSH_T()` to expand realloc-like semantics to `Koliseo_Temp`
+- Update `templates/darray.h` to support `Koliseo_Temp` allocation
+
 ### Changed
 
 - Drop unused var in darray template

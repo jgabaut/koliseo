@@ -478,6 +478,15 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
 #define kls_repush(kls, old, size, align, old_count, new_count) kls_repush_dbg((kls), (old), (size), (align), (old_count), (new_count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
+#ifndef KOLISEO_HAS_LOCATE
+void *kls_temp_repush(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
+                        ptrdiff_t old_count, ptrdiff_t new_count);
+#else
+void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
+                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
+#define kls_temp_repush(t_kls, old, size, align, old_count, new_count) kls_temp_repush_dbg((t_kls), (old), (size), (align), (old_count), (new_count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
 /**
  * Macro used to request memory for an array of type values from a Koliseo.
  */
@@ -487,6 +496,11 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
  * Macro used to repush memory for dinamic arrays from a Koliseo.
  */
 #define KLS_REPUSH(kls, old, type, old_count, new_count) (type*)kls_repush((kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
+
+/**
+ * Macro used to repush memory for dinamic arrays from a Koliseo_Temp.
+ */
+#define KLS_REPUSH_T(t_kls, old, type, old_count, new_count) (type*)kls_temp_repush((t_kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
 
 /**
  * Macro to request memory for a C string from a Koliseo.

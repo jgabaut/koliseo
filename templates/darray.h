@@ -68,7 +68,11 @@
 
 typedef struct DARRAY_NAME DARRAY_NAME;
 struct DARRAY_NAME {
-    Koliseo* kls;
+    bool use_temp;
+    union {
+        Koliseo* kls;
+        Koliseo_Temp* t_kls;
+    } allocator;
     DARRAY_T* items;
     size_t count;
     size_t capacity;
@@ -77,6 +81,9 @@ struct DARRAY_NAME {
 #define DARRAY_push DARRAY_IMPL(push)
 #define DARRAY_init DARRAY_IMPL(init)
 #define DARRAY_free DARRAY_IMPL(free)
+#define DARRAY_push_t DARRAY_IMPL(push_t)
+#define DARRAY_init_t DARRAY_IMPL(init_t)
+#define DARRAY_free_t DARRAY_IMPL(free_t)
 
 #ifdef DARRAY_DECLS_ONLY
 
@@ -92,16 +99,32 @@ DARRAY_LINKAGE
 void
 DARRAY_free(DARRAY_NAME* array);
 
+DARRAY_LINKAGE
+void
+DARRAY_push_t(DARRAY_NAME* array, DARRAY_T item);
+
+DARRAY_LINKAGE
+DARRAY_NAME
+DARRAY_init_t(Koliseo_Temp* t_kls);
+
+DARRAY_LINKAGE
+void
+DARRAY_free_t(DARRAY_NAME* array);
+
 #else
 
 DARRAY_LINKAGE
 void
 DARRAY_push(DARRAY_NAME* array, DARRAY_T item){
+    if (array->use_temp) {
+        fprintf(stderr, "In %s, at %i: %s(): array uses Koliseo_Temp\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
     if(array->count >= array->capacity){
         size_t old_cap = array->capacity;
         size_t new_cap = old_cap?old_cap*2:4;
         // size_t new_size = new_cap * sizeof(DARRAY_T);
-        array->items = KLS_REPUSH(array->kls, array->items, DARRAY_T, old_cap, new_cap);
+        array->items = KLS_REPUSH(array->allocator.kls, array->items, DARRAY_T, old_cap, new_cap);
         if (!array->items) {
             fprintf(stderr, "In %s, at %i: %s(): failed KLS_REPUSH()\n", __FILE__, __LINE__, __func__);
             exit(EXIT_FAILURE);
@@ -122,10 +145,10 @@ DARRAY_init(Koliseo* kls){
     DARRAY_NAME* res = KLS_PUSH_EX(kls, DARRAY_NAME, "from DARRAY_new()");
     if (res == NULL) {
         fprintf(stderr,"In %s, at %i: %s(): res was NULL.\n", __FILE__, __LINE__, __func__);
-        kls_free(res->kls);
+        kls_free(res->allocator.kls);
         exit(EXIT_FAILURE);
     }
-    res->kls = kls;
+    res->allocator.kls = kls;
     res->capacity = 4;
     res->items = KLS_PUSH_ARR(kls, DARRAY_T, 4);
     return res;
@@ -138,7 +161,68 @@ DARRAY_free(DARRAY_NAME* array){
         fprintf(stderr,"In %s, at %i: %s(): array was NULL.\n", __FILE__, __LINE__, __func__);
         exit(EXIT_FAILURE);
     }
-    kls_free(array->kls);
+    if (array->use_temp) {
+        fprintf(stderr, "In %s, at %i: %s(): array uses Koliseo_Temp()\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
+    kls_free(array->allocator.kls);
+    return;
+}
+
+DARRAY_LINKAGE
+void
+DARRAY_push_t(DARRAY_NAME* array, DARRAY_T item){
+    if (!array->use_temp) {
+        fprintf(stderr, "In %s, at %i: %s(): array uses Koliseo\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
+    if(array->count >= array->capacity){
+        size_t old_cap = array->capacity;
+        size_t new_cap = old_cap?old_cap*2:4;
+        // size_t new_size = new_cap * sizeof(DARRAY_T);
+        array->items = KLS_REPUSH_T(array->allocator.t_kls, array->items, DARRAY_T, old_cap, new_cap);
+        if (!array->items) {
+            fprintf(stderr, "In %s, at %i: %s(): failed KLS_REPUSH()\n", __FILE__, __LINE__, __func__);
+            exit(EXIT_FAILURE);
+        }
+        array->capacity = new_cap;
+    }
+    array->items[array->count++] = item;
+}
+
+DARRAY_LINKAGE
+DARRAY_NAME*
+DARRAY_init_t(Koliseo_Temp* t_kls){
+    // This functions sets the passed Koliseo as the backing memory for the array, and returns a pointer to it.
+    if(t_kls == NULL) {
+        fprintf(stderr,"In %s, at %i: %s(): t_kls was NULL.\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
+    DARRAY_NAME* res = KLS_PUSH_T_EX(t_kls, DARRAY_NAME, "from DARRAY_new()");
+    if (res == NULL) {
+        fprintf(stderr,"In %s, at %i: %s(): res was NULL.\n", __FILE__, __LINE__, __func__);
+        kls_temp_end(res->allocator.t_kls);
+        exit(EXIT_FAILURE);
+    }
+    res->use_temp = true;
+    res->allocator.t_kls = t_kls;
+    res->capacity = 4;
+    res->items = KLS_PUSH_ARR_T(t_kls, DARRAY_T, 4);
+    return res;
+}
+
+DARRAY_LINKAGE
+void
+DARRAY_free_t(DARRAY_NAME* array){
+    if (array == NULL) {
+        fprintf(stderr,"In %s, at %i: %s(): array was NULL.\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
+    if (!array->use_temp) {
+        fprintf(stderr, "In %s, at %i: %s(): array uses Koliseo\n", __FILE__, __LINE__, __func__);
+        exit(EXIT_FAILURE);
+    }
+    kls_temp_end(array->allocator.t_kls);
     return;
 }
 #endif
@@ -153,6 +237,9 @@ DARRAY_free(DARRAY_NAME* array){
 #undef DARRAY_push
 #undef DARRAY_init
 #undef DARRAY_free
+#undef DARRAY_push_t
+#undef DARRAY_init_t
+#undef DARRAY_free_t
 #ifdef DARRAY_DECLS_ONLY
 #undef DARRAY_DECLS_ONLY
 #endif // DARRAY_HEADER_H
