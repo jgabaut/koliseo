@@ -1543,6 +1543,17 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     return p;
 }
 
+/**
+ * Takes a Koliseo pointer, and a void pointer to the old allocation, ptrdiff_t values for size, align and old and new count. Tries repushing the specified amount of memory to the Koliseo data field.
+ * Notably, it zeroes the memory region.
+ * @param kls The Koliseo at hand.
+ * @param old The old allocation.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param old_count The multiplicative quantity to scale data size of old allocation.
+ * @param new_count The multiplicative quantity to scale data size of new allocation.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                         ptrdiff_t old_count, ptrdiff_t new_count)
@@ -1652,6 +1663,17 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
     return new_ptr;
 }
 
+/**
+ * Takes a Koliseo_Temp pointer, and a void pointer to the old allocation, ptrdiff_t values for size, align and old and new count. Tries repushing the specified amount of memory to the Koliseo_Temp data field.
+ * Notably, it zeroes the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param old The old allocation.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param old_count The multiplicative quantity to scale data size of old allocation.
+ * @param new_count The multiplicative quantity to scale data size of new allocation.
+ * @return A void pointer to the start of memory just pushed to the Koliseo_Temp, or NULL for errors.
+ */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_repush(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
                         ptrdiff_t old_count, ptrdiff_t new_count)

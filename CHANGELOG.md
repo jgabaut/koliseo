@@ -10,6 +10,7 @@
 ### Changed
 
 - Drop unused var in darray template
+- Add docs for `repush()`
 
 ## [0.5.6] - 2025-10-07
 
