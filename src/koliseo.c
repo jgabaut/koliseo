@@ -1543,12 +1543,23 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     return p;
 }
 
+/**
+ * Takes a Koliseo pointer, and a void pointer to the old allocation, ptrdiff_t values for size, align and old and new count. Tries repushing the specified amount of memory to the Koliseo data field.
+ * Notably, it zeroes the memory region.
+ * @param kls The Koliseo at hand.
+ * @param old The old allocation.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param old_count The multiplicative quantity to scale data size of old allocation.
+ * @param new_count The multiplicative quantity to scale data size of new allocation.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                        ptrdiff_t old_count, ptrdiff_t new_count)
+                 ptrdiff_t old_count, ptrdiff_t new_count)
 #else
 void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
+                     ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     if (!old) {
@@ -1646,6 +1657,122 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
     size_t old_size = old_count * size;
     size_t new_size = new_count * size;
     void *new_ptr = kls_push_zero_ext(kls, size, align, new_count);
+    if (new_ptr && old_size > 0) {
+        memcpy(new_ptr, old, old_size < new_size ? old_size : new_size);
+    }
+    return new_ptr;
+}
+
+/**
+ * Takes a Koliseo_Temp pointer, and a void pointer to the old allocation, ptrdiff_t values for size, align and old and new count. Tries repushing the specified amount of memory to the Koliseo_Temp data field.
+ * Notably, it zeroes the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param old The old allocation.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param old_count The multiplicative quantity to scale data size of old allocation.
+ * @param new_count The multiplicative quantity to scale data size of new allocation.
+ * @return A void pointer to the start of memory just pushed to the Koliseo_Temp, or NULL for errors.
+ */
+#ifndef KOLISEO_HAS_LOCATE
+void *kls_temp_repush(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
+                      ptrdiff_t old_count, ptrdiff_t new_count)
+#else
+void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
+                          ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+    if (!old) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): old was NULL.\n",
+                __func__);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): old was NULL.\n",
+                KLS_Loc_Arg(loc),
+                __func__);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (old_count < 0) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): old_count [%td] was < 0.\n",
+                __func__,
+                old_count);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): old_count [%td] was < 0.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                old_count);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (new_count < 0) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): new_count [%td] was < 0.\n",
+                __func__,
+                new_count);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): new_count [%td] was < 0.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                new_count);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (size < 1) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): size [%td] was < 1.\n",
+                __func__,
+                size);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): size [%td] was < 1.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                size);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (align < 1) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): align [%td] was < 1.\n",
+                __func__,
+                align);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was < 1.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                align);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (! ((align & (align - 1)) == 0)) {
+#ifndef KOLISEO_HAS_LOCATE
+        fprintf(stderr,
+                "[KLS] %s(): align [%td] was not a power of 2.\n",
+                __func__,
+                align);
+#else
+        fprintf(stderr,
+                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was not a power of 2.\n",
+                KLS_Loc_Arg(loc),
+                __func__,
+                align);
+#endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    size_t old_size = old_count * size;
+    size_t new_size = new_count * size;
+    void *new_ptr = kls_temp_push_zero_ext(t_kls, size, align, new_count);
     if (new_ptr && old_size > 0) {
         memcpy(new_ptr, old, old_size < new_size ? old_size : new_size);
     }

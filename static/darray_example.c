@@ -37,6 +37,17 @@ int main(int argc, char** argv)
         printf("{#%i: %s}\n", i, ds->items[i]);
     }
 
+    Koliseo_Temp* t_kls = kls_temp_start(kls);
+
+    darray_str* ds_t = darray_str_init_t(t_kls);
+
+    darray_str_push_t(ds_t, "MEOW");
+
+    for (int i = 0; i < ds_t->count; i++) {
+        printf("{#%i: %s}\n", i, ds_t->items[i]);
+    }
+
+    kls_temp_end(t_kls);
 
     kls_free(kls);
     return 0;

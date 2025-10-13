@@ -221,14 +221,14 @@ void
 LIST_removeNode_gl(LIST_NAME* list, LIST_ITEM_NAME* node)
 {
     if (node->prev == NULL) {
-         list->firstNode = node->next;
+        list->firstNode = node->next;
     } else {
-         node->prev->next = node->next;
+        node->prev->next = node->next;
     }
     if (node->next == NULL) {
-         list->lastNode = node->prev;
+        list->lastNode = node->prev;
     } else {
-         node->next->prev = node->prev;
+        node->next->prev = node->prev;
     }
     LIST_freeNode(node);
 }
@@ -238,14 +238,14 @@ void
 LIST_removeNode_kls(LIST_NAME* list, LIST_ITEM_NAME* node)
 {
     if (node->prev == NULL) {
-         list->firstNode = node->next;
+        list->firstNode = node->next;
     } else {
-         node->prev->next = node->next;
+        node->prev->next = node->next;
     }
     if (node->next == NULL) {
-         list->lastNode = node->prev;
+        list->lastNode = node->prev;
     } else {
-         node->next->prev = node->prev;
+        node->next->prev = node->prev;
     }
 }
 
@@ -273,11 +273,11 @@ LIST_insertAfter(LIST_NAME* list, LIST_ITEM_NAME* node, LIST_ITEM_NAME* new_node
     }
     new_node->prev = node;
     if (node->next == NULL) {
-         new_node->next = NULL; //NOT ALWAYS NECESSARY
-         list->lastNode = new_node;
+        new_node->next = NULL; //NOT ALWAYS NECESSARY
+        list->lastNode = new_node;
     } else {
-         new_node->next = node->next;
-         node->next->prev = new_node;
+        new_node->next = node->next;
+        node->next->prev = new_node;
     }
     node->next = new_node;
     list->len++;
@@ -296,11 +296,11 @@ LIST_insertBefore(LIST_NAME* list, LIST_ITEM_NAME* node, LIST_ITEM_NAME* new_nod
     }
     new_node->next = node;
     if (node->prev == NULL) {
-         new_node->prev = NULL; //NOT ALWAYS NECESSARY
-         list->firstNode = new_node;
+        new_node->prev = NULL; //NOT ALWAYS NECESSARY
+        list->firstNode = new_node;
     } else {
-         new_node->prev = node->prev;
-         node->next->prev = new_node;
+        new_node->prev = node->prev;
+        node->next->prev = new_node;
     }
     node->prev = new_node;
     list->len++;
