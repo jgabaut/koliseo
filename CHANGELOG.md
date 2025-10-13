@@ -11,6 +11,7 @@
 
 - Drop unused var in darray template
 - Add docs for `repush()`
+- Drop `darray_X_free()` from `templates/darray.h`
 
 ## [0.5.6] - 2025-10-07
 
