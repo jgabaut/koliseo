@@ -1556,10 +1556,10 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                        ptrdiff_t old_count, ptrdiff_t new_count)
+                 ptrdiff_t old_count, ptrdiff_t new_count)
 #else
 void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
+                     ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     if (!old) {
@@ -1676,10 +1676,10 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_repush(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                        ptrdiff_t old_count, ptrdiff_t new_count)
+                      ptrdiff_t old_count, ptrdiff_t new_count)
 #else
 void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
+                          ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     if (!old) {

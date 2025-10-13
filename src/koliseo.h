@@ -19,9 +19,9 @@
 #ifndef KOLISEO_H_
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) //We need C11
-    #define KLS_ALIGNOF _Alignof
+#define KLS_ALIGNOF _Alignof
 #elif defined(__cplusplus)
-    #define KLS_ALIGNOF alignof
+#define KLS_ALIGNOF alignof
 #else
 #error "This code requires C11 or later.\n    _Alignof() is not available"
 #endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
@@ -29,7 +29,7 @@
 #define KOLISEO_H_
 
 #if defined(__cplusplus)
-    extern "C" {
+extern "C" {
 #endif // __cplusplus
 
 #ifndef _WIN32
@@ -471,19 +471,19 @@ void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                        ptrdiff_t old_count, ptrdiff_t new_count);
+                 ptrdiff_t old_count, ptrdiff_t new_count);
 #else
 void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
+                     ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
 #define kls_repush(kls, old, size, align, old_count, new_count) kls_repush_dbg((kls), (old), (size), (align), (old_count), (new_count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_repush(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                        ptrdiff_t old_count, ptrdiff_t new_count);
+                      ptrdiff_t old_count, ptrdiff_t new_count);
 #else
 void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdiff_t align,
-                            ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
+                          ptrdiff_t old_count, ptrdiff_t new_count, Koliseo_Loc loc);
 #define kls_temp_repush(t_kls, old, size, align, old_count, new_count) kls_temp_repush_dbg((t_kls), (old), (size), (align), (old_count), (new_count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
@@ -719,7 +719,7 @@ char** kls_t_strdup_arr(Koliseo_Temp* t_kls, size_t count, char** source);
 #endif // KOLISEO_HAS_EXPER
 
 #if defined(__cplusplus)
-    }
+}
 #endif // __cplusplus
 #endif //KOLISEO_H_
 

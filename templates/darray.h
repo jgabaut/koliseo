@@ -105,12 +105,13 @@ DARRAY_init_t(Koliseo_Temp* t_kls);
 
 DARRAY_LINKAGE
 void
-DARRAY_push(DARRAY_NAME* array, DARRAY_T item){
+DARRAY_push(DARRAY_NAME* array, DARRAY_T item)
+{
     if (array->use_temp) {
         fprintf(stderr, "In %s, at %i: %s(): array uses Koliseo_Temp\n", __FILE__, __LINE__, __func__);
         exit(EXIT_FAILURE);
     }
-    if(array->count >= array->capacity){
+    if(array->count >= array->capacity) {
         size_t old_cap = array->capacity;
         size_t new_cap = old_cap?old_cap*2:4;
         // size_t new_size = new_cap * sizeof(DARRAY_T);
@@ -126,7 +127,8 @@ DARRAY_push(DARRAY_NAME* array, DARRAY_T item){
 
 DARRAY_LINKAGE
 DARRAY_NAME*
-DARRAY_init(Koliseo* kls){
+DARRAY_init(Koliseo* kls)
+{
     // This functions sets the passed Koliseo as the backing memory for the array, and returns a pointer to it.
     if(kls == NULL) {
         fprintf(stderr,"In %s, at %i: %s(): kls was NULL.\n", __FILE__, __LINE__, __func__);
@@ -146,12 +148,13 @@ DARRAY_init(Koliseo* kls){
 
 DARRAY_LINKAGE
 void
-DARRAY_push_t(DARRAY_NAME* array, DARRAY_T item){
+DARRAY_push_t(DARRAY_NAME* array, DARRAY_T item)
+{
     if (!array->use_temp) {
         fprintf(stderr, "In %s, at %i: %s(): array uses Koliseo\n", __FILE__, __LINE__, __func__);
         exit(EXIT_FAILURE);
     }
-    if(array->count >= array->capacity){
+    if(array->count >= array->capacity) {
         size_t old_cap = array->capacity;
         size_t new_cap = old_cap?old_cap*2:4;
         // size_t new_size = new_cap * sizeof(DARRAY_T);
@@ -167,7 +170,8 @@ DARRAY_push_t(DARRAY_NAME* array, DARRAY_T item){
 
 DARRAY_LINKAGE
 DARRAY_NAME*
-DARRAY_init_t(Koliseo_Temp* t_kls){
+DARRAY_init_t(Koliseo_Temp* t_kls)
+{
     // This functions sets the passed Koliseo as the backing memory for the array, and returns a pointer to it.
     if(t_kls == NULL) {
         fprintf(stderr,"In %s, at %i: %s(): t_kls was NULL.\n", __FILE__, __LINE__, __func__);
