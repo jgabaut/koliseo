@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.5.7] - Unreleased
+## [0.5.8] - Unreleased
+
+### Changed
+
+- Bump `invil` to `0.2.28`
+- Bump `amboso` to `2.1.0`
+
+## [0.5.7] - 2025-10-13
 
 ### Added
 
