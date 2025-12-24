@@ -2089,6 +2089,34 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
     }
 }
 
+char* kls_sprintf(Koliseo* kls, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int len = vsnprintf(NULL, 0, fmt, args);
+    char* str = KLS_PUSH_ARR(kls, char, len+1);
+    vsnprintf(str, len+1, fmt, args_copy);
+    va_end(args_copy);
+    va_end(args);
+    return str;
+}
+
+char* kls_temp_sprintf(Koliseo_Temp* kls_t, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int len = vsnprintf(NULL, 0, fmt, args);
+    char* str = KLS_PUSH_ARR_T(kls_t, char, len+1);
+    vsnprintf(str, len+1, fmt, args_copy);
+    va_end(args_copy);
+    va_end(args);
+    return str;
+}
+
 #ifdef KOLISEO_HAS_EXPER
 /**
  * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.

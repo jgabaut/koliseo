@@ -640,6 +640,9 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
  */
 #define KLS_PUSH_T_TYPED_EX(kls_temp, type, region_type, name) KLS_PUSH_T_TYPED((kls_temp), type, (region_type), (name), STRINFIGY(type))
 
+char* kls_sprintf(Koliseo* kls, const char* fmt, ...);
+char* kls_temp_sprintf(Koliseo_Temp* kls_t, const char* fmt, ...);
+
 #ifdef KOLISEO_HAS_EXPER
 
 void *kls_pop(Koliseo * kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count);
