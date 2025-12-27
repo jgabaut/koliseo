@@ -1451,7 +1451,6 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @return A char pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
  */
 #ifndef KOLISEO_HAS_LOCATE
-#ifndef KOLISEO_HAS_LOCATE
 char* kls_sprintf(Koliseo* kls, const char* fmt, ...)
 #else
 char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...)
