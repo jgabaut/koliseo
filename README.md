@@ -99,7 +99,7 @@ int main(void)
 
 
   :construction: Disclaimer: after version 0.5, the Region feature is no longer present inside the main koliseo.c file. It has been reimplemented as an extension, in kls_region.c file. :construction:
-  :contruction: See the [Extension section](#extensions). :construction:
+  :construction: See the [Extension section](#extensions). :construction:
 
   A ready-to-go index for every allocation you make.
   - It uses a linked list and has some the memory overhead, due to hosting a couple static string buffers for the tags, so it may not be suited for all usecases.
