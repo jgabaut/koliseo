@@ -2,6 +2,10 @@
 
 ## [0.5.8] - Unreleased
 
+### Added
+
+- Add `kls_sprintf()`, `kls_temp_sprintf()`
+
 ### Changed
 
 - Bump `invil` to `0.2.28`
