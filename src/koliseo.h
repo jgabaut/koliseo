@@ -500,6 +500,17 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
 #define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_ext((kls), sizeof(type), KLS_ALIGNOF(type), (count))
 
 /**
+ * Macro used to format a cstring into a Koliseo.
+ */
+#define KLS_SPRINTF(kls, fmt, ...) kls_sprintf((kls), (fmt), __VA_ARGS__)
+
+/**
+ * Macro to request memory for a C string from a Koliseo.
+ * @see KLS_STRDUP()
+ */
+#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
+
+/**
  * Macro used to repush memory for dinamic arrays from a Koliseo.
  */
 #define KLS_REPUSH(kls, old, type, old_count, new_count) (type*)kls_repush((kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
@@ -508,12 +519,6 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
  * Macro used to repush memory for dinamic arrays from a Koliseo_Temp.
  */
 #define KLS_REPUSH_T(t_kls, old, type, old_count, new_count) (type*)kls_temp_repush((t_kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
-
-/**
- * Macro to request memory for a C string from a Koliseo.
- * @see KLS_STRDUP()
- */
-#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
@@ -600,6 +605,11 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
  * Macro used to request memory for an array of type values from a Koliseo_Temp.
  */
 #define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_ext((kls_temp), sizeof(type), KLS_ALIGNOF(type), (count))
+
+/**
+ * Macro used to format a cstring into a Koliseo_Temp.
+ */
+#define KLS_SPRINTF_T(kls_temp, fmt, ...) kls_temp_sprintf((kls_temp), (fmt), __VA_ARGS__)
 
 /**
  * Macro to request memory for a C string from a Koliseo_Temp.
