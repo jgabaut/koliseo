@@ -1444,6 +1444,28 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     return p;
 }
 
+#ifndef KOLISEO_HAS_LOCATE
+char* kls_sprintf(Koliseo* kls, const char* fmt, ...)
+#else
+char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...)
+#endif // KOLISEO_HAS_LOCATE
+{
+    va_list args;
+    va_start(args, fmt);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int len = vsnprintf(NULL, 0, fmt, args);
+#ifndef KOLISEO_HAS_LOCATE
+    char* str = KLS_PUSH_ARR(kls, char, len+1);
+#else
+    char* str = kls_push_zero_ext_dbg(kls, sizeof(char), KLS_ALIGNOF(char), len+1, loc);
+#endif // KOLISEO_HAS_LOCATE
+    vsnprintf(str, len+1, fmt, args_copy);
+    va_end(args_copy);
+    va_end(args);
+    return str;
+}
+
 /**
  * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
@@ -1541,6 +1563,28 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
         current->stats.tot_temp_pushes += 1;
     }
     return p;
+}
+
+#ifndef KOLISEO_HAS_LOCATE
+char* kls_temp_sprintf(Koliseo_Temp* kls_t, const char* fmt, ...)
+#else
+char* kls_temp_sprintf_dbg(Koliseo_Temp* kls_t, Koliseo_Loc loc, const char* fmt, ...)
+#endif // KOLISEO_HAS_LOCATE
+{
+    va_list args;
+    va_start(args, fmt);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int len = vsnprintf(NULL, 0, fmt, args);
+#ifndef KOLISEO_HAS_LOCATE
+    char* str = KLS_PUSH_ARR_T(kls_t, char, len+1);
+#else
+    char* str = kls_temp_push_zero_ext_dbg(kls_t, sizeof(char), KLS_ALIGNOF(char), len+1, loc);
+#endif // KOLISEO_HAS_LOCATE
+    vsnprintf(str, len+1, fmt, args_copy);
+    va_end(args_copy);
+    va_end(args);
+    return str;
 }
 
 /**
@@ -2087,34 +2131,6 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         kls_ref->stats.tot_temp_pushes = 0;
         kls_ref->stats.tot_temp_pops = 0;
     }
-}
-
-char* kls_sprintf(Koliseo* kls, const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    va_list args_copy;
-    va_copy(args_copy, args);
-    int len = vsnprintf(NULL, 0, fmt, args);
-    char* str = KLS_PUSH_ARR(kls, char, len+1);
-    vsnprintf(str, len+1, fmt, args_copy);
-    va_end(args_copy);
-    va_end(args);
-    return str;
-}
-
-char* kls_temp_sprintf(Koliseo_Temp* kls_t, const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    va_list args_copy;
-    va_copy(args_copy, args);
-    int len = vsnprintf(NULL, 0, fmt, args);
-    char* str = KLS_PUSH_ARR_T(kls_t, char, len+1);
-    vsnprintf(str, len+1, fmt, args_copy);
-    va_end(args_copy);
-    va_end(args);
-    return str;
 }
 
 #ifdef KOLISEO_HAS_EXPER
