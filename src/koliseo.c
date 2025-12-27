@@ -1445,6 +1445,34 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 }
 
 /**
+ * Takes a Koliseo pointer, and a format cstring, plus varargs. Tries using the passed Koliseo to hold the result of standard formatting using the varargs.
+ * @param kls The Koliseo at hand.
+ * @param fmt The format cstring.
+ * @return A char pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ */
+#ifndef KOLISEO_HAS_LOCATE
+char* kls_sprintf(Koliseo* kls, const char* fmt, ...)
+#else
+char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...)
+#endif // KOLISEO_HAS_LOCATE
+{
+    va_list args;
+    va_start(args, fmt);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int len = vsnprintf(NULL, 0, fmt, args);
+#ifndef KOLISEO_HAS_LOCATE
+    char* str = KLS_PUSH_ARR(kls, char, len+1);
+#else
+    char* str = kls_push_zero_ext_dbg(kls, sizeof(char), KLS_ALIGNOF(char), len+1, loc);
+#endif // KOLISEO_HAS_LOCATE
+    vsnprintf(str, len+1, fmt, args_copy);
+    va_end(args_copy);
+    va_end(args);
+    return str;
+}
+
+/**
  * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
  * Notably, it zeroes the memory region.
  * Will be removed in 0.6, leaving kls_temp_push_zero_ext() as its replacement.
@@ -1541,6 +1569,34 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
         current->stats.tot_temp_pushes += 1;
     }
     return p;
+}
+
+/**
+ * Takes a Koliseo_Temp pointer, and a format cstring, plus varargs. Tries using the passed Koliseo_Temp to hold the result of standard formatting using the varargs.
+ * @param kls_t The Koliseo_Temp at hand.
+ * @param fmt The format cstring.
+ * @return A char pointer to the start of memory just pushed to the Koliseo_Temp, or NULL for errors.
+ */
+#ifndef KOLISEO_HAS_LOCATE
+char* kls_temp_sprintf(Koliseo_Temp* kls_t, const char* fmt, ...)
+#else
+char* kls_temp_sprintf_dbg(Koliseo_Temp* kls_t, Koliseo_Loc loc, const char* fmt, ...)
+#endif // KOLISEO_HAS_LOCATE
+{
+    va_list args;
+    va_start(args, fmt);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int len = vsnprintf(NULL, 0, fmt, args);
+#ifndef KOLISEO_HAS_LOCATE
+    char* str = KLS_PUSH_ARR_T(kls_t, char, len+1);
+#else
+    char* str = kls_temp_push_zero_ext_dbg(kls_t, sizeof(char), KLS_ALIGNOF(char), len+1, loc);
+#endif // KOLISEO_HAS_LOCATE
+    vsnprintf(str, len+1, fmt, args_copy);
+    va_end(args_copy);
+    va_end(args);
+    return str;
 }
 
 /**

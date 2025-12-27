@@ -1,6 +1,17 @@
 # Changelog
 
-## [0.5.7] - Unreleased
+## [0.5.8] - 2025-12-27
+
+### Added
+
+- Add `kls_sprintf()`, `kls_temp_sprintf()`
+
+### Changed
+
+- Bump `invil` to `0.2.28`
+- Bump `amboso` to `2.1.0`
+
+## [0.5.7] - 2025-10-13
 
 ### Added
 

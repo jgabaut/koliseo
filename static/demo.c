@@ -220,6 +220,11 @@ int main(int argc, char **argv)
     printf("\n*z is [%i] after KLS_POP\n", *z);
 #endif // KOLISEO_HAS_EXPER
 
+    char* str = kls_temp_sprintf(temp_kls, "Foo = %s", "bar");
+    if (str) {
+        printf("%s\n", str);
+    }
+
 #ifndef _WIN32
     printf("[Current position in Koliseo] [pos: %li]\n", kls_get_pos(kls));
 #else

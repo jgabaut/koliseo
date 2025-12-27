@@ -88,7 +88,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 5 /**< Represents current minor release.*/
-#define KLS_PATCH 7 /**< Represents current patch release.*/
+#define KLS_PATCH 8 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -109,7 +109,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.5.7"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.5.8"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -470,6 +470,13 @@ void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KOLISEO_HAS_LOCATE
+char* kls_sprintf(Koliseo* kls, const char* fmt, ...);
+#else
+char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...);
+#define kls_sprintf(kls, fmt, ...) kls_sprintf_dbg((kls), KLS_HERE, (fmt), __VA_ARGS__)
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                  ptrdiff_t old_count, ptrdiff_t new_count);
 #else
@@ -493,6 +500,17 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
 #define KLS_PUSH_ARR(kls, type, count) (type*)kls_push_zero_ext((kls), sizeof(type), KLS_ALIGNOF(type), (count))
 
 /**
+ * Macro used to format a cstring into a Koliseo.
+ */
+#define KLS_SPRINTF(kls, fmt, ...) kls_sprintf((kls), (fmt), __VA_ARGS__)
+
+/**
+ * Macro to request memory for a C string from a Koliseo.
+ * @see KLS_STRDUP()
+ */
+#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
+
+/**
  * Macro used to repush memory for dinamic arrays from a Koliseo.
  */
 #define KLS_REPUSH(kls, old, type, old_count, new_count) (type*)kls_repush((kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
@@ -501,12 +519,6 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
  * Macro used to repush memory for dinamic arrays from a Koliseo_Temp.
  */
 #define KLS_REPUSH_T(t_kls, old, type, old_count, new_count) (type*)kls_temp_repush((t_kls), (old), sizeof(type), KLS_ALIGNOF(type), (old_count), (new_count))
-
-/**
- * Macro to request memory for a C string from a Koliseo.
- * @see KLS_STRDUP()
- */
-#define KLS_PUSH_STR(kls, cstr) KLS_PUSH_ARR((kls), char, strlen((cstr))+1)
 
 /**
  * Macro used to request memory for an array of type values from a Koliseo, and assign a name and a description to the region item.
@@ -579,6 +591,13 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
 #define kls_temp_push_zero_ext(t_kls, size, align, count) kls_temp_push_zero_ext_dbg((t_kls), (size), (align), (count), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
+#ifndef KOLISEO_HAS_LOCATE
+char* kls_temp_sprintf(Koliseo_Temp* kls_t, const char* fmt, ...);
+#else
+char* kls_temp_sprintf_dbg(Koliseo_Temp* kls_t, Koliseo_Loc loc, const char* fmt, ...);
+#define kls_temp_sprintf(t_kls, fmt, ...) kls_temp_sprintf_dbg((t_kls), KLS_HERE, (fmt), __VA_ARGS__)
+#endif // KOLISEO_HAS_LOCATE
+
 void print_temp_kls_2file(FILE * fp, const Koliseo_Temp * t_kls);
 void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
 
@@ -586,6 +605,11 @@ void print_dbg_temp_kls(const Koliseo_Temp * t_kls);
  * Macro used to request memory for an array of type values from a Koliseo_Temp.
  */
 #define KLS_PUSH_ARR_T(kls_temp, type, count) (type*)kls_temp_push_zero_ext((kls_temp), sizeof(type), KLS_ALIGNOF(type), (count))
+
+/**
+ * Macro used to format a cstring into a Koliseo_Temp.
+ */
+#define KLS_SPRINTF_T(kls_temp, fmt, ...) kls_temp_sprintf((kls_temp), (fmt), __VA_ARGS__)
 
 /**
  * Macro to request memory for a C string from a Koliseo_Temp.
