@@ -1444,6 +1444,13 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
     return p;
 }
 
+/**
+ * Takes a Koliseo pointer, and a format cstring, plus varargs. Tries using the passed Koliseo to hold the result of standard formatting using the varargs.
+ * @param kls The Koliseo at hand.
+ * @param fmt The format cstring.
+ * @return A char pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ */
+#ifndef KOLISEO_HAS_LOCATE
 #ifndef KOLISEO_HAS_LOCATE
 char* kls_sprintf(Koliseo* kls, const char* fmt, ...)
 #else
@@ -1565,6 +1572,12 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     return p;
 }
 
+/**
+ * Takes a Koliseo_Temp pointer, and a format cstring, plus varargs. Tries using the passed Koliseo_Temp to hold the result of standard formatting using the varargs.
+ * @param kls_t The Koliseo_Temp at hand.
+ * @param fmt The format cstring.
+ * @return A char pointer to the start of memory just pushed to the Koliseo_Temp, or NULL for errors.
+ */
 #ifndef KOLISEO_HAS_LOCATE
 char* kls_temp_sprintf(Koliseo_Temp* kls_t, const char* fmt, ...)
 #else
