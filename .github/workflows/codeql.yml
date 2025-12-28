@@ -1,0 +1,40 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: c
+
+    - name: Run aclocal
+      run: aclocal
+    - name: Run autoconf
+      run: autoconf
+    - name: Run automake --add-missing
+      run: automake --add-missing
+    - name: Run ./configure
+      run: ./configure
+    - name: Run make
+      run: make
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v4
