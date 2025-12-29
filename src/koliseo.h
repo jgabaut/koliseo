@@ -308,6 +308,7 @@ extern KLS_Stats KLS_STATS_DEFAULT;
 #endif // KLS_DEBUG_CORE
 
 /**
+ * DEPRECATED: Support for multiple extension will be dropped in the next release.
  * Defines how many extensions can be handled at once.
  * @see KLS_Hooks
  * @see Koliseo
@@ -317,6 +318,7 @@ extern KLS_Stats KLS_STATS_DEFAULT;
 #endif // KLS_MAX_EXTENSIONS
 
 /**
+ * DEPRECATED: Support for multiple extension will be dropped in the next release.
  * Defines how many extensions are loaded on kls_new() variants lacking explicit set of KLS_Hooks.
  * Useful to be redefined by an extension file, together with KLS_DEFAULT_HOOKS.
  * @see KLS_DEFAULT_HOOKS
