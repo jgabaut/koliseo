@@ -470,6 +470,13 @@ void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KOLISEO_HAS_LOCATE
+char* kls_vsprintf(Koliseo* kls, const char* fmt, va_list args);
+#else
+char* kls_vsprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, va_list args);
+#define kls_vsprintf(kls, fmt, args) kls_vsprintf_dbg((kls), KLS_HERE, (fmt), (args))
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 char* kls_sprintf(Koliseo* kls, const char* fmt, ...);
 #else
 char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...);
@@ -589,6 +596,13 @@ void *kls_temp_push_zero_ext(Koliseo_Temp * t_kls, ptrdiff_t size,
 void *kls_temp_push_zero_ext_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
                                  ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc);
 #define kls_temp_push_zero_ext(t_kls, size, align, count) kls_temp_push_zero_ext_dbg((t_kls), (size), (align), (count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
+char* kls_temp_vsprintf(Koliseo_Temp* kls_t, const char* fmt, va_list args);
+#else
+char* kls_temp_vsprintf_dbg(Koliseo_Temp* kls_t, Koliseo_Loc loc, const char* fmt, va_list args);
+#define kls_temp_vsprintf(t_kls, fmt, args) kls_temp_vsprintf_dbg((t_kls), KLS_HERE, (fmt), (args))
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KOLISEO_HAS_LOCATE
