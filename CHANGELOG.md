@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.9] - 2026-01-02
+
+### Added
+
+- Add `.github/workflows/codeql.yml`
+
+### Changed
+
+- Fix `static/region_example.c`
+- Deprecate multiple extensions support
+- Deprecate `KLS_DEFAULT_EXTENSIONS_LEN`, `KLS_MAX_EXTENSIONS`
+
 ## [0.5.8] - 2025-12-27
 
 ### Added

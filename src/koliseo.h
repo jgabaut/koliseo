@@ -88,7 +88,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 5 /**< Represents current minor release.*/
-#define KLS_PATCH 8 /**< Represents current patch release.*/
+#define KLS_PATCH 9 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -109,7 +109,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.5.8"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.5.9"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -308,6 +308,7 @@ extern KLS_Stats KLS_STATS_DEFAULT;
 #endif // KLS_DEBUG_CORE
 
 /**
+ * DEPRECATED: Support for multiple extension will be dropped in the next release.
  * Defines how many extensions can be handled at once.
  * @see KLS_Hooks
  * @see Koliseo
@@ -317,6 +318,7 @@ extern KLS_Stats KLS_STATS_DEFAULT;
 #endif // KLS_MAX_EXTENSIONS
 
 /**
+ * DEPRECATED: Support for multiple extension will be dropped in the next release.
  * Defines how many extensions are loaded on kls_new() variants lacking explicit set of KLS_Hooks.
  * Useful to be redefined by an extension file, together with KLS_DEFAULT_HOOKS.
  * @see KLS_DEFAULT_HOOKS
@@ -470,6 +472,13 @@ void *kls_push_zero_ext_dbg(Koliseo * kls, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KOLISEO_HAS_LOCATE
+char* kls_vsprintf(Koliseo* kls, const char* fmt, va_list args);
+#else
+char* kls_vsprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, va_list args);
+#define kls_vsprintf(kls, fmt, args) kls_vsprintf_dbg((kls), KLS_HERE, (fmt), (args))
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
 char* kls_sprintf(Koliseo* kls, const char* fmt, ...);
 #else
 char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...);
@@ -589,6 +598,13 @@ void *kls_temp_push_zero_ext(Koliseo_Temp * t_kls, ptrdiff_t size,
 void *kls_temp_push_zero_ext_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
                                  ptrdiff_t align, ptrdiff_t count, Koliseo_Loc loc);
 #define kls_temp_push_zero_ext(t_kls, size, align, count) kls_temp_push_zero_ext_dbg((t_kls), (size), (align), (count), KLS_HERE)
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
+char* kls_temp_vsprintf(Koliseo_Temp* kls_t, const char* fmt, va_list args);
+#else
+char* kls_temp_vsprintf_dbg(Koliseo_Temp* kls_t, Koliseo_Loc loc, const char* fmt, va_list args);
+#define kls_temp_vsprintf(t_kls, fmt, args) kls_temp_vsprintf_dbg((t_kls), KLS_HERE, (fmt), (args))
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KOLISEO_HAS_LOCATE
