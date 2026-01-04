@@ -890,6 +890,17 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 
 static bool kls__try_grow(Koliseo* kls, ptrdiff_t needed);
 
+/**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
+ * It sets the passed padding pointer to the amount of padding used in the advancement.
+ * Notably, it does NOT zero the memory region.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @param padding The pointer used to store amount of padding used in the advancement.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ */
 #ifndef KOLISEO_HAS_LOCATE
 void* kls__advance(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name)
 #else
@@ -1224,6 +1235,17 @@ int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t al
     return 0;
 }
 
+/**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
+ * It sets the passed padding pointer to the amount of padding used in the advancement.
+ * Notably, it does NOT zero the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @param padding The pointer used to store amount of padding used in the advancement.
+ * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ */
 #ifndef KOLISEO_HAS_LOCATE
 void* kls__temp_advance(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name)
 #else
@@ -1320,6 +1342,7 @@ bool kls__try_grow(Koliseo* kls, ptrdiff_t needed)
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ * @see kls__advance
  */
 void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 {
@@ -1341,6 +1364,7 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ * @see kls__advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1371,6 +1395,8 @@ void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ * @see kls__advance
+ * @see KLS_Hooks
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_ext(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1397,8 +1423,8 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         current = current->next;
     }
 
-    for (size_t i=0; i < kls->hooks_len; i++) {
-        if (kls->hooks[i].on_push_handler != NULL) {
+    for (size_t i=0; i < current->hooks_len; i++) {
+        if (current->hooks[i].on_push_handler != NULL) {
             /*
             struct KLS_EXTENSION_AR_DEFAULT_ARGS {
                 const char* region_name;
@@ -1416,7 +1442,7 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
             };
             kls->hooks.on_push_handler(kls, padding, (void*)&ar_args);
             */
-            kls->hooks[i].on_push_handler(current, padding, __func__, NULL);
+            current->hooks[i].on_push_handler(current, padding, __func__, NULL);
         }
     }
     return p;
@@ -1473,6 +1499,7 @@ char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...)
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ * @see kls__temp_advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_ext(Koliseo_Temp *t_kls, ptrdiff_t size,
@@ -1495,11 +1522,15 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     memset(p, 0, size * count);
 
     Koliseo* kls = t_kls->kls;
+    Koliseo* current = kls;
+    while (current->next != NULL) {
+        current = current->next;
+    }
 
-    for (size_t i=0; i < kls->hooks_len; i++) {
-        if (kls->hooks[i].on_temp_push_handler != NULL) {
+    for (size_t i=0; i < current->hooks_len; i++) {
+        if (current->hooks[i].on_temp_push_handler != NULL) {
             // Call on_temp_push extension with empty user arg
-            kls->hooks[i].on_temp_push_handler(t_kls, padding, __func__, NULL);
+            current->hooks[i].on_temp_push_handler(t_kls, padding, __func__, NULL);
         }
     }
     return p;
@@ -2034,7 +2065,7 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
 
     current->has_temp = 1;
     current->t_kls = tmp;
-    for (size_t i=0; i < kls->hooks_len; i++) {
+    for (size_t i=0; i < current->hooks_len; i++) {
         if (current->hooks[i].on_temp_start_handler != NULL) {
             // Call on_temp_start extension
             current->hooks[i].on_temp_start_handler(tmp);

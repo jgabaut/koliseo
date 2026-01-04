@@ -971,6 +971,7 @@ static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls,
  * @param name The name to assign to the resulting KLS_Region.
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
+ * @see kls__advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_named(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1006,6 +1007,7 @@ void *kls_push_zero_named_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param name The name to assign to the resulting KLS_Region.
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
+ * @see kls__temp_advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_named(Koliseo_Temp *t_kls, ptrdiff_t size,
@@ -1043,6 +1045,7 @@ void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
  * @param name The name to assign to the resulting KLS_Region.
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the Koliseo.
+ * @see kls__advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_typed(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1079,6 +1082,7 @@ void *kls_push_zero_typed_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param name The name to assign to the resulting KLS_Region.
  * @param desc The desc to assign to the resulting KLS_Region.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ * @see kls__advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_typed(Koliseo_Temp *t_kls, ptrdiff_t size,
