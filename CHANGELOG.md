@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.10] - Unreleased
+
+### Changed
+
+- Refactor `kls_push`, `kls_temp_push` functions to use `kls__advance`, `kls__temp_advance`
+
 ## [0.5.9] - 2026-01-02
 
 ### Added
