@@ -5,6 +5,7 @@
 ### Added
 
 - Add `KLS_Push_Error`, used internally to handle failures on `kls_push`, `kls_temp_push` calls
+- Add `templates/hashmap.h`, `static/hashmap_example.c`
 
 ### Changed
 
