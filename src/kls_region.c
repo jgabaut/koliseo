@@ -981,11 +981,13 @@ void *kls_push_zero_named_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                               ptrdiff_t count, char *name, char *desc, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
-    ptrdiff_t padding = -1;
+    ptrdiff_t padding = 0;
 #ifndef KOLISEO_HAS_LOCATE
-    char* p = kls__advance(kls, size, align, count, &padding, __func__);
+    KLS_Push_Result res = kls__advance(kls, size, align, count, &padding, __func__);
+    void* p = kls__handle_push_result(kls, res, size, align, count, padding, __func__);
 #else
-    char* p = kls__advance_dbg(kls, size, align, count, &padding, __func__, loc);
+    KLS_Push_Result res = kls__advance_dbg(kls, size, align, count, &padding, __func__, loc);
+    void* p = kls__handle_push_result_dbg(kls, res, size, align, count, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
     if (!p) return NULL;
 
@@ -1019,11 +1021,13 @@ void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
                                    char *desc, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
-    ptrdiff_t padding = -1;
+    ptrdiff_t padding = 0;
 #ifndef KOLISEO_HAS_LOCATE
-    char* p = kls__temp_advance(t_kls, size, align, count, &padding, __func__);
+    KLS_Push_Result res = kls__temp_advance(t_kls, size, align, count, &padding, __func__);
+    void* p = kls__handle_push_result(t_kls->kls, res, size, align, count, padding, __func__);
 #else
-    char* p = kls__temp_advance_dbg(t_kls, size, align, count, &padding, __func__, loc);
+    KLS_Push_Result res = kls__temp_advance_dbg(t_kls, size, align, count, &padding, __func__, loc);
+    void* p = kls__handle_push_result_dbg(t_kls->kls, res, size, align, count, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
     if (!p) return NULL;
 
@@ -1055,11 +1059,13 @@ void *kls_push_zero_typed_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                               ptrdiff_t count, int type, char *name, char *desc, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
-    ptrdiff_t padding = -1;
+    ptrdiff_t padding = 0;
 #ifndef KOLISEO_HAS_LOCATE
-    char* p = kls__advance(kls, size, align, count, &padding, __func__);
+    KLS_Push_Result res = kls__advance(kls, size, align, count, &padding, __func__);
+    void* p = kls__handle_push_result(kls, res, size, align, count, padding, __func__);
 #else
-    char* p = kls__advance_dbg(kls, size, align, count, &padding, __func__, loc);
+    KLS_Push_Result res = kls__advance_dbg(kls, size, align, count, &padding, __func__, loc);
+    void* p = kls__handle_push_result_dbg(kls, res, size, align, count, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
     if (!p) return NULL;
 
@@ -1096,9 +1102,11 @@ void *kls_temp_push_zero_typed_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 {
     ptrdiff_t padding = -1;
 #ifndef KOLISEO_HAS_LOCATE
-    char* p = kls__temp_advance(t_kls, size, align, count, &padding, __func__);
+    KLS_Push_Result res = kls__temp_advance(t_kls, size, align, count, &padding, __func__);
+    void* p = kls__handle_push_result(t_kls->kls, res, size, align, count, padding, __func__);
 #else
-    char* p = kls__temp_advance_dbg(t_kls, size, align, count, &padding, __func__, loc);
+    KLS_Push_Result res = kls__temp_advance_dbg(t_kls, size, align, count, &padding, __func__, loc);
+    void* p = kls__handle_push_result_dbg(t_kls->kls, res, size, align, count, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
     if (!p) return NULL;
 

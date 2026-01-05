@@ -2,6 +2,10 @@
 
 ## [0.5.10] - Unreleased
 
+### Added
+
+- Add `KLS_Push_Error`, used internally to handle failures on `kls_push`, `kls_temp_push` calls
+
 ### Changed
 
 - Refactor `kls_push`, `kls_temp_push` functions to use `kls__advance`, `kls__temp_advance`
