@@ -66,6 +66,10 @@
 #define DARRAY_LINKAGE static inline
 #endif
 
+#ifndef DARRAY_STARTING_CAPACITY
+#define DARRAY_STARTING_CAPACITY 4
+#endif // DARRAY_STARTING_CAPACITY
+
 typedef struct DARRAY_NAME DARRAY_NAME;
 struct DARRAY_NAME {
     bool use_temp;
@@ -185,8 +189,8 @@ DARRAY_init_t(Koliseo_Temp* t_kls)
     }
     res->use_temp = true;
     res->allocator.t_kls = t_kls;
-    res->capacity = 4;
-    res->items = KLS_PUSH_ARR_T(t_kls, DARRAY_T, 4);
+    res->capacity = DARRAY_STARTING_CAPACITY;
+    res->items = KLS_PUSH_ARR_T(t_kls, DARRAY_T, DARRAY_STARTING_CAPACITY);
     return res;
 }
 
@@ -199,6 +203,7 @@ DARRAY_init_t(Koliseo_Temp* t_kls)
 #undef DARRAY_PREFIX
 #undef DARRAY_NAME
 #undef DARRAY_LINKAGE
+#undef DARRAY_STARTING_CAPACITY
 #undef DARRAY_push
 #undef DARRAY_init
 #undef DARRAY_push_t
