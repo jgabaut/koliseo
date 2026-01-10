@@ -93,7 +93,15 @@ typedef struct HASHMAP_NAME {
 } HASHMAP_NAME;
 
 #ifndef HASHMAP_HASH
-#define HASHMAP_hash_str HASHMAP_IMPL(hash_str)
+#ifdef HASHMAP_HASH_FNV_1A
+#define HASHMAP_hash_str HASHMAP_fnv_1a_hash_str
+#else
+#ifdef HASHMAP_HASH_MURMUR2
+#define HASHMAP_hash_str HASHMAP_murmur2_hash_str
+#else
+#define HASHMAP_hash_str HASHMAP_fnv_1a_hash_str
+#endif // HASHMAP_HASH_MURMUR2
+#endif // HASHMAP_HASH_FNV_1A
 #else
 #define HASHMAP_hash_str HASHMAP_HASH
 #endif // HASHMAP_HASH
@@ -107,7 +115,11 @@ typedef struct HASHMAP_NAME {
 #ifndef HASHMAP_HASH
 static
 uint64_t
-HASHMAP_hash_str(const char* s);
+HASHMAP_fnv_1a_hash_str(const char* s, size_t len);
+
+static
+uint64_t
+HASHMAP_murmur2_hash_str(const char* s, size_t len);
 #endif // HASHMAP_HASH
 
 HASHMAP_LINKAGE
@@ -129,13 +141,57 @@ HASHMAP_remove(HASHMAP_NAME *map, const char *key);
 
 #ifndef HASHMAP_HASH
 /* FNV-1a hash */
-static uint64_t HASHMAP_hash_str(const char *s)
+static uint64_t HASHMAP_fnv_1a_hash_str(const char *s, size_t len)
 {
+    const uint8_t *p = (const uint8_t *)s;
     uint64_t h = 14695981039346656037ULL;
-    while (*s) {
-        h ^= (unsigned char)*s++;
+    for (size_t i = 0; i < len; i++) {
+        h ^= (uint64_t)p[i];
         h *= 1099511628211ULL;
     }
+    return h;
+}
+
+/* Murmur2 hash */
+static uint64_t HASHMAP_murmur2_hash_str(const void *key, size_t len) {
+    const uint64_t m = 0xc6a4a7935bd1e995ULL;
+    const int r = 47;
+
+    uint64_t h = len * m;
+
+    const uint8_t *p = key;
+    const uint8_t *end = p + (len & ~7ULL);
+
+    while (p < end) {
+        uint64_t k;
+        memcpy(&k, p, 8);
+        p += 8;
+
+        k *= m;
+        k ^= k >> r;
+        k *= m;
+
+        h ^= k;
+        h *= m;
+    }
+
+    uint64_t tail = 0;
+    switch (len & 7) {
+        case 7: tail ^= (uint64_t)p[6] << 48;
+        case 6: tail ^= (uint64_t)p[5] << 40;
+        case 5: tail ^= (uint64_t)p[4] << 32;
+        case 4: tail ^= (uint64_t)p[3] << 24;
+        case 3: tail ^= (uint64_t)p[2] << 16;
+        case 2: tail ^= (uint64_t)p[1] << 8;
+        case 1: tail ^= (uint64_t)p[0];
+                h ^= tail;
+                h *= m;
+    }
+
+    h ^= h >> r;
+    h *= m;
+    h ^= h >> r;
+
     return h;
 }
 #endif // HASHMAP_HASH
@@ -160,7 +216,7 @@ HASHMAP_NAME *HASHMAP_new(Koliseo* kls, size_t bucket_count)
 
 bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value)
 {
-    uint64_t h = HASHMAP_hash_str(key);
+    uint64_t h = HASHMAP_hash_str(key, strlen(key));
     size_t index = h % map->bucket_count;
 
     DARRAY_NAME *node = map->buckets[index];
@@ -185,7 +241,7 @@ bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value)
 
 HASHMAP_T *HASHMAP_get(HASHMAP_NAME *map, const char *key)
 {
-    uint64_t h = HASHMAP_hash_str(key);
+    uint64_t h = HASHMAP_hash_str(key, strlen(key));
     size_t index = h % map->bucket_count;
 
     DARRAY_NAME *node = map->buckets[index];
@@ -199,7 +255,7 @@ HASHMAP_T *HASHMAP_get(HASHMAP_NAME *map, const char *key)
 
 bool HASHMAP_remove(HASHMAP_NAME *map, const char *key)
 {
-    uint64_t h = HASHMAP_hash_str(key);
+    uint64_t h = HASHMAP_hash_str(key, strlen(key));
     size_t index = h % map->bucket_count;
 
     DARRAY_NAME **prev = &map->buckets[index];
@@ -232,6 +288,12 @@ bool HASHMAP_remove(HASHMAP_NAME *map, const char *key)
 #ifdef HASHMAP_HASH
 #undef HASHMAP_HASH
 #endif // HASHMAP_HASH
+#ifdef HASHMAP_HASH_FNV_1A
+#undef HASHMAP_HASH_FNV_1A
+#endif // HASHMAP_HASH_FNV_1A
+#ifdef HASHMAP_HASH_MURMUR2
+#undef HASHMAP_HASH_MURMUR2
+#endif // HASHMAP_HASH_MURMUR2
 #undef HASHMAP_new
 #undef HASHMAP_push
 #undef HASHMAP_get

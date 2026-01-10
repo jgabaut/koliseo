@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include <stdio.h>
 /* FNV-1a hash */
-static uint64_t my_hash_str(const char *s) {
-    uint64_t h = 1469598103934665603ULL;
-    while (*s) {
-        h ^= (unsigned char)*s++;
+static uint64_t my_hash_str(const char *s, size_t len) {
+    const uint8_t *p = (const uint8_t *)s;
+    uint64_t h = 14695981039346656037ULL;
+    for (size_t i = 0; i < len; i++) {
+        h ^= (uint64_t)p[i];
         h *= 1099511628211ULL;
     }
     printf("%s() %s -> #[%llu]\n", __func__, s, h);
@@ -16,6 +17,7 @@ static uint64_t my_hash_str(const char *s) {
 #define HASHMAP_PREFIX hashmap_int_
 #include "hashmap.h"
 
+#define HASHMAP_HASH_MURMUR2
 #define HASHMAP_T char
 #define HASHMAP_NAME hash_map_char
 #define HASHMAP_PREFIX hashmap_char_
