@@ -153,7 +153,8 @@ static uint64_t HASHMAP_fnv_1a_hash_str(const char *s, size_t len)
 }
 
 /* Murmur2 hash */
-static uint64_t HASHMAP_murmur2_hash_str(const void *key, size_t len) {
+static uint64_t HASHMAP_murmur2_hash_str(const void *key, size_t len)
+{
     const uint64_t m = 0xc6a4a7935bd1e995ULL;
     const int r = 47;
 
@@ -177,15 +178,22 @@ static uint64_t HASHMAP_murmur2_hash_str(const void *key, size_t len) {
 
     uint64_t tail = 0;
     switch (len & 7) {
-        case 7: tail ^= (uint64_t)p[6] << 48;
-        case 6: tail ^= (uint64_t)p[5] << 40;
-        case 5: tail ^= (uint64_t)p[4] << 32;
-        case 4: tail ^= (uint64_t)p[3] << 24;
-        case 3: tail ^= (uint64_t)p[2] << 16;
-        case 2: tail ^= (uint64_t)p[1] << 8;
-        case 1: tail ^= (uint64_t)p[0];
-                h ^= tail;
-                h *= m;
+    case 7:
+        tail ^= (uint64_t)p[6] << 48;
+    case 6:
+        tail ^= (uint64_t)p[5] << 40;
+    case 5:
+        tail ^= (uint64_t)p[4] << 32;
+    case 4:
+        tail ^= (uint64_t)p[3] << 24;
+    case 3:
+        tail ^= (uint64_t)p[2] << 16;
+    case 2:
+        tail ^= (uint64_t)p[1] << 8;
+    case 1:
+        tail ^= (uint64_t)p[0];
+        h ^= tail;
+        h *= m;
     }
 
     h ^= h >> r;

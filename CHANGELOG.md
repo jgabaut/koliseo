@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.5.10] - Unreleased
+## [0.5.10] - 2026-01-10
 
 ### Added
 
 - Add `KLS_Push_Error`, used internally to handle failures on `kls_push`, `kls_temp_push` calls
-- Add `templates/hashmap.h`, `static/hashmap_example.c`
 - Add support for `ASan` (build TUs with `-fsanitize=address`)
+- Add `templates/hashmap.h`, `static/hashmap_example.c`
 
 ### Changed
 
