@@ -131,7 +131,7 @@ HASHMAP_remove(HASHMAP_NAME *map, const char *key);
 /* FNV-1a hash */
 static uint64_t HASHMAP_hash_str(const char *s)
 {
-    uint64_t h = 1469598103934665603ULL;
+    uint64_t h = 14695981039346656037ULL;
     while (*s) {
         h ^= (unsigned char)*s++;
         h *= 1099511628211ULL;
