@@ -70,6 +70,15 @@ int int_koliseo_version(void)
     return KOLISEO_API_VERSION_INT;
 }
 
+#if defined(__SANITIZE_ADDRESS__)
+#include <sanitizer/asan_interface.h>
+#define KLS_ASAN_POISON(addr, size)   __asan_poison_memory_region((addr), (size))
+#define KLS_ASAN_UNPOISON(addr, size) __asan_unpoison_memory_region((addr), (size))
+#else
+#define KLS_ASAN_POISON(addr, size)   ((void)0)
+#define KLS_ASAN_UNPOISON(addr, size) ((void)0)
+#endif // __SANITIZE_ADDRESS__
+
 /**
  * Used internally for handling Out-Of-Memory in push calls when no user handler is provided.
  * @param kls The Koliseo used in the push call
@@ -552,6 +561,8 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
         kls->stats = KLS_STATS_DEFAULT;
         kls->conf.kls_log_fp = stderr;
         kls->hooks_len = ext_len;
+
+        KLS_ASAN_POISON(kls->data + kls->offset, kls->size - kls->offset);
 
         for (size_t i=0; i < kls->hooks_len; i++) {
             kls->hooks[i] = ext_handlers[i];
@@ -1134,6 +1145,8 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
     current->prev_offset = current->offset;
     current->offset += pad + size * count;
 
+    KLS_ASAN_UNPOISON(p, size * count);
+
     char h_size[200];
     kls_formatSize(size * count, h_size, sizeof(h_size));
     //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
@@ -1291,6 +1304,8 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
     *padding = pad;
     current->prev_offset = current->offset;
     current->offset += pad + size * count;
+
+    KLS_ASAN_UNPOISON(p, size * count);
 
     char h_size[200];
     kls_formatSize(size * count, h_size, sizeof(h_size));
@@ -1955,6 +1970,7 @@ void kls_clear(Koliseo *kls)
     //Reset pointer
     kls->prev_offset = kls->offset;
     kls->offset = sizeof(*kls);
+    KLS_ASAN_POISON(kls->data + kls->offset, kls->size - kls->offset);
 #ifdef KLS_DEBUG_CORE
     kls_log(kls, "KLS", "API Level { %i } -> Cleared offsets for KLS.",
             int_koliseo_version());
@@ -2116,6 +2132,10 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
 #endif
     tmp_kls->kls->has_temp = 0;
     tmp_kls->kls->t_kls = NULL;
+#if defined(__SANITIZE_ADDRESS__)
+    ptrdiff_t old_offset = tmp_kls->kls->offset;
+    ptrdiff_t new_offset = tmp_kls->offset;
+#endif // __SANITIZE_ADDRESS__
     tmp_kls->kls->prev_offset = tmp_kls->prev_offset;
     tmp_kls->kls->offset = tmp_kls->offset;
 
@@ -2126,6 +2146,7 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         tmp_kls->kls->next = NULL;
     }
 
+    KLS_ASAN_POISON(tmp_kls->kls->data + new_offset, old_offset - new_offset);
     tmp_kls = NULL; // statement with no effect TODO: Clear tmp_kls from caller
     if (kls_ref->conf.kls_collect_stats == 1) {
         kls_ref->stats.tot_temp_pushes = 0;

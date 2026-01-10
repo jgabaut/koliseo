@@ -129,7 +129,8 @@ HASHMAP_remove(HASHMAP_NAME *map, const char *key);
 
 #ifndef HASHMAP_HASH
 /* FNV-1a hash */
-static uint64_t HASHMAP_hash_str(const char *s) {
+static uint64_t HASHMAP_hash_str(const char *s)
+{
     uint64_t h = 1469598103934665603ULL;
     while (*s) {
         h ^= (unsigned char)*s++;
@@ -139,7 +140,8 @@ static uint64_t HASHMAP_hash_str(const char *s) {
 }
 #endif // HASHMAP_HASH
 
-HASHMAP_NAME *HASHMAP_new(Koliseo* kls, size_t bucket_count) {
+HASHMAP_NAME *HASHMAP_new(Koliseo* kls, size_t bucket_count)
+{
     HASHMAP_NAME *map = KLS_PUSH(kls, HASHMAP_NAME);
     if (!map) return NULL;
     map->kls = kls;
@@ -156,7 +158,8 @@ HASHMAP_NAME *HASHMAP_new(Koliseo* kls, size_t bucket_count) {
     return map;
 }
 
-bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value) {
+bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value)
+{
     uint64_t h = HASHMAP_hash_str(key);
     size_t index = h % map->bucket_count;
 
@@ -180,7 +183,8 @@ bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value) {
     return true;
 }
 
-HASHMAP_T *HASHMAP_get(HASHMAP_NAME *map, const char *key) {
+HASHMAP_T *HASHMAP_get(HASHMAP_NAME *map, const char *key)
+{
     uint64_t h = HASHMAP_hash_str(key);
     size_t index = h % map->bucket_count;
 
@@ -193,7 +197,8 @@ HASHMAP_T *HASHMAP_get(HASHMAP_NAME *map, const char *key) {
     return NULL;
 }
 
-bool HASHMAP_remove(HASHMAP_NAME *map, const char *key) {
+bool HASHMAP_remove(HASHMAP_NAME *map, const char *key)
+{
     uint64_t h = HASHMAP_hash_str(key);
     size_t index = h % map->bucket_count;
 
