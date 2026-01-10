@@ -480,6 +480,7 @@ KLS_Push_Error kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, p
 #endif // KOLISEO_HAS_LOCATE
 
 /**
+ * DEPRECATED: Support for this macro will be dropped in the next release.
  * Macro to return NULL on errors from kls__check_available_failable.
  * @see kls__check_available_failable
  */

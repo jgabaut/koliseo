@@ -11,6 +11,7 @@
 ### Changed
 
 - Refactor `kls_push`, `kls_temp_push` functions to use `kls__advance`, `kls__temp_advance`
+- Deprecate `kls__check_available()` macro
 
 ## [0.5.9] - 2026-01-02
 
