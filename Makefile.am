@@ -246,7 +246,9 @@ kstr_test.k:
 	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k growable.k growable_temp.k oom.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
+tests: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k growable.k growable_temp.k oom.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
+
+anviltest: tests
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"
