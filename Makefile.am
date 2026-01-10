@@ -131,6 +131,13 @@ clean:
 	-rm static/*.o
 	-rm static/*.so
 	-rm static/*.dll
+	-rm static/basic_example
+	-rm static/region_example
+	-rm static/list_example
+	-rm static/dllist_example
+	-rm static/darray_example
+	-rm static/pit_example
+	-rm static/hashmap_example
 	@echo -e "\033[1;33mDone.\e[0m"
 
 cleanob:
@@ -252,6 +259,43 @@ anviltest: tests
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"
+
+basic_example:
+	@echo -en "Building region_example"
+	$(CCOMP) -Isrc/ src/koliseo.c static/basic_example.c -o static/basic_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+region_example:
+	@echo -en "Building region_example"
+	$(CCOMP) -Isrc/ src/kls_region.c static/region_example.c -o static/region_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+list_example:
+	@echo -en "Building list_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/list_example.c -o static/list_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+dllist_example:
+	@echo -en "Building dllist_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/dllist_example.c -o static/dllist_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+darray_example:
+	@echo -en "Building darray_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/darray_example.c -o static/darray_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+pit_example:
+	@echo -en "Building pit_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/pit_example.c -o static/pit_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+hashmap_example:
+	@echo -en "Building hashmap_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/hashmap_example.c -o static/hashmap_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+examples: basic_example region_example list_example dllist_example darray_example pit_example hashmap_example
 
 pack: rebuild
 	@echo -e "Packing koliseo:  make pack for $(VERSION)"
