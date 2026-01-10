@@ -35,6 +35,8 @@ jobs:
       run: ./configure
     - name: Run make
       run: make
+    - name: Run make tests
+      run: make tests
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
