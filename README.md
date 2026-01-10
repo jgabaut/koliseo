@@ -6,17 +6,18 @@
 
 + [What is this thing?](#witt)
   + [Basic example](#basic_example)
+  + [Prerequisites](#prerequisites)
+  + [Configuration](#config)
+  + [Building](#building)
   + [Extra features](#extra_features)
     + [Region](#extra_region)
     + [Debug](#extra_debug)
     + [Gulp](#extra_gulp)
-    + [List template](#list_template)
+    + [Templates](#templates)
     + [Experimental](#extra_exper)
     + [How to use extras](#extra_howto)
+  + [Extensions](#extensions)
   + [Documentation](#docs)
-  + [Prerequisites](#prerequisites)
-  + [Configuration](#config)
-  + [Building](#building)
   + [Supported platforms](#support)
 + [Credits](#credits)
 + [Todo](#todo)
@@ -88,6 +89,48 @@ int main(void)
 
   For more documentation on the available functions, see [this section.](#docs)
 
+## Prerequisites <a name = "prerequisites"></a>
+
+  To build the `demo` binary, you need:
+  * `automake` and `autoconf` to generate the needed `Makefile`
+  * `make` to build the binary
+  * `gcc` or `clang`, for building `demo`
+
+
+  To bootstrap and use the `./anvil` tool to build all amboso-supported tags for `demo`, you also need either:
+
+  * `bash >4.x, gawk` if you want to use `amboso`
+  * `rustc` if you want to use `invil`
+
+
+## Configuration <a name = "config"></a>
+
+  To prepare the files needed by `autotools`, run:
+
+  ```sh
+  aclocal
+  autoconf
+  automake --add-missing
+  ./configure # Optionally, with --enable-debug or --host
+  make
+  ```
+
+  You will get a `./configure` script, which you can use to enable debug mode or other features.
+
+  - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
+  - Run `./configure --enable-debug` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
+    - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
+  - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag. :construction: (After 0.5, this is no longer relevant) :construction:
+  - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag. :construction: (After 0.5, this is no longer relevant) :construction:
+  - Run `./configure --enable-exper` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_EXPER` flag.
+
+
+## Building <a name = "building"></a>
+
+  To build both the `libkoliseo.so` lib and `demo` binary, run:
+  * `./configure`, which should generate the `Makefile`. See [Configuration](#config) section.
+  * `make`, to build all target
+
 ## Extra features <a name = "extra_features"></a>
 
   By default, extended functionalities are not included in the build, with each feature needing a preprocessor macro to be defined before including the library header.
@@ -122,7 +165,12 @@ int main(void)
   Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
   - Also includes a minimal string-view API, in case you want to work on the file contents differently.
 
-### List templates <a name = "list_template"></a>
+### Templates <a name = "templates"></a>
+
+  The `templates/` directory hosts some template headers for different data structures.
+  You can find examples on how to use them in the `static/` directory.
+
+  For example:
 
   Any time `LIST_T` is defined before including `templates/list.h` or `templates/dllist.h`, respectively a basic linked-list or a doubly-linked list implementation supporting `Koliseo` allocation will be declared for the passed type.
   - It can be done also after building a static object for the library.
@@ -182,48 +230,6 @@ typedef struct KLS_Hooks {
 
   If you have `doxygen` you can generate the HTML yourself, or even the pdf if you have `doxygen-latex` or equivalents.
 
-## Prerequisites <a name = "prerequisites"></a>
-
-  To build the `demo` binary, you need:
-  * `automake` and `autoconf` to generate the needed `Makefile`
-  * `make` to build the binary
-  * `gcc` or `clang`, for building `demo`
-
-
-  To bootstrap and use the `./anvil` tool to build all amboso-supported tags for `demo`, you also need either:
-
-  * `bash >4.x, gawk` if you want to use `amboso`
-  * `rustc` if you want to use `invil`
-
-
-## Configuration <a name = "config"></a>
-
-  To prepare the files needed by `autotools`, run:
-
-  ```sh
-  aclocal
-  autoconf
-  automake --add-missing
-  ./configure # Optionally, with --enable-debug or --host
-  make
-  ```
-
-  You will get a `./configure` script, which you can use to enable debug mode or other features.
-
-  - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
-  - Run `./configure --enable-debug` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
-    - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
-  - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag. :construction: (After 0.5, this is no longer relevant) :construction:
-  - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag. :construction: (After 0.5, this is no longer relevant) :construction:
-  - Run `./configure --enable-exper` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_EXPER` flag.
-
-
-## Building <a name = "building"></a>
-
-  To build both the `libkoliseo.so` lib and `demo` binary, run:
-  * `./configure`, which should generate the `Makefile`. See [Configuration](#config) section.
-  * `make`, to build all target
-
 ## Supported platforms <a name = "support"></a>
 
   ATM the code should build for:
@@ -244,9 +250,5 @@ typedef struct KLS_Hooks {
 
 ## Todo <a name = "todo"></a>
 
-  - Break up internal extensions to the core functionality
-    - Maybe move the guarded code into separate headers?
   - Model `KLS_Temp_Conf` to still be included without `Region` feature
-  - At the moment, the arena can't grown its own underlying buffer.
-    - Add backwards-compatible logic to enable growable arenas.
   - Clean up the `Windows` part of the includes, to have minimal definitions from `windows.h`.

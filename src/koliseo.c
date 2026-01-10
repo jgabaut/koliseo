@@ -1,7 +1,7 @@
 // jgabaut @ github.com/jgabaut
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-    Copyright (C) 2023-2025  jgabaut
+    Copyright (C) 2023-2026  jgabaut
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,6 +69,15 @@ int int_koliseo_version(void)
 {
     return KOLISEO_API_VERSION_INT;
 }
+
+#if defined(__SANITIZE_ADDRESS__)
+#include <sanitizer/asan_interface.h>
+#define KLS_ASAN_POISON(addr, size)   __asan_poison_memory_region((addr), (size))
+#define KLS_ASAN_UNPOISON(addr, size) __asan_unpoison_memory_region((addr), (size))
+#else
+#define KLS_ASAN_POISON(addr, size)   ((void)0)
+#define KLS_ASAN_UNPOISON(addr, size) ((void)0)
+#endif // __SANITIZE_ADDRESS__
 
 /**
  * Used internally for handling Out-Of-Memory in push calls when no user handler is provided.
@@ -281,6 +290,190 @@ ptrdiff_t kls_get_pos(const Koliseo *kls)
     return kls->offset;
 }
 
+#ifndef KOLISEO_HAS_LOCATE
+void* kls__handle_push_result(Koliseo* kls, KLS_Push_Result r, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t padding, const char* caller_name)
+#else
+void* kls__handle_push_result_dbg(Koliseo* kls, KLS_Push_Result r, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t padding, const char* caller_name, Koliseo_Loc loc)
+#endif
+{
+    if (!kls) return NULL;
+    Koliseo* current = kls;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+    if (r.error) {
+        const ptrdiff_t available = current->size - current->offset;
+        switch (r.error) {
+        case KLS_PUSH_OK: {
+            return r.p;
+        }
+        break;
+        case KLS_PUSH_SIZE_LT1: {
+#ifndef KOLISEO_HAS_LOCATE
+            fprintf(stderr,
+                    "[KLS] %s(): size [%td] was < 1.\n",
+                    caller_name,
+                    size);
+#else
+            fprintf(stderr,
+                    "[KLS] " KLS_Loc_Fmt "%s(): size [%td] was < 1.\n",
+                    KLS_Loc_Arg(loc),
+                    caller_name,
+                    size);
+#endif // KOLISEO_HAS_LOCATE
+        }
+        break;
+        case KLS_PUSH_ALIGN_LT1: {
+#ifndef KOLISEO_HAS_LOCATE
+            fprintf(stderr,
+                    "[KLS] %s(): align [%td] was < 1.\n",
+                    caller_name,
+                    align);
+#else
+            fprintf(stderr,
+                    "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was < 1.\n",
+                    KLS_Loc_Arg(loc),
+                    caller_name,
+                    align);
+#endif // KOLISEO_HAS_LOCATE
+        }
+        break;
+        case KLS_PUSH_ALIGN_NOT_POW2: {
+#ifndef KOLISEO_HAS_LOCATE
+            fprintf(stderr,
+                    "[KLS] %s(): align [%td] was not a power of 2.\n",
+                    caller_name,
+                    align);
+#else
+            fprintf(stderr,
+                    "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was not a power of 2.\n",
+                    KLS_Loc_Arg(loc),
+                    caller_name,
+                    align);
+#endif // KOLISEO_HAS_LOCATE
+        }
+        break;
+        case KLS_PUSH_NEGATIVE_COUNT: {
+#ifndef KOLISEO_HAS_LOCATE
+            fprintf(stderr,
+                    "[KLS] %s(): count [%td] was < 0.\n",
+                    caller_name,
+                    count);
+#else
+            fprintf(stderr,
+                    "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was < 0.\n",
+                    KLS_Loc_Arg(loc),
+                    caller_name,
+                    count);
+#endif // KOLISEO_HAS_LOCATE
+        }
+        break;
+        case KLS_PUSH_ZEROCOUNT: {
+            if (current->conf.err_handlers.ZEROCOUNT_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
+                current->conf.err_handlers.ZEROCOUNT_handler(current, available, padding, size);
+#else
+                current->conf.err_handlers.ZEROCOUNT_handler(current, available, padding, size, loc);
+#endif // KOLISEO_HAS_LOCATE
+            } else {
+#ifndef KOLISEO_HAS_LOCATE
+                fprintf(stderr,
+                        "[KLS] %s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                        caller_name,
+                        size, padding, available);
+#else
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "%s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
+                        KLS_Loc_Arg(loc),
+                        caller_name,
+                        size, padding, available);
+#endif // KOLISEO_HAS_LOCATE
+                kls_free(kls);
+                exit(EXIT_FAILURE);
+            }
+        }
+        break;
+        case KLS_PUSH_WITH_TEMP_ACTIVE: {
+#ifndef KOLISEO_HAS_LOCATE
+            fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", caller_name);
+#else
+            fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), caller_name);
+            kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), caller_name);
+            exit(EXIT_FAILURE);
+#endif // KOLISEO_HAS_LOCATE
+        }
+        break;
+        case KLS_PUSH_PTRDIFF_MAX: {
+            if (current->conf.err_handlers.PTRDIFF_MAX_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
+                current->conf.err_handlers.PTRDIFF_MAX_handler(current, size, count);
+#else
+                current->conf.err_handlers.PTRDIFF_MAX_handler(current, size, count, loc);
+#endif // KOLISEO_HAS_LOCATE
+            } else { // Let's keep this here for now? It's the original part before adding KLS_PTRDIFF_MAX_default_handler__()
+#ifndef _WIN32
+#ifndef KOLISEO_HAS_LOCATE
+                fprintf(stderr,
+                        "[KLS] %s(): count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        caller_name,
+                        count, PTRDIFF_MAX / size);
+#else
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
+                        KLS_Loc_Arg(loc),
+                        caller_name,
+                        count, PTRDIFF_MAX / size);
+#endif // KOLISEO_HAS_LOCATE
+#else
+#ifndef KOLISEO_HAS_LOCATE
+                fprintf(stderr,
+                        "[KLS] %s(): count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        caller_name,
+                        count, PTRDIFF_MAX / size);
+#else
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
+                        KLS_Loc_Arg(loc),
+                        caller_name,
+                        count, PTRDIFF_MAX / size);
+#endif // KOLISEO_HAS_LOCATE
+#endif // _WIN32
+            }
+        }
+        break;
+        case KLS_PUSH_OOM: {
+            if (current->conf.err_handlers.OOM_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
+                current->conf.err_handlers.OOM_handler(current, available, padding, size, count);
+#else
+                current->conf.err_handlers.OOM_handler(current, available, padding, size, count, loc);
+#endif // KOLISEO_HAS_LOCATE
+            } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
+#ifndef KOLISEO_HAS_LOCATE
+                fprintf(stderr,
+                        "[KLS] %s(): Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        caller_name,
+                        size * count, available - padding);
+#else
+                fprintf(stderr,
+                        "[KLS] " KLS_Loc_Fmt "%s(): Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
+                        KLS_Loc_Arg(loc),
+                        caller_name,
+                        size * count, available - padding);
+#endif // KOLISEO_HAS_LOCATE
+            }
+        }
+        break;
+        default: {
+            fprintf(stderr, "[KLS] %s(): unexpected error code [%i]\n", __func__, r.error);
+            return NULL;
+        }
+        break;
+        }
+    }
+    return r.p;
+}
+
 /**
  * Logs a message to the log_fp FILE field of the passed Koliseo pointer, if its conf.kls_verbose_lvl is >0.
  * @param kls The Koliseo pointer hosting the log_fp FILE pointer.
@@ -368,6 +561,8 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
         kls->stats = KLS_STATS_DEFAULT;
         kls->conf.kls_log_fp = stderr;
         kls->hooks_len = ext_len;
+
+        KLS_ASAN_POISON(kls->data + kls->offset, kls->size - kls->offset);
 
         for (size_t i=0; i < kls->hooks_len; i++) {
             kls->hooks[i] = ext_handlers[i];
@@ -891,6 +1086,105 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
 static bool kls__try_grow(Koliseo* kls, ptrdiff_t needed);
 
 /**
+ * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the Koliseo data field, or goes to exit() if the operation fails.
+ * It sets the passed padding pointer to the amount of padding used in the advancement.
+ * Notably, it does NOT zero the memory region.
+ * @param kls The Koliseo at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @param padding The pointer used to store amount of padding used in the advancement.
+ * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ */
+#ifndef KOLISEO_HAS_LOCATE
+KLS_Push_Result kls__advance(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name)
+#else
+KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+#ifdef KLS_DEBUG_CORE
+#ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+#else
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+#endif
+#endif
+
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", caller_name);
+        exit(EXIT_FAILURE);
+    }
+    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+        return (KLS_Push_Result) {
+            .p = NULL,
+            .error = KLS_PUSH_WITH_TEMP_ACTIVE,
+        };
+    }
+
+#ifndef KOLISEO_HAS_LOCATE
+    KLS_Push_Error res = kls__check_available_failable(kls, size, align, count, __func__);
+#else
+    KLS_Push_Error res = kls__check_available_failable_dbg(kls, size, align, count, __func__, loc);
+#endif
+    if (res != 0) {
+        return (KLS_Push_Result) {
+            .p = NULL,
+            .error = res,
+        };
+    }
+    Koliseo* current = kls;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+    const ptrdiff_t pad = -current->offset & (align - 1);
+    *padding = pad;
+    char *p = current->data + current->offset + pad;
+    current->prev_offset = current->offset;
+    current->offset += pad + size * count;
+
+    KLS_ASAN_UNPOISON(p, size * count);
+
+    char h_size[200];
+    kls_formatSize(size * count, h_size, sizeof(h_size));
+    //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+    //kls_log("KLS",msg);
+#ifdef KLS_DEBUG_CORE
+    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
+    kls_log(current, "KLS", "API Level { %i } -> Pushed zeroes, size (%s) for KLS.",
+            int_koliseo_version(), h_size);
+    if (current->conf.kls_verbose_lvl > 0) {
+        print_kls_2file(current->conf.kls_log_fp, current);
+    }
+    if (current->conf.kls_collect_stats == 1) {
+#ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
+        double elapsed_time =
+            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
+                start_time.tv_nsec) / 1e9;
+#else
+        QueryPerformanceCounter(&end_time);	// %.7f
+        double elapsed_time =
+            (double)(end_time.QuadPart -
+                     start_time.QuadPart) / frequency.QuadPart;
+#endif
+        if (elapsed_time > current->stats.worst_pushcall_time) {
+            current->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
+#endif
+    if (current->conf.kls_collect_stats == 1) {
+        current->stats.tot_pushes += 1;
+    }
+    return (KLS_Push_Result) {
+        .p = p,
+        .error = KLS_PUSH_OK,
+    };
+}
+
+/**
  * Takes a Koliseo, a ptrdiff_t size, align and count, and a caller name.
  * Checks if the passed Koliseo can fit the requested allocation.
  * In case of errors, tries calling the appropriate handler.
@@ -903,72 +1197,24 @@ static bool kls__try_grow(Koliseo* kls, ptrdiff_t needed);
  * @see Koliseo
  */
 #ifndef KOLISEO_HAS_LOCATE
-int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
+KLS_Push_Error kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
 #else
-int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
+KLS_Push_Error kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
     assert(caller_name != NULL);
     if (count < 0) {
-#ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr,
-                "[KLS] %s(): count [%td] was < 0.\n",
-                caller_name,
-                count);
-#else
-        fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was < 0.\n",
-                KLS_Loc_Arg(loc),
-                caller_name,
-                count);
-#endif // KOLISEO_HAS_LOCATE
-        return -1;
+        return KLS_PUSH_NEGATIVE_COUNT;
     }
     if (size < 1) {
-#ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr,
-                "[KLS] %s(): size [%td] was < 1.\n",
-                caller_name,
-                size);
-#else
-        fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "%s(): size [%td] was < 1.\n",
-                KLS_Loc_Arg(loc),
-                caller_name,
-                size);
-#endif // KOLISEO_HAS_LOCATE
-        return -1;
+        return KLS_PUSH_SIZE_LT1;
     }
     if (align < 1) {
-#ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr,
-                "[KLS] %s(): align [%td] was < 1.\n",
-                caller_name,
-                align);
-#else
-        fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was < 1.\n",
-                KLS_Loc_Arg(loc),
-                caller_name,
-                align);
-#endif // KOLISEO_HAS_LOCATE
-        return -1;
+        return KLS_PUSH_ALIGN_LT1;
     }
     if (! ((align & (align - 1)) == 0)) {
-#ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr,
-                "[KLS] %s(): align [%td] was not a power of 2.\n",
-                caller_name,
-                align);
-#else
-        fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "%s(): align [%td] was not a power of 2.\n",
-                KLS_Loc_Arg(loc),
-                caller_name,
-                align);
-#endif // KOLISEO_HAS_LOCATE
-        return -1;
+        return KLS_PUSH_ALIGN_NOT_POW2;
     }
     Koliseo* current = kls;
     while (current->next != NULL) {
@@ -976,34 +1222,9 @@ int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t al
     }
     const ptrdiff_t available = current->size - current->offset;
     const ptrdiff_t padding = -current->offset & (align - 1);
-    bool ZEROCOUNT_happened = false;
-    bool ZEROCOUNT_handled = false;
     if (count == 0) {
         if (current->conf.kls_allow_zerocount_push != 1) {
-            ZEROCOUNT_happened = true;
-            if (current->conf.err_handlers.ZEROCOUNT_handler != NULL) {
-#ifndef KOLISEO_HAS_LOCATE
-                current->conf.err_handlers.ZEROCOUNT_handler(current, available, padding, size);
-#else
-                current->conf.err_handlers.ZEROCOUNT_handler(current, available, padding, size, loc);
-#endif // KOLISEO_HAS_LOCATE
-                ZEROCOUNT_handled = true;
-            } else {
-#ifndef KOLISEO_HAS_LOCATE
-                fprintf(stderr,
-                        "[KLS] %s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                        caller_name,
-                        size, padding, available);
-#else
-                fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "%s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                        KLS_Loc_Arg(loc),
-                        caller_name,
-                        size, padding, available);
-#endif // KOLISEO_HAS_LOCATE
-                kls_free(kls);
-                exit(EXIT_FAILURE);
-            }
+            return KLS_PUSH_ZEROCOUNT;
         } else {
 #ifdef KLS_DEBUG_CORE
             kls_log(current, "DEBUG", "Accepting zero-count push: conf.kls_allow_zerocount_push was 1");
@@ -1011,136 +1232,117 @@ int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t al
         }
     }
 
-    if (ZEROCOUNT_happened && ZEROCOUNT_handled) {
-#ifdef KLS_DEBUG_CORE
-        kls_log(current, "DEBUG", "Requested a zero-count push while kls_allow_zerocount_push is not 1, but the error handler returned instead of exiting.");
-#endif // KLS_DEBUG_CORE
-#ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr,
-                "[KLS] %s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                caller_name,
-                size, padding, available);
-#else
-        fprintf(stderr,
-                "[KLS] " KLS_Loc_Fmt "%s(): Doing a zero-count push. size [%td] padding [%td] available [%td].\n",
-                KLS_Loc_Arg(loc),
-                caller_name,
-                size, padding, available);
-#endif // KOLISEO_HAS_LOCATE
-        kls_free(kls);
-        exit(EXIT_FAILURE);
-    }
-
-    bool OOM_happened = false;
-    bool OOM_handled = false;
-    bool PTRDIFF_MAX_happened = false;
-    bool PTRDIFF_MAX_handled = false;
     if (count > PTRDIFF_MAX / size || available - padding < size * count) {
         if (count > PTRDIFF_MAX / size) {
-            PTRDIFF_MAX_happened = true;
-            if (current->conf.err_handlers.PTRDIFF_MAX_handler != NULL) {
-#ifndef KOLISEO_HAS_LOCATE
-                current->conf.err_handlers.PTRDIFF_MAX_handler(current, size, count);
-#else
-                current->conf.err_handlers.PTRDIFF_MAX_handler(current, size, count, loc);
-#endif // KOLISEO_HAS_LOCATE
-                PTRDIFF_MAX_handled = true;
-            } else { // Let's keep this here for now? It's the original part before adding KLS_PTRDIFF_MAX_default_handler__()
-#ifndef _WIN32
-#ifndef KOLISEO_HAS_LOCATE
-                fprintf(stderr,
-                        "[KLS] %s(): count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                        caller_name,
-                        count, PTRDIFF_MAX / size);
-#else
-                fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was bigger than PTRDIFF_MAX/size [%li].\n",
-                        KLS_Loc_Arg(loc),
-                        caller_name,
-                        count, PTRDIFF_MAX / size);
-#endif // KOLISEO_HAS_LOCATE
-#else
-#ifndef KOLISEO_HAS_LOCATE
-                fprintf(stderr,
-                        "[KLS] %s(): count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                        caller_name,
-                        count, PTRDIFF_MAX / size);
-#else
-                fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "%s(): count [%td] was bigger than PTRDIFF_MAX/size [%lli].\n",
-                        KLS_Loc_Arg(loc),
-                        caller_name,
-                        count, PTRDIFF_MAX / size);
-#endif // KOLISEO_HAS_LOCATE
-#endif // _WIN32
-            }
+            return KLS_PUSH_PTRDIFF_MAX;
         } else {
             if (current->conf.kls_growable == 1 && kls__try_grow(current, size + count + padding)) {
-                return 0;
+                return KLS_PUSH_OK;
             }
-            OOM_happened = true;
-            if (current->conf.err_handlers.OOM_handler != NULL) {
-#ifndef KOLISEO_HAS_LOCATE
-                current->conf.err_handlers.OOM_handler(current, available, padding, size, count);
-#else
-                current->conf.err_handlers.OOM_handler(current, available, padding, size, count, loc);
-#endif // KOLISEO_HAS_LOCATE
-                OOM_handled = true;
-            } else { // Let's keep this here for now? It's the original part before adding KLS_OOM_default_handler__()
-#ifndef KOLISEO_HAS_LOCATE
-                fprintf(stderr,
-                        "[KLS] %s(): Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                        caller_name,
-                        size * count, available - padding);
-#else
-                fprintf(stderr,
-                        "[KLS] " KLS_Loc_Fmt "%s(): Out of memory. size*count [%td] was bigger than available-padding [%td].\n",
-                        KLS_Loc_Arg(loc),
-                        caller_name,
-                        size * count, available - padding);
-#endif // KOLISEO_HAS_LOCATE
-            }
+            return KLS_PUSH_OOM;
         }
-        if (PTRDIFF_MAX_happened) {
-            if (current->conf.err_handlers.PTRDIFF_MAX_handler && PTRDIFF_MAX_handled) {
+    }
+    return KLS_PUSH_OK;
+}
+
+/**
+ * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries pushing the specified amount of memory to the referred Koliseo data field, or goes to exit() if the operation fails.
+ * It sets the passed padding pointer to the amount of padding used in the advancement.
+ * Notably, it does NOT zero the memory region.
+ * @param t_kls The Koliseo_Temp at hand.
+ * @param size The size for data to push.
+ * @param align The alignment for data to push.
+ * @param count The multiplicative quantity to scale data size to push for.
+ * @param padding The pointer used to store amount of padding used in the advancement.
+ * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ */
 #ifndef KOLISEO_HAS_LOCATE
-                fprintf(stderr, "[KLS] %s(): PTRDIFF_MAX fault happened and was handled.\n", caller_name);
-#ifdef KLS_DEBUG_CORE
-                kls_log(current, "DEBUG", "%s(): PTRDIFF_MAX fault happened and was handled.", caller_name);
-#endif // KLS_DEBUG_CORE
+KLS_Push_Result kls__temp_advance(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name)
 #else
-                fprintf(stderr, "[KLS] " KLS_Loc_Fmt "%s(): PTRDIFF_MAX fault happened and was handled.\n", KLS_Loc_Arg(loc), caller_name);
-#ifdef KLS_DEBUG_CORE
-                kls_log(current, "DEBUG", KLS_Loc_Fmt "%s(): PTRDIFF_MAX fault happened and was handled.", KLS_Loc_Arg(loc), caller_name);
-#endif // KLS_DEBUG_CORE
+KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
-                return -1;
-            }
-        } else if (OOM_happened) {
-            if (current->conf.err_handlers.OOM_handler && OOM_handled) {
-#ifndef KOLISEO_HAS_LOCATE
-                fprintf(stderr, "[KLS] %s(): OOM fault happened and was handled.\n", caller_name);
+{
 #ifdef KLS_DEBUG_CORE
-                kls_log(current, "DEBUG", "%s(): OOM fault happened and was handled.", caller_name);
-#endif // KLS_DEBUG_CORE
+#ifndef _WIN32
+    struct timespec start_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
 #else
-                fprintf(stderr, "[KLS] " KLS_Loc_Fmt "%s(): OOM fault happened and was handled.\n", KLS_Loc_Arg(loc), caller_name);
-#ifdef KLS_DEBUG_CORE
-                kls_log(current, "DEBUG", KLS_Loc_Fmt "%s(): OOM fault happened and was handled.", KLS_Loc_Arg(loc), caller_name);
-#endif // KLS_DEBUG_CORE
-#endif // KOLISEO_HAS_LOCATE
-                return -1;
-            }
-        }
-#ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr, "[KLS] Failed %s() call.\n", caller_name);
-#else
-        fprintf(stderr, "[KLS] " KLS_Loc_Fmt "Failed %s() call.\n", KLS_Loc_Arg(loc), caller_name);
-#endif // KOLISEO_HAS_LOCATE
-        kls_free(kls);
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start_time);
+#endif
+#endif
+
+    if (kls_t == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
+                __func__);
         exit(EXIT_FAILURE);
     }
-    return 0;
+    Koliseo *kls = kls_t->kls;
+    if (kls == NULL) {
+        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
+                __func__);
+        exit(EXIT_FAILURE);
+    }
+#ifndef KOLISEO_HAS_LOCATE
+    KLS_Push_Error res = kls__check_available_failable(kls, size, align, count, __func__);
+#else
+    KLS_Push_Error res = kls__check_available_failable_dbg(kls, size, align, count, __func__, loc);
+#endif
+    if (res != 0) {
+        return (KLS_Push_Result) {
+            .p = NULL,
+            .error = res,
+        };
+    }
+    Koliseo* current = kls;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+    ptrdiff_t pad = -current->offset & (align - 1);
+    char *p = current->data + current->offset + pad;
+    *padding = pad;
+    current->prev_offset = current->offset;
+    current->offset += pad + size * count;
+
+    KLS_ASAN_UNPOISON(p, size * count);
+
+    char h_size[200];
+    kls_formatSize(size * count, h_size, sizeof(h_size));
+    //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
+    //kls_log("KLS",msg);
+#ifdef KLS_DEBUG_CORE
+    if (current->conf.kls_collect_stats == 1) {
+#ifndef _WIN32
+        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
+        double elapsed_time =
+            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
+                start_time.tv_nsec) / 1e9;
+#else
+        QueryPerformanceCounter(&end_time);	// %.7f
+        double elapsed_time =
+            (double)(end_time.QuadPart -
+                     start_time.QuadPart) / frequency.QuadPart;
+#endif
+        if (elapsed_time > current->stats.worst_pushcall_time) {
+            current->stats.worst_pushcall_time = elapsed_time;
+        }
+    }
+    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
+    kls_log(current, "KLS",
+            "API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",
+            int_koliseo_version(), h_size);
+    if (current->conf.kls_verbose_lvl > 0) {
+        print_kls_2file(current->conf.kls_log_fp, current);
+    }
+#endif
+    if (current->conf.kls_collect_stats == 1) {
+        current->stats.tot_temp_pushes += 1;
+    }
+    return (KLS_Push_Result) {
+        .p = p,
+        .error = KLS_PUSH_OK,
+    };
 }
 
 bool kls__try_grow(Koliseo* kls, ptrdiff_t needed)
@@ -1161,78 +1363,18 @@ bool kls__try_grow(Koliseo* kls, ptrdiff_t needed)
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ * @see kls__advance
  */
 void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 {
-
-#ifdef KLS_DEBUG_CORE
-#ifndef _WIN32
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-#else
-    LARGE_INTEGER start_time, end_time, frequency;
-    QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&start_time);
-#endif
-#endif
-
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
-    }
-    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
-#ifdef KLS_DEBUG_CORE
-        kls_log(kls, "ERROR", "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", __func__);
-        exit(EXIT_FAILURE);
-#endif // KLS_DEBUG_CORE
-        return NULL;
-    }
+    ptrdiff_t padding = 0;
 #ifndef KOLISEO_HAS_LOCATE
-    kls__check_available(kls, size, align, count);
+    KLS_Push_Result res = kls__advance(kls, size, align, count, &padding, __func__);
+    return kls__handle_push_result(kls, res, size, align, count, padding, __func__);
 #else
-    kls__check_available_dbg(kls, size, align, count, KLS_HERE);
+    KLS_Push_Result res = kls__advance_dbg(kls, size, align, count, &padding, __func__, KLS_HERE);
+    return kls__handle_push_result_dbg(kls, res, size, align, count, padding, __func__, KLS_HERE);
 #endif // KOLISEO_HAS_LOCATE
-    Koliseo* current = kls;
-    while (current->next != NULL) {
-        current = current->next;
-    }
-    ptrdiff_t padding = -current->offset & (align - 1);
-    char *p = current->data + current->offset + padding;
-    current->prev_offset = current->offset;
-    current->offset += padding + size * count;
-    char h_size[200];
-    kls_formatSize(size * count, h_size, sizeof(h_size));
-    //sprintf(msg,"Pushed size (%li) for KLS.",size);
-    //kls_log("KLS",msg);
-#ifdef KLS_DEBUG_CORE
-    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
-    kls_log(current, "KLS", "API Level { %i } -> Pushed size (%s) for KLS.",
-            int_koliseo_version(), h_size);
-    if (current->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(current->conf.kls_log_fp, current);
-    }
-    if (current->conf.kls_collect_stats == 1) {
-#ifndef _WIN32
-        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
-        double elapsed_time =
-            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
-                start_time.tv_nsec) / 1e9;
-#else
-        QueryPerformanceCounter(&end_time);	// %.7f
-        double elapsed_time =
-            (double)(end_time.QuadPart -
-                     start_time.QuadPart) / frequency.QuadPart;
-#endif
-        if (elapsed_time > current->stats.worst_pushcall_time) {
-            current->stats.worst_pushcall_time = elapsed_time;
-        }
-    }
-#endif
-    if (current->conf.kls_collect_stats == 1) {
-        current->stats.tot_pushes += 1;
-    }
-    return p;
 }
 
 /**
@@ -1243,6 +1385,7 @@ void *kls_push(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ * @see kls__advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1252,78 +1395,17 @@ void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
                         ptrdiff_t count, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
-
-#ifdef KLS_DEBUG_CORE
-#ifndef _WIN32
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-#else
-    LARGE_INTEGER start_time, end_time, frequency;
-    QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&start_time);
-#endif
-#endif
-
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
-    }
-    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+    ptrdiff_t padding = 0;
 #ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+    KLS_Push_Result res = kls__advance(kls, size, align, count, &padding, __func__);
+    void* p = kls__handle_push_result(kls, res, size, align, count, padding, __func__);
 #else
-        fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), __func__);
-        kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), __func__);
-        exit(EXIT_FAILURE);
+    KLS_Push_Result res = kls__advance_dbg(kls, size, align, count, &padding, __func__, loc);
+    void* p = kls__handle_push_result_dbg(kls, res, size, align, count, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
-        return NULL;
-    }
-#ifndef KOLISEO_HAS_LOCATE
-    kls__check_available(kls, size, align, count);
-#else
-    kls__check_available_dbg(kls, size, align, count, loc);
-#endif
-    Koliseo* current = kls;
-    while (current->next != NULL) {
-        current = current->next;
-    }
-    ptrdiff_t padding = -current->offset & (align - 1);
-    char *p = current->data + current->offset + padding;
+    if (!p) return NULL;
     //Zero new area
     memset(p, 0, size * count);
-    current->prev_offset = current->offset;
-    current->offset += padding + size * count;
-    char h_size[200];
-    kls_formatSize(size * count, h_size, sizeof(h_size));
-    //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
-    //kls_log("KLS",msg);
-#ifdef KLS_DEBUG_CORE
-    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
-    kls_log(current, "KLS", "API Level { %i } -> Pushed zeroes, size (%s) for KLS.",
-            int_koliseo_version(), h_size);
-    if (current->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(current->conf.kls_log_fp, current);
-    }
-    if (current->conf.kls_collect_stats == 1) {
-#ifndef _WIN32
-        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
-        double elapsed_time =
-            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
-                start_time.tv_nsec) / 1e9;
-#else
-        QueryPerformanceCounter(&end_time);	// %.7f
-        double elapsed_time =
-            (double)(end_time.QuadPart -
-                     start_time.QuadPart) / frequency.QuadPart;
-#endif
-        if (elapsed_time > current->stats.worst_pushcall_time) {
-            current->stats.worst_pushcall_time = elapsed_time;
-        }
-    }
-#endif
-    if (current->conf.kls_collect_stats == 1) {
-        current->stats.tot_pushes += 1;
-    }
     return p;
 }
 
@@ -1335,6 +1417,8 @@ void *kls_push_zero_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ * @see kls__advance
+ * @see KLS_Hooks
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_push_zero_ext(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
@@ -1345,49 +1429,24 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
 {
 
-#ifdef KLS_DEBUG_CORE
-#ifndef _WIN32
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-#else
-    LARGE_INTEGER start_time, end_time, frequency;
-    QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&start_time);
-#endif
-#endif
-
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
-    }
-    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+    ptrdiff_t padding = 0;
 #ifndef KOLISEO_HAS_LOCATE
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", __func__);
+    KLS_Push_Result res = kls__advance(kls, size, align, count, &padding, __func__);
+    void* p = kls__handle_push_result(kls, res, size, align, count, padding, __func__);
 #else
-        fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), __func__);
-        kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), __func__);
-        exit(EXIT_FAILURE);
+    KLS_Push_Result res = kls__advance_dbg(kls, size, align, count, &padding, __func__, loc);
+    void* p = kls__handle_push_result_dbg(kls, res, size, align, count, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
-        return NULL;
-    }
+    if (!p) return NULL;
+    //Zero new area
+    memset(p, 0, size * count);
 
-#ifndef KOLISEO_HAS_LOCATE
-    kls__check_available(kls, size, align, count);
-#else
-    kls__check_available_dbg(kls, size, align, count, loc);
-#endif
     Koliseo* current = kls;
     while (current->next != NULL) {
         current = current->next;
     }
-    ptrdiff_t padding = -current->offset & (align - 1);
-    char *p = current->data + current->offset + padding;
-    //Zero new area
-    memset(p, 0, size * count);
-    current->prev_offset = current->offset;
-    current->offset += padding + size * count;
 
-    for (size_t i=0; i < kls->hooks_len; i++) {
+    for (size_t i=0; i < current->hooks_len; i++) {
         if (current->hooks[i].on_push_handler != NULL) {
             /*
             struct KLS_EXTENSION_AR_DEFAULT_ARGS {
@@ -1408,38 +1467,6 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
             */
             current->hooks[i].on_push_handler(current, padding, __func__, NULL);
         }
-    }
-
-    char h_size[200];
-    kls_formatSize(size * count, h_size, sizeof(h_size));
-    //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
-    //kls_log("KLS",msg);
-#ifdef KLS_DEBUG_CORE
-    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
-    kls_log(current, "KLS", "API Level { %i } -> Pushed zeroes, size (%s) for KLS.",
-            int_koliseo_version(), h_size);
-    if (current->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(current->conf.kls_log_fp, current);
-    }
-    if (current->conf.kls_collect_stats == 1) {
-#ifndef _WIN32
-        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
-        double elapsed_time =
-            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
-                start_time.tv_nsec) / 1e9;
-#else
-        QueryPerformanceCounter(&end_time);	// %.7f
-        double elapsed_time =
-            (double)(end_time.QuadPart -
-                     start_time.QuadPart) / frequency.QuadPart;
-#endif
-        if (elapsed_time > current->stats.worst_pushcall_time) {
-            current->stats.worst_pushcall_time = elapsed_time;
-        }
-    }
-#endif
-    if (current->conf.kls_collect_stats == 1) {
-        current->stats.tot_pushes += 1;
     }
     return p;
 }
@@ -1495,6 +1522,7 @@ char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...)
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ * @see kls__temp_advance
  */
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_ext(Koliseo_Temp *t_kls, ptrdiff_t size,
@@ -1505,84 +1533,30 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 #endif // KOLISEO_HAS_LOCATE
 {
 
-#ifdef KLS_DEBUG_CORE
-#ifndef _WIN32
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-#else
-    LARGE_INTEGER start_time, end_time, frequency;
-    QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&start_time);
-#endif
-#endif
+    ptrdiff_t padding = 0;
 
-    if (t_kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    Koliseo *kls = t_kls->kls;
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
 #ifndef KOLISEO_HAS_LOCATE
-    kls__check_available(kls, size, align, count);
+    KLS_Push_Result res = kls__temp_advance(t_kls, size, align, count, &padding, __func__);
 #else
-    kls__check_available_dbg(kls, size, align, count, loc);
-#endif
+    KLS_Push_Result res = kls__temp_advance_dbg(t_kls, size, align, count, &padding, __func__, loc);
+#endif // KOLISEO_HAS_LOCATE
+    if (res.error) return NULL;
+    //Zero new area
+    memset(res.p, 0, size * count);
+
+    Koliseo* kls = t_kls->kls;
     Koliseo* current = kls;
     while (current->next != NULL) {
         current = current->next;
     }
-    ptrdiff_t padding = -current->offset & (align - 1);
-    char *p = current->data + current->offset + padding;
-    //Zero new area
-    memset(p, 0, size * count);
-    current->prev_offset = current->offset;
-    current->offset += padding + size * count;
 
-    for (size_t i=0; i < kls->hooks_len; i++) {
+    for (size_t i=0; i < current->hooks_len; i++) {
         if (current->hooks[i].on_temp_push_handler != NULL) {
             // Call on_temp_push extension with empty user arg
             current->hooks[i].on_temp_push_handler(t_kls, padding, __func__, NULL);
         }
     }
-
-    char h_size[200];
-    kls_formatSize(size * count, h_size, sizeof(h_size));
-    //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
-    //kls_log("KLS",msg);
-#ifdef KLS_DEBUG_CORE
-    if (current->conf.kls_collect_stats == 1) {
-#ifndef _WIN32
-        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
-        double elapsed_time =
-            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
-                start_time.tv_nsec) / 1e9;
-#else
-        QueryPerformanceCounter(&end_time);	// %.7f
-        double elapsed_time =
-            (double)(end_time.QuadPart -
-                     start_time.QuadPart) / frequency.QuadPart;
-#endif
-        if (elapsed_time > current->stats.worst_pushcall_time) {
-            current->stats.worst_pushcall_time = elapsed_time;
-        }
-    }
-    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
-    kls_log(current, "KLS",
-            "API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",
-            int_koliseo_version(), h_size);
-    if (current->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(current->conf.kls_log_fp, current);
-    }
-#endif
-    if (current->conf.kls_collect_stats == 1) {
-        current->stats.tot_temp_pushes += 1;
-    }
-    return p;
+    return res.p;
 }
 
 #ifndef KOLISEO_HAS_LOCATE
@@ -1996,6 +1970,7 @@ void kls_clear(Koliseo *kls)
     //Reset pointer
     kls->prev_offset = kls->offset;
     kls->offset = sizeof(*kls);
+    KLS_ASAN_POISON(kls->data + kls->offset, kls->size - kls->offset);
 #ifdef KLS_DEBUG_CORE
     kls_log(kls, "KLS", "API Level { %i } -> Cleared offsets for KLS.",
             int_koliseo_version());
@@ -2114,7 +2089,7 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
 
     current->has_temp = 1;
     current->t_kls = tmp;
-    for (size_t i=0; i < kls->hooks_len; i++) {
+    for (size_t i=0; i < current->hooks_len; i++) {
         if (current->hooks[i].on_temp_start_handler != NULL) {
             // Call on_temp_start extension
             current->hooks[i].on_temp_start_handler(tmp);
@@ -2157,6 +2132,10 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
 #endif
     tmp_kls->kls->has_temp = 0;
     tmp_kls->kls->t_kls = NULL;
+#if defined(__SANITIZE_ADDRESS__)
+    ptrdiff_t old_offset = tmp_kls->kls->offset;
+    ptrdiff_t new_offset = tmp_kls->offset;
+#endif // __SANITIZE_ADDRESS__
     tmp_kls->kls->prev_offset = tmp_kls->prev_offset;
     tmp_kls->kls->offset = tmp_kls->offset;
 
@@ -2167,6 +2146,7 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         tmp_kls->kls->next = NULL;
     }
 
+    KLS_ASAN_POISON(tmp_kls->kls->data + new_offset, old_offset - new_offset);
     tmp_kls = NULL; // statement with no effect TODO: Clear tmp_kls from caller
     if (kls_ref->conf.kls_collect_stats == 1) {
         kls_ref->stats.tot_temp_pushes = 0;

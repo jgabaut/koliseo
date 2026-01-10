@@ -131,6 +131,13 @@ clean:
 	-rm static/*.o
 	-rm static/*.so
 	-rm static/*.dll
+	-rm static/basic_example
+	-rm static/region_example
+	-rm static/list_example
+	-rm static/dllist_example
+	-rm static/darray_example
+	-rm static/pit_example
+	-rm static/hashmap_example
 	@echo -e "\033[1;33mDone.\e[0m"
 
 cleanob:
@@ -246,10 +253,49 @@ kstr_test.k:
 	$(CCOMP) tests/ok/kstr_test.c src/koliseo.c -o tests/ok/kstr_test.k -DKLS_DEBUG_CORE
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-anviltest: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k growable.k growable_temp.k oom.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
+tests: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k growable.k growable_temp.k oom.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
+
+anviltest: tests
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX
 	@echo -e "\n\033[1;32mDone.\e[0m"
+
+basic_example:
+	@echo -en "Building region_example"
+	$(CCOMP) -Isrc/ src/koliseo.c static/basic_example.c -o static/basic_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+region_example:
+	@echo -en "Building region_example"
+	$(CCOMP) -Isrc/ src/kls_region.c static/region_example.c -o static/region_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+list_example:
+	@echo -en "Building list_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/list_example.c -o static/list_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+dllist_example:
+	@echo -en "Building dllist_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/dllist_example.c -o static/dllist_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+darray_example:
+	@echo -en "Building darray_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/darray_example.c -o static/darray_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+pit_example:
+	@echo -en "Building pit_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/pit_example.c -o static/pit_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+hashmap_example:
+	@echo -en "Building hashmap_example"
+	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/hashmap_example.c -o static/hashmap_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
+examples: basic_example region_example list_example dllist_example darray_example pit_example hashmap_example
 
 pack: rebuild
 	@echo -e "Packing koliseo:  make pack for $(VERSION)"

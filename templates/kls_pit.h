@@ -1,7 +1,7 @@
 // jgabaut @ github.com/jgabaut
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-    Copyright (C) 2023-2025  jgabaut
+    Copyright (C) 2023-2026  jgabaut
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,10 +21,17 @@
 #ifndef KOLISEO_H_
 #include "koliseo.h"
 #endif // KOLISEO_H_
+static bool kls_cmp(const Koliseo* a, const Koliseo* b);
+#define LIST_CMP_DEFAULT_FN &kls_cmp
 #define LIST_T Koliseo
 #define LIST_NAME KlsList
 #include "list.h"
 
+static bool kls_cmp(const Koliseo* a, const Koliseo* b)
+{
+    printf("%s: %p == %p?\n", __func__, *a, *b);
+    return (a == b);
+}
 
 /**
  * Out custom handler for when an underlying Koliseo fails a push operation with "OOM".

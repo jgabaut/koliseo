@@ -1,7 +1,7 @@
 // jgabaut @ github.com/jgabaut
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-    Copyright (C) 2023-2025  jgabaut
+    Copyright (C) 2023-2026  jgabaut
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 5 /**< Represents current minor release.*/
-#define KLS_PATCH 9 /**< Represents current patch release.*/
+#define KLS_PATCH 10 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -109,7 +109,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.5.9"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.5.10"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -382,6 +382,33 @@ typedef struct Koliseo_Temp {
     ptrdiff_t prev_offset;     /**< Previous position of memory pointer.*/
 } Koliseo_Temp;
 
+/**
+ * Defines the result for kls__check_available_failable()
+ * @see kls__check_available_failable
+ * @see KLS_Push_Result
+ */
+typedef enum KLS_Push_Error {
+    KLS_PUSH_OK,
+    KLS_PUSH_SIZE_LT1,
+    KLS_PUSH_ALIGN_LT1,
+    KLS_PUSH_ALIGN_NOT_POW2,
+    KLS_PUSH_NEGATIVE_COUNT,
+    KLS_PUSH_ZEROCOUNT,
+    KLS_PUSH_WITH_TEMP_ACTIVE,
+    KLS_PUSH_PTRDIFF_MAX,
+    KLS_PUSH_OOM,
+} KLS_Push_Error;
+
+/**
+ * Defines the result for kls__advance() and kls__temp_advance().
+ * @see kls__advance
+ * @see kls__temp_advance
+ */
+typedef struct KLS_Push_Result {
+    void* p;
+    KLS_Push_Error error;
+} KLS_Push_Result;
+
 void kls_log(Koliseo * kls, const char *tag, const char *format, ...);
 ptrdiff_t kls_get_pos(const Koliseo * kls);
 
@@ -429,12 +456,31 @@ Koliseo *kls_new_dbg(ptrdiff_t size);
 Koliseo *kls_new_dbg_handled(ptrdiff_t size, KLS_Err_Handlers err_handlers);
 
 #ifndef KOLISEO_HAS_LOCATE
-int kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name);
+void* kls__handle_push_result(Koliseo* kls, KLS_Push_Result r, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t padding, const char* caller_name);
 #else
-int kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc);
+void* kls__handle_push_result_dbg(Koliseo* kls, KLS_Push_Result r, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t padding, const char* caller_name, Koliseo_Loc loc);
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
+KLS_Push_Result kls__advance(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name);
+#else
+KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name, Koliseo_Loc loc);
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
+KLS_Push_Result kls__temp_advance(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name);
+#else
+KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name, Koliseo_Loc loc);
+#endif // KOLISEO_HAS_LOCATE
+
+#ifndef KOLISEO_HAS_LOCATE
+KLS_Push_Error kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name);
+#else
+KLS_Push_Error kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc);
 #endif // KOLISEO_HAS_LOCATE
 
 /**
+ * DEPRECATED: Support for this macro will be dropped in the next release.
  * Macro to return NULL on errors from kls__check_available_failable.
  * @see kls__check_available_failable
  */

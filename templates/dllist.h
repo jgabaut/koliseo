@@ -2,7 +2,7 @@
 // jgabaut @ github.com/jgabaut
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-    Copyright (C) 2025  jgabaut
+    Copyright (C) 2025-2026  jgabaut
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
