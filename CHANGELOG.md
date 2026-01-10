@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0] - Unreleased
+
+### Changed
+
+- Drop deprecated symbols
+  - `kls__check_available()` macro -> now a function (previously named `kls__check_available_failable()`)
+  - `KLS_DEFAULT_EXTENSIONS_LEN`, `KLS_MAX_EXTENSIONS`
+  - `KLS_AUTOREGION_EXT_SLOT` (from `src/kls_region.[h,c]`)
+- Drop `kls_pop_AR()`, `kls_temp_pop_AR()`
+
 ## [0.5.10] - 2026-01-10
 
 ### Added

@@ -526,9 +526,9 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
  * @see kls_temp_end()
  */
 #ifndef KOLISEO_HAS_LOCATE
-Koliseo *kls_new_alloc_ext(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
+Koliseo *kls_new_alloc_ext(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks ext_handlers, void* user)
 #else
-Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks* ext_handlers, void** user, size_t ext_len, Koliseo_Loc loc)
+Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks ext_handlers, void* user, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     if (size < (ptrdiff_t)sizeof(Koliseo)) {
@@ -560,19 +560,14 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
         kls_set_conf(kls, KLS_DEFAULT_CONF);
         kls->stats = KLS_STATS_DEFAULT;
         kls->conf.kls_log_fp = stderr;
-        kls->hooks_len = ext_len;
 
         KLS_ASAN_POISON(kls->data + kls->offset, kls->size - kls->offset);
 
-        for (size_t i=0; i < kls->hooks_len; i++) {
-            kls->hooks[i] = ext_handlers[i];
-        }
-        for (size_t i=0; i < kls->hooks_len; i++) {
-            if (user) {
-                kls->extension_data[i] = user[i];
-            } else {
-                kls->extension_data[i] = NULL;
-            }
+        kls->hooks = ext_handlers;
+        if (user) {
+            kls->extension_data = user;
+        } else {
+            kls->extension_data = NULL;
         }
         kls->free_func = free_func;
         kls->next = NULL;
@@ -584,11 +579,9 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
                 kls + kls->offset);
 #endif
 
-        for (size_t i=0; i < kls->hooks_len; i++) {
-            if (kls->hooks[i].on_new_handler != NULL) {
-                // Call on_new extension
-                kls->hooks[i].on_new_handler(kls);
-            }
+        if (kls->hooks.on_new_handler != NULL) {
+            // Call on_new extension
+            kls->hooks.on_new_handler(kls);
         }
     } else {
 #ifndef KOLISEO_HAS_LOCATE
@@ -629,9 +622,9 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_f
 #endif // KOLISEO_HAS_LOCATE
 {
 #ifndef KOLISEO_HAS_LOCATE
-    return kls_new_alloc_ext(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
+    return kls_new_alloc_ext(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
 #else
-    return kls_new_alloc_ext_dbg(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN, loc);
+    return kls_new_alloc_ext_dbg(size, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, loc);
 #endif // KOLISEO_HAS_LOCATE
 }
 
@@ -668,9 +661,9 @@ Koliseo *kls_new(ptrdiff_t size)
  * @see kls_new_alloc_ext()
  * @see kls_set_conf()
  */
-Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
+Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Hooks ext_handlers, void* user)
 {
-    Koliseo *k = kls_new_alloc_ext(size, alloc_func, free_func, ext_handlers, user, ext_len);
+    Koliseo *k = kls_new_alloc_ext(size, alloc_func, free_func, ext_handlers, user);
     bool conf_res = kls_set_conf(k, conf);
     if (!conf_res) {
         fprintf(stderr,
@@ -699,7 +692,7 @@ Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func al
  */
 Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_func, kls_free_func free_func)
 {
-    return kls_new_conf_alloc_ext(size, conf, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
+    return kls_new_conf_alloc_ext(size, conf, alloc_func, free_func, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
 }
 
 /**
@@ -714,9 +707,9 @@ Koliseo *kls_new_conf_alloc(ptrdiff_t size, KLS_Conf conf, kls_alloc_func alloc_
  * @see KLS_DEFAULT_CONF
  * @see kls_new_alloc_ext()
  */
-Koliseo *kls_new_conf_ext(ptrdiff_t size, KLS_Conf conf, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
+Koliseo *kls_new_conf_ext(ptrdiff_t size, KLS_Conf conf, KLS_Hooks ext_handlers, void* user)
 {
-    return kls_new_conf_alloc_ext(size, conf, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, ext_handlers, user, ext_len);
+    return kls_new_conf_alloc_ext(size, conf, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, ext_handlers, user);
 }
 
 /**
@@ -750,7 +743,7 @@ Koliseo *kls_new_conf(ptrdiff_t size, KLS_Conf conf)
  * @see KLS_Conf
  * @see kls_new_conf_alloc_ext()
  */
-Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
+Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers, KLS_Hooks ext_handlers, void* user)
 {
 
 #ifndef KLS_DEBUG_CORE
@@ -769,7 +762,7 @@ Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_pat
                                    .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLISEO_HAS_LOCATE
     };
-    return kls_new_conf_alloc_ext(size, k, alloc_func, free_func, ext_handlers, user, ext_len);
+    return kls_new_conf_alloc_ext(size, k, alloc_func, free_func, ext_handlers, user);
 }
 
 /**
@@ -788,7 +781,7 @@ Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_pat
  */
 Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers)
 {
-    return kls_new_traced_alloc_handled_ext(size, output_path, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
+    return kls_new_traced_alloc_handled_ext(size, output_path, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
 }
 
 /**
@@ -803,10 +796,10 @@ Koliseo *kls_new_traced_alloc_handled(ptrdiff_t size, const char *output_path, k
  * @see KLS_Conf
  * @see kls_new_conf_alloc()
  */
-Koliseo *kls_new_traced_ext(ptrdiff_t size, const char *output_path, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
+Koliseo *kls_new_traced_ext(ptrdiff_t size, const char *output_path, KLS_Hooks ext_handlers, void* user)
 {
     KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
-    return kls_new_traced_alloc_handled_ext(size, output_path, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, err_handlers, ext_handlers, user, ext_len);
+    return kls_new_traced_alloc_handled_ext(size, output_path, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, err_handlers, ext_handlers, user);
 }
 
 /**
@@ -874,7 +867,7 @@ Koliseo *kls_new_traced_handled(ptrdiff_t size, const char *output_path, KLS_Err
  * @see KLS_Conf
  * @see kls_new_conf_alloc_ext()
  */
-Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
+Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers, KLS_Hooks ext_handlers, void* user)
 {
 #ifndef KLS_DEBUG_CORE
     fprintf(stderr,
@@ -891,7 +884,7 @@ Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func
                                .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLIEO_HAS_LOCATE
     };
-    Koliseo * kls = kls_new_conf_alloc_ext(size, k, alloc_func, free_func, ext_handlers, user, ext_len);
+    Koliseo * kls = kls_new_conf_alloc_ext(size, k, alloc_func, free_func, ext_handlers, user);
     kls->conf.kls_verbose_lvl = 1;
     return kls;
 }
@@ -910,7 +903,7 @@ Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func
  */
 Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_func free_func, KLS_Err_Handlers err_handlers)
 {
-    return kls_new_dbg_alloc_handled_ext(size, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA, KLS_DEFAULT_EXTENSIONS_LEN);
+    return kls_new_dbg_alloc_handled_ext(size, alloc_func, free_func, err_handlers, KLS_DEFAULT_HOOKS, KLS_DEFAULT_EXTENSION_DATA);
 }
 
 /**
@@ -923,10 +916,10 @@ Koliseo *kls_new_dbg_alloc_handled(ptrdiff_t size, kls_alloc_func alloc_func, kl
  * @see KLS_Conf
  * @see kls_new_conf()
  */
-Koliseo *kls_new_dbg_ext(ptrdiff_t size, KLS_Hooks* ext_handlers, void** user, size_t ext_len)
+Koliseo *kls_new_dbg_ext(ptrdiff_t size, KLS_Hooks ext_handlers, void* user)
 {
     KLS_Err_Handlers err_handlers = KLS_DEFAULT_ERR_HANDLERS;
-    return kls_new_dbg_alloc_handled_ext(size, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, err_handlers, ext_handlers, user, ext_len);
+    return kls_new_dbg_alloc_handled_ext(size, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, err_handlers, ext_handlers, user);
 }
 
 /**
@@ -1125,9 +1118,9 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
     }
 
 #ifndef KOLISEO_HAS_LOCATE
-    KLS_Push_Error res = kls__check_available_failable(kls, size, align, count, __func__);
+    KLS_Push_Error res = kls__check_available(kls, size, align, count, __func__);
 #else
-    KLS_Push_Error res = kls__check_available_failable_dbg(kls, size, align, count, __func__, loc);
+    KLS_Push_Error res = kls__check_available_dbg(kls, size, align, count, __func__, loc);
 #endif
     if (res != 0) {
         return (KLS_Push_Result) {
@@ -1197,9 +1190,9 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
  * @see Koliseo
  */
 #ifndef KOLISEO_HAS_LOCATE
-KLS_Push_Error kls__check_available_failable(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
+KLS_Push_Error kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
 #else
-KLS_Push_Error kls__check_available_failable_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
+KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
@@ -1285,9 +1278,9 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
         exit(EXIT_FAILURE);
     }
 #ifndef KOLISEO_HAS_LOCATE
-    KLS_Push_Error res = kls__check_available_failable(kls, size, align, count, __func__);
+    KLS_Push_Error res = kls__check_available(kls, size, align, count, __func__);
 #else
-    KLS_Push_Error res = kls__check_available_failable_dbg(kls, size, align, count, __func__, loc);
+    KLS_Push_Error res = kls__check_available_dbg(kls, size, align, count, __func__, loc);
 #endif
     if (res != 0) {
         return (KLS_Push_Result) {
@@ -1348,7 +1341,7 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
 bool kls__try_grow(Koliseo* kls, ptrdiff_t needed)
 {
     ptrdiff_t new_size = KLS_MAX(kls->size * 2, needed);
-    Koliseo* new_kls = kls_new_conf_alloc_ext(new_size, kls->conf, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, kls->hooks, kls->extension_data, kls->hooks_len);
+    Koliseo* new_kls = kls_new_conf_alloc_ext(new_size, kls->conf, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, kls->hooks, kls->extension_data);
     kls_log(kls, "DEBUG", "%s(): growing Koliseo, new size: {%td}", __func__, new_size);
     if (!new_kls) return false;
     kls->next = new_kls;
@@ -1446,27 +1439,25 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         current = current->next;
     }
 
-    for (size_t i=0; i < current->hooks_len; i++) {
-        if (current->hooks[i].on_push_handler != NULL) {
-            /*
-            struct KLS_EXTENSION_AR_DEFAULT_ARGS {
-                const char* region_name;
-                size_t region_name_len;
-                const char* region_desc;
-                size_t region_desc_len;
-                int region_type;
-            };
-            struct KLS_EXTENSION_AR_DEFAULT_ARGS ar_args = {
-                .region_name = KOLISEO_DEFAULT_REGION_NAME,
-                .region_name_len = strlen(KOLISEO_DEFAULT_REGION_NAME),
-                .region_desc = KOLISEO_DEFAULT_REGION_DESC,
-                .region_desc_len = strlen(KOLISEO_DEFAULT_REGION_DESC),
-                .region_type = KLS_None
-            };
-            kls->hooks.on_push_handler(kls, padding, (void*)&ar_args);
-            */
-            current->hooks[i].on_push_handler(current, padding, __func__, NULL);
-        }
+    if (current->hooks.on_push_handler != NULL) {
+        /*
+        struct KLS_EXTENSION_AR_DEFAULT_ARGS {
+            const char* region_name;
+            size_t region_name_len;
+            const char* region_desc;
+            size_t region_desc_len;
+            int region_type;
+        };
+        struct KLS_EXTENSION_AR_DEFAULT_ARGS ar_args = {
+            .region_name = KOLISEO_DEFAULT_REGION_NAME,
+            .region_name_len = strlen(KOLISEO_DEFAULT_REGION_NAME),
+            .region_desc = KOLISEO_DEFAULT_REGION_DESC,
+            .region_desc_len = strlen(KOLISEO_DEFAULT_REGION_DESC),
+            .region_type = KLS_None
+        };
+        kls->hooks.on_push_handler(kls, padding, (void*)&ar_args);
+        */
+        current->hooks.on_push_handler(current, padding, __func__, NULL);
     }
     return p;
 }
@@ -1550,11 +1541,9 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
         current = current->next;
     }
 
-    for (size_t i=0; i < current->hooks_len; i++) {
-        if (current->hooks[i].on_temp_push_handler != NULL) {
-            // Call on_temp_push extension with empty user arg
-            current->hooks[i].on_temp_push_handler(t_kls, padding, __func__, NULL);
-        }
+    if (current->hooks.on_temp_push_handler != NULL) {
+        // Call on_temp_push extension with empty user arg
+        current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL);
     }
     return res.p;
 }
@@ -1992,11 +1981,9 @@ void kls_free(Koliseo *kls)
     while (current) {
         Koliseo* next = current->next;
         current->next = NULL;
-        for (size_t i=0; i < current->hooks_len; i++) {
-            if (current->hooks[i].on_free_handler != NULL) {
-                // Call on_free() extension
-                current->hooks[i].on_free_handler(current);
-            }
+        if (current->hooks.on_free_handler != NULL) {
+            // Call on_free() extension
+            current->hooks.on_free_handler(current);
         }
         if (current->has_temp == 1) {
 #ifdef KLS_DEBUG_CORE
@@ -2089,11 +2076,9 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
 
     current->has_temp = 1;
     current->t_kls = tmp;
-    for (size_t i=0; i < current->hooks_len; i++) {
-        if (current->hooks[i].on_temp_start_handler != NULL) {
-            // Call on_temp_start extension
-            current->hooks[i].on_temp_start_handler(tmp);
-        }
+    if (current->hooks.on_temp_start_handler != NULL) {
+        // Call on_temp_start extension
+        current->hooks.on_temp_start_handler(tmp);
     }
 #ifdef KLS_DEBUG_CORE
     kls_log(current, "KLS", "Prepared new Temp KLS.");
@@ -2120,11 +2105,9 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i=0; i < kls_ref->hooks_len; i++) {
-        if (kls_ref->hooks[i].on_temp_free_handler != NULL) {
-            // Call on_temp_free() extension
-            kls_ref->hooks[i].on_temp_free_handler(tmp_kls);
-        }
+    if (kls_ref->hooks.on_temp_free_handler != NULL) {
+        // Call on_temp_free() extension
+        kls_ref->hooks.on_temp_free_handler(tmp_kls);
     }
 
 #ifdef KLS_DEBUG_CORE
@@ -2193,43 +2176,6 @@ void *kls_pop(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 }
 
 /**
- * Takes a Koliseo pointer, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
- * @param kls The Koliseo at hand.
- * @param size The size for data to pop.
- * @param align The alignment for data to pop.
- * @param count The multiplicative quantity to scale data size to pop for.
- * @return A void pointer to the start of memory just popped from the Koliseo.
- */
-void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
-{
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
-    }
-    ptrdiff_t padding = -kls->offset & (align - 1);
-    if (count > PTRDIFF_MAX / size
-        || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
-        kls_free(kls);
-        exit(EXIT_FAILURE);
-    }
-    char *p = kls->data + kls->offset - padding - size * count;
-    kls->prev_offset = kls->offset;
-    kls->offset -= padding + size * count;
-#ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
-    }
-#endif
-    if (kls->conf.kls_collect_stats == 1) {
-        kls->stats.tot_pops += 1;
-    }
-    return p;
-}
-
-/**
  * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
  * @param t_kls The Koliseo_Temp at hand.
  * @param size The size for data to pop.
@@ -2239,51 +2185,6 @@ void *kls_pop_AR(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
  */
 void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
                    ptrdiff_t count)
-{
-    if (t_kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    Koliseo *kls = t_kls->kls;
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
-                __func__);
-        exit(EXIT_FAILURE);
-    }
-    ptrdiff_t padding = -kls->offset & (align - 1);
-    if (count > PTRDIFF_MAX / size
-        || (kls->size + kls->offset) < (size * count)) {
-        fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
-        kls_free(kls);
-        exit(EXIT_FAILURE);
-    }
-    char *p = kls->data + kls->offset - padding - size * count;
-    kls->prev_offset = kls->offset;
-    kls->offset -= padding + size * count;
-#ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for Temp_KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
-    }
-#endif
-    if (kls->conf.kls_collect_stats == 1) {
-        kls->stats.tot_temp_pops += 1;
-    }
-    return p;
-}
-
-/**
- * Takes a Koliseo_Temp, and ptrdiff_t values for size, align and count. Tries popping the specified amount of memory from the Koliseo data field, marking it as free (as far as Koliseo is concerned), or goes to exit() if the operation fails.
- * @param t_kls The Koliseo_Temp at hand.
- * @param size The size for data to pop.
- * @param align The alignment for data to pop.
- * @param count The multiplicative quantity to scale data size to pop for.
- * @return A void pointer to the start of memory just popped from the referred Koliseo.
- */
-void *kls_temp_pop_AR(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 {
     if (t_kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
