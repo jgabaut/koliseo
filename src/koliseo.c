@@ -1340,8 +1340,12 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
 
 bool kls__try_grow(Koliseo* kls, ptrdiff_t needed)
 {
+    assert(kls->next == NULL);
     ptrdiff_t new_size = KLS_MAX(kls->size * 2, needed);
-    Koliseo* new_kls = kls_new_conf_alloc_ext(new_size, kls->conf, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, kls->hooks, kls->extension_data);
+    KLS_Hooks hooks = kls->hooks;
+    hooks.on_new_handler = NULL; // We don't want the extension handler to run again on the tail
+                                 // since the extension_data is shared
+    Koliseo* new_kls = kls_new_conf_alloc_ext(new_size, kls->conf, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, hooks, kls->extension_data);
     kls_log(kls, "DEBUG", "%s(): growing Koliseo, new size: {%td}", __func__, new_size);
     if (!new_kls) return false;
     kls->next = new_kls;
@@ -1959,6 +1963,17 @@ void kls_clear(Koliseo *kls)
     //Reset pointer
     kls->prev_offset = kls->offset;
     kls->offset = sizeof(*kls);
+    if (kls->next) {
+        Koliseo *chain = kls->next;
+        kls->next = NULL;
+        if (chain) {
+            kls_free(chain);
+            kls->extension_data = NULL; // The chain shares this pointer and we need to restore the extension data
+            if (kls->hooks.on_new_handler) {
+                kls->hooks.on_new_handler(kls);
+            }
+        }
+    }
     KLS_ASAN_POISON(kls->data + kls->offset, kls->size - kls->offset);
 #ifdef KLS_DEBUG_CORE
     kls_log(kls, "KLS", "API Level { %i } -> Cleared offsets for KLS.",
@@ -1979,12 +1994,6 @@ void kls_free(Koliseo *kls)
     }
     Koliseo* current = kls;
     while (current) {
-        Koliseo* next = current->next;
-        current->next = NULL;
-        if (current->hooks.on_free_handler != NULL) {
-            // Call on_free() extension
-            current->hooks.on_free_handler(current);
-        }
         if (current->has_temp == 1) {
 #ifdef KLS_DEBUG_CORE
             kls_log(current, "KLS",
@@ -1993,7 +2002,18 @@ void kls_free(Koliseo *kls)
 #endif
             kls_temp_end(current->t_kls);
         }
-        kls_clear(current);
+        if (current->hooks.on_free_handler != NULL) {
+            // Call on_free() extension
+            current->hooks.on_free_handler(current);
+            for (Koliseo *k = current; k; k = k->next) {
+                // We NULL all subsequent extension_data pointers, since the chain shares it
+                // and it's freed in the first hook call
+                k->extension_data = NULL;
+            }
+        }
+        Koliseo* next = current->next;
+        current->next = NULL;
+        //kls_clear(current);
 #ifdef KLS_DEBUG_CORE
         kls_log(current, "KLS", "API Level { %i } -> Freeing KLS.",
                 int_koliseo_version());

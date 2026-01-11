@@ -1211,6 +1211,7 @@ void KLS_autoregion_on_free(struct Koliseo* kls)
         return;
     }
     KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data;
+    kls->extension_data = NULL;
     if (data_pt->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS_BASIC || data_pt->conf.kls_reglist_alloc_backend == KLS_REGLIST_ALLOC_KLS) {
         kls_free(data_pt->reglist_kls);
         //free(kls->reglist_kls);
@@ -1218,7 +1219,7 @@ void KLS_autoregion_on_free(struct Koliseo* kls)
         kls_rl_freeList(data_pt->regs);
     }
 
-    KLS_DEFAULT_FREEF(kls->extension_data);
+    KLS_DEFAULT_FREEF(data_pt);
 }
 
 void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)

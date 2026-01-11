@@ -9,6 +9,13 @@
   - `KLS_DEFAULT_EXTENSIONS_LEN`, `KLS_MAX_EXTENSIONS`
   - `KLS_AUTOREGION_EXT_SLOT` (from `src/kls_region.[h,c]`)
 - Drop `kls_pop_AR()`, `kls_temp_pop_AR()`
+- Refactor `kls_clear()`:
+  - Frees the chained `Koliseo`s
+  - Calls `on_new_handler()` to reinit the extension
+- Since extension data is shared in the `Koliseo` chain:
+  - Made `on_free_handler()` use the extension data properly
+  - Made `kls__try_grow()` pass `NULL` `on_new_handler` to the next `Koliseo`
+  - Made `kls_free()` clear up a pending `Koliseo_Temp` before calling `on_free()`
 
 ## [0.5.10] - 2026-01-10
 
