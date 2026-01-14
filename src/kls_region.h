@@ -159,7 +159,7 @@ void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls);
 void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
 
 #ifndef KLS_DEFAULT_HOOKS
-#define KLS_DEFAULT_HOOKS &(KLS_Hooks) { \
+#define KLS_DEFAULT_HOOKS (KLS_Hooks) { \
         .on_new_handler = &KLS_autoregion_on_new, \
         .on_free_handler = &KLS_autoregion_on_free, \
         .on_push_handler =  &KLS_autoregion_on_push, \
@@ -168,20 +168,6 @@ void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, 
         .on_temp_push_handler = &KLS_autoregion_on_temp_push, \
     }
 #endif // KLS_DEFAULT_HOOKS
-
-/**
- * DEPRECATED: Support for multiple extension will be dropped in the next release.
- */
-#ifndef KLS_DEFAULT_EXTENSIONS_LEN
-#define KLS_DEFAULT_EXTENSIONS_LEN 1
-#endif // KLS_DEFAULT_EXTENSIONS_LEN
-
-/**
- * DEPRECATED: Support for multiple extension will be dropped in the next release.
- */
-#ifndef KLS_AUTOREGION_EXT_SLOT
-#define KLS_AUTOREGION_EXT_SLOT 0
-#endif // KLS_AUTOREGION_EXT_SLOT
 
 #include "koliseo.h"
 

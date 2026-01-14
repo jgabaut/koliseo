@@ -10,9 +10,9 @@
   + [Configuration](#config)
   + [Building](#building)
   + [Extra features](#extra_features)
-    + [Region](#extra_region)
     + [Debug](#extra_debug)
     + [Gulp](#extra_gulp)
+    + [Region](#extra_region)
     + [Templates](#templates)
     + [Experimental](#extra_exper)
     + [How to use extras](#extra_howto)
@@ -25,7 +25,16 @@
 ## What is this thing? <a name = "witt"></a>
 
   This is a C library for an arena allocator, whose arenas are named `Koliseo`.
-  It offers a basic API to perform initialisation, push (request arena memory), reset and free of a `Koliseo`.
+  It offers:
+  - A basic API to perform initialisation, push (request arena memory), reset and free of a `Koliseo`.
+  - A dedicated temporary arena `Koliseo_Temp` API
+  - Support for `ASan` checks on arena memory usage
+  - Support for optional chaining of arenas on space exhaustion
+  - Customizable error handlers
+  - Customizable extension slot (see [this section](#extensions))
+    - See the [region](#extra_region) section for an example
+  - Customizable templates for data structs using the arena (see [this section](#templates))
+  - Optional extra features (see [this section](#extra_features))
 
   If you compile it without defining any special macros, you will get the basic functionality.
 
@@ -138,6 +147,17 @@ int main(void)
 
 ### :construction: Disclaimer: after version 0.5, the Region and Gulp features are no longer bundled in the main koliseo.c file, after being moved to their own files. Read below for more info. :construction:
 
+### Core debug <a name = "extra_debug"></a>
+
+  Extra debug for core calls, may be too verbose for some applications.
+
+### Gulp <a name = "extra_gulp"></a>
+
+  :construction: Disclaimer: after version 0.5, the Gulp feature is no longer present inside the main koliseo.c file. It has been reimplemented in [kls_gulp.h](./src/kls_gulp.h) file. :construction:
+
+  Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+  - Also includes a minimal string-view API, in case you want to work on the file contents differently.
+
 ### Region <a name = "extra_region"></a>
 
 
@@ -153,17 +173,6 @@ int main(void)
     - Using the global allocator (from malloc)
   - Extra utility functions
     - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
-
-### Core debug <a name = "extra_debug"></a>
-
-  Extra debug for core calls, may be too verbose for some applications.
-
-### Gulp <a name = "extra_gulp"></a>
-
-  :construction: Disclaimer: after version 0.5, the Gulp feature is no longer present inside the main koliseo.c file. It has been reimplemented as an extension, in kls_gulp.h file. :construction:
-
-  Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
-  - Also includes a minimal string-view API, in case you want to work on the file contents differently.
 
 ### Templates <a name = "templates"></a>
 
@@ -220,7 +229,7 @@ typedef struct KLS_Hooks {
     KLS_hook_on_temp_push* on_temp_push_handler; /**< Used to pass custom push handler for kls_temp_push calls.*/
 } KLS_Hooks;
 ```
-  You can have multiple extensions. For example, `src/kls_region.h` shows how to implement support for keeping track of all allocated memory regions. See the [Region section](#extra_region).
+  For example, `src/kls_region.h` shows how to implement support for keeping track of all allocated memory regions. See the [Region section](#extra_region).
 
 ## Documentation <a name = "docs"></a>
 
