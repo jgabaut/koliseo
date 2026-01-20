@@ -2,7 +2,7 @@
 
 int main(void) {
     KLS_Conf conf = KLS_DEFAULT_CONF;
-    conf.kls_allow_zerocount_push = 1;
+    conf.allow_zerocount_push = 1;
 
     Koliseo* k = kls_new_conf(KLS_DEFAULT_SIZE, conf);
 

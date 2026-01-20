@@ -227,13 +227,13 @@ typedef struct KLS_Hooks {
  * @see Koliseo
  */
 typedef struct KLS_Conf {
-    int kls_collect_stats; /**< If set to 1, make the Koliseo collect performance stats.*/
-    int kls_verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
-    FILE *kls_log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
-    const char *kls_log_filepath; /**< String representing the path to the Koliseo logfile.*/
-    int kls_block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
-    int kls_allow_zerocount_push; /**< If set to 1, make the Koliseo accept push calls with a count of 0.*/
-    int kls_growable; /**< If set to 1, make the Koliseo grow when a out of memory for a push call.*/
+    int collect_stats; /**< If set to 1, make the Koliseo collect performance stats.*/
+    int verbose_lvl; /**< If > 0, makes the Koliseo try to acquire kls_log_fp from kls_log_filepath.*/
+    FILE *log_fp; /**< FILE pointer used by the Koliseo to print its kls_log() output.*/
+    const char *log_filepath; /**< String representing the path to the Koliseo logfile.*/
+    int block_while_has_temp; /**< If set to 1, make the Koliseo reject push calls while it has an open Koliseo_Temp.*/
+    int allow_zerocount_push; /**< If set to 1, make the Koliseo accept push calls with a count of 0.*/
+    int growable; /**< If set to 1, make the Koliseo grow when a out of memory for a push call.*/
     KLS_Err_Handlers err_handlers; /**< Used to pass custom error handlers for push calls.*/
 } KLS_Conf;
 
@@ -283,7 +283,7 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format macro for KLS_Conf args.
  * @see KLS_Conf_Fmt
  */
-#define KLS_Conf_Arg(conf) (conf.kls_collect_stats),(conf.kls_verbose_lvl),(conf.kls_log_filepath),(void*)(conf.kls_log_fp),(conf.kls_block_while_has_temp),(conf.kls_allow_zerocount_push)
+#define KLS_Conf_Arg(conf) (conf.collect_stats),(conf.verbose_lvl),(conf.log_filepath),(void*)(conf.log_fp),(conf.block_while_has_temp),(conf.allow_zerocount_push)
 
 /**
  * Defines a format string for KLS_Stats.
@@ -326,7 +326,7 @@ typedef struct Koliseo {
     void* extension_data; /**< Points to data for extensions.*/
     size_t hooks_len; /**< Length for hooks and extension_data.*/
     kls_free_func* free_func; /**< Points to the free function for the arena's backing memory.*/
-    struct Koliseo* next; /**< Points to the next Koliseo when conf.kls_growable == 1.*/
+    struct Koliseo* next; /**< Points to the next Koliseo when conf.growable == 1.*/
 } Koliseo;
 
 /**

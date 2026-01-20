@@ -25,13 +25,13 @@ const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
 };
 
 static const KLS_Conf KLS_DEFAULT_CONF__ = {
-    .kls_collect_stats = 0,
-    .kls_verbose_lvl = 0,
-    .kls_block_while_has_temp = 1,
-    .kls_allow_zerocount_push = 0,
-    .kls_log_fp = NULL,
-    .kls_growable = 0,
-    .kls_log_filepath = "",
+    .collect_stats = 0,
+    .verbose_lvl = 0,
+    .block_while_has_temp = 1,
+    .allow_zerocount_push = 0,
+    .log_fp = NULL,
+    .growable = 0,
+    .log_filepath = "",
     .err_handlers = {
 #ifndef KOLISEO_HAS_LOCATE
         .OOM_handler = &KLS_OOM_default_handler__,
@@ -830,13 +830,13 @@ static inline void kls__autoregion(const char* caller, Koliseo* kls, ptrdiff_t p
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding max_regions_kls_alloc_basic: {%i}.\n",
                         caller, data_pt->max_regions_kls_alloc_basic);
-                if (kls->conf.kls_verbose_lvl > 0) {
+                if (kls->conf.verbose_lvl > 0) {
                     kls_log(kls, "ERROR",
                             "[%s()]:  Exceeding max_regions_kls_alloc_basic: {%i}.",
                             caller, data_pt->max_regions_kls_alloc_basic);
-                    kls_rl_showList_toFile(data_pt->regs, kls->conf.kls_log_fp);
-                    print_kls_2file(kls->conf.kls_log_fp, data_pt->reglist_kls);
-                    print_kls_2file(kls->conf.kls_log_fp, kls);
+                    kls_rl_showList_toFile(data_pt->regs, kls->conf.log_fp);
+                    print_kls_2file(kls->conf.log_fp, data_pt->reglist_kls);
+                    print_kls_2file(kls->conf.log_fp, kls);
                 }
                 kls_free(kls);
                 exit(EXIT_FAILURE);
@@ -909,15 +909,15 @@ static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls,
                 fprintf(stderr,
                         "[ERROR]    [%s()]:  Exceeding max_regions_kls_alloc_basic: {%i}.\n",
                         caller, data_pt->max_regions_kls_alloc_basic);
-                if (kls->conf.kls_verbose_lvl > 0) {
+                if (kls->conf.verbose_lvl > 0) {
                     kls_log(kls, "ERROR",
                             "[%s()]:  Exceeding max_regions_kls_alloc_basic: {%i}.",
                             caller, data_pt->max_regions_kls_alloc_basic);
                     kls_rl_showList_toFile(data_pt->t_regs,
-                                           kls->conf.kls_log_fp);
-                    print_kls_2file(kls->conf.kls_log_fp,
+                                           kls->conf.log_fp);
+                    print_kls_2file(kls->conf.log_fp,
                                     data_pt->t_reglist_kls);
-                    print_kls_2file(kls->conf.kls_log_fp, kls);
+                    print_kls_2file(kls->conf.log_fp, kls);
                 }
                 kls_free(kls);
                 exit(EXIT_FAILURE);
@@ -1159,7 +1159,7 @@ void KLS_autoregion_on_new(struct Koliseo* kls)
             Koliseo *reglist_kls = NULL;
             KLS_Hooks ext = {0};
             reglist_kls = kls_new_conf_ext(data_pt->conf.kls_reglist_kls_size, KLS_DEFAULT_CONF__, ext, NULL);
-            reglist_kls->conf.kls_growable = 1;
+            reglist_kls->conf.growable = 1;
             data_pt->reglist_kls = reglist_kls;
             kls_header = (KLS_Region *) KLS_PUSH(data_pt->reglist_kls, KLS_Region);
         }
@@ -1273,7 +1273,7 @@ void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls)
             Koliseo *t_reglist_kls = NULL;
             KLS_Hooks ext = {0};
             t_reglist_kls = kls_new_conf_ext(data_pt->conf.kls_reglist_kls_size, KLS_DEFAULT_CONF__, ext, NULL);
-            t_reglist_kls->conf.kls_growable = 1;
+            t_reglist_kls->conf.growable = 1;
             data_pt->t_reglist_kls = t_reglist_kls;
             temp_kls_header = (KLS_Region *) KLS_PUSH(data_pt->t_reglist_kls, KLS_Region);
         }

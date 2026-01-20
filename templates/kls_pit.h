@@ -142,8 +142,8 @@ static inline KLS_Conf kls_conf_from_pitconf(KLS_Pit_Conf pit_conf)
     kls_conf.kls_autoset_regions = pit_conf.kls_autoset_regions;
     kls_conf.kls_autoset_temp_regions = pit_conf.kls_autoset_temp_regions;
 #endif // KOLISEO_HAS_REGION
-    kls_conf.kls_collect_stats = pit_conf.kls_collect_stats;
-    kls_conf.kls_block_while_has_temp = pit_conf.kls_block_while_has_temp;
+    kls_conf.collect_stats = pit_conf.kls_collect_stats;
+    kls_conf.block_while_has_temp = pit_conf.kls_block_while_has_temp;
     kls_conf.err_handlers = KLS_PIT_ERR_HANDLERS;
     if (pit_conf.PTRDIFF_MAX_handler != NULL) {
         kls_conf.err_handlers.PTRDIFF_MAX_handler = pit_conf.PTRDIFF_MAX_handler;

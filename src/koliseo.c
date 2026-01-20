@@ -18,13 +18,13 @@
 #include "koliseo.h"
 
 KLS_Conf KLS_DEFAULT_CONF = {
-    .kls_collect_stats = 0,
-    .kls_verbose_lvl = 0,
-    .kls_block_while_has_temp = 1,
-    .kls_allow_zerocount_push = 0,
-    .kls_log_fp = NULL,
-    .kls_growable = 0,
-    .kls_log_filepath = "",
+    .collect_stats = 0,
+    .verbose_lvl = 0,
+    .block_while_has_temp = 1,
+    .allow_zerocount_push = 0,
+    .log_fp = NULL,
+    .growable = 0,
+    .log_filepath = "",
     .err_handlers = {
 #ifndef KOLISEO_HAS_LOCATE
         .OOM_handler = &KLS_OOM_default_handler__,
@@ -178,13 +178,13 @@ void KLS_ZEROCOUNT_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrd
 KLS_Conf kls_conf_init_handled(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, int growable, FILE* log_fp, const char* log_filepath, KLS_Err_Handlers err_handlers)
 {
     KLS_Conf res = {0};
-    res.kls_collect_stats = collect_stats;
-    res.kls_verbose_lvl = verbose_lvl;
-    res.kls_block_while_has_temp = block_while_has_temp;
-    res.kls_allow_zerocount_push = allow_zerocount_push;
-    res.kls_growable = growable;
-    res.kls_log_fp = log_fp;
-    res.kls_log_filepath = log_filepath;
+    res.collect_stats = collect_stats;
+    res.verbose_lvl = verbose_lvl;
+    res.block_while_has_temp = block_while_has_temp;
+    res.allow_zerocount_push = allow_zerocount_push;
+    res.growable = growable;
+    res.log_fp = log_fp;
+    res.log_filepath = log_filepath;
 
     if (err_handlers.OOM_handler != NULL) {
         res.err_handlers.OOM_handler = err_handlers.OOM_handler;
@@ -475,7 +475,7 @@ void* kls__handle_push_result_dbg(Koliseo* kls, KLS_Push_Result r, ptrdiff_t siz
 }
 
 /**
- * Logs a message to the log_fp FILE field of the passed Koliseo pointer, if its conf.kls_verbose_lvl is >0.
+ * Logs a message to the log_fp FILE field of the passed Koliseo pointer, if its conf.verbose_lvl is >0.
  * @param kls The Koliseo pointer hosting the log_fp FILE pointer.
  * @param tag Tag for a message.
  * @param format The message format string.
@@ -486,9 +486,9 @@ void kls_log(Koliseo *kls, const char *tag, const char *format, ...)
         fprintf(stderr, "[KLS]    %s(): Passed kls was NULL.\n", __func__);
         return;
     }
-    if (kls->conf.kls_verbose_lvl > 0) {
+    if (kls->conf.verbose_lvl > 0) {
         va_list args;
-        FILE *fp = kls->conf.kls_log_fp;
+        FILE *fp = kls->conf.log_fp;
         va_start(args, format);
         if (fp == NULL) {
             fprintf(stderr,
@@ -559,7 +559,7 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
         kls->t_kls = NULL;
         kls_set_conf(kls, KLS_DEFAULT_CONF);
         kls->stats = KLS_STATS_DEFAULT;
-        kls->conf.kls_log_fp = stderr;
+        kls->conf.log_fp = stderr;
 
         KLS_ASAN_POISON(kls->data + kls->offset, kls->size - kls->offset);
 
@@ -593,8 +593,8 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
     }
 #ifdef KLS_DEBUG_CORE
     Koliseo *kls_ref = p;
-    if (kls_ref->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls_ref->conf.kls_log_fp, p);
+    if (kls_ref->conf.verbose_lvl > 0) {
+        print_kls_2file(kls_ref->conf.log_fp, p);
     }
 #endif
     return p;
@@ -752,14 +752,14 @@ Koliseo *kls_new_traced_alloc_handled_ext(ptrdiff_t size, const char *output_pat
             __func__);
 #endif
     KLS_Conf k = (KLS_Conf) {
-        .kls_collect_stats = 1,.kls_verbose_lvl =
-                                 1,.kls_log_filepath = output_path,
+        .collect_stats = 1,.verbose_lvl =
+                             1,.log_filepath = output_path,
 #ifndef KOLISEO_HAS_LOCATE
-                                   .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-                                   .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+                               .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+                               .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-                                   .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-                                   .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+                               .err_handlers.OOM_handler = (err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+                               .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLISEO_HAS_LOCATE
     };
     return kls_new_conf_alloc_ext(size, k, alloc_func, free_func, ext_handlers, user);
@@ -875,17 +875,17 @@ Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func
             __func__);
 #endif
     KLS_Conf k = (KLS_Conf) {
-        .kls_collect_stats = 1,.kls_verbose_lvl = 0,
+        .collect_stats = 1,.verbose_lvl = 0,
 #ifndef KOLISEO_HAS_LOCATE
-                               .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-                               .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+                           .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+                           .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-                               .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-                               .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+                           .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+                           .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLIEO_HAS_LOCATE
     };
     Koliseo * kls = kls_new_conf_alloc_ext(size, k, alloc_func, free_func, ext_handlers, user);
-    kls->conf.kls_verbose_lvl = 1;
+    kls->conf.verbose_lvl = 1;
     return kls;
 }
 
@@ -983,12 +983,12 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     }
 
     kls->conf = conf;
-    if (kls->conf.kls_log_fp == NULL) {
-        kls->conf.kls_log_fp = stderr;
+    if (kls->conf.log_fp == NULL) {
+        kls->conf.log_fp = stderr;
 #ifdef KLS_DEBUG_CORE
 #ifdef KLS_SETCONF_DEBUG
         kls_log(kls, "KLS",
-                "[%s()]:  Preliminary set of conf.kls_log_fp to stderr.",
+                "[%s()]:  Preliminary set of conf.log_fp to stderr.",
                 __func__);
 #endif
 #endif // KLS_DEBUG_CORE
@@ -1031,46 +1031,46 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
     }
 
 #ifndef KLS_DEBUG_CORE
-    if (kls->conf.kls_collect_stats == 1) {
+    if (kls->conf.collect_stats == 1) {
         fprintf(stderr,
                 "[WARN]    [%s()]: KLS_DEBUG_CORE is not defined. Stats may not be collected in full.\n",
                 __func__);
     }
 #endif
 
-    if (kls->conf.kls_verbose_lvl > 0) {
-        if (kls->conf.kls_log_fp != NULL) {
+    if (kls->conf.verbose_lvl > 0) {
+        if (kls->conf.log_fp != NULL) {
 #ifdef KLS_DEBUG_CORE
 #ifdef KLS_SETCONF_DEBUG
             kls_log(kls, "WARN",
-                    "[%s()]: kls->conf.kls_log_fp was not NULL. Overriding it.",
+                    "[%s()]: kls->conf.log_fp was not NULL. Overriding it.",
                     __func__);
 #endif
 #endif
-            if (kls->conf.kls_collect_stats == 1) {
+            if (kls->conf.collect_stats == 1) {
                 kls->stats.tot_hiccups += 1;
             }
         }
 
         FILE *log_fp = NULL;
-        log_fp = fopen(kls->conf.kls_log_filepath, "w");
+        log_fp = fopen(kls->conf.log_filepath, "w");
         if (!log_fp) {
             fprintf(stderr,
                     "[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [write].\n",
-                    __func__, kls->conf.kls_log_filepath);
+                    __func__, kls->conf.log_filepath);
             return false;
         } else {
             fprintf(log_fp, "%s", "");	//Reset log_fp
             fclose(log_fp);
         }
-        log_fp = fopen(kls->conf.kls_log_filepath, "a");
+        log_fp = fopen(kls->conf.log_filepath, "a");
         if (!log_fp) {
             fprintf(stderr,
                     "[ERROR] [%s()]: Failed opening logfile at {\"%s\"} [append].\n",
-                    __func__, kls->conf.kls_log_filepath);
+                    __func__, kls->conf.log_filepath);
             return false;
         } else {
-            kls->conf.kls_log_fp = log_fp;
+            kls->conf.log_fp = log_fp;
         }
     }
     return true;
@@ -1110,7 +1110,7 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", caller_name);
         exit(EXIT_FAILURE);
     }
-    if ((kls->has_temp == 1) && (kls->conf.kls_block_while_has_temp == 1)) {
+    if ((kls->has_temp == 1) && (kls->conf.block_while_has_temp == 1)) {
         return (KLS_Push_Result) {
             .p = NULL,
             .error = KLS_PUSH_WITH_TEMP_ACTIVE,
@@ -1148,10 +1148,10 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
     kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
     kls_log(current, "KLS", "API Level { %i } -> Pushed zeroes, size (%s) for KLS.",
             int_koliseo_version(), h_size);
-    if (current->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(current->conf.kls_log_fp, current);
+    if (current->conf.verbose_lvl > 0) {
+        print_kls_2file(current->conf.log_fp, current);
     }
-    if (current->conf.kls_collect_stats == 1) {
+    if (current->conf.collect_stats == 1) {
 #ifndef _WIN32
         clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
         double elapsed_time =
@@ -1168,7 +1168,7 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
         }
     }
 #endif
-    if (current->conf.kls_collect_stats == 1) {
+    if (current->conf.collect_stats == 1) {
         current->stats.tot_pushes += 1;
     }
     return (KLS_Push_Result) {
@@ -1216,11 +1216,11 @@ KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t 
     const ptrdiff_t available = current->size - current->offset;
     const ptrdiff_t padding = -current->offset & (align - 1);
     if (count == 0) {
-        if (current->conf.kls_allow_zerocount_push != 1) {
+        if (current->conf.allow_zerocount_push != 1) {
             return KLS_PUSH_ZEROCOUNT;
         } else {
 #ifdef KLS_DEBUG_CORE
-            kls_log(current, "DEBUG", "Accepting zero-count push: conf.kls_allow_zerocount_push was 1");
+            kls_log(current, "DEBUG", "Accepting zero-count push: conf.allow_zerocount_push was 1");
 #endif // KLS_DEBUG_CORE
         }
     }
@@ -1229,7 +1229,7 @@ KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t 
         if (count > PTRDIFF_MAX / size) {
             return KLS_PUSH_PTRDIFF_MAX;
         } else {
-            if (current->conf.kls_growable == 1 && kls__try_grow(current, size + count + padding)) {
+            if (current->conf.growable == 1 && kls__try_grow(current, size + count + padding)) {
                 return KLS_PUSH_OK;
             }
             return KLS_PUSH_OOM;
@@ -1305,7 +1305,7 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
     //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
     //kls_log("KLS",msg);
 #ifdef KLS_DEBUG_CORE
-    if (current->conf.kls_collect_stats == 1) {
+    if (current->conf.collect_stats == 1) {
 #ifndef _WIN32
         clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
         double elapsed_time =
@@ -1325,11 +1325,11 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
     kls_log(current, "KLS",
             "API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",
             int_koliseo_version(), h_size);
-    if (current->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(current->conf.kls_log_fp, current);
+    if (current->conf.verbose_lvl > 0) {
+        print_kls_2file(current->conf.log_fp, current);
     }
 #endif
-    if (current->conf.kls_collect_stats == 1) {
+    if (current->conf.collect_stats == 1) {
         current->stats.tot_temp_pushes += 1;
     }
     return (KLS_Push_Result) {
@@ -1344,7 +1344,7 @@ bool kls__try_grow(Koliseo* kls, ptrdiff_t needed)
     ptrdiff_t new_size = KLS_MAX(kls->size * 2, needed);
     KLS_Hooks hooks = kls->hooks;
     hooks.on_new_handler = NULL; // We don't want the extension handler to run again on the tail
-                                 // since the extension_data is shared
+    // since the extension_data is shared
     Koliseo* new_kls = kls_new_conf_alloc_ext(new_size, kls->conf, KLS_DEFAULT_ALLOCF, KLS_DEFAULT_FREEF, hooks, kls->extension_data);
     kls_log(kls, "DEBUG", "%s(): growing Koliseo, new size: {%td}", __func__, new_size);
     if (!new_kls) return false;
@@ -1702,7 +1702,7 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
 #endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
-    if (kls->has_temp == 1 && kls->conf.kls_block_while_has_temp == 1) {
+    if (kls->has_temp == 1 && kls->conf.block_while_has_temp == 1) {
         fprintf(stderr, "%s(): kls has an active temp\n", __func__);
         return NULL;
     }
@@ -2018,24 +2018,24 @@ void kls_free(Koliseo *kls)
         kls_log(current, "KLS", "API Level { %i } -> Freeing KLS.",
                 int_koliseo_version());
 #endif
-        if (current->conf.kls_log_fp != NULL && current->conf.kls_log_fp != stdout
-            && current->conf.kls_log_fp != stderr) {
+        if (current->conf.log_fp != NULL && current->conf.log_fp != stdout
+            && current->conf.log_fp != stderr) {
 #ifdef KLS_DEBUG_CORE
             kls_log(current, "KLS", "Closing kls log file. Path: {\"%s\"}.",
-                    kls->conf.kls_log_filepath);
+                    kls->conf.log_filepath);
 #endif
-            int close_res = fclose(current->conf.kls_log_fp);
+            int close_res = fclose(current->conf.log_fp);
             if (close_res != 0) {
                 fprintf(stderr,
                         "[ERROR]    %s(): Failed fclose() on log_fp. Path: {\"%s\"}.",
-                        __func__, current->conf.kls_log_filepath);
+                        __func__, current->conf.log_filepath);
             }
-        } else if (current->conf.kls_log_fp == stdout || current->conf.kls_log_fp == stderr) {
-            if (current->conf.kls_verbose_lvl > 1) {
+        } else if (current->conf.log_fp == stdout || current->conf.log_fp == stderr) {
+            if (current->conf.verbose_lvl > 1) {
                 fprintf(stderr,
-                        "[INFO]    %s(): kls->conf.kls_log_fp is %s. Not closing it.\n",
+                        "[INFO]    %s(): kls->conf.log_fp is %s. Not closing it.\n",
                         __func__,
-                        (current->conf.kls_log_fp == stdout ? "stdout" : "stderr"));
+                        (current->conf.log_fp == stdout ? "stdout" : "stderr"));
             }
         }
         if (current->free_func == NULL) {
@@ -2077,7 +2077,7 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
         kls_log(current, "ERROR", "[%s()]: Passed Koliseo->has_temp != 0 . {%i}",
                 __func__, current->has_temp);
 #endif
-        if (current->conf.kls_collect_stats == 1) {
+        if (current->conf.collect_stats == 1) {
             current->stats.tot_hiccups += 1;
         }
         return NULL;
@@ -2151,7 +2151,7 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
 
     KLS_ASAN_POISON(tmp_kls->kls->data + new_offset, old_offset - new_offset);
     tmp_kls = NULL; // statement with no effect TODO: Clear tmp_kls from caller
-    if (kls_ref->conf.kls_collect_stats == 1) {
+    if (kls_ref->conf.collect_stats == 1) {
         kls_ref->stats.tot_temp_pushes = 0;
         kls_ref->stats.tot_temp_pops = 0;
     }
@@ -2185,11 +2185,11 @@ void *kls_pop(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 #ifdef KLS_DEBUG_CORE
     kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for KLS.",
             int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
+    if (kls->conf.verbose_lvl > 0) {
+        print_kls_2file(kls->conf.log_fp, kls);
     }
 #endif
-    if (kls->conf.kls_collect_stats == 1) {
+    if (kls->conf.collect_stats == 1) {
         kls->stats.tot_pops += 1;
     }
     return p;
@@ -2231,11 +2231,11 @@ void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
     kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
     kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for Temp_KLS.",
             int_koliseo_version(), size);
-    if (kls->conf.kls_verbose_lvl > 0) {
-        print_kls_2file(kls->conf.kls_log_fp, kls);
+    if (kls->conf.verbose_lvl > 0) {
+        print_kls_2file(kls->conf.log_fp, kls);
     }
 #endif
-    if (kls->conf.kls_collect_stats == 1) {
+    if (kls->conf.collect_stats == 1) {
         kls->stats.tot_temp_pops += 1;
     }
     return p;

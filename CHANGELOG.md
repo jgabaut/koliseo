@@ -16,6 +16,7 @@
   - Made `on_free_handler()` use the extension data properly
   - Made `kls__try_grow()` pass `NULL` `on_new_handler` to the next `Koliseo`
   - Made `kls_free()` clear up a pending `Koliseo_Temp` before calling `on_free()`
+- Drop `kls_` prefix from `KLS_Conf` fields
 
 ## [0.5.10] - 2026-01-10
 
