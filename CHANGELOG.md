@@ -2,8 +2,14 @@
 
 ## [0.6.0] - Unreleased
 
+### Added
+
+- Define fallback for `KLS_ALIGNOF` for `<C11`
+  - Allows building for older standards
+
 ### Changed
 
+- Drop support for multiple extensions
 - Drop deprecated symbols
   - `kls__check_available()` macro -> now a function (previously named `kls__check_available_failable()`)
   - `KLS_DEFAULT_EXTENSIONS_LEN`, `KLS_MAX_EXTENSIONS`
@@ -17,6 +23,7 @@
   - Made `kls__try_grow()` pass `NULL` `on_new_handler` to the next `Koliseo`
   - Made `kls_free()` clear up a pending `Koliseo_Temp` before calling `on_free()`
 - Drop `kls_` prefix from `KLS_Conf` fields
+- Fix direct usage of `_Alignof` in `kls_region.h`
 
 ## [0.5.10] - 2026-01-10
 

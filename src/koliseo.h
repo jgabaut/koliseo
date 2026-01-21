@@ -18,12 +18,14 @@
 
 #ifndef KOLISEO_H_
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) //We need C11
-#define KLS_ALIGNOF _Alignof
-#elif defined(__cplusplus)
+#if defined(__cplusplus)
 #define KLS_ALIGNOF alignof
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) //We need C11
+#define KLS_ALIGNOF _Alignof
+#elif defined(__GNUC__) || defined(__clang__)
+#define KLS_ALIGNOF __alignof__
 #else
-#error "This code requires C11 or later.\n    _Alignof() is not available"
+#define KLS_ALIGNOF(type) offsetof(struct { char c; type t; }, t)
 #endif // __STDC_VERSION__ && __STDC_VERSION__ >= 201112L //We need C11
 
 #define KOLISEO_H_

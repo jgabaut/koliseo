@@ -212,16 +212,16 @@ void *kls_temp_push_zero_typed_dbg(Koliseo_Temp * t_kls, ptrdiff_t size,
 #endif // KOLISEO_HAS_LOCATE
 
 #undef KLS_PUSH_ARR_NAMED
-#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named((kls), sizeof(type), _Alignof(type), (count), (name), (desc))
+#define KLS_PUSH_ARR_NAMED(kls, type, count, name, desc) (type*)kls_push_zero_named((kls), sizeof(type), KLS_ALIGNOF(type), (count), (name), (desc))
 
 #undef KLS_PUSH_ARR_TYPED
-#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed((kls), sizeof(type), _Alignof(type), (count), (region_type), (name), (desc))
+#define KLS_PUSH_ARR_TYPED(kls, type, count, region_type, name, desc) (type*)kls_push_zero_typed((kls), sizeof(type), KLS_ALIGNOF(type), (count), (region_type), (name), (desc))
 
 #undef KLS_PUSH_ARR_T_NAMED
-#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named((kls_temp), sizeof(type), _Alignof(type), (count), (name), (desc))
+#define KLS_PUSH_ARR_T_NAMED(kls_temp, type, count, name, desc) (type*)kls_temp_push_zero_named((kls_temp), sizeof(type), KLS_ALIGNOF(type), (count), (name), (desc))
 
 #undef KLS_PUSH_ARR_T_TYPED
-#define KLS_PUSH_ARR_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)kls_temp_push_zero_typed((kls_temp), sizeof(type), _Alignof(type), (count), (region_type), (name), (desc))
+#define KLS_PUSH_ARR_T_TYPED(kls_temp, type, count, region_type, name, desc) (type*)kls_temp_push_zero_typed((kls_temp), sizeof(type), KLS_ALIGNOF(type), (count), (region_type), (name), (desc))
 
 KLS_Region_List kls_rl_emptyList(void);
 #define KLS_RL_GETLIST() kls_rl_emptyList()
