@@ -25,6 +25,7 @@
 - Drop `kls_` prefix from `KLS_Conf` fields
 - Fix direct usage of `_Alignof` in `kls_region.h`
 - Move `CODEOWNERS`, `SECURITY.md` to `.github/`
+- Move `format.sh` to `scripts/`
 
 ## [0.5.10] - 2026-01-10
 
