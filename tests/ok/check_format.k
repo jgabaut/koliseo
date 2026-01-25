@@ -5,7 +5,7 @@
 SRC_DIR="./src"
 
 # Specify the path to the configuration file
-CONFIG_FILE="./.astylerc"
+CONFIG_FILE="./scripts/.astylerc"
 
 [[ -f $CONFIG_FILE ]] || { printf "[ERROR] $CONFIG_FILE was not found.\n"; exit 1; } ;
 
