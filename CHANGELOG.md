@@ -24,6 +24,7 @@
   - Made `kls_free()` clear up a pending `Koliseo_Temp` before calling `on_free()`
 - Drop `kls_` prefix from `KLS_Conf` fields
 - Fix direct usage of `_Alignof` in `kls_region.h`
+- Move `CODEOWNERS`, `SECURITY.md` to `.github/`
 
 ## [0.5.10] - 2026-01-10
 
