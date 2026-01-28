@@ -26,6 +26,8 @@
 - Fix direct usage of `_Alignof` in `kls_region.h`
 - Move `CODEOWNERS`, `SECURITY.md` to `.github/`
 - Move `format.sh`, `installer-sh`, `.astylerc` to `scripts/`
+- Bump `invil` to `0.2.29`
+- Bump `amboso` to `2.1.1`
 
 ## [0.5.10] - 2026-01-10
 
