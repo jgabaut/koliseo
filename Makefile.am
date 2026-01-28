@@ -78,13 +78,13 @@ libkoliseo.a: libkoliseo.o
 
 install: $(SHARED_LIB)
 	@echo -en "Installing koliseo lib $(VERSION):  "
-	./installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	./scripts/installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	ldconfig
 	@echo -e "\n\033[1;33mDone.\e[0m"
 
 uninstall:
 	@echo -en "Uninstalling koliseo lib:  "
-	./installer-sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	./scripts/installer-sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Build rule for the demo binary
