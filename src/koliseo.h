@@ -255,7 +255,6 @@ typedef struct KLS_Stats {
     int tot_pops; /**< Total POP calls done.*/
     int tot_temp_pops; /**< Total POP_T calls done.*/
     int tot_logcalls; /**< Total kls_log() calls done.*/
-    int tot_hiccups; /**< Total hiccups encountered.*/
 #ifdef KLS_DEBUG_CORE
     double worst_pushcall_time;	/**< Longest time taken by a PUSH call.*/
 #endif
@@ -292,9 +291,9 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Stats_Arg()
  */
 #ifdef KLS_DEBUG_CORE
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i, worst_push_time: %.7f }"
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, worst_push_time: %.7f }"
 #else
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, tot_hiccups: %i }"
+#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i }"
 #endif // KLS_DEBUG_CORE
 
 /**
@@ -302,9 +301,9 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * @see KLS_Stats_Fmt
  */
 #ifdef KLS_DEBUG_CORE
-#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups),(stats.worst_pushcall_time)
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.worst_pushcall_time)
 #else
-#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.tot_hiccups)
+#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops)
 #endif // KLS_DEBUG_CORE
 
 /**

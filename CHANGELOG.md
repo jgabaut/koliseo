@@ -23,6 +23,7 @@
   - Made `kls__try_grow()` pass `NULL` `on_new_handler` to the next `Koliseo`
   - Made `kls_free()` clear up a pending `Koliseo_Temp` before calling `on_free()`
 - Drop `kls_` prefix from `KLS_Conf` fields
+- Drop `tot_hiccups` from `KLS_Stats`
 - Fix direct usage of `_Alignof` in `kls_region.h`
 - Move `CODEOWNERS`, `SECURITY.md` to `.github/`
 - Move `format.sh`, `installer-sh`, `.astylerc` to `scripts/`

@@ -44,7 +44,6 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .tot_pops = 0,
     .tot_temp_pops = 0,
     .tot_logcalls = 0,
-    .tot_hiccups = 0,
 #ifdef KLS_DEBUG_CORE
     .worst_pushcall_time = -1,
 #endif
@@ -1047,9 +1046,6 @@ bool kls_set_conf(Koliseo *kls, KLS_Conf conf)
                     __func__);
 #endif
 #endif
-            if (kls->conf.collect_stats == 1) {
-                kls->stats.tot_hiccups += 1;
-            }
         }
 
         FILE *log_fp = NULL;
@@ -2077,9 +2073,6 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
         kls_log(current, "ERROR", "[%s()]: Passed Koliseo->has_temp != 0 . {%i}",
                 __func__, current->has_temp);
 #endif
-        if (current->conf.collect_stats == 1) {
-            current->stats.tot_hiccups += 1;
-        }
         return NULL;
     }
     ptrdiff_t prev = current->prev_offset;
