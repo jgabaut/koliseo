@@ -11,6 +11,7 @@
   + [Building](#building)
   + [Extra features](#extra_features)
     + [Debug](#extra_debug)
+    + [Locate](#extra_locate)
     + [Gulp](#extra_gulp)
     + [Region](#extra_region)
     + [Templates](#templates)
@@ -151,6 +152,10 @@ int main(void)
 
   Extra debug for core calls, may be too verbose for some applications.
 
+### Locate <a name = "extra_locate"></a>
+
+  Improved diagnostics with source location for errors and logs.
+
 ### Gulp <a name = "extra_gulp"></a>
 
   :construction: Disclaimer: after version 0.5, the Gulp feature is no longer present inside the main koliseo.c file. It has been reimplemented in [kls_gulp.h](./src/kls_gulp.h) file. :construction:
@@ -212,6 +217,7 @@ int main(void)
 
   - Region: `KOLISEO_HAS_REGION` :construction: (After 0.5, this macro is no longer used) :construction:
   - Debug: `KLS_DEBUG_CORE`
+  - Locate: `KOLISEO_HAS_LOCATE`
   - Gulp: `KOLISEO_HAS_GULP` :construction: (After 0.5, this macro is no longer used) :construction:
   - Experimental: `KOLISEO_HAS_EXPER`
 

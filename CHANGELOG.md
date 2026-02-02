@@ -26,6 +26,7 @@
 - Drop `tot_hiccups` from `KLS_Stats`
 - Fix direct usage of `_Alignof` in `kls_region.h`
 - Less verbose debug logging
+- Add info on `locate` extra feature to `README.md`
 - Move `CODEOWNERS`, `SECURITY.md` to `.github/`
 - Move `format.sh`, `installer-sh`, `.astylerc` to `scripts/`
 - Bump `invil` to `0.2.29`
