@@ -265,6 +265,4 @@ typedef struct KLS_Hooks {
   Thanks to [David Priver](https://www.davidpriver.com/ctemplates.html#template-headers.) for its dynamic array template example.
 
 ## Todo <a name = "todo"></a>
-
-  - Model `KLS_Temp_Conf` to still be included without `Region` feature
-  - Clean up the `Windows` part of the includes, to have minimal definitions from `windows.h`.
+  - Add support for `WASM`
