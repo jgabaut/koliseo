@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "kls_region.h"
+// We need to include the Koliseo implementation since we want it to
+// use our redefined KLS_DEFAULT_HOOKS
 #include "koliseo.c"
 
 const char* kls_reglist_backend_strings[KLS_REGLIST_TOTAL_BACKENDS] = {
