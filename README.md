@@ -10,9 +10,10 @@
   + [Configuration](#config)
   + [Building](#building)
   + [Extra features](#extra_features)
-    + [Region](#extra_region)
     + [Debug](#extra_debug)
+    + [Locate](#extra_locate)
     + [Gulp](#extra_gulp)
+    + [Region](#extra_region)
     + [Templates](#templates)
     + [Experimental](#extra_exper)
     + [How to use extras](#extra_howto)
@@ -25,7 +26,16 @@
 ## What is this thing? <a name = "witt"></a>
 
   This is a C library for an arena allocator, whose arenas are named `Koliseo`.
-  It offers a basic API to perform initialisation, push (request arena memory), reset and free of a `Koliseo`.
+  It offers:
+  - A basic API to perform initialisation, push (request arena memory), reset and free of a `Koliseo`.
+  - A dedicated temporary arena `Koliseo_Temp` API
+  - Support for `ASan` checks on arena memory usage
+  - Support for optional chaining of arenas on space exhaustion
+  - Customizable error handlers
+  - Customizable extension slot (see [this section](#extensions))
+    - See the [region](#extra_region) section for an example
+  - Customizable templates for data structs using the arena (see [this section](#templates))
+  - Optional extra features (see [this section](#extra_features))
 
   If you compile it without defining any special macros, you will get the basic functionality.
 
@@ -120,6 +130,7 @@ int main(void)
   - Run `./configure --host x86-64-w64-mingw32` to setup the `Makefile` appropriately for a `x86_64-w64-mingw32` build.
   - Run `./configure --enable-debug` to setup the `Makefile` appropriately and build with `-DKLS_DEBUG_CORE` flag.
     - By default, enabling debug this way also adds `-DKLS_SETCONF_DEBUG` to the demo build. This preproc guard lets you really debug kls initialisation, by printing logs from inside `kls_set_conf()`.
+  - Run `./configure --enable-locate` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_LOCATE` flag.
   - Run `./configure --enable-region` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_REGION` flag. :construction: (After 0.5, this is no longer relevant) :construction:
   - Run `./configure --enable-gulp` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_GULP` flag. :construction: (After 0.5, this is no longer relevant) :construction:
   - Run `./configure --enable-exper` to setup the `Makefile` appropriately and build with `-DKOLISEO_HAS_EXPER` flag.
@@ -138,6 +149,21 @@ int main(void)
 
 ### :construction: Disclaimer: after version 0.5, the Region and Gulp features are no longer bundled in the main koliseo.c file, after being moved to their own files. Read below for more info. :construction:
 
+### Core debug <a name = "extra_debug"></a>
+
+  Extra debug for core calls, may be too verbose for some applications.
+
+### Locate <a name = "extra_locate"></a>
+
+  Improved diagnostics with source location for errors and logs.
+
+### Gulp <a name = "extra_gulp"></a>
+
+  :construction: Disclaimer: after version 0.5, the Gulp feature is no longer present inside the main koliseo.c file. It has been reimplemented in [kls_gulp.h](./src/kls_gulp.h) file. :construction:
+
+  Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
+  - Also includes a minimal string-view API, in case you want to work on the file contents differently.
+
 ### Region <a name = "extra_region"></a>
 
 
@@ -153,17 +179,6 @@ int main(void)
     - Using the global allocator (from malloc)
   - Extra utility functions
     - Help you estimate relative memory usage by some particular type of object. May prove useful in some scenarios.
-
-### Core debug <a name = "extra_debug"></a>
-
-  Extra debug for core calls, may be too verbose for some applications.
-
-### Gulp <a name = "extra_gulp"></a>
-
-  :construction: Disclaimer: after version 0.5, the Gulp feature is no longer present inside the main koliseo.c file. It has been reimplemented as an extension, in kls_gulp.h file. :construction:
-
-  Utility to memory-map a file (always the best idea, right?) to a C string, by providing the filepath.
-  - Also includes a minimal string-view API, in case you want to work on the file contents differently.
 
 ### Templates <a name = "templates"></a>
 
@@ -203,6 +218,7 @@ int main(void)
 
   - Region: `KOLISEO_HAS_REGION` :construction: (After 0.5, this macro is no longer used) :construction:
   - Debug: `KLS_DEBUG_CORE`
+  - Locate: `KOLISEO_HAS_LOCATE`
   - Gulp: `KOLISEO_HAS_GULP` :construction: (After 0.5, this macro is no longer used) :construction:
   - Experimental: `KOLISEO_HAS_EXPER`
 
@@ -220,7 +236,7 @@ typedef struct KLS_Hooks {
     KLS_hook_on_temp_push* on_temp_push_handler; /**< Used to pass custom push handler for kls_temp_push calls.*/
 } KLS_Hooks;
 ```
-  You can have multiple extensions. For example, `src/kls_region.h` shows how to implement support for keeping track of all allocated memory regions. See the [Region section](#extra_region).
+  For example, `src/kls_region.h` shows how to implement support for keeping track of all allocated memory regions. See the [Region section](#extra_region).
 
 ## Documentation <a name = "docs"></a>
 
@@ -249,6 +265,4 @@ typedef struct KLS_Hooks {
   Thanks to [David Priver](https://www.davidpriver.com/ctemplates.html#template-headers.) for its dynamic array template example.
 
 ## Todo <a name = "todo"></a>
-
-  - Model `KLS_Temp_Conf` to still be included without `Region` feature
-  - Clean up the `Windows` part of the includes, to have minimal definitions from `windows.h`.
+  - Add support for `WASM`

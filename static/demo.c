@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     printf("[Show Region list for Koliseo] [pos: %lli]\n", kls_get_pos(kls));
 #endif
 
-    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data[0];
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data;
     KLS_RL_ECHOLIST(data_pt->regs);
 #endif // KOLISEO_HAS_REGION
 

@@ -5,7 +5,7 @@
 SRC_DIR="./src"
 
 # Specify the path to the configuration file
-CONFIG_FILE="./.astylerc"
+CONFIG_FILE="./scripts/.astylerc"
 
 [[ -f $CONFIG_FILE ]] || { printf "[ERROR] $CONFIG_FILE was not found.\n"; exit 1; } ;
 
@@ -21,7 +21,7 @@ for src in "${kls_SOURCES[@]}"; do
 
     # Check if the temporary file differs from the original file
     if ! diff -q "$src" "$src.tmp" &>/dev/null ; then
-        printf "\033[1;31m$src\e[0m needs formatting"
+        printf "\033[1;31m$src\e[0m needs formatting\n"
     fi
 
     # Clean up the temporary files
