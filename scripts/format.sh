@@ -11,7 +11,7 @@ SRC_DIR="src"
 TEMPLATES_DIR="templates"
 
 kls_SOURCES=("$SRC_DIR"/*.c "$SRC_DIR"/*.h "$TEMPLATES_DIR"/*.h)
-CONFIG_FILE=".astylerc"
+CONFIG_FILE="./scripts/.astylerc"
 
 printf "Running \033[1;34mastyle -s4 --style=linux\e[0m for all source files.\n"
 for src_i in "${kls_SOURCES[@]}"; do {
