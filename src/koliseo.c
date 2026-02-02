@@ -1141,12 +1141,7 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
     //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
     //kls_log("KLS",msg);
 #ifdef KLS_DEBUG_CORE
-    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
-    kls_log(current, "KLS", "API Level { %i } -> Pushed zeroes, size (%s) for KLS.",
-            int_koliseo_version(), h_size);
-    if (current->conf.verbose_lvl > 0) {
-        print_kls_2file(current->conf.log_fp, current);
-    }
+    kls_log(current, "KLS", "Pushed zeroes on KLS, size (%s). Curr offset: { %p }.", h_size, current->data + current->offset);
     if (current->conf.collect_stats == 1) {
 #ifndef _WIN32
         clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
@@ -1317,13 +1312,7 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
             current->stats.worst_pushcall_time = elapsed_time;
         }
     }
-    kls_log(current, "KLS", "Curr offset: { %p }.", current + current->offset);
-    kls_log(current, "KLS",
-            "API Level { %i } -> Pushed zeroes, size (%s) for Temp_KLS.",
-            int_koliseo_version(), h_size);
-    if (current->conf.verbose_lvl > 0) {
-        print_kls_2file(current->conf.log_fp, current);
-    }
+    kls_log(current, "KLS", "Pushed zeroes on Temp_KLS, size (%s). Curr offset: { %p }.", h_size, current->data + current->offset);
 #endif
     if (current->conf.collect_stats == 1) {
         current->stats.tot_temp_pushes += 1;
@@ -2176,11 +2165,8 @@ void *kls_pop(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
     kls->prev_offset = kls->offset;
     kls->offset -= padding + size * count;
 #ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.verbose_lvl > 0) {
-        print_kls_2file(kls->conf.log_fp, kls);
-    }
+    kls_log(kls, "KLS", "Popped (%td) for KLS. Curr offset: { %p }",
+            size, kls->data + kls->offset);
 #endif
     if (kls->conf.collect_stats == 1) {
         kls->stats.tot_pops += 1;
@@ -2221,12 +2207,7 @@ void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
     kls->prev_offset = kls->offset;
     kls->offset -= padding + size * count;
 #ifdef KLS_DEBUG_CORE
-    kls_log(kls, "KLS", "Curr offset: { %p }.", kls + kls->offset);
-    kls_log(kls, "KLS", "API Level { %i } -> Popped (%li) for Temp_KLS.",
-            int_koliseo_version(), size);
-    if (kls->conf.verbose_lvl > 0) {
-        print_kls_2file(kls->conf.log_fp, kls);
-    }
+    kls_log(kls, "KLS", "Popped (%td) for Temp_KLS. Curr offset: { %p }.", size, kls->data + kls->offset);
 #endif
     if (kls->conf.collect_stats == 1) {
         kls->stats.tot_temp_pops += 1;
