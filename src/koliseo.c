@@ -289,6 +289,18 @@ ptrdiff_t kls_get_pos(const Koliseo *kls)
     return kls->offset;
 }
 
+/**
+ * Handles a KLS_Push_Result.
+ * Internal, not intended for ordinary usage. Exposed for extension implementations.
+ * @param kls The Koliseo on which the push was performed.
+ * @param r The KLS_Push_Result to handle.
+ * @param size The size arg of the push call.
+ * @param align The align arg of the push call.
+ * @param count The count arg of the push call.
+ * @param padding The padding calculated by the push call.
+ * @param caller_name The caller name of the push call.
+ * @return The pointer field of the KLS_Push_Result (may be NULL), or calls error handlers / goes to exit() on errors.
+ */
 #ifndef KOLISEO_HAS_LOCATE
 void* kls__handle_push_result(Koliseo* kls, KLS_Push_Result r, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t padding, const char* caller_name)
 #else
@@ -1083,7 +1095,7 @@ static bool kls__try_grow(Koliseo* kls, ptrdiff_t needed);
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @param padding The pointer used to store amount of padding used in the advancement.
- * @return A void pointer to the start of memory just pushed to the Koliseo, or NULL for errors.
+ * @return A KLS_Push_Result value.
  */
 #ifndef KOLISEO_HAS_LOCATE
 KLS_Push_Result kls__advance(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name)
@@ -1177,7 +1189,7 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
  * @param align The alignment of the type to allocate.
  * @param count The count of allocations.
  * @param caller_name Name for caller. Used for error reporting.
- * @return 0 for success, other values for errors. May exit of some errors without a custom handler.
+ * @return A KLS_Push_Error value.
  * @see Koliseo
  */
 #ifndef KOLISEO_HAS_LOCATE
@@ -1238,7 +1250,7 @@ KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t 
  * @param align The alignment for data to push.
  * @param count The multiplicative quantity to scale data size to push for.
  * @param padding The pointer used to store amount of padding used in the advancement.
- * @return A void pointer to the start of memory just pushed to the referred Koliseo.
+ * @return A KLS_Push_Result value.
  */
 #ifndef KOLISEO_HAS_LOCATE
 KLS_Push_Result kls__temp_advance(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name)
