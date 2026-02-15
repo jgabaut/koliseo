@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.6.0] - Unreleased
+## [0.6.1] - Unreleased
+
+### Added
+
+- Add `DARRAY_sort` to `templates/darray.h` using `qsort`
+
+## [0.6.0] - 2026-02-02
 
 ### Added
 

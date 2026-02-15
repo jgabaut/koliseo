@@ -33,7 +33,7 @@
 #define DARRAY_HEADER_H
 // Inline functions, #defines and includes that will be
 // needed for all instantiations can go up here.
-#include <stdlib.h> // realloc, size_t
+#include <stdlib.h> // realloc, size_t, qsort
 #include <stdio.h> // fprintf, stderr
 
 #define DARRAY_IMPL(word) DARRAY_COMB1(DARRAY_PREFIX,word)
@@ -82,10 +82,13 @@ struct DARRAY_NAME {
     size_t capacity;
 };
 
+typedef int (*DARRAY_IMPL(cmp_fn))(const DARRAY_T*, const DARRAY_T*);
+
 #define DARRAY_push DARRAY_IMPL(push)
 #define DARRAY_init DARRAY_IMPL(init)
 #define DARRAY_push_t DARRAY_IMPL(push_t)
 #define DARRAY_init_t DARRAY_IMPL(init_t)
+#define DARRAY_sort DARRAY_IMPL(sort)
 
 #ifdef DARRAY_DECLS_ONLY
 
@@ -104,6 +107,10 @@ DARRAY_push_t(DARRAY_NAME* array, DARRAY_T item);
 DARRAY_LINKAGE
 DARRAY_NAME
 DARRAY_init_t(Koliseo_Temp* t_kls);
+
+DARRAY_LINKAGE
+void
+DARRAY_sort(DARRAY_NAME* array, DARRAY_IMPL(cmp_fn) cmp);
 
 #else
 
@@ -194,6 +201,34 @@ DARRAY_init_t(Koliseo_Temp* t_kls)
     return res;
 }
 
+static DARRAY_IMPL(cmp_fn) DARRAY_IMPL(_sort_cmp);
+
+static int
+DARRAY_IMPL(_sort_adapter)(const void* a, const void* b)
+{
+    const DARRAY_T* lhs = (const DARRAY_T*)a;
+    const DARRAY_T* rhs = (const DARRAY_T*)b;
+    return DARRAY_IMPL(_sort_cmp)(lhs, rhs);
+}
+
+DARRAY_LINKAGE
+void
+DARRAY_sort(
+    DARRAY_NAME* array,
+    DARRAY_IMPL(cmp_fn) cmp
+)
+{
+    if (!array || !array->items || array->count <= 1 || !cmp)
+        return;
+
+    DARRAY_IMPL(_sort_cmp) = cmp;
+
+    qsort(array->items,
+          array->count,
+          sizeof(DARRAY_T),
+          DARRAY_IMPL(_sort_adapter));
+}
+
 #endif // DARRAY_DECLS_ONLY
 
 // Cleanup
@@ -207,6 +242,7 @@ DARRAY_init_t(Koliseo_Temp* t_kls)
 #undef DARRAY_push
 #undef DARRAY_init
 #undef DARRAY_push_t
+#undef DARRAY_sort
 #undef DARRAY_init_t
 #ifdef DARRAY_DECLS_ONLY
 #undef DARRAY_DECLS_ONLY

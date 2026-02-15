@@ -6,6 +6,11 @@
 #define DARRAY_NAME darray_str
 #include "darray.h"
 
+int longest_string(const char** a, const char** b) {
+    int l_a = strlen(*a);
+    int l_b = strlen(*b);
+    return l_b - l_a;
+}
 
 int main(int argc, char** argv)
 {
@@ -32,6 +37,17 @@ int main(int argc, char** argv)
 
     char* bar = "bar";
     darray_str_push(ds, bar);
+
+    char* foobar = "foobar";
+    darray_str_push(ds, foobar);
+
+    for (int i = 0; i < ds->count; i++) {
+        printf("{#%i: %s}\n", i, ds->items[i]);
+    }
+
+    printf("Sorting based on length (longest first):\n");
+
+    darray_str_sort(ds, longest_string);
 
     for (int i = 0; i < ds->count; i++) {
         printf("{#%i: %s}\n", i, ds->items[i]);
