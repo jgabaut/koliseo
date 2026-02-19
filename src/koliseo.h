@@ -34,10 +34,6 @@
 extern "C" {
 #endif // __cplusplus
 
-#ifndef _WIN32
-#define _POSIX_C_SOURCE 200809L
-#endif
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
