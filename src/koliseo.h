@@ -252,6 +252,9 @@ typedef struct KLS_Stats {
     int tot_temp_pops; /**< Total POP_T calls done.*/
     int tot_logcalls; /**< Total kls_log() calls done.*/
 #ifdef KLS_DEBUG_CORE
+    /**
+     * DEPRECATED: support for timing will be dropped in the next release.
+     */
     double worst_pushcall_time;	/**< Longest time taken by a PUSH call.*/
 #endif
 } KLS_Stats;

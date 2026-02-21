@@ -5,6 +5,8 @@
 ### Added
 
 - Add `DARRAY_sort` to `templates/darray.h` using `qsort`
+- Move `_POSIX_C_SOURCE` definition to `koliseo.c`
+- Mark `KLS_Stats.worst_pushcall_time` as deprecated
 
 ## [0.6.0] - 2026-02-02
 
