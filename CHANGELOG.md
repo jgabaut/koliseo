@@ -6,9 +6,12 @@
 
 - Add `DARRAY_sort` to `templates/darray.h` using `qsort`
 - Move `_POSIX_C_SOURCE` definition to `koliseo.c`
-- Mark `KLS_Stats.worst_pushcall_time` as deprecated
+
+### Changed
+
 - Bump `invil` to `0.2.30`
 - Bump `amboso` to `2.1.2`
+- Deprecate `KLS_Stats.worst_pushcall_time`
 
 ## [0.6.0] - 2026-02-02
 
