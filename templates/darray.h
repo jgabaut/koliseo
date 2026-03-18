@@ -82,13 +82,16 @@ struct DARRAY_NAME {
     size_t capacity;
 };
 
-typedef int (*DARRAY_IMPL(cmp_fn))(const DARRAY_T*, const DARRAY_T*);
 
 #define DARRAY_push DARRAY_IMPL(push)
 #define DARRAY_init DARRAY_IMPL(init)
 #define DARRAY_push_t DARRAY_IMPL(push_t)
 #define DARRAY_init_t DARRAY_IMPL(init_t)
+
+#ifdef DARRAY_HAS_SORT
+typedef int (*DARRAY_IMPL(cmp_fn))(const DARRAY_T*, const DARRAY_T*);
 #define DARRAY_sort DARRAY_IMPL(sort)
+#endif // DARRAY_HAS_SORT
 
 #ifdef DARRAY_DECLS_ONLY
 
@@ -108,9 +111,11 @@ DARRAY_LINKAGE
 DARRAY_NAME
 DARRAY_init_t(Koliseo_Temp* t_kls);
 
+#ifdef DARRAY_HAS_SORT
 DARRAY_LINKAGE
 void
 DARRAY_sort(DARRAY_NAME* array, DARRAY_IMPL(cmp_fn) cmp);
+#endif // DARRAY_HAS_SORT
 
 #else
 
@@ -201,6 +206,7 @@ DARRAY_init_t(Koliseo_Temp* t_kls)
     return res;
 }
 
+#ifdef DARRAY_HAS_SORT
 static DARRAY_IMPL(cmp_fn) DARRAY_IMPL(_sort_cmp);
 
 static int
@@ -228,6 +234,7 @@ DARRAY_sort(
           sizeof(DARRAY_T),
           DARRAY_IMPL(_sort_adapter));
 }
+#endif // DARRAY_HAS_SORT
 
 #endif // DARRAY_DECLS_ONLY
 
@@ -242,8 +249,11 @@ DARRAY_sort(
 #undef DARRAY_push
 #undef DARRAY_init
 #undef DARRAY_push_t
-#undef DARRAY_sort
 #undef DARRAY_init_t
+#ifdef DARRAY_HAS_SORT
+#undef DARRAY_sort
+#undef DARRAY_HAS_SORT
+#endif // DARRAY_HAS_SORT
 #ifdef DARRAY_DECLS_ONLY
 #undef DARRAY_DECLS_ONLY
 #endif // DARRAY_DECLS_ONLY

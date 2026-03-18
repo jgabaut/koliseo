@@ -3,6 +3,7 @@
 #define DARRAY_T int
 #include "darray.h"
 #define DARRAY_T char*
+#define DARRAY_HAS_SORT
 #define DARRAY_NAME darray_str
 #include "darray.h"
 
