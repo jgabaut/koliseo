@@ -1,6 +1,20 @@
 # Changelog
 
-## [0.6.0] - Unreleased
+## [0.6.1] - 2026-03-19
+
+### Added
+
+- Add `DARRAY_sort` to `templates/darray.h` using `qsort`
+  - Needs `DARRAY_HAS_SORT` to be defined before including the header
+- Move `_POSIX_C_SOURCE` definition to `koliseo.c`
+
+### Changed
+
+- Bump `invil` to `0.2.30`
+- Bump `amboso` to `2.1.2`
+- Deprecate `KLS_Stats.worst_pushcall_time`
+
+## [0.6.0] - 2026-02-02
 
 ### Added
 
