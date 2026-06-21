@@ -237,7 +237,7 @@ bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value)
     }
     Koliseo* kls = node->allocator.kls;
     char* key_dup = KLS_PUSH_STR(kls, key);
-    memcpy(key_dup, key, strlen(key));
+    memcpy(key_dup, key, strlen(key)+1);
     HASHMAP_NODE_NAME new = {
         .key = key_dup,
         .value = value,

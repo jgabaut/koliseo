@@ -8,6 +8,7 @@
   - Check for `NULL` node in `HASHMAP_get()`
   - Correct type mismatch in definition signature of `HASHMAP_murmur2_hash_str()`
   - Correct type for iteration indexes in `HASHMAP_remove()`
+  - Account for NULL terminator for `memcpy()` in `HASHMAP_push()`
 
 ## [0.6.1] - 2026-03-19
 
