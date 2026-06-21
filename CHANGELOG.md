@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.2] - Unreleased
+
+### Changed
+
+- Fixes for `templates/hashmap.h`:
+  - Check for `NULL` node in `HASHMAP_get()`
+  - Correct type mismatch in definition signature of `HASHMAP_murmur2_hash_str()`
+
 ## [0.6.1] - 2026-03-19
 
 ### Added

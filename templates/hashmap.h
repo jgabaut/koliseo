@@ -153,7 +153,7 @@ static uint64_t HASHMAP_fnv_1a_hash_str(const char *s, size_t len)
 }
 
 /* Murmur2 hash */
-static uint64_t HASHMAP_murmur2_hash_str(const void *key, size_t len)
+static uint64_t HASHMAP_murmur2_hash_str(const char *key, size_t len)
 {
     const uint64_t m = 0xc6a4a7935bd1e995ULL;
     const int r = 47;
@@ -253,6 +253,7 @@ HASHMAP_T *HASHMAP_get(HASHMAP_NAME *map, const char *key)
     size_t index = h % map->bucket_count;
 
     DARRAY_NAME *node = map->buckets[index];
+    if (!node) return NULL;
     for (int i = 0; i < node->count; i++) {
         if (strcmp(node->items[i].key, key) == 0) {
             return node->items[i].value;
