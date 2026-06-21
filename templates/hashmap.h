@@ -269,9 +269,9 @@ bool HASHMAP_remove(HASHMAP_NAME *map, const char *key)
 
     DARRAY_NAME **prev = &map->buckets[index];
     DARRAY_NAME *node = *prev;
-    for (int i = 0; i < node->count; i++) {
+    for (size_t i = 0; i < node->count; i++) {
         if (strcmp(node->items[i].key, key) == 0) {
-            for (int j = i; j < node->count -1; j++) {
+            for (size_t j = i; j + 1 < node->count; j++) {
                 (*prev)->items[j] = (*prev)->items[j+1];
             }
             (*prev)->count -= 1;
