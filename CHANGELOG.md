@@ -9,6 +9,7 @@
   - Correct type mismatch in definition signature of `HASHMAP_murmur2_hash_str()`
   - Correct type for iteration indexes in `HASHMAP_remove()`
   - Account for NULL terminator for `memcpy()` in `HASHMAP_push()`
+  - Check for strictly positive `bucket_count` in `HASHMAP_push()`
 - Fix allocation size for `growable` feature
 
 ## [0.6.1] - 2026-03-19

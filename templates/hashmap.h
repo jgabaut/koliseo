@@ -224,6 +224,7 @@ HASHMAP_NAME *HASHMAP_new(Koliseo* kls, size_t bucket_count)
 
 bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value)
 {
+    if (map->bucket_count <= 0) return false;
     uint64_t h = HASHMAP_hash_str(key, strlen(key));
     size_t index = h % map->bucket_count;
 
