@@ -1237,7 +1237,7 @@ KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t 
         if (count > PTRDIFF_MAX / size) {
             return KLS_PUSH_PTRDIFF_MAX;
         } else {
-            if (current->conf.growable == 1 && kls__try_grow(current, size + count + padding)) {
+            if (current->conf.growable == 1 && kls__try_grow(current, (size * count) + padding)) {
                 return KLS_PUSH_OK;
             }
             return KLS_PUSH_OOM;
