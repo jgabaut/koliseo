@@ -1934,21 +1934,23 @@ void print_dbg_temp_kls(const Koliseo_Temp *t_kls)
  * @param outputBuffer The output buffer.
  * @param bufferSize The output buffer size.
  */
-void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize)
+void kls_formatSize(size_t size, char *outputBuffer, size_t bufferSize)
 {
-    const char *units[] =
-    { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+    static const char *units[] = {
+        "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"
+    };
+
     const int numUnits = sizeof(units) / sizeof(units[0]);
 
-    int unitIndex = 0;
-    double sizeValue = (double)size;
+    size_t unitIndex = 0;
+    long double sizeValue = (long double)size;
 
     while (sizeValue >= 1000 && unitIndex < numUnits - 1) {
         sizeValue /= 1000;
         unitIndex++;
     }
 
-    snprintf(outputBuffer, bufferSize, "%.2f %s", sizeValue, units[unitIndex]);
+    snprintf(outputBuffer, bufferSize, "%.2Lf %s", sizeValue, units[unitIndex]);
 }
 
 /**

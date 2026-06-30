@@ -592,7 +592,7 @@ void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
 void print_kls_2file(FILE * fp, const Koliseo * kls);
 void print_dbg_kls(const Koliseo * kls);
-void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
+void kls_formatSize(size_t size, char *outputBuffer, size_t bufferSize);
 
 #ifndef KOLISEO_HAS_LOCATE
 Koliseo_Temp *kls_temp_start(Koliseo * kls);
