@@ -11,6 +11,7 @@
   - Account for NULL terminator for `memcpy()` in `HASHMAP_push()`
   - Check for strictly positive `bucket_count` in `HASHMAP_push()`
 - Fix allocation size for `growable` feature
+- Preprocessor guard for usercode defining only one of `KLS_DEFAULT_ALLOCF` and `KLS_DEFAULT_FREEF`
 
 ## [0.6.1] - 2026-03-19
 

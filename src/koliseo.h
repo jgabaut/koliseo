@@ -402,6 +402,10 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_f
 #define kls_new_alloc(size, alloc_func, free_func) kls_new_alloc_dbg((size), (alloc_func), (free_func), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
+#if defined(KLS_DEFAULT_ALLOCF) != defined(KLS_DEFAULT_FREEF)
+#error "KLS_DEFAULT_ALLOCF and KLS_DEFAULT_FREEF must either both be defined or both be left undefined."
+#endif
+
 #ifndef KLS_DEFAULT_ALLOCF
 #define KLS_DEFAULT_ALLOCF malloc /**< Defines the default allocation function.*/
 #endif
