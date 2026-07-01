@@ -494,6 +494,8 @@ char* kls_sprintf_dbg(Koliseo* kls, Koliseo_Loc loc, const char* fmt, ...);
 #define kls_sprintf(kls, fmt, ...) kls_sprintf_dbg((kls), KLS_HERE, (fmt), __VA_ARGS__)
 #endif // KOLISEO_HAS_LOCATE
 
+bool kls_contains_pointer(const Koliseo *kls, const void *ptr);
+
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_repush(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                  ptrdiff_t old_count, ptrdiff_t new_count);
