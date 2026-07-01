@@ -1709,6 +1709,9 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         return NULL;
     }
     if (old_count >= new_count) return old;
+
+    ptrdiff_t growth = new_count - old_count;
+
     if ((size_t)old_count > SIZE_MAX / (size_t)size) return NULL;
 
     if ((size_t)new_count > SIZE_MAX / (size_t)size) return NULL;
@@ -1731,15 +1734,15 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         // Save prev_offset
         const ptrdiff_t saved_prev_offset = current->prev_offset;
 #ifndef KOLISEO_HAS_LOCATE
-        KLS_Push_Result res = kls__advance(current, size, align, new_count - old_count, &padding, __func__);
-        void* p = kls__handle_push_result(current, res, size, align, new_count - old_count, padding, __func__);
+        KLS_Push_Result res = kls__advance(current, size, align, growth, &padding, __func__);
+        void* p = kls__handle_push_result(current, res, size, align, growth, padding, __func__);
 #else
-        KLS_Push_Result res = kls__advance_dbg(current, size, align, new_count - old_count, &padding, __func__, loc);
-        void* p = kls__handle_push_result_dbg(current, res, size, align, new_count - old_count, padding, __func__, loc);
+        KLS_Push_Result res = kls__advance_dbg(current, size, align, growth, &padding, __func__, loc);
+        void* p = kls__handle_push_result_dbg(current, res, size, align, growth, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
         if (!p) return NULL;
         //Zero new area
-        memset(p, 0, size * (new_count - old_count));
+        memset(p, 0, size * growth);
         new_ptr = old;
 
         Koliseo* new_current = current;
@@ -1748,7 +1751,6 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         }
 
 #ifdef KLS_DEBUG_CORE
-        //const ptrdiff_t new_byte_slice_len = size * (new_count - old_count);
         const ptrdiff_t new_byte_slice_len = new_current->offset - new_current->prev_offset + padding;
         kls_log(new_current, "KLS", "Extended last allocation on KLS, new_byte_slice_len (%td), padding (%td). Curr offset: { %p } Old: { %p }, New: { %p }.", new_byte_slice_len, padding, new_current->data + new_current->offset, old, new_ptr);
 #endif
