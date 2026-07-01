@@ -1828,6 +1828,13 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
 #endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
+    if (!kls_contains_pointer(t_kls->kls, old)) {
+        fprintf(stderr,
+                "[KLS] %s(): pointer %p does not belong to this Koliseo.\n",
+                __func__,
+                old);
+        return NULL;
+    }
     if (old_count < 0) {
 #ifndef KOLISEO_HAS_LOCATE
         fprintf(stderr,
@@ -1903,11 +1910,65 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
 #endif // KOLISEO_HAS_LOCATE
         return NULL;
     }
-    size_t old_size = old_count * size;
-    size_t new_size = new_count * size;
-    void *new_ptr = kls_temp_push_zero_ext(t_kls, size, align, new_count);
-    if (new_ptr && old_size > 0) {
-        memcpy(new_ptr, old, old_size < new_size ? old_size : new_size);
+
+    if (old_count >= new_count) return old;
+
+    ptrdiff_t growth = new_count - old_count;
+
+    if ((size_t)old_count > SIZE_MAX / (size_t)size) return NULL;
+
+    if ((size_t)new_count > SIZE_MAX / (size_t)size) return NULL;
+
+    size_t old_size = (size_t)old_count * (size_t)size;
+    size_t new_size = (size_t)new_count * (size_t)size;
+
+    Koliseo* current = t_kls->kls;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+
+    ptrdiff_t padding = 0;
+    bool is_last_alloc = old == (current->data + current->prev_offset);
+
+    void* new_ptr = NULL;
+    if (is_last_alloc) {
+        // Extend last allocation
+
+        // Save prev_offset
+        const ptrdiff_t saved_prev_offset = current->prev_offset;
+#ifndef KOLISEO_HAS_LOCATE
+        KLS_Push_Result res = kls__temp_advance(t_kls, size, align, growth, &padding, __func__);
+        void* p = kls__handle_push_result(current, res, size, align, growth, padding, __func__);
+#else
+        KLS_Push_Result res = kls__temp_advance_dbg(t_kls, size, align, growth, &padding, __func__, loc);
+        void* p = kls__handle_push_result_dbg(current, res, size, align, growth, padding, __func__, loc);
+#endif // KOLISEO_HAS_LOCATE
+        if (!p) return NULL;
+        size_t added_size = new_size - old_size;
+        //Zero new area
+        memset(p, 0, added_size);
+        new_ptr = old;
+
+        Koliseo* new_current = current;
+        while (new_current->next != NULL) {
+            new_current = new_current->next;
+        }
+
+#ifdef KLS_DEBUG_CORE
+        const ptrdiff_t new_byte_slice_len = new_current->offset - new_current->prev_offset + padding;
+        kls_log(new_current, "KLS", "Extended last allocation on Temp_KLS, new_byte_slice_len (%td), padding (%td). Curr offset: { %p } Old: { %p }, New: { %p }.", new_byte_slice_len, padding, new_current->data + new_current->offset, old, new_ptr);
+#endif
+
+        // Restore saved prev_offset
+        current->prev_offset = saved_prev_offset;
+    } else {
+#ifdef KLS_DEBUG_CORE
+        kls_log(current, "KLS", "%s(): pushed new memory", __func__);
+#endif
+        new_ptr = kls_temp_push_zero_ext(t_kls, size, align, new_count);
+        if (new_ptr && old_size > 0) {
+            memcpy(new_ptr, old, old_size);
+        }
     }
     return new_ptr;
 }
