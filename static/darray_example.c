@@ -15,7 +15,7 @@ int longest_string(const char** a, const char** b) {
 
 int main(int argc, char** argv)
 {
-    Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
+    Koliseo* kls = kls_new_dbg(KLS_DEFAULT_SIZE);
     darray_int* darray = darray_int_init(kls);
 
     darray_int_push(darray, 1);

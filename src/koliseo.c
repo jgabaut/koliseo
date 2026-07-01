@@ -1708,11 +1708,57 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         fprintf(stderr, "%s(): kls has an active temp\n", __func__);
         return NULL;
     }
+    if (old_count >= new_count) return old;
     size_t old_size = old_count * size;
     size_t new_size = new_count * size;
-    void *new_ptr = kls_push_zero_ext(kls, size, align, new_count);
-    if (new_ptr && old_size > 0) {
-        memcpy(new_ptr, old, old_size < new_size ? old_size : new_size);
+
+    Koliseo* current = kls;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+
+    ptrdiff_t padding = 0;
+    bool is_last_alloc = old == (current->data + current->prev_offset);
+
+    void* new_ptr = NULL;
+    if (is_last_alloc) {
+        // Extend last allocation
+
+        // Save prev_offset
+        const ptrdiff_t saved_prev_offset = current->prev_offset;
+#ifndef KOLISEO_HAS_LOCATE
+        KLS_Push_Result res = kls__advance(current, size, align, new_count - old_count, &padding, __func__);
+        void* p = kls__handle_push_result(current, res, size, align, new_count - old_count, padding, __func__);
+#else
+        KLS_Push_Result res = kls__advance_dbg(current, size, align, count, &padding, __func__, loc);
+        void* p = kls__handle_push_result_dbg(current, res, size, align, count, padding, __func__, loc);
+#endif // KOLISEO_HAS_LOCATE
+        if (!p) return NULL;
+        //Zero new area
+        memset(p, 0, size * (new_count - old_count));
+        new_ptr = old;
+
+        Koliseo* new_current = current;
+        while (new_current->next != NULL) {
+            new_current = new_current->next;
+        }
+
+#ifdef KLS_DEBUG_CORE
+        //const ptrdiff_t new_byte_slice_len = size * (new_count - old_count);
+        const ptrdiff_t new_byte_slice_len = new_current->offset - new_current->prev_offset + padding;
+        kls_log(new_current, "KLS", "Extended last allocation on KLS, new_byte_slice_len (%td), padding (%td). Curr offset: { %p } Old: { %p }, New: { %p }.", new_byte_slice_len, padding, new_current->data + new_current->offset, old, new_ptr);
+#endif
+
+        // Restore saved prev_offset
+        current->prev_offset = saved_prev_offset;
+    } else {
+#ifdef KLS_DEBUG_CORE
+        kls_log(current, "KLS", "%s(): pushed new memory", __func__);
+#endif
+        new_ptr = kls_push_zero_ext(kls, size, align, new_count);
+        if (new_ptr && old_size > 0) {
+            memcpy(new_ptr, old, old_size < new_size ? old_size : new_size);
+        }
     }
     return new_ptr;
 }

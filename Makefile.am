@@ -287,7 +287,7 @@ dllist_example:
 
 darray_example:
 	@echo -en "Building darray_example"
-	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/darray_example.c -o static/darray_example
+	$(CCOMP) -DKLS_DEBUG_CORE -Isrc/ -Itemplates/ src/koliseo.c static/darray_example.c -o static/darray_example
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 pit_example:
