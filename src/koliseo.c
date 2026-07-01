@@ -1709,8 +1709,12 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         return NULL;
     }
     if (old_count >= new_count) return old;
-    size_t old_size = old_count * size;
-    size_t new_size = new_count * size;
+    if ((size_t)old_count > SIZE_MAX / (size_t)size) return NULL;
+
+    if ((size_t)new_count > SIZE_MAX / (size_t)size) return NULL;
+
+    size_t old_size = (size_t)old_count * (size_t)size;
+    size_t new_size = (size_t)new_count * (size_t)size;
 
     Koliseo* current = kls;
     while (current->next != NULL) {
@@ -1730,8 +1734,8 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         KLS_Push_Result res = kls__advance(current, size, align, new_count - old_count, &padding, __func__);
         void* p = kls__handle_push_result(current, res, size, align, new_count - old_count, padding, __func__);
 #else
-        KLS_Push_Result res = kls__advance_dbg(current, size, align, count, &padding, __func__, loc);
-        void* p = kls__handle_push_result_dbg(current, res, size, align, count, padding, __func__, loc);
+        KLS_Push_Result res = kls__advance_dbg(current, size, align, new_count - old_count, &padding, __func__, loc);
+        void* p = kls__handle_push_result_dbg(current, res, size, align, new_count - old_count, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
         if (!p) return NULL;
         //Zero new area
@@ -1757,7 +1761,7 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
 #endif
         new_ptr = kls_push_zero_ext(kls, size, align, new_count);
         if (new_ptr && old_size > 0) {
-            memcpy(new_ptr, old, old_size < new_size ? old_size : new_size);
+            memcpy(new_ptr, old, old_size);
         }
     }
     return new_ptr;
