@@ -266,7 +266,7 @@ anviltest: tests
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 basic_example:
-	@echo -en "Building region_example"
+	@echo -en "Building basic_example"
 	$(CCOMP) -Isrc/ src/koliseo.c static/basic_example.c -o static/basic_example
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
