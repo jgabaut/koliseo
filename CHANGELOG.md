@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.6.2] - Unreleased
+## [0.6.3] - Unreleased
+
+### Added
+
+- Proper implementation of `repush()` semantics
+
+## [0.6.2] - 2026-07-01
 
 ### Added
 
