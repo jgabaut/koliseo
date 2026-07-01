@@ -86,7 +86,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 6 /**< Represents current minor release.*/
-#define KLS_PATCH 1 /**< Represents current patch release.*/
+#define KLS_PATCH 2 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -107,7 +107,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.6.1"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.6.2"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -402,6 +402,10 @@ Koliseo *kls_new_alloc_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_free_f
 #define kls_new_alloc(size, alloc_func, free_func) kls_new_alloc_dbg((size), (alloc_func), (free_func), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 
+#if defined(KLS_DEFAULT_ALLOCF) != defined(KLS_DEFAULT_FREEF)
+#error "KLS_DEFAULT_ALLOCF and KLS_DEFAULT_FREEF must either both be defined or both be left undefined."
+#endif
+
 #ifndef KLS_DEFAULT_ALLOCF
 #define KLS_DEFAULT_ALLOCF malloc /**< Defines the default allocation function.*/
 #endif
@@ -588,7 +592,7 @@ void kls_clear(Koliseo * kls);
 void kls_free(Koliseo * kls);
 void print_kls_2file(FILE * fp, const Koliseo * kls);
 void print_dbg_kls(const Koliseo * kls);
-void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize);
+void kls_formatSize(size_t size, char *outputBuffer, size_t bufferSize);
 
 #ifndef KOLISEO_HAS_LOCATE
 Koliseo_Temp *kls_temp_start(Koliseo * kls);

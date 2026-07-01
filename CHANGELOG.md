@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.2] - Unreleased
+
+### Added
+
+- Add `huge.k` test for maximum allocation size
+
+### Changed
+
+- Fixes for `templates/hashmap.h`:
+  - Check for `NULL` node in `HASHMAP_get()`
+  - Correct type mismatch in definition signature of `HASHMAP_murmur2_hash_str()`
+  - Correct type for iteration indexes in `HASHMAP_remove()`
+  - Account for NULL terminator for `memcpy()` in `HASHMAP_push()`
+  - Check for strictly positive `bucket_count` in `HASHMAP_push()`
+- Fix allocation size for `growable` feature
+- Preprocessor guard for usercode defining only one of `KLS_DEFAULT_ALLOCF` and `KLS_DEFAULT_FREEF`
+- Refactor `kls_formatSize` to expect `size_t`
+
 ## [0.6.1] - 2026-03-19
 
 ### Added

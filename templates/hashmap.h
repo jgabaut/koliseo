@@ -153,7 +153,7 @@ static uint64_t HASHMAP_fnv_1a_hash_str(const char *s, size_t len)
 }
 
 /* Murmur2 hash */
-static uint64_t HASHMAP_murmur2_hash_str(const void *key, size_t len)
+static uint64_t HASHMAP_murmur2_hash_str(const char *key, size_t len)
 {
     const uint64_t m = 0xc6a4a7935bd1e995ULL;
     const int r = 47;
@@ -224,6 +224,7 @@ HASHMAP_NAME *HASHMAP_new(Koliseo* kls, size_t bucket_count)
 
 bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value)
 {
+    if (map->bucket_count <= 0) return false;
     uint64_t h = HASHMAP_hash_str(key, strlen(key));
     size_t index = h % map->bucket_count;
 
@@ -237,7 +238,7 @@ bool HASHMAP_push(HASHMAP_NAME *map, const char *key, HASHMAP_T *value)
     }
     Koliseo* kls = node->allocator.kls;
     char* key_dup = KLS_PUSH_STR(kls, key);
-    memcpy(key_dup, key, strlen(key));
+    memcpy(key_dup, key, strlen(key)+1);
     HASHMAP_NODE_NAME new = {
         .key = key_dup,
         .value = value,
@@ -253,6 +254,7 @@ HASHMAP_T *HASHMAP_get(HASHMAP_NAME *map, const char *key)
     size_t index = h % map->bucket_count;
 
     DARRAY_NAME *node = map->buckets[index];
+    if (!node) return NULL;
     for (int i = 0; i < node->count; i++) {
         if (strcmp(node->items[i].key, key) == 0) {
             return node->items[i].value;
@@ -268,9 +270,9 @@ bool HASHMAP_remove(HASHMAP_NAME *map, const char *key)
 
     DARRAY_NAME **prev = &map->buckets[index];
     DARRAY_NAME *node = *prev;
-    for (int i = 0; i < node->count; i++) {
+    for (size_t i = 0; i < node->count; i++) {
         if (strcmp(node->items[i].key, key) == 0) {
-            for (int j = i; j < node->count -1; j++) {
+            for (size_t j = i; j + 1 < node->count; j++) {
                 (*prev)->items[j] = (*prev)->items[j+1];
             }
             (*prev)->count -= 1;

@@ -893,11 +893,11 @@ Koliseo *kls_new_dbg_alloc_handled_ext(ptrdiff_t size, kls_alloc_func alloc_func
     KLS_Conf k = (KLS_Conf) {
         .collect_stats = 1,.verbose_lvl = 0,
 #ifndef KOLISEO_HAS_LOCATE
-                           .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
-                           .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
+        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler__),
+        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler__),
 #else
-                           .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
-                           .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
+        .err_handlers.OOM_handler = ( err_handlers.OOM_handler != NULL ? err_handlers.OOM_handler : &KLS_OOM_default_handler_dbg__),
+        .err_handlers.PTRDIFF_MAX_handler = ( err_handlers.PTRDIFF_MAX_handler != NULL ? err_handlers.PTRDIFF_MAX_handler : &KLS_PTRDIFF_MAX_default_handler_dbg__),
 #endif // KOLIEO_HAS_LOCATE
     };
     Koliseo * kls = kls_new_conf_alloc_ext(size, k, alloc_func, free_func, ext_handlers, user);
@@ -1237,7 +1237,7 @@ KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t 
         if (count > PTRDIFF_MAX / size) {
             return KLS_PUSH_PTRDIFF_MAX;
         } else {
-            if (current->conf.growable == 1 && kls__try_grow(current, size + count + padding)) {
+            if (current->conf.growable == 1 && kls__try_grow(current, (size * count) + padding)) {
                 return KLS_PUSH_OK;
             }
             return KLS_PUSH_OOM;
@@ -1934,21 +1934,23 @@ void print_dbg_temp_kls(const Koliseo_Temp *t_kls)
  * @param outputBuffer The output buffer.
  * @param bufferSize The output buffer size.
  */
-void kls_formatSize(ptrdiff_t size, char *outputBuffer, size_t bufferSize)
+void kls_formatSize(size_t size, char *outputBuffer, size_t bufferSize)
 {
-    const char *units[] =
-    { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+    static const char *units[] = {
+        "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"
+    };
+
     const int numUnits = sizeof(units) / sizeof(units[0]);
 
-    int unitIndex = 0;
-    double sizeValue = (double)size;
+    size_t unitIndex = 0;
+    long double sizeValue = (long double)size;
 
     while (sizeValue >= 1000 && unitIndex < numUnits - 1) {
         sizeValue /= 1000;
         unitIndex++;
     }
 
-    snprintf(outputBuffer, bufferSize, "%.2f %s", sizeValue, units[unitIndex]);
+    snprintf(outputBuffer, bufferSize, "%.2Lf %s", sizeValue, units[unitIndex]);
 }
 
 /**
