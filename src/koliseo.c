@@ -1598,6 +1598,25 @@ char* kls_temp_sprintf_dbg(Koliseo_Temp* kls_t, Koliseo_Loc loc, const char* fmt
 }
 
 /**
+ * Takes a Koliseo pointer, and a void pointer to a memory region. Checks if the passed Koliseo contains the passed address.
+ * @param kls The Koliseo at hand.
+ * @param ptr The pointer to check.
+ */
+bool kls_contains_pointer(const Koliseo *kls, const void *ptr)
+{
+    const char *p = ptr;
+
+    for (const Koliseo *cur = kls; cur; cur = cur->next) {
+        if (p >= cur->data &&
+            p < cur->data + cur->offset) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Takes a Koliseo pointer, and a void pointer to the old allocation, ptrdiff_t values for size, align and old and new count. Tries repushing the specified amount of memory to the Koliseo data field.
  * Notably, it zeroes the memory region.
  * @param kls The Koliseo at hand.
@@ -1627,6 +1646,13 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
                 KLS_Loc_Arg(loc),
                 __func__);
 #endif // KOLISEO_HAS_LOCATE
+        return NULL;
+    }
+    if (!kls_contains_pointer(kls, old)) {
+        fprintf(stderr,
+                "[KLS] %s(): pointer %p does not belong to this Koliseo.\n",
+                __func__,
+                old);
         return NULL;
     }
     if (old_count < 0) {
@@ -1741,8 +1767,9 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         void* p = kls__handle_push_result_dbg(current, res, size, align, growth, padding, __func__, loc);
 #endif // KOLISEO_HAS_LOCATE
         if (!p) return NULL;
+        size_t added_size = new_size - old_size;
         //Zero new area
-        memset(p, 0, size * growth);
+        memset(p, 0, added_size);
         new_ptr = old;
 
         Koliseo* new_current = current;
