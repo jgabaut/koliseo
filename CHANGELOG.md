@@ -1,6 +1,17 @@
 # Changelog
 
-## [0.6.2] - Unreleased
+## [0.6.3] - Unreleased
+
+### Added
+
+- Proper implementation of `repush()` semantics
+
+### Changed
+
+- Bump `invil` to `0.2.31`
+- Bump `amboso` to `2.1.3`
+
+## [0.6.2] - 2026-07-01
 
 ### Added
 
