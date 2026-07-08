@@ -1,6 +1,12 @@
 # Changelog
 
-## [0.6.3] - Unreleased
+## [0.6.4] - Unreleased
+
+### Added
+
+- Add `on_repush`, `on_temp_repush` handlers to `KLS_Hooks`
+
+## [0.6.3] - 2026-07-02
 
 ### Added
 
