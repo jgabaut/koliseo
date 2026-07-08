@@ -1245,6 +1245,34 @@ void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* 
     }
 }
 
+void KLS_autoregion_on_repush(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)
+{
+    assert(kls != NULL);
+    if (kls->extension_data == NULL) {
+        return;
+    }
+    struct KLS_EXTENSION_AR_DEFAULT_ARGS {
+        const char* region_name;
+        size_t region_name_len;
+        const char* region_desc;
+        size_t region_desc_len;
+        int region_type;
+    };
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data;
+    KLS_Region_List l = data_pt->regs;
+    KLS_Region *reg = kls_rl_head(l);
+    if (user) {
+        struct KLS_EXTENSION_AR_DEFAULT_ARGS *ar_args = user;
+        reg->end_offset = kls->offset;
+        reg->size = reg->end_offset - reg->begin_offset;
+        reg->type = ar_args->region_type;
+    } else {
+        reg->end_offset = kls->offset;
+        reg->size = reg->end_offset - reg->begin_offset;
+        reg->type = KLS_None;
+    }
+}
+
 void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls)
 {
     assert(t_kls != NULL);
@@ -1370,5 +1398,32 @@ void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, 
         kls__temp_autoregion(caller, t_kls, padding, ar_args->region_name, strlen(ar_args->region_name), ar_args->region_desc, strlen(ar_args->region_desc), ar_args->region_type);
     } else {
         kls__temp_autoregion(caller, t_kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None);
+    }
+}
+
+void KLS_autoregion_on_temp_repush(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user)
+{
+    assert(t_kls != NULL);
+    Koliseo* kls = t_kls->kls;
+    assert(kls != NULL);
+    struct KLS_EXTENSION_AR_DEFAULT_ARGS {
+        const char* region_name;
+        size_t region_name_len;
+        const char* region_desc;
+        size_t region_desc_len;
+        int region_type;
+    };
+    KLS_Autoregion_Extension_Data *data_pt = (KLS_Autoregion_Extension_Data*) kls->extension_data;
+    KLS_Region_List l = data_pt->regs;
+    KLS_Region *reg = kls_rl_head(l);
+    if (user) {
+        struct KLS_EXTENSION_AR_DEFAULT_ARGS *ar_args = user;
+        reg->end_offset = kls->offset;
+        reg->size = reg->end_offset - reg->begin_offset;
+        reg->type = ar_args->region_type;
+    } else {
+        reg->end_offset = kls->offset;
+        reg->size = reg->end_offset - reg->begin_offset;
+        reg->type = KLS_None;
     }
 }

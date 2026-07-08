@@ -1784,6 +1784,9 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
 
         // Restore saved prev_offset
         current->prev_offset = saved_prev_offset;
+        if (current->hooks.on_repush_handler != NULL) {
+            current->hooks.on_repush_handler(current, padding, __func__, NULL);
+        }
     } else {
 #ifdef KLS_DEBUG_CORE
         kls_log(current, "KLS", "%s(): pushed new memory", __func__);
@@ -1961,6 +1964,9 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
 
         // Restore saved prev_offset
         current->prev_offset = saved_prev_offset;
+        if (current->hooks.on_temp_repush_handler != NULL) {
+            current->hooks.on_temp_repush_handler(t_kls, padding, __func__, NULL);
+        }
     } else {
 #ifdef KLS_DEBUG_CORE
         kls_log(current, "KLS", "%s(): pushed new memory", __func__);
