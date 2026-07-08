@@ -29,7 +29,7 @@ static bool kls_cmp(const Koliseo* a, const Koliseo* b);
 
 static bool kls_cmp(const Koliseo* a, const Koliseo* b)
 {
-    printf("%s: %p == %p?\n", __func__, *a, *b);
+    printf("%s: %p == %p?\n", __func__, (void*)a, (void*)b);
     return (a == b);
 }
 
