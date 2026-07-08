@@ -186,7 +186,7 @@ typedef void(KLS_hook_on_free)(struct Koliseo* kls); /**< Used to pass an extens
 
 typedef void(KLS_hook_on_push)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_push().*/
 
-typedef void(KLS_hook_on_repush)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_push().*/
+typedef void(KLS_hook_on_repush)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_repush() when extending the last allocation (otherwise, the on_push handler fires).*/
 
 typedef void(KLS_hook_on_temp_start)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_start().*/
 
