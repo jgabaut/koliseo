@@ -86,7 +86,7 @@ typedef struct Koliseo_Loc {
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
 #define KLS_MINOR 6 /**< Represents current minor release.*/
-#define KLS_PATCH 3 /**< Represents current patch release.*/
+#define KLS_PATCH 4 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -107,7 +107,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.6.3"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.6.4"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -186,19 +186,25 @@ typedef void(KLS_hook_on_free)(struct Koliseo* kls); /**< Used to pass an extens
 
 typedef void(KLS_hook_on_push)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_push().*/
 
+typedef void(KLS_hook_on_repush_last)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_repush() when extending the last allocation (otherwise, the on_push handler fires).*/
+
 typedef void(KLS_hook_on_temp_start)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_start().*/
 
 typedef void(KLS_hook_on_temp_free)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_end().*/
 
 typedef void(KLS_hook_on_temp_push)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_temp_push().*/
 
+typedef void(KLS_hook_on_temp_repush_last)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_temp_repush() when extending the last allocation (otherwise, the on_temp_push handler fires).*/
+
 typedef struct KLS_Hooks {
     KLS_hook_on_new* on_new_handler; /**< Used to pass custom new handler for kls_new_alloc calls.*/
     KLS_hook_on_free* on_free_handler; /**< Used to pass custom free handler for kls_free calls.*/
     KLS_hook_on_push* on_push_handler; /**< Used to pass custom push handler for kls_push calls.*/
+    KLS_hook_on_repush_last* on_repush_last_handler; /**< Used to pass custom push handler for kls_repush calls that extend the last allocation (otherwise, the on_push handler fires).*/
     KLS_hook_on_temp_start* on_temp_start_handler; /**< Used to pass custom start handler for kls_temp_start calls.*/
     KLS_hook_on_temp_free* on_temp_free_handler; /**< Used to pass custom free handler for kls_temp_end calls.*/
     KLS_hook_on_temp_push* on_temp_push_handler; /**< Used to pass custom push handler for kls_temp_push calls.*/
+    KLS_hook_on_temp_repush_last* on_temp_repush_last_handler; /**< Used to pass custom push handler for kls_temp_repush calls that extend the last allocation (otherwise, the on_temp_push handler fires).*/
 } KLS_Hooks;
 
 /**

@@ -231,9 +231,11 @@ typedef struct KLS_Hooks {
     KLS_hook_on_new* on_new_handler; /**< Used to pass custom new handler for kls_new_alloc calls.*/
     KLS_hook_on_free* on_free_handler; /**< Used to pass custom free handler for kls_free calls.*/
     KLS_hook_on_push* on_push_handler; /**< Used to pass custom push handler for kls_push calls.*/
+    KLS_hook_on_repush_last* on_repush_last_handler; /**< Used to pass custom push handler for kls_repush calls that extend the last allocation (otherwise, the on_push handler fires).*/
     KLS_hook_on_temp_start* on_temp_start_handler; /**< Used to pass custom start handler for kls_temp_start calls.*/
     KLS_hook_on_temp_free* on_temp_free_handler; /**< Used to pass custom free handler for kls_temp_end calls.*/
     KLS_hook_on_temp_push* on_temp_push_handler; /**< Used to pass custom push handler for kls_temp_push calls.*/
+    KLS_hook_on_temp_repush_last* on_temp_repush_last_handler; /**< Used to pass custom push handler for kls_temp_repush calls that extend the last allocation (otherwise, the on_temp_push handler fires).*/
 } KLS_Hooks;
 ```
   For example, `src/kls_region.h` shows how to implement support for keeping track of all allocated memory regions. See the [Region section](#extra_region).

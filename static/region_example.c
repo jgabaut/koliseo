@@ -22,6 +22,12 @@ int main(void) {
     printf("Region list length: {%i}\n", kls_rl_length(data_pt->regs));
     kls_rl_showList(data_pt->regs);
 
+    bar = KLS_REPUSH(kls, bar, int, 1, 4);
+
+    printf("After repush:\n");
+    printf("Region list length: {%i}\n", kls_rl_length(data_pt->regs));
+    kls_rl_showList(data_pt->regs);
+
     kls_free(kls);
     return 0;
 }

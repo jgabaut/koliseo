@@ -1,6 +1,16 @@
 # Changelog
 
-## [0.6.3] - Unreleased
+## [0.6.4] - 2026-07-09
+
+### Added
+
+- Add `on_repush_last`, `on_temp_repush_last` handlers to `KLS_Hooks`
+
+### Changed
+
+- Fix invalid format specifier in `kls_cmp()` for `kls_pit` template
+
+## [0.6.3] - 2026-07-02
 
 ### Added
 
