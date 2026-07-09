@@ -154,22 +154,22 @@ typedef struct KLS_Autoregion_Extension_Data {
 void KLS_autoregion_on_new(struct Koliseo* kls);
 void KLS_autoregion_on_free(struct Koliseo* kls);
 void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
-void KLS_autoregion_on_repush(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
+void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
 void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls);
 void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls);
 void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
-void KLS_autoregion_on_temp_repush(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
+void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
 
 #ifndef KLS_DEFAULT_HOOKS
 #define KLS_DEFAULT_HOOKS (KLS_Hooks) { \
         .on_new_handler = &KLS_autoregion_on_new, \
         .on_free_handler = &KLS_autoregion_on_free, \
         .on_push_handler =  &KLS_autoregion_on_push, \
-        .on_repush_handler =  &KLS_autoregion_on_repush, \
+        .on_repush_last_handler =  &KLS_autoregion_on_repush_last, \
         .on_temp_start_handler = &KLS_autoregion_on_temp_start, \
         .on_temp_free_handler = &KLS_autoregion_on_temp_free, \
         .on_temp_push_handler = &KLS_autoregion_on_temp_push, \
-        .on_temp_repush_handler = &KLS_autoregion_on_temp_repush, \
+        .on_temp_repush_last_handler = &KLS_autoregion_on_temp_repush_last, \
     }
 #endif // KLS_DEFAULT_HOOKS
 

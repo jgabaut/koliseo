@@ -1245,7 +1245,7 @@ void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* 
     }
 }
 
-void KLS_autoregion_on_repush(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)
+void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)
 {
     assert(kls != NULL);
     if (kls->extension_data == NULL) {
@@ -1401,7 +1401,7 @@ void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, 
     }
 }
 
-void KLS_autoregion_on_temp_repush(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user)
+void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user)
 {
     assert(t_kls != NULL);
     Koliseo* kls = t_kls->kls;

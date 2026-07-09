@@ -4,7 +4,7 @@
 
 ### Added
 
-- Add `on_repush`, `on_temp_repush` handlers to `KLS_Hooks`
+- Add `on_repush_last`, `on_temp_repush_last` handlers to `KLS_Hooks`
 
 ### Changed
 
