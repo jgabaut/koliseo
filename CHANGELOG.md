@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.5] - 2026-10-09
+
+### Added
+
+- Add `templates/ringbuf.h`
+
 ## [0.6.4] - 2026-07-09
 
 ### Added
