@@ -25,6 +25,8 @@ dllist_example
 region_example
 # ignore darray_example binary
 darray_example
+# ignore ringbuf_example binary
+ringbuf_example
 # ignore hashmap_example binary
 hashmap_example
 

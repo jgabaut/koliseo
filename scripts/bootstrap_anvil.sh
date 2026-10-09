@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-script_version="0.2"
+script_version="0.2.1"
 
 print_impls() {
     printf "Impl list:\n"
@@ -73,7 +73,8 @@ if [ "$is_interactive" -eq 0 ] ; then {
         } else {
             printf "[ERROR]    Failed building invil.\n"
             printf "[ERROR]    Fallback to repo_amboso.\n"
-            exit "$("$0" repo_amboso)"
+            "$("$0" repo_amboso)"
+            exit "$?"
         }
         fi
     } elif [ "$impl_q" = "path_anvil" ] ; then {

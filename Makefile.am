@@ -136,6 +136,7 @@ clean:
 	-rm static/list_example
 	-rm static/dllist_example
 	-rm static/darray_example
+	-rm static/ringbuf_example
 	-rm static/pit_example
 	-rm static/hashmap_example
 	@echo -e "\033[1;33mDone.\e[0m"
@@ -290,6 +291,11 @@ darray_example:
 	$(CCOMP) -DKLS_DEBUG_CORE -Isrc/ -Itemplates/ src/koliseo.c static/darray_example.c -o static/darray_example
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
+ringbuf_example:
+	@echo -en "Building ringbuf_example"
+	$(CCOMP) -DKLS_DEBUG_CORE -Isrc/ -Itemplates/ src/koliseo.c static/ringbuf_example.c -o static/ringbuf_example
+	@echo -e "\n\033[1;32mDone.\e[0m"
+
 pit_example:
 	@echo -en "Building pit_example"
 	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/pit_example.c -o static/pit_example
@@ -300,7 +306,7 @@ hashmap_example:
 	$(CCOMP) -Isrc/ -Itemplates/ src/koliseo.c static/hashmap_example.c -o static/hashmap_example
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
-examples: basic_example region_example list_example dllist_example darray_example pit_example hashmap_example
+examples: basic_example region_example list_example dllist_example darray_example ringbuf_example pit_example hashmap_example
 
 pack: rebuild
 	@echo -e "Packing koliseo:  make pack for $(VERSION)"
