@@ -112,6 +112,11 @@ typedef struct KLS_Region {
     char name[KLS_REGION_MAX_NAME_SIZE + 1];   /**< Name field for the KLS_Region.*/
     char desc[KLS_REGION_MAX_DESC_SIZE + 1];   /**< Description field for the KLS_Region.*/
     int type;	  /**< Used to identify which type the KLS_Region holds.*/
+#ifdef KOLISEO_HAS_LOCATE
+    const char* loc_file;     /**< File source position of allocation call.*/
+    int loc_line;     /**< Line source position of allocation call.*/
+    const char* loc_func;     /**< Function source position of allocation call.*/
+#endif // KOLISEO_HAS_LOCATE
 } KLS_Region;
 
 static const char KOLISEO_DEFAULT_REGION_NAME[] = "No Name"; /**< Represents default Region name, used for kls_push_zero().*/
@@ -153,12 +158,22 @@ typedef struct KLS_Autoregion_Extension_Data {
 
 void KLS_autoregion_on_new(struct Koliseo* kls);
 void KLS_autoregion_on_free(struct Koliseo* kls);
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
 void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
+#else
+void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func);
+void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func);
+#endif // KOLISEO_HAS_LOCATE
 void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls);
 void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls);
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
 void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
+#else
+void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func);
+void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func);
+#endif // KOLISEO_HAS_LOCATE
 
 #ifndef KLS_DEFAULT_HOOKS
 #define KLS_DEFAULT_HOOKS (KLS_Hooks) { \

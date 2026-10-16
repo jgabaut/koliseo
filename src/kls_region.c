@@ -805,7 +805,11 @@ int kls_temp_get_maxRegions_KLS_BASIC(Koliseo_Temp *t_kls)
             (KLS_region_list_item));
 }
 
+#ifndef KOLISEO_HAS_LOCATE
 static inline void kls__autoregion(const char* caller, Koliseo* kls, ptrdiff_t padding, const char* region_name, size_t region_name_len, const char* region_desc, size_t region_desc_len, int region_type)
+#else
+static inline void kls__autoregion(const char* caller, Koliseo* kls, ptrdiff_t padding, const char* region_name, size_t region_name_len, const char* region_desc, size_t region_desc_len, int region_type, const char* loc_file, int loc_line, const char* loc_func)
+#endif // KOLISEO_HAS_LOCATE
 {
     assert(caller != NULL);
     assert(kls != NULL);
@@ -874,6 +878,11 @@ static inline void kls__autoregion(const char* caller, Koliseo* kls, ptrdiff_t p
         strncpy(reg->desc, region_desc,
                 desc_len);
         reg->desc[desc_len] = '\0';
+#ifdef KOLISEO_HAS_LOCATE
+        reg->loc_file = loc_file;
+        reg->loc_line = loc_line;
+        reg->loc_func = loc_func;
+#endif // KOLISEO_HAS_LOCATE
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //kls->regs = kls_append(kls,reglist, kls->regs);
@@ -881,7 +890,11 @@ static inline void kls__autoregion(const char* caller, Koliseo* kls, ptrdiff_t p
     }
 }
 
+#ifndef KOLISEO_HAS_LOCATE
 static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls, ptrdiff_t padding, const char* region_name, size_t region_name_len, const char* region_desc, size_t region_desc_len, int region_type)
+#else
+static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls, ptrdiff_t padding, const char* region_name, size_t region_name_len, const char* region_desc, size_t region_desc_len, int region_type, const char* loc_file, int loc_line, const char* loc_func)
+#endif // KOLISEO_HAS_LOCATE
 {
     assert(caller != NULL);
     assert(t_kls != NULL);
@@ -955,6 +968,11 @@ static inline void kls__temp_autoregion(const char* caller, Koliseo_Temp* t_kls,
         strncpy(reg->desc, region_desc,
                 desc_len);
         reg->desc[desc_len] = '\0';
+#ifdef KOLISEO_HAS_LOCATE
+        reg->loc_file = loc_file;
+        reg->loc_line = loc_line;
+        reg->loc_func = loc_func;
+#endif // KOLISEO_HAS_LOCATE
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,reg,reglist);
         //t_kls->t_regs = kls_append(kls,reglist, t_kls->t_regs);
@@ -995,7 +1013,11 @@ void *kls_push_zero_named_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 
     //Zero new area
     memset(p, 0, size * count);
+#ifndef KOLISEO_HAS_LOCATE
     kls__autoregion(__func__, kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None);
+#else
+    kls__autoregion(__func__, kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None, loc.file, loc.line, loc.func);
+#endif
 
     return p;
 }
@@ -1035,7 +1057,11 @@ void *kls_temp_push_zero_named_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 
     //Zero new area
     memset(p, 0, size * count);
+#ifndef KOLISEO_HAS_LOCATE
     kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None);
+#else
+    kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, KLS_None, loc.file, loc.line, loc.func);
+#endif // KOLISEO_HAS_LOCATE
     return p;
 }
 
@@ -1073,7 +1099,11 @@ void *kls_push_zero_typed_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 
     //Zero new area
     memset(p, 0, size * count);
+#ifndef KOLISEO_HAS_LOCATE
     kls__autoregion(__func__, kls, padding, name, strlen(name), desc, strlen(desc), type);
+#else
+    kls__autoregion(__func__, kls, padding, name, strlen(name), desc, strlen(desc), type, loc.file, loc.line, loc.func);
+#endif // KOLISEO_HAS_LOCATE
 
     return p;
 }
@@ -1114,7 +1144,11 @@ void *kls_temp_push_zero_typed_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 
     //Zero new area
     memset(p, 0, size * count);
+#ifndef KOLISEO_HAS_LOCATE
     kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, type);
+#else
+    kls__temp_autoregion(__func__, t_kls, padding, name, strlen(name)+1, desc, strlen(desc)+1, type, loc.file, loc.line, loc.func);
+#endif
     return p;
 }
 
@@ -1191,6 +1225,11 @@ void KLS_autoregion_on_new(struct Koliseo* kls)
         strncpy(kls_header->desc, "Sizeof Koliseo header",
                 KLS_REGION_MAX_DESC_SIZE);
         kls_header->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
+#ifdef KOLISEO_HAS_LOCATE
+        kls_header->loc_file = __FILE__;
+        kls_header->loc_line = __LINE__;
+        kls_header->loc_func = __func__;
+#endif // KOLISEO_HAS_LOCATE
         //KLS_Region_List reglist = kls_emptyList();
         //reglist = kls_cons(kls,kls_header,reglist);
         //kls->regs = reglist;
@@ -1224,7 +1263,11 @@ void KLS_autoregion_on_free(struct Koliseo* kls)
     KLS_DEFAULT_FREEF(data_pt);
 }
 
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)
+#else
+void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func)
+#endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
     if (kls->extension_data == NULL) {
@@ -1239,13 +1282,25 @@ void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* 
     };
     if (user) {
         struct KLS_EXTENSION_AR_DEFAULT_ARGS *ar_args = user;
+#ifndef KOLISEO_HAS_LOCATE
         kls__autoregion(caller, kls, padding, ar_args->region_name, strlen(ar_args->region_name), ar_args->region_desc, strlen(ar_args->region_desc), ar_args->region_type);
+#else
+        kls__autoregion(caller, kls, padding, ar_args->region_name, strlen(ar_args->region_name), ar_args->region_desc, strlen(ar_args->region_desc), ar_args->region_type, loc_file, loc_line, loc_func);
+#endif // KOLISEO_HAS_LOCATE
     } else {
+#ifndef KOLISEO_HAS_LOCATE
         kls__autoregion(caller, kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None);
+#else
+        kls__autoregion(caller, kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None, loc_file, loc_line, loc_func);
+#endif // KOLISEO_HAS_LOCATE
     }
 }
 
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user)
+#else
+void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func)
+#endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
     if (kls->extension_data == NULL) {
@@ -1271,6 +1326,11 @@ void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const
         reg->size = reg->end_offset - reg->begin_offset;
         reg->type = KLS_None;
     }
+#ifdef KOLISEO_HAS_LOCATE
+    reg->loc_file = loc_file;
+    reg->loc_line = loc_line;
+    reg->loc_func = loc_func;
+#endif // KOLISEO_HAS_LOCATE
 }
 
 void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls)
@@ -1334,6 +1394,11 @@ void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls)
         strncpy(temp_kls_header->desc, "Last Reg b4 KLS_T",
                 KLS_REGION_MAX_DESC_SIZE);
         temp_kls_header->desc[KLS_REGION_MAX_DESC_SIZE] = '\0';
+#ifdef KOLISEO_HAS_LOCATE
+        temp_kls_header->loc_file = __FILE__;
+        temp_kls_header->loc_line = __LINE__;
+        temp_kls_header->loc_func = __func__;
+#endif // KOLISEO_HAS_LOCATE
         KLS_Region_List reglist = kls_rl_emptyList();
         reglist = kls_rl_t_cons(t_kls, temp_kls_header, reglist);
         data_pt->t_regs = reglist;
@@ -1381,7 +1446,11 @@ void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls)
     }
 }
 
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user)
+#else
+void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func)
+#endif // KOLISEO_HAS_LOCATE
 {
     assert(t_kls != NULL);
     Koliseo* kls = t_kls->kls;
@@ -1395,13 +1464,25 @@ void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, 
     };
     if (user) {
         struct KLS_EXTENSION_AR_DEFAULT_ARGS *ar_args = user;
+#ifndef KOLISEO_HAS_LOCATE
         kls__temp_autoregion(caller, t_kls, padding, ar_args->region_name, strlen(ar_args->region_name), ar_args->region_desc, strlen(ar_args->region_desc), ar_args->region_type);
+#else
+        kls__temp_autoregion(caller, t_kls, padding, ar_args->region_name, strlen(ar_args->region_name), ar_args->region_desc, strlen(ar_args->region_desc), ar_args->region_type, loc_file, loc_line, loc_func);
+#endif // KOLISEO_HAS_LOCATE
     } else {
+#ifndef KOLISEO_HAS_LOCATE
         kls__temp_autoregion(caller, t_kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None);
+#else
+        kls__temp_autoregion(caller, t_kls, padding, KOLISEO_DEFAULT_REGION_NAME, strlen(KOLISEO_DEFAULT_REGION_NAME), KOLISEO_DEFAULT_REGION_DESC, strlen(KOLISEO_DEFAULT_REGION_DESC), KLS_None, loc_file, loc_line, loc_func);
+#endif // KOLISEO_HAS_LOCATE
     }
 }
 
+#ifndef KOLISEO_HAS_LOCATE
 void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user)
+#else
+void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func)
+#endif // KOLISEO_HAS_LOCATE
 {
     assert(t_kls != NULL);
     Koliseo* kls = t_kls->kls;
@@ -1426,4 +1507,9 @@ void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t pa
         reg->size = reg->end_offset - reg->begin_offset;
         reg->type = KLS_None;
     }
+#ifdef KOLISEO_HAS_LOCATE
+    reg->loc_file = loc_file;
+    reg->loc_line = loc_line;
+    reg->loc_func = loc_func;
+#endif // KOLISEO_HAS_LOCATE
 }
