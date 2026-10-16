@@ -1515,7 +1515,11 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         };
         kls->hooks.on_push_handler(kls, padding, (void*)&ar_args);
         */
+#ifndef KOLISEO_HAS_LOCATE
         current->hooks.on_push_handler(current, padding, __func__, NULL);
+#else
+        current->hooks.on_push_handler(current, padding, __func__, NULL, loc.file, loc.line, loc.func);
+#endif // KOLISEO_HAS_LOCATE
     }
     return p;
 }
@@ -1601,7 +1605,11 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 
     if (current->hooks.on_temp_push_handler != NULL) {
         // Call on_temp_push extension with empty user arg
+#ifndef KOLISEO_HAS_LOCATE
         current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL);
+#else
+        current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL, loc.file, loc.line, loc.func);
+#endif
     }
     return res.p;
 }

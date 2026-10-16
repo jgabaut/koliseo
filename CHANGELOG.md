@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.7] - Unreleased
+
+### Added
+
+- `KLS_Region` extension now stores source position of allocation when built with `-DKOLISEO_HAS_LOCATE`
+
 ## [0.6.6] - 2026-11-22
 
 ### Changed

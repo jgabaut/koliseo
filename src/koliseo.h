@@ -184,17 +184,25 @@ typedef void(KLS_hook_on_new)(struct Koliseo* kls); /**< Used to pass an extensi
 
 typedef void(KLS_hook_on_free)(struct Koliseo* kls); /**< Used to pass an extension handler for kls_free().*/
 
+#ifndef KOLISEO_HAS_LOCATE
 typedef void(KLS_hook_on_push)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_push().*/
-
 typedef void(KLS_hook_on_repush_last)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_repush() when extending the last allocation (otherwise, the on_push handler fires).*/
+#else
+typedef void(KLS_hook_on_push)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func); /**< Used to pass an extension handler for kls_push().*/
+typedef void(KLS_hook_on_repush_last)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func); /**< Used to pass an extension handler for kls_repush() when extending the last allocation (otherwise, the on_push handler fires).*/
+#endif // KOLISEO_HAS_LOCATE
 
 typedef void(KLS_hook_on_temp_start)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_start().*/
 
 typedef void(KLS_hook_on_temp_free)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_end().*/
 
+#ifndef KOLISEO_HAS_LOCATE
 typedef void(KLS_hook_on_temp_push)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_temp_push().*/
-
 typedef void(KLS_hook_on_temp_repush_last)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_temp_repush() when extending the last allocation (otherwise, the on_temp_push handler fires).*/
+#else
+typedef void(KLS_hook_on_temp_push)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func); /**< Used to pass an extension handler for kls_temp_push().*/
+typedef void(KLS_hook_on_temp_repush_last)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, const char* loc_file, int loc_line, const char* loc_func); /**< Used to pass an extension handler for kls_temp_repush() when extending the last allocation (otherwise, the on_temp_push handler fires).*/
+#endif // KOLISEO_HAS_LOCATE
 
 typedef struct KLS_Hooks {
     KLS_hook_on_new* on_new_handler; /**< Used to pass custom new handler for kls_new_alloc calls.*/
