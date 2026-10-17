@@ -1466,7 +1466,7 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
 #ifndef KOLISEO_HAS_LOCATE
         current->hooks.on_push_handler(current, padding, __func__, NULL);
 #else
-        current->hooks.on_push_handler(current, padding, __func__, NULL, loc.file, loc.line, loc.func);
+        current->hooks.on_push_handler(current, padding, __func__, NULL, loc);
 #endif // KOLISEO_HAS_LOCATE
     }
     return p;
@@ -1556,7 +1556,7 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 #ifndef KOLISEO_HAS_LOCATE
         current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL);
 #else
-        current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL, loc.file, loc.line, loc.func);
+        current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL, loc);
 #endif
     }
     return res.p;
@@ -1796,7 +1796,7 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
 #ifndef KOLISEO_HAS_LOCATE
             current->hooks.on_repush_last_handler(current, padding, __func__, NULL);
 #else
-            current->hooks.on_repush_last_handler(current, padding, __func__, NULL, loc.file, loc.line, loc.func);
+            current->hooks.on_repush_last_handler(current, padding, __func__, NULL, loc);
 #endif
         }
     } else {
@@ -1980,7 +1980,7 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
 #ifndef KOLISEO_HAS_LOCATE
             current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL);
 #else
-            current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL, loc.file, loc.line, loc.func);
+            current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL, loc);
 #endif // KOLISEO_HAS_LOCATE
         }
     } else {
