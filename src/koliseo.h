@@ -265,12 +265,6 @@ typedef struct KLS_Stats {
     int tot_pops; /**< Total POP calls done.*/
     int tot_temp_pops; /**< Total POP_T calls done.*/
     int tot_logcalls; /**< Total kls_log() calls done.*/
-#ifdef KLS_DEBUG_CORE
-    /**
-     * DEPRECATED: support for timing will be dropped in the next release.
-     */
-    double worst_pushcall_time;	/**< Longest time taken by a PUSH call.*/
-#endif
 } KLS_Stats;
 
 /**
@@ -303,21 +297,13 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format string for KLS_Stats.
  * @see KLS_Stats_Arg()
  */
-#ifdef KLS_DEBUG_CORE
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, worst_push_time: %.7f }"
-#else
 #define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i }"
-#endif // KLS_DEBUG_CORE
 
 /**
  * Defines a format macro for KLS_Stats args.
  * @see KLS_Stats_Fmt
  */
-#ifdef KLS_DEBUG_CORE
-#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.worst_pushcall_time)
-#else
 #define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops)
-#endif // KLS_DEBUG_CORE
 
 /**
  * Represents the initialised arena allocator struct.
