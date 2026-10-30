@@ -60,9 +60,17 @@ int main(void)
 {
     //Init the arena
     Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
+    if (!kls) {
+        fprintf(stderr, "Failed Koliseo allocation\n");
+        return 1;
+    }
 
     //Use the arena (see demo for Koliseo_Temp usage)
     Example* e = KLS_PUSH(kls, Example);
+    if (!e) {
+        fprintf(stderr, "Failed Example allocation\n");
+        return 1;
+    }
     e->val = 42;
 
     //Show contents to stdout
