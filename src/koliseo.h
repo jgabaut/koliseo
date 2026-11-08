@@ -52,16 +52,12 @@ extern "C" {
 #define KOLISEO_HAS_LOCATE // Used for enabling caller location arguments for some APIs.
 #endif // KOLISEO_HAS_LOCATE
 */
-
-#ifdef _WIN32
-#include <profileapi.h>		//Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
-#endif
 #endif //KLS_DEBUG_CORE
 
 #ifdef KOLISEO_HAS_LOCATE
 typedef struct Koliseo_Loc {
     const char* file;
-    const int line;
+    int line;
     const char* func;
 } Koliseo_Loc;
 
@@ -85,8 +81,8 @@ typedef struct Koliseo_Loc {
 #endif // KOLISEO_HAS_LOCATE
 
 #define KLS_MAJOR 0 /**< Represents current major release.*/
-#define KLS_MINOR 6 /**< Represents current minor release.*/
-#define KLS_PATCH 5 /**< Represents current patch release.*/
+#define KLS_MINOR 7 /**< Represents current minor release.*/
+#define KLS_PATCH 0 /**< Represents current patch release.*/
 
 typedef void*(kls_alloc_func)(size_t); /**< Used to select an allocation function for the arena's backing memory.*/
 typedef void(kls_free_func)(void*); /**< Used to select a free function for the arena's backing memory.*/
@@ -107,7 +103,7 @@ static const int KOLISEO_API_VERSION_INT =
 /**
  * Defines current API version string.
  */
-static const char KOLISEO_API_VERSION_STRING[] = "0.6.5"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
+static const char KOLISEO_API_VERSION_STRING[] = "0.7.0"; /**< Represents current version with MAJOR.MINOR.PATCH format.*/
 
 /**
  * Returns current koliseo version as a string.
@@ -184,17 +180,25 @@ typedef void(KLS_hook_on_new)(struct Koliseo* kls); /**< Used to pass an extensi
 
 typedef void(KLS_hook_on_free)(struct Koliseo* kls); /**< Used to pass an extension handler for kls_free().*/
 
+#ifndef KOLISEO_HAS_LOCATE
 typedef void(KLS_hook_on_push)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_push().*/
-
 typedef void(KLS_hook_on_repush_last)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_repush() when extending the last allocation (otherwise, the on_push handler fires).*/
+#else
+typedef void(KLS_hook_on_push)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, Koliseo_Loc loc); /**< Used to pass an extension handler for kls_push().*/
+typedef void(KLS_hook_on_repush_last)(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, Koliseo_Loc loc); /**< Used to pass an extension handler for kls_repush() when extending the last allocation (otherwise, the on_push handler fires).*/
+#endif // KOLISEO_HAS_LOCATE
 
 typedef void(KLS_hook_on_temp_start)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_start().*/
 
 typedef void(KLS_hook_on_temp_free)(struct Koliseo_Temp* t_kls); /**< Used to pass an extension handler for kls_temp_end().*/
 
+#ifndef KOLISEO_HAS_LOCATE
 typedef void(KLS_hook_on_temp_push)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_temp_push().*/
-
 typedef void(KLS_hook_on_temp_repush_last)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user); /**< Used to pass an extension handler for kls_temp_repush() when extending the last allocation (otherwise, the on_temp_push handler fires).*/
+#else
+typedef void(KLS_hook_on_temp_push)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, Koliseo_Loc loc); /**< Used to pass an extension handler for kls_temp_push().*/
+typedef void(KLS_hook_on_temp_repush_last)(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, Koliseo_Loc loc); /**< Used to pass an extension handler for kls_temp_repush() when extending the last allocation (otherwise, the on_temp_push handler fires).*/
+#endif // KOLISEO_HAS_LOCATE
 
 typedef struct KLS_Hooks {
     KLS_hook_on_new* on_new_handler; /**< Used to pass custom new handler for kls_new_alloc calls.*/
@@ -257,12 +261,6 @@ typedef struct KLS_Stats {
     int tot_pops; /**< Total POP calls done.*/
     int tot_temp_pops; /**< Total POP_T calls done.*/
     int tot_logcalls; /**< Total kls_log() calls done.*/
-#ifdef KLS_DEBUG_CORE
-    /**
-     * DEPRECATED: support for timing will be dropped in the next release.
-     */
-    double worst_pushcall_time;	/**< Longest time taken by a PUSH call.*/
-#endif
 } KLS_Stats;
 
 /**
@@ -295,21 +293,13 @@ extern KLS_Stats KLS_STATS_DEFAULT;
  * Defines a format string for KLS_Stats.
  * @see KLS_Stats_Arg()
  */
-#ifdef KLS_DEBUG_CORE
-#define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i, worst_push_time: %.7f }"
-#else
 #define KLS_Stats_Fmt "KLS_Stats { tot_pushes: %i, tot_pops: %i, tot_temp_pushes: %i, tot_temp_pops: %i }"
-#endif // KLS_DEBUG_CORE
 
 /**
  * Defines a format macro for KLS_Stats args.
  * @see KLS_Stats_Fmt
  */
-#ifdef KLS_DEBUG_CORE
-#define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops),(stats.worst_pushcall_time)
-#else
 #define KLS_Stats_Arg(stats) (stats.tot_pushes),(stats.tot_pops),(stats.tot_temp_pushes),(stats.tot_temp_pops)
-#endif // KLS_DEBUG_CORE
 
 /**
  * Represents the initialised arena allocator struct.

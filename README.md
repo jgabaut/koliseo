@@ -17,6 +17,7 @@
     + [Templates](#templates)
     + [Experimental](#extra_exper)
     + [How to use extras](#extra_howto)
+  + [Error handling](#errors)
   + [Extensions](#extensions)
   + [Documentation](#docs)
   + [Supported platforms](#support)
@@ -31,7 +32,7 @@
   - A dedicated temporary arena `Koliseo_Temp` API
   - Support for `ASan` checks on arena memory usage
   - Support for optional chaining of arenas on space exhaustion
-  - Customizable error handlers
+  - Customizable error handlers (see [this section](#errors))
   - Customizable extension slot (see [this section](#extensions))
     - See the [region](#extra_region) section for an example
   - Customizable templates for data structs using the arena (see [this section](#templates))
@@ -60,9 +61,17 @@ int main(void)
 {
     //Init the arena
     Koliseo* kls = kls_new(KLS_DEFAULT_SIZE);
+    if (!kls) {
+        fprintf(stderr, "Failed Koliseo allocation\n");
+        return 1;
+    }
 
     //Use the arena (see demo for Koliseo_Temp usage)
     Example* e = KLS_PUSH(kls, Example);
+    if (!e) {
+        fprintf(stderr, "Failed Example allocation\n");
+        return 1;
+    }
     e->val = 42;
 
     //Show contents to stdout
@@ -221,6 +230,25 @@ int main(void)
   - Locate: `KOLISEO_HAS_LOCATE`
   - Gulp: `KOLISEO_HAS_GULP` :construction: (After 0.5, this macro is no longer used) :construction:
   - Experimental: `KOLISEO_HAS_EXPER`
+
+## Error handling <a name = "errors"></a>
+
+  You can set custom error handlers to override the default behaviour:
+
+```c
+typedef struct KLS_Err_Handlers {
+    KLS_OOM_Handler* OOM_handler; /**< Pointer to handler for Out-Of-Memory errors in push calls.*/
+    KLS_PTRDIFF_MAX_Handler* PTRDIFF_MAX_handler; /**< Pointer to handler for count > (PTRDIFF_MAX / size) errors in push calls.*/
+    KLS_ZEROCOUNT_Handler* ZEROCOUNT_handler; /**< Pointer to handler for zero-count errors in push calls.*/
+} KLS_Err_Handlers;
+typedef struct KLS_Conf {
+    // [More fields...]
+    KLS_Err_Handlers err_handlers; /**< Used to pass custom error handlers for push calls.*/
+} KLS_Conf;
+```
+
+  Default handlers print a notice to `stderr` and call `exit()`.
+  Some errors (e.g. invalid size or align) do not support custom handling as of now, instead causing push calls to return `NULL`.
 
 ## Extensions <a name = "extensions"></a>
 

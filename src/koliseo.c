@@ -15,11 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef _WIN32
-#ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE 200809L
-#endif
-#endif
 #include "koliseo.h"
 
 KLS_Conf KLS_DEFAULT_CONF = {
@@ -49,9 +44,6 @@ KLS_Stats KLS_STATS_DEFAULT = {
     .tot_pops = 0,
     .tot_temp_pops = 0,
     .tot_logcalls = 0,
-#ifdef KLS_DEBUG_CORE
-    .worst_pushcall_time = -1,
-#endif
 };
 
 static bool kls_set_conf(Koliseo * kls, KLS_Conf conf);	//Declare function used internally by kls_new() and kls_new_conf()
@@ -1108,17 +1100,6 @@ KLS_Push_Result kls__advance(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrd
 KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
-#ifdef KLS_DEBUG_CORE
-#ifndef _WIN32
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-#else
-    LARGE_INTEGER start_time, end_time, frequency;
-    QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&start_time);
-#endif
-#endif
-
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", caller_name);
         exit(EXIT_FAILURE);
@@ -1159,22 +1140,6 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
     //kls_log("KLS",msg);
 #ifdef KLS_DEBUG_CORE
     kls_log(current, "KLS", "Pushed zeroes on KLS, size (%s). Curr offset: { %p }.", h_size, current->data + current->offset);
-    if (current->conf.collect_stats == 1) {
-#ifndef _WIN32
-        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
-        double elapsed_time =
-            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
-                start_time.tv_nsec) / 1e9;
-#else
-        QueryPerformanceCounter(&end_time);	// %.7f
-        double elapsed_time =
-            (double)(end_time.QuadPart -
-                     start_time.QuadPart) / frequency.QuadPart;
-#endif
-        if (elapsed_time > current->stats.worst_pushcall_time) {
-            current->stats.worst_pushcall_time = elapsed_time;
-        }
-    }
 #endif
     if (current->conf.collect_stats == 1) {
         current->stats.tot_pushes += 1;
@@ -1263,17 +1228,6 @@ KLS_Push_Result kls__temp_advance(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdiff_t
 KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ptrdiff_t* padding, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
-#ifdef KLS_DEBUG_CORE
-#ifndef _WIN32
-    struct timespec start_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-#else
-    LARGE_INTEGER start_time, end_time, frequency;
-    QueryPerformanceFrequency(&frequency);
-    QueryPerformanceCounter(&start_time);
-#endif
-#endif
-
     if (kls_t == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
                 __func__);
@@ -1313,22 +1267,6 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
     //sprintf(msg,"Pushed zeroes, size (%li) for KLS.",size);
     //kls_log("KLS",msg);
 #ifdef KLS_DEBUG_CORE
-    if (current->conf.collect_stats == 1) {
-#ifndef _WIN32
-        clock_gettime(CLOCK_MONOTONIC, &end_time);	// %.9f
-        double elapsed_time =
-            (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec -
-                start_time.tv_nsec) / 1e9;
-#else
-        QueryPerformanceCounter(&end_time);	// %.7f
-        double elapsed_time =
-            (double)(end_time.QuadPart -
-                     start_time.QuadPart) / frequency.QuadPart;
-#endif
-        if (elapsed_time > current->stats.worst_pushcall_time) {
-            current->stats.worst_pushcall_time = elapsed_time;
-        }
-    }
     kls_log(current, "KLS", "Pushed zeroes on Temp_KLS, size (%s). Curr offset: { %p }.", h_size, current->data + current->offset);
 #endif
     if (current->conf.collect_stats == 1) {
@@ -1463,7 +1401,11 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         };
         kls->hooks.on_push_handler(kls, padding, (void*)&ar_args);
         */
+#ifndef KOLISEO_HAS_LOCATE
         current->hooks.on_push_handler(current, padding, __func__, NULL);
+#else
+        current->hooks.on_push_handler(current, padding, __func__, NULL, loc);
+#endif // KOLISEO_HAS_LOCATE
     }
     return p;
 }
@@ -1549,7 +1491,11 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
 
     if (current->hooks.on_temp_push_handler != NULL) {
         // Call on_temp_push extension with empty user arg
+#ifndef KOLISEO_HAS_LOCATE
         current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL);
+#else
+        current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL, loc);
+#endif
     }
     return res.p;
 }
@@ -1785,7 +1731,11 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
         // Restore saved prev_offset
         current->prev_offset = saved_prev_offset;
         if (current->hooks.on_repush_last_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
             current->hooks.on_repush_last_handler(current, padding, __func__, NULL);
+#else
+            current->hooks.on_repush_last_handler(current, padding, __func__, NULL, loc);
+#endif
         }
     } else {
 #ifdef KLS_DEBUG_CORE
@@ -1965,7 +1915,11 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
         // Restore saved prev_offset
         current->prev_offset = saved_prev_offset;
         if (current->hooks.on_temp_repush_last_handler != NULL) {
+#ifndef KOLISEO_HAS_LOCATE
             current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL);
+#else
+            current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL, loc);
+#endif // KOLISEO_HAS_LOCATE
         }
     } else {
 #ifdef KLS_DEBUG_CORE

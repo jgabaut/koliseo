@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0] - Unreleased
+
+### Added
+
+- `KLS_Region` extension now stores source position of allocation when built with `-DKOLISEO_HAS_LOCATE`
+
+### Changed
+
+- Drop `KLS_Stats.worst_pushcall_time`
+- Drop `_POSIX_C_SOURCE` definition
+
 ## [0.6.5] - 2026-10-09
 
 ### Added
