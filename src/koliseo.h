@@ -52,10 +52,6 @@ extern "C" {
 #define KOLISEO_HAS_LOCATE // Used for enabling caller location arguments for some APIs.
 #endif // KOLISEO_HAS_LOCATE
 */
-
-#ifdef _WIN32
-#include <profileapi.h>		//Used for QueryPerformanceFrequency(), QueryPerformanceCounter()
-#endif
 #endif //KLS_DEBUG_CORE
 
 #ifdef KOLISEO_HAS_LOCATE
