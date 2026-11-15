@@ -100,8 +100,6 @@ void KLS_OOM_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrdiff_t 
             KLS_Loc_Arg(loc),
             size * count, available - padding);
 #endif // KOLISEO_HAS_LOCATE
-    kls_free(kls); // Is it even worth it to try?
-    exit(EXIT_FAILURE); // Better than nothing. May change to return NULL instead? Requiring refactor of handler signature
 }
 
 #ifndef KOLISEO_HAS_LOCATE

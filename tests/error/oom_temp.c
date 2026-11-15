@@ -17,6 +17,11 @@ int main(void)
     Example* e = NULL;
     for(int i = 0; i < 500; i++) {
         e = KLS_PUSH_T(kls_t,Example);
+        if (!e) {
+            printf("Failed allocation #%i on Koliseo_Temp.\n", i);
+            kls_free(kls);
+            return 0;
+        }
     }
     e->val = 42;
 
@@ -24,6 +29,11 @@ int main(void)
 
     for(int i = 0; i < 500; i++) {
         e = KLS_PUSH(kls,Example);
+        if (!e) {
+            printf("Failed allocation #%i on Koliseo.\n", i);
+            kls_free(kls);
+            return 0;
+        }
     }
 
     //Free the arena
