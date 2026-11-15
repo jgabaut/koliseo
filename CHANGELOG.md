@@ -10,6 +10,7 @@
 
 - Drop `KLS_Stats.worst_pushcall_time`
 - Drop `_POSIX_C_SOURCE` definition
+- Drop include of `profileapi.h` on `_WIN32` builds
 
 ## [0.6.6] - 2026-11-22
 
