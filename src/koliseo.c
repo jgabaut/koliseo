@@ -1281,8 +1281,7 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
 #endif // KOLISEO_HAS_LOCATE
 {
     if (kls_t == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
-                __func__);
+        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n", caller_name);
         exit(EXIT_FAILURE);
     }
     Koliseo *kls = kls_t->kls;
@@ -2140,7 +2139,7 @@ void kls_formatSize(size_t size, char *outputBuffer, size_t bufferSize)
         "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"
     };
 
-    const int numUnits = sizeof(units) / sizeof(units[0]);
+    const size_t numUnits = sizeof(units) / sizeof(units[0]);
 
     size_t unitIndex = 0;
     long double sizeValue = (long double)size;
