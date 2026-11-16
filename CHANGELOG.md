@@ -13,6 +13,7 @@
   - `KLS_PTRDIFF_MAX_default_handler__`
   - `KLS_ZEROCOUNT_default_handler__`
 - Drop `KLS_Stats.worst_pushcall_time`
+- Drop `Koliseo.hooks_len`
 - Drop `_POSIX_C_SOURCE` definition
 - Drop include of `profileapi.h` on `_WIN32` builds
 
