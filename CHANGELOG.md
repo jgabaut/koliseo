@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0] - Unreleased
+
+### Added
+
+- `KLS_Region` extension now stores source position of allocation when built with `-DKOLISEO_HAS_LOCATE`
+
+### Changed
+
+- Do not go to `exit()` in:
+  - `KLS_OOM_default_handler__`
+  - `KLS_PTRDIFF_MAX_default_handler__`
+  - `KLS_ZEROCOUNT_default_handler__`
+- Drop `KLS_Stats.worst_pushcall_time`
+- Drop `Koliseo.hooks_len`
+- Drop `_POSIX_C_SOURCE` definition
+- Drop include of `profileapi.h` on `_WIN32` builds
+
 ## [0.6.5] - 2026-10-09
 
 ### Added
