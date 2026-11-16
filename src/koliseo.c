@@ -131,13 +131,10 @@ void KLS_PTRDIFF_MAX_default_handler_dbg__(struct Koliseo* kls, ptrdiff_t size, 
             count, PTRDIFF_MAX / size);
 #endif // KOLISEO_HAS_LOCATE
 #endif // _WIN32
-    kls_free(kls);
-    exit(EXIT_FAILURE);
 }
 
 /**
  * Used internally for handling zero-count in push calls when no user handler is provided.
- * By default, it goes to exit().
  * @param kls The Koliseo used in the push call
  * @param available The Koliseo's available memory
  * @param padding The current push call's padding
@@ -160,8 +157,6 @@ void KLS_ZEROCOUNT_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrd
             KLS_Loc_Arg(loc),
             size, padding, available);
 #endif // KOLISEO_HAS_LOCATE
-    kls_free(kls);
-    exit(EXIT_FAILURE);
 }
 
 /**
