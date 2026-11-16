@@ -320,7 +320,6 @@ typedef struct Koliseo {
     struct Koliseo_Temp *t_kls;	    /**< Points to related active Kolieo_Temp, when has_temp == 1.*/
     KLS_Hooks hooks;  /**< Contains handlers for extensions.*/
     void* extension_data; /**< Points to data for extensions.*/
-    size_t hooks_len; /**< Length for hooks and extension_data.*/
     kls_free_func* free_func; /**< Points to the free function for the arena's backing memory.*/
     struct Koliseo* next; /**< Points to the next Koliseo when conf.growable == 1.*/
 } Koliseo;
