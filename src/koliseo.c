@@ -1811,33 +1811,58 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
 
         // Save prev_offset
         const ptrdiff_t saved_prev_offset = current->prev_offset;
-#ifndef KOLISEO_HAS_LOCATE
-        KLS_Push_Result res = kls__advance(current, size, align, growth, &padding, __func__);
-        void* p = kls__handle_push_result(current, res, size, align, growth, padding, __func__);
-#else
-        KLS_Push_Result res = kls__advance_dbg(current, size, align, growth, &padding, __func__, loc);
-        void* p = kls__handle_push_result_dbg(current, res, size, align, growth, padding, __func__, loc);
-#endif // KOLISEO_HAS_LOCATE
-        if (!p) return NULL;
-        size_t added_size = new_size - old_size;
-        //Zero new area
-        memset(p, 0, added_size);
-        new_ptr = old;
 
-        Koliseo* new_current = current;
-        while (new_current->next != NULL) {
-            new_current = new_current->next;
-        }
+        bool fits =
+#ifndef KOLISEO_HAS_LOCATE
+            kls__check_available_nogrow(
+                current, size, align, growth, __func__
+#else
+            kls__check_available_nogrow_dbg(
+                current, size, align, growth, __func__, loc
+#endif // KOLISEO_HAS_LOCATE
+            ) == KLS_PUSH_OK;
+
+        if (fits) {
+
+#ifndef KOLISEO_HAS_LOCATE
+            KLS_Push_Result res = kls__advance(current, size, align, growth, &padding, __func__);
+            void* p = kls__handle_push_result(current, res, size, align, growth, padding, __func__);
+#else
+            KLS_Push_Result res = kls__advance_dbg(current, size, align, growth, &padding, __func__, loc);
+            void* p = kls__handle_push_result_dbg(current, res, size, align, growth, padding, __func__, loc);
+#endif // KOLISEO_HAS_LOCATE
+            if (!p) return NULL;
+            size_t added_size = new_size - old_size;
+            //Zero new area
+            memset(p, 0, added_size);
+            new_ptr = old;
+
+            Koliseo* new_current = current;
+            while (new_current->next != NULL) {
+                new_current = new_current->next;
+            }
 
 #ifdef KLS_DEBUG_CORE
-        const ptrdiff_t new_byte_slice_len = new_current->offset - new_current->prev_offset + padding;
-        kls_log(new_current, "KLS", "Extended last allocation on KLS, new_byte_slice_len (%td), padding (%td). Curr offset: { %p } Old: { %p }, New: { %p }.", new_byte_slice_len, padding, new_current->data + new_current->offset, old, new_ptr);
+            const ptrdiff_t new_byte_slice_len = new_current->offset - new_current->prev_offset + padding;
+            kls_log(new_current, "KLS", "Extended last allocation on KLS, new_byte_slice_len (%td), padding (%td). Curr offset: { %p } Old: { %p }, New: { %p }.", new_byte_slice_len, padding, new_current->data + new_current->offset, old, new_ptr);
 #endif
 
-        // Restore saved prev_offset
-        current->prev_offset = saved_prev_offset;
-        if (current->hooks.on_repush_last_handler != NULL) {
-            current->hooks.on_repush_last_handler(current, padding, __func__, NULL);
+            // Restore saved prev_offset
+            current->prev_offset = saved_prev_offset;
+            if (current->hooks.on_repush_last_handler != NULL) {
+                current->hooks.on_repush_last_handler(current, padding, __func__, NULL);
+            }
+        } else {
+            // Can't fit without growing.
+            if (current->conf.growable == 1) {
+                new_ptr = kls_push_zero_ext(kls, size, align, new_count);
+                if (!new_ptr) {
+                    return NULL;
+                }
+                memcpy(new_ptr, old, old_size);
+            } else {
+                return NULL;
+            }
         }
     } else {
 #ifdef KLS_DEBUG_CORE
@@ -1991,33 +2016,56 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
 
         // Save prev_offset
         const ptrdiff_t saved_prev_offset = current->prev_offset;
+        bool fits =
 #ifndef KOLISEO_HAS_LOCATE
-        KLS_Push_Result res = kls__temp_advance(t_kls, size, align, growth, &padding, __func__);
-        void* p = kls__handle_push_result(current, res, size, align, growth, padding, __func__);
+            kls__check_available_nogrow(
+                current, size, align, growth, __func__
 #else
-        KLS_Push_Result res = kls__temp_advance_dbg(t_kls, size, align, growth, &padding, __func__, loc);
-        void* p = kls__handle_push_result_dbg(current, res, size, align, growth, padding, __func__, loc);
+            kls__check_available_nogrow_dbg(
+                current, size, align, growth, __func__, loc
 #endif // KOLISEO_HAS_LOCATE
-        if (!p) return NULL;
-        size_t added_size = new_size - old_size;
-        //Zero new area
-        memset(p, 0, added_size);
-        new_ptr = old;
+            ) == KLS_PUSH_OK;
 
-        Koliseo* new_current = current;
-        while (new_current->next != NULL) {
-            new_current = new_current->next;
-        }
+        if (fits) {
+#ifndef KOLISEO_HAS_LOCATE
+            KLS_Push_Result res = kls__temp_advance(t_kls, size, align, growth, &padding, __func__);
+            void* p = kls__handle_push_result(current, res, size, align, growth, padding, __func__);
+#else
+            KLS_Push_Result res = kls__temp_advance_dbg(t_kls, size, align, growth, &padding, __func__, loc);
+            void* p = kls__handle_push_result_dbg(current, res, size, align, growth, padding, __func__, loc);
+#endif // KOLISEO_HAS_LOCATE
+            if (!p) return NULL;
+            size_t added_size = new_size - old_size;
+            //Zero new area
+            memset(p, 0, added_size);
+            new_ptr = old;
+
+            Koliseo* new_current = current;
+            while (new_current->next != NULL) {
+                new_current = new_current->next;
+            }
 
 #ifdef KLS_DEBUG_CORE
-        const ptrdiff_t new_byte_slice_len = new_current->offset - new_current->prev_offset + padding;
-        kls_log(new_current, "KLS", "Extended last allocation on Temp_KLS, new_byte_slice_len (%td), padding (%td). Curr offset: { %p } Old: { %p }, New: { %p }.", new_byte_slice_len, padding, new_current->data + new_current->offset, old, new_ptr);
+            const ptrdiff_t new_byte_slice_len = new_current->offset - new_current->prev_offset + padding;
+            kls_log(new_current, "KLS", "Extended last allocation on Temp_KLS, new_byte_slice_len (%td), padding (%td). Curr offset: { %p } Old: { %p }, New: { %p }.", new_byte_slice_len, padding, new_current->data + new_current->offset, old, new_ptr);
 #endif
 
-        // Restore saved prev_offset
-        current->prev_offset = saved_prev_offset;
-        if (current->hooks.on_temp_repush_last_handler != NULL) {
-            current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL);
+            // Restore saved prev_offset
+            current->prev_offset = saved_prev_offset;
+            if (current->hooks.on_temp_repush_last_handler != NULL) {
+                current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL);
+            }
+        } else {
+            // Can't fit without growing.
+            if (current->conf.growable == 1) {
+                new_ptr = kls_temp_push_zero_ext(t_kls, size, align, new_count);
+                if (!new_ptr) {
+                    return NULL;
+                }
+                memcpy(new_ptr, old, old_size);
+            } else {
+                return NULL;
+            }
         }
     } else {
 #ifdef KLS_DEBUG_CORE
