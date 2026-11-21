@@ -2392,11 +2392,11 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
     // Free any Koliseo chained after the current one
     Koliseo* to_free = tmp_kls->kls->next;
     if (to_free != NULL) {
-        kls_free(to_free);
         tmp_kls->kls->next = NULL;
+        kls_free(to_free);
     }
 
-    KLS_ASAN_POISON(tmp_kls->kls->data + new_offset, old_offset - new_offset);
+    KLS_ASAN_POISON(kls_ref->data + new_offset, old_offset - new_offset);
     tmp_kls = NULL; // statement with no effect TODO: Clear tmp_kls from caller
     if (kls_ref->conf.collect_stats == 1) {
         kls_ref->stats.tot_temp_pushes = 0;

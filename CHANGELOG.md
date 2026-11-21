@@ -6,6 +6,7 @@
 
 - Add `kls__check_available_nogrow`
 - Fix repush calls returning an invalid pointer when growing the last allocation needs a grow
+- Fix use-after-free in `kls_temp_end` when temp init caused a grow
 
 ## [0.6.5] - 2026-10-09
 
