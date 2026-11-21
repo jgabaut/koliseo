@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.6] - Unreleased
+
+### Changed
+
+- Add `kls__check_available_nogrow`
+
 ## [0.6.5] - 2026-10-09
 
 ### Added

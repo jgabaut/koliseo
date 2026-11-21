@@ -1187,7 +1187,7 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
 
 /**
  * Takes a Koliseo, a ptrdiff_t size, align and count, and a caller name.
- * Checks if the passed Koliseo can fit the requested allocation.
+ * Checks if the passed Koliseo can fit the requested allocation without growing.
  * In case of errors, tries calling the appropriate handler.
  * @param kls The Koliseo to check space for.
  * @param size The size of the type to allocate.
@@ -1198,9 +1198,9 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
  * @see Koliseo
  */
 #ifndef KOLISEO_HAS_LOCATE
-KLS_Push_Error kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
+KLS_Push_Error kls__check_available_nogrow(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
 #else
-KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
+KLS_Push_Error kls__check_available_nogrow_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
 #endif // KOLISEO_HAS_LOCATE
 {
     assert(kls != NULL);
@@ -1237,13 +1237,65 @@ KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t 
         if (count > PTRDIFF_MAX / size) {
             return KLS_PUSH_PTRDIFF_MAX;
         } else {
-            if (current->conf.growable == 1 && kls__try_grow(current, (size * count) + padding)) {
-                return KLS_PUSH_OK;
-            }
             return KLS_PUSH_OOM;
         }
     }
     return KLS_PUSH_OK;
+}
+
+/**
+ * Takes a Koliseo, a ptrdiff_t size, align and count, and a caller name.
+ * Checks if the passed Koliseo can fit the requested allocation, possibly by growing.
+ * In case of errors, tries calling the appropriate handler.
+ * @param kls The Koliseo to check space for.
+ * @param size The size of the type to allocate.
+ * @param align The alignment of the type to allocate.
+ * @param count The count of allocations.
+ * @param caller_name Name for caller. Used for error reporting.
+ * @return A KLS_Push_Error value.
+ * @see Koliseo
+ */
+#ifndef KOLISEO_HAS_LOCATE
+KLS_Push_Error kls__check_available(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name)
+#else
+KLS_Push_Error kls__check_available_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, const char* caller_name, Koliseo_Loc loc)
+#endif // KOLISEO_HAS_LOCATE
+{
+    assert(kls != NULL);
+    assert(caller_name != NULL);
+
+    Koliseo* current = kls;
+    while (current->next != NULL) {
+        current = current->next;
+    }
+
+    const ptrdiff_t padding = -current->offset & (align - 1);
+
+    KLS_Push_Error e =
+#ifndef KOLISEO_HAS_LOCATE
+        kls__check_available_nogrow(
+            current,
+            size,
+            align,
+            count,
+            caller_name
+        );
+#else
+        kls__check_available_nogrow_dbg(
+            current,
+            size,
+            align,
+            count,
+            caller_name,
+            loc
+        );
+#endif // KOLISEO_HAS_LOCATE
+
+    // If we got OOM we try to grow
+    if (e == KLS_PUSH_OOM && current->conf.growable == 1 && kls__try_grow(current, (size * count) + padding)) {
+        return KLS_PUSH_OK;
+    }
+    return e;
 }
 
 /**
