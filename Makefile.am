@@ -11,7 +11,7 @@ SHELL := /bin/bash
 .ONESHELL:
 # Check system info
 MACHINE := $$(uname -m)
-TARGET_INSTALL_DIR = /usr/local
+TARGET_INSTALL_DIR = $(prefix)
 SOURCE_INSTALL_DIR = "."
 INSTALLER_LOG_FILE = "./installer.log"
 # Check local version

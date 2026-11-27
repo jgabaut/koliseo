@@ -16,6 +16,7 @@
 - Drop `Koliseo.hooks_len`
 - Drop `_POSIX_C_SOURCE` definition
 - Drop include of `profileapi.h` on `_WIN32` builds
+- Use `$(prefix)` for `TARGET_INSTALL_DIR`
 
 ## [0.6.6] - 2026-11-22
 
