@@ -2166,7 +2166,9 @@ bool kls_clear(Koliseo *kls)
         Koliseo *chain = kls->next;
         kls->next = NULL;
         if (chain) {
-            kls_free(chain);
+            if (!kls_free(chain)) {
+                fprintf(stderr, "[ERROR] [%s()]: Failed free of chain link.\n", __func__);
+            }
             kls->extension_data = NULL; // The chain shares this pointer and we need to restore the extension data
             if (kls->hooks.on_new_handler) {
                 kls->hooks.on_new_handler(kls);
@@ -2200,7 +2202,9 @@ bool kls_free(Koliseo *kls)
                     "API Level { %i } -> KLS had an active Koliseo_Temp.",
                     int_koliseo_version());
 #endif
-            kls_temp_end(current->t_kls);
+            if (!kls_temp_end(current->t_kls)) {
+                fprintf(stderr, "[ERROR] [%s()]: Failed kls_temp_end().\n", __func__);
+            }
         }
         if (current->hooks.on_free_handler != NULL) {
             // Call on_free() extension
@@ -2344,7 +2348,9 @@ bool kls_temp_end(Koliseo_Temp *tmp_kls)
     Koliseo* to_free = tmp_kls->kls->next;
     if (to_free != NULL) {
         tmp_kls->kls->next = NULL;
-        kls_free(to_free);
+        if (!kls_free(to_free)) {
+            fprintf(stderr, "[ERROR] [%s()]: Failed free of chain link.\n", __func__);
+        }
     }
 
     KLS_ASAN_POISON(kls_ref->data + new_offset, old_offset - new_offset);
