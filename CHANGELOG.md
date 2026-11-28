@@ -20,6 +20,8 @@
 - Use `$(prefix)` for `TARGET_INSTALL_DIR`
 - Use `$(libdir)` and `$(includedir)` for `install`
 - `kls_clear`, `kls_free` and `kls_temp_end` now return `bool`
+- All hooks now return `bool`
+- When a push hook is registered, hook failure now causes push failure (`NULL` return, for now)
 
 ## [0.6.6] - 2026-11-22
 

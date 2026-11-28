@@ -1452,10 +1452,13 @@ void *kls_push_zero_ext_dbg(Koliseo *kls, ptrdiff_t size, ptrdiff_t align,
         kls->hooks.on_push_handler(kls, padding, (void*)&ar_args);
         */
 #ifndef KOLISEO_HAS_LOCATE
-        current->hooks.on_push_handler(current, padding, __func__, NULL);
+        if (!current->hooks.on_push_handler(current, padding, __func__, NULL)) {
 #else
-        current->hooks.on_push_handler(current, padding, __func__, NULL, loc);
+        if (!current->hooks.on_push_handler(current, padding, __func__, NULL, loc)) {
 #endif // KOLISEO_HAS_LOCATE
+            fprintf(stderr, "[ERROR]    [%s()]:  on_push handler failed.\n", __func__);
+            return NULL;
+        }
     }
     return p;
 }
@@ -1542,10 +1545,13 @@ void *kls_temp_push_zero_ext_dbg(Koliseo_Temp *t_kls, ptrdiff_t size,
     if (current->hooks.on_temp_push_handler != NULL) {
         // Call on_temp_push extension with empty user arg
 #ifndef KOLISEO_HAS_LOCATE
-        current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL);
+        if (!current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL)) {
 #else
-        current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL, loc);
+        if (!current->hooks.on_temp_push_handler(t_kls, padding, __func__, NULL, loc)) {
 #endif
+            fprintf(stderr, "[ERROR]     [%s()]:  on_temp_push handler failed.\n", __func__);
+            return NULL;
+        }
     }
     return res.p;
 }
@@ -1795,10 +1801,12 @@ void *kls_repush_dbg(Koliseo *kls, void* old, ptrdiff_t size, ptrdiff_t align,
             current->prev_offset = saved_prev_offset;
             if (current->hooks.on_repush_last_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
-                current->hooks.on_repush_last_handler(current, padding, __func__, NULL);
+                if (!current->hooks.on_repush_last_handler(current, padding, __func__, NULL)) {
 #else
-                current->hooks.on_repush_last_handler(current, padding, __func__, NULL, loc);
+                if (!current->hooks.on_repush_last_handler(current, padding, __func__, NULL, loc)) {
 #endif
+                    return NULL;
+                }
             }
         } else {
             // Can't fit without growing.
@@ -2002,10 +2010,12 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
             current->prev_offset = saved_prev_offset;
             if (current->hooks.on_temp_repush_last_handler != NULL) {
 #ifndef KOLISEO_HAS_LOCATE
-                current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL);
+                if (!current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL)) {
 #else
-                current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL, loc);
+                if (!current->hooks.on_temp_repush_last_handler(t_kls, padding, __func__, NULL, loc)) {
 #endif // KOLISEO_HAS_LOCATE
+                    return NULL;
+                }
             }
         } else {
             // Can't fit without growing.

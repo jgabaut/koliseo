@@ -8,6 +8,10 @@ int main(void) {
     int iter=1;
     while(true) {
         int* dummy = KLS_PUSH_T_NAMED(t_kls,int, "An int", "An int");
+        if (!dummy) {
+            kls_free(kls);
+            return 1;
+        }
     }
     kls_free(kls);
     return 0;

@@ -21,6 +21,7 @@
 #include <time.h>
 #include <stddef.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #ifndef KLS_AUTOREGION_AUTOSET_DEFAULT
 #define KLS_AUTOREGION_AUTOSET_DEFAULT 1
@@ -110,23 +111,23 @@ struct KLS_Autoregion_Extension_Conf;
 struct KLS_Autoregion_Extension_Data;
 struct Koliseo_Loc;
 
-void KLS_autoregion_on_new(struct Koliseo* kls);
+bool KLS_autoregion_on_new(struct Koliseo* kls);
 void KLS_autoregion_on_free(struct Koliseo* kls);
 #ifndef KOLISEO_HAS_LOCATE
-void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
-void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
+bool KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
+bool KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user);
 #else
-void KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc);
-void KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc loc);
+bool KLS_autoregion_on_push(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc);
+bool KLS_autoregion_on_repush_last(struct Koliseo* kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc loc);
 #endif // KOLISEO_HAS_LOCATE
-void KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls);
-void KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls);
+bool KLS_autoregion_on_temp_start(struct Koliseo_Temp* t_kls);
+bool KLS_autoregion_on_temp_free(struct Koliseo_Temp* t_kls);
 #ifndef KOLISEO_HAS_LOCATE
-void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
-void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
+bool KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
+bool KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user);
 #else
-void KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc loc);
-void KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc loc);
+bool KLS_autoregion_on_temp_push(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc loc);
+bool KLS_autoregion_on_temp_repush_last(struct Koliseo_Temp* t_kls, ptrdiff_t padding, const char* caller, void* user, struct Koliseo_Loc loc);
 #endif // KOLISEO_HAS_LOCATE
 
 #ifndef KLS_DEFAULT_HOOKS
