@@ -389,8 +389,6 @@ void* kls__handle_push_result_dbg(Koliseo* kls, KLS_Push_Result r, ptrdiff_t siz
                         caller_name,
                         size, padding, available);
 #endif // KOLISEO_HAS_LOCATE
-                kls_free(kls);
-                exit(EXIT_FAILURE);
             }
         }
         break;
@@ -400,7 +398,6 @@ void* kls__handle_push_result_dbg(Koliseo* kls, KLS_Push_Result r, ptrdiff_t siz
 #else
             fprintf(stderr, "[ERROR] " KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.\n", KLS_Loc_Arg(loc), caller_name);
             kls_log(kls, "ERROR", KLS_Loc_Fmt "[%s()]: Passed Koliseo has an open Koliseo_Temp session.", KLS_Loc_Arg(loc), caller_name);
-            exit(EXIT_FAILURE);
 #endif // KOLISEO_HAS_LOCATE
         }
         break;
@@ -590,7 +587,7 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
 #else
         fprintf(stderr, "[KLS] " KLS_Loc_Fmt "Failed %s() call.\n", KLS_Loc_Arg(loc), __func__);
 #endif // KOLISEO_HAS_LOCATE
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 #ifdef KLS_DEBUG_CORE
     Koliseo *kls_ref = p;
@@ -670,7 +667,7 @@ Koliseo *kls_new_conf_alloc_ext(ptrdiff_t size, KLS_Conf conf, kls_alloc_func al
         fprintf(stderr,
                 "[ERROR] [%s()]: Failed to set config for new Koliseo.\n",
                 __func__);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     return k;
 }
@@ -2063,10 +2060,7 @@ void print_kls_2file(FILE *fp, const Koliseo *kls)
  */
 void print_dbg_kls(const Koliseo *kls)
 {
-    if (kls == NULL) {
-        fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
-    }
+    assert(kls != NULL);
     print_kls_2file(stderr, kls);
 }
 
@@ -2079,7 +2073,7 @@ void print_temp_kls_2file(FILE *fp, const Koliseo_Temp *t_kls)
 {
     if (fp == NULL) {
         fprintf(stderr, "print_temp_kls_2file():  fp was NULL.\n");
-        exit(EXIT_FAILURE);
+        return;
     }
     if (t_kls == NULL) {
         fprintf(fp, "[KLS_T] t_kls was NULL.");
@@ -2150,11 +2144,11 @@ void kls_formatSize(size_t size, char *outputBuffer, size_t bufferSize)
  * Notably, it sets the prev_offset field to the previous offset, thus remembering where last allocation was before the clear.
  * @param kls The Koliseo at hand.
  */
-void kls_clear(Koliseo *kls)
+bool kls_clear(Koliseo *kls)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
+        return false;
     }
     //Reset pointer
     kls->prev_offset = kls->offset;
@@ -2175,6 +2169,7 @@ void kls_clear(Koliseo *kls)
     kls_log(kls, "KLS", "API Level { %i } -> Cleared offsets for KLS.",
             int_koliseo_version());
 #endif
+    return true;
 }
 
 /**
@@ -2182,11 +2177,11 @@ void kls_clear(Koliseo *kls)
  * @param kls The Koliseo at hand.
  * @see kls_clear()
  */
-void kls_free(Koliseo *kls)
+bool kls_free(Koliseo *kls)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
+        return false;
     }
     Koliseo* current = kls;
     while (current) {
@@ -2237,11 +2232,12 @@ void kls_free(Koliseo *kls)
         if (current->free_func == NULL) {
             fprintf(stderr,
                     "[ERROR]    %s(): free function was NULL.\n", __func__);
-            return;
+            return false;
         }
         current->free_func(current);
         current = next;
     }
+    return true;
 }
 
 /**
@@ -2259,7 +2255,7 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     Koliseo* current = kls;
     while (current->next != NULL) {
@@ -2303,19 +2299,19 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
  * Ends passed Koliseo_Temp pointer.
  * @param tmp_kls The Koliseo_Temp at hand.
  */
-void kls_temp_end(Koliseo_Temp *tmp_kls)
+bool kls_temp_end(Koliseo_Temp *tmp_kls)
 {
     if (tmp_kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
                 __func__);
-        exit(EXIT_FAILURE);
+        return false;
     }
 
     Koliseo *kls_ref = tmp_kls->kls;
     if (kls_ref == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
                 __func__);
-        exit(EXIT_FAILURE);
+        return false;
     }
 
     if (kls_ref->hooks.on_temp_free_handler != NULL) {
@@ -2348,6 +2344,7 @@ void kls_temp_end(Koliseo_Temp *tmp_kls)
         kls_ref->stats.tot_temp_pushes = 0;
         kls_ref->stats.tot_temp_pops = 0;
     }
+    return true;
 }
 
 #ifdef KOLISEO_HAS_EXPER
@@ -2363,14 +2360,13 @@ void *kls_pop(Koliseo *kls, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count)
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", __func__);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
-        kls_free(kls);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     char *p = kls->data + kls->offset - padding - size * count;
     kls->prev_offset = kls->offset;
@@ -2399,20 +2395,19 @@ void *kls_temp_pop(Koliseo_Temp *t_kls, ptrdiff_t size, ptrdiff_t align,
     if (t_kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n",
                 __func__);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     Koliseo *kls = t_kls->kls;
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
                 __func__);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     ptrdiff_t padding = -kls->offset & (align - 1);
     if (count > PTRDIFF_MAX / size
         || (kls->size + kls->offset) < (size * count)) {
         fprintf(stderr, "[KLS] Failed %s() call.\n", __func__);
-        kls_free(kls);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     char *p = kls->data + kls->offset - padding - size * count;
     kls->prev_offset = kls->offset;

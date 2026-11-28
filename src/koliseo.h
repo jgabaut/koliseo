@@ -591,8 +591,8 @@ void *kls_temp_repush_dbg(Koliseo_Temp *t_kls, void* old, ptrdiff_t size, ptrdif
  */
 #define KLS_PUSH_TYPED_EX(kls, type, region_type, name) KLS_PUSH_TYPED((kls), type, (region_type), (name), STRINGIFY(type))
 
-void kls_clear(Koliseo * kls);
-void kls_free(Koliseo * kls);
+bool kls_clear(Koliseo * kls);
+bool kls_free(Koliseo * kls);
 void print_kls_2file(FILE * fp, const Koliseo * kls);
 void print_dbg_kls(const Koliseo * kls);
 void kls_formatSize(size_t size, char *outputBuffer, size_t bufferSize);
@@ -604,7 +604,7 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo * kls, Koliseo_Loc loc);
 #define kls_temp_start(kls) kls_temp_start_dbg((kls), KLS_HERE)
 #endif // KOLISEO_HAS_LOCATE
 //bool kls_temp_set_conf(Koliseo_Temp* t_kls, KLS_Temp_Conf conf);
-void kls_temp_end(Koliseo_Temp * tmp_kls);
+bool kls_temp_end(Koliseo_Temp * tmp_kls);
 
 #ifndef KOLISEO_HAS_LOCATE
 void *kls_temp_push_zero_ext(Koliseo_Temp * t_kls, ptrdiff_t size,

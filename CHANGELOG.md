@@ -12,12 +12,14 @@
   - `KLS_OOM_default_handler__`
   - `KLS_PTRDIFF_MAX_default_handler__`
   - `KLS_ZEROCOUNT_default_handler__`
+  - Almost all occurrences in lib code
 - Drop `KLS_Stats.worst_pushcall_time`
 - Drop `Koliseo.hooks_len`
 - Drop `_POSIX_C_SOURCE` definition
 - Drop include of `profileapi.h` on `_WIN32` builds
 - Use `$(prefix)` for `TARGET_INSTALL_DIR`
 - Use `$(libdir)` and `$(includedir)` for `install`
+- `kls_clear`, `kls_free` and `kls_temp_end` now return `bool`
 
 ## [0.6.6] - 2026-11-22
 
