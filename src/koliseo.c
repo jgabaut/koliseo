@@ -160,7 +160,7 @@ void KLS_ZEROCOUNT_default_handler_dbg__(Koliseo* kls, ptrdiff_t available, ptrd
 }
 
 /**
- * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * Used to prepare a KLS_Conf.
  * Passes custom error handlers for errors in push calls.
  * @see KLS_Conf
  */
@@ -209,7 +209,7 @@ KLS_Conf kls_conf_init_handled(int collect_stats, int verbose_lvl, int block_whi
 }
 
 /**
- * Used to prepare a KLS_Conf without caring about KOLISEO_HAS_REGIONS.
+ * Used to prepare a KLS_Conf.
  * @see KLS_Conf
  */
 KLS_Conf kls_conf_init(int collect_stats, int verbose_lvl, int block_while_has_temp, int allow_zerocount_push, int growable, FILE* log_fp, const char* log_filepath)
