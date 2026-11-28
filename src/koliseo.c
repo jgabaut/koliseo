@@ -579,7 +579,10 @@ Koliseo *kls_new_alloc_ext_dbg(ptrdiff_t size, kls_alloc_func alloc_func, kls_fr
 
         if (kls->hooks.on_new_handler != NULL) {
             // Call on_new extension
-            kls->hooks.on_new_handler(kls);
+            if (!kls->hooks.on_new_handler(kls)) {
+                fprintf(stderr, "[ERROR]    [%s()]:  on_new handler failed.\n", __func__);
+                return NULL;
+            }
         }
     } else {
 #ifndef KOLISEO_HAS_LOCATE
@@ -2181,7 +2184,10 @@ bool kls_clear(Koliseo *kls)
             }
             kls->extension_data = NULL; // The chain shares this pointer and we need to restore the extension data
             if (kls->hooks.on_new_handler) {
-                kls->hooks.on_new_handler(kls);
+                if (!kls->hooks.on_new_handler(kls)) {
+                    fprintf(stderr, "[ERROR]    [%s()]:  on_new handler failed.\n", __func__);
+                    return false;
+                }
             }
         }
     }
@@ -2310,7 +2316,10 @@ Koliseo_Temp *kls_temp_start_dbg(Koliseo *kls, Koliseo_Loc loc)
     current->t_kls = tmp;
     if (current->hooks.on_temp_start_handler != NULL) {
         // Call on_temp_start extension
-        current->hooks.on_temp_start_handler(tmp);
+        if (!current->hooks.on_temp_start_handler(tmp)) {
+            fprintf(stderr, "[ERROR]    [%s()]:  on_temp_start handler failed.\n", __func__);
+            return NULL;
+        }
     }
 #ifdef KLS_DEBUG_CORE
     kls_log(current, "KLS", "Prepared new Temp KLS.");
