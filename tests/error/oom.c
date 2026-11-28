@@ -16,6 +16,11 @@ int main(void)
     Example* e = NULL;
     for(int i = 0; i < 500; i++) {
         e = KLS_PUSH(kls,Example);
+        if (!e) {
+            printf("Failed allocation #%i.\n", i);
+            kls_free(kls);
+            return 0;
+        }
     }
     e->val = 42;
 

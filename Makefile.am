@@ -11,7 +11,7 @@ SHELL := /bin/bash
 .ONESHELL:
 # Check system info
 MACHINE := $$(uname -m)
-TARGET_INSTALL_DIR = /usr/local
+TARGET_INSTALL_DIR = $(prefix)
 SOURCE_INSTALL_DIR = "."
 INSTALLER_LOG_FILE = "./installer.log"
 # Check local version
@@ -78,13 +78,13 @@ libkoliseo.a: libkoliseo.o
 
 install: $(SHARED_LIB)
 	@echo -en "Installing koliseo lib $(VERSION):  "
-	./scripts/installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	./scripts/installer-sh "-i" $(VERSION) $(TARGET_INSTALL_DIR) $(libdir) $(includedir) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	ldconfig
 	@echo -e "\n\033[1;33mDone.\e[0m"
 
 uninstall:
 	@echo -en "Uninstalling koliseo lib:  "
-	./scripts/installer-sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
+	./scripts/installer-sh "-u" $(VERSION) $(TARGET_INSTALL_DIR) $(libdir) $(includedir) $(SOURCE_INSTALL_DIR) $(INSTALLER_LOG_FILE)
 	@echo -e "\033[1;33mDone.\e[0m"
 
 # Build rule for the demo binary
@@ -270,6 +270,7 @@ kstr_test.k:
 	@echo -e "\n\033[1;32mDone.\e[0m"
 
 tests: bad_new_size.k bad_count.k bad_size.k zero_count.k zero_count_err.k basic_run.k growable.k growable_temp.k growable_repush.k growable_temp_repush.k oom.k basic_gulp.k kstr_gulp.k kstr_test.k big_size.k huge.k many_regions.k many_temp_regions.k many_regions_named.k many_temp_regions_named.k many_regions_typed.k many_temp_regions_typed.k ./anvil
+
 anviltest: tests
 	@echo -en "Running anvil tests.\n"
 	./anvil -tX

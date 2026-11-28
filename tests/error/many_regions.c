@@ -7,6 +7,10 @@ int main(void) {
     int iter=1;
     while(true) {
         int* dummy = KLS_PUSH(kls,int);
+        if (!dummy) {
+            kls_free(kls);
+            return -1;
+        }
     }
     kls_free(kls);
     return 0;
