@@ -21,6 +21,7 @@ int main(void)
     Example *e = KLS_PUSH(kls, Example);
     if (!e) {
         fprintf(stderr, "Failed Example allocation\n");
+        kls_free(kls);
         return 1;
     }
     e->val = 42;
@@ -29,6 +30,6 @@ int main(void)
     print_dbg_kls(kls);
 
     //Free the arena
-    kls_free(kls);
+    if (!kls_free(kls)) return 1;
     return 0;
 }
