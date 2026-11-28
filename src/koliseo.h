@@ -360,6 +360,7 @@ typedef struct Koliseo_Temp {
  */
 typedef enum KLS_Push_Error {
     KLS_PUSH_OK,
+    KLS_PUSH_NULL,
     KLS_PUSH_SIZE_LT1,
     KLS_PUSH_ALIGN_LT1,
     KLS_PUSH_ALIGN_NOT_POW2,

@@ -1092,7 +1092,10 @@ KLS_Push_Result kls__advance_dbg(Koliseo* kls, ptrdiff_t size, ptrdiff_t align, 
 {
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo was NULL.\n", caller_name);
-        exit(EXIT_FAILURE);
+        return (KLS_Push_Result) {
+            .p = NULL,
+            .error = KLS_PUSH_NULL,
+        };
     }
     if ((kls->has_temp == 1) && (kls->conf.block_while_has_temp == 1)) {
         return (KLS_Push_Result) {
@@ -1272,13 +1275,19 @@ KLS_Push_Result kls__temp_advance_dbg(Koliseo_Temp* kls_t, ptrdiff_t size, ptrdi
 {
     if (kls_t == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Passed Koliseo_Temp was NULL.\n", caller_name);
-        exit(EXIT_FAILURE);
+        return (KLS_Push_Result) {
+            .p = NULL,
+            .error = KLS_PUSH_NULL,
+        };
     }
     Koliseo *kls = kls_t->kls;
     if (kls == NULL) {
         fprintf(stderr, "[ERROR] [%s()]: Referred Koliseo was NULL.\n",
                 __func__);
-        exit(EXIT_FAILURE);
+        return (KLS_Push_Result) {
+            .p = NULL,
+            .error = KLS_PUSH_NULL,
+        };
     }
 #ifndef KOLISEO_HAS_LOCATE
     KLS_Push_Error res = kls__check_available(kls, size, align, count, __func__);

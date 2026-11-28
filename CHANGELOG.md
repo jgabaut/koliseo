@@ -12,7 +12,7 @@
   - `KLS_OOM_default_handler__`
   - `KLS_PTRDIFF_MAX_default_handler__`
   - `KLS_ZEROCOUNT_default_handler__`
-  - Almost all occurrences in lib code
+  - All occurrences in lib code
 - Drop `KLS_Stats.worst_pushcall_time`
 - Drop `Koliseo.hooks_len`
 - Drop `_POSIX_C_SOURCE` definition
